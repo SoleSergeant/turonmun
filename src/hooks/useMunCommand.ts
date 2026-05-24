@@ -316,7 +316,13 @@ export function useMunCommand({ committeeId, isChair = false }: UseMunCommandOpt
         .update({ status: 'speaking', spoke_at: new Date().toISOString() })
         .eq('id', next.id);
       const totalTime = next.speaking_time + bonusSeconds;
-      await startTimer(totalTime);
+      // Load the timer but leave it paused — chair starts it manually
+      await updateSession({
+        timer_duration: totalTime,
+        timer_remaining: totalTime,
+        timer_running: false,
+        timer_started_at: null,
+      });
       await updateSession({
         current_speaker_id: next.id,
         yield_type: 'none',
