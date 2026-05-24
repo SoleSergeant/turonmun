@@ -164,6 +164,10 @@ export default function CommandCenter() {
     if (total > 0) startTimer(total);
   };
 
+  const handleDragStart = (id: string) => {
+    setDraggedId(id);
+  };
+
   const handleDragOver = (e: React.DragEvent, id: string) => {
     e.preventDefault(); setDragOverId(id);
   };

@@ -30,6 +30,7 @@ export function useMunCommand({ committeeId, isChair = false }: UseMunCommandOpt
   const [logs, setLogs] = useState<SessionLog[]>([]);
   const [loading, setLoading] = useState(true);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const sessionRef = useRef<CommitteeSession | null>(null);
 
   // ─── Load initial data ───────────────────────────────────
   const loadSession = useCallback(async () => {
@@ -41,7 +42,10 @@ export function useMunCommand({ committeeId, isChair = false }: UseMunCommandOpt
       .limit(1)
       .single();
 
-    if (data) setSession(data as CommitteeSession);
+    if (data) {
+      setSession(data as CommitteeSession);
+      sessionRef.current = data as CommitteeSession;
+    }
     return data as CommitteeSession | null;
   }, [committeeId]);
 
@@ -117,44 +121,45 @@ export function useMunCommand({ committeeId, isChair = false }: UseMunCommandOpt
         table: 'committee_sessions',
         filter: `committee_id=eq.${committeeId}`,
       }, (payload: any) => {
-        if (payload.new) setSession(payload.new as CommitteeSession);
+        if (payload.new) {
+          setSession(payload.new as CommitteeSession);
+          sessionRef.current = payload.new as CommitteeSession;
+        }
       })
       .on('postgres_changes', {
         event: '*',
         schema: 'public',
         table: 'speakers_list',
       }, () => {
-        // Reload speakers when any change happens
-        if (session?.id) loadSpeakers(session.id);
+        if (sessionRef.current?.id) loadSpeakers(sessionRef.current.id);
       })
       .on('postgres_changes', {
         event: '*',
         schema: 'public',
         table: 'motions',
       }, () => {
-        if (session?.id) loadMotions(session.id);
+        if (sessionRef.current?.id) loadMotions(sessionRef.current.id);
       })
       .on('postgres_changes', {
         event: '*',
         schema: 'public',
         table: 'votes',
       }, () => {
-        const votingMotion = motions.find(m => m.status === 'voting');
-        if (votingMotion) loadVotes(votingMotion.id);
+        if (sessionRef.current?.id) loadMotions(sessionRef.current.id);
       })
       .on('postgres_changes', {
         event: '*',
         schema: 'public',
         table: 'attendance',
       }, () => {
-        if (session?.id) loadAttendance(session.id);
+        if (sessionRef.current?.id) loadAttendance(sessionRef.current.id);
       })
       .on('postgres_changes', {
         event: '*',
         schema: 'public',
         table: 'session_logs',
       }, () => {
-        if (session?.id) loadLogs(session.id);
+        if (sessionRef.current?.id) loadLogs(sessionRef.current.id);
       })
       .subscribe();
 
@@ -163,6 +168,11 @@ export function useMunCommand({ committeeId, isChair = false }: UseMunCommandOpt
       supabase.removeChannel(channel);
     };
   }, [committeeId]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Keep sessionRef in sync with session state
+  useEffect(() => {
+    sessionRef.current = session;
+  }, [session]);
 
   // ─── Local timer countdown ──────────────────────────────
   useEffect(() => {
@@ -236,6 +246,8 @@ export function useMunCommand({ committeeId, isChair = false }: UseMunCommandOpt
 
   const startTimer = useCallback(async (durationSeconds: number) => {
     await updateSession({
+      timer_duration: durationSeconds,
+      timer_remaining: durationSeconds,
       timer_running: true,
       timer_started_at: new Date().toISOString(),
     });
@@ -344,6 +356,24 @@ export function useMunCommand({ committeeId, isChair = false }: UseMunCommandOpt
 
   const markAttendance = useCallback(async (applicationId: string, status: AttendanceStatus) => {
     if (!session) return;
+    // Optimistic update — flip the card immediately without waiting for realtime
+    setAttendance(prev => {
+      const exists = prev.find(a => a.application_id === applicationId && a.session_id === session.id);
+      if (exists) {
+        return prev.map(a =>
+          a.application_id === applicationId && a.session_id === session.id ? { ...a, status } : a
+        );
+      }
+      return [...prev, {
+        id: crypto.randomUUID(),
+        session_id: session.id,
+        application_id: applicationId,
+        status,
+        is_voting: true,
+        updated_at: new Date().toISOString(),
+      } as Attendance];
+    });
+    // Persist to DB
     await (supabase.from('attendance') as any).upsert({
       session_id: session.id,
       application_id: applicationId,
