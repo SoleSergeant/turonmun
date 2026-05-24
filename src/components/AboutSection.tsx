@@ -29,10 +29,10 @@ const features = [
 ];
 
 const stats = [
-  { label: 'Delegates Empowered', value: 250, suffix: '+' },
-  { label: 'Schools Represented', value: 30, suffix: '+' },
-  { label: 'Committees', value: 6, suffix: '' },
-  { label: 'Seasons of Excellence', value: 6, suffix: '+' },
+  { label: 'Delegates Empowered', value: 500, suffix: '+' },
+  { label: 'Countries Represented', value: 3, suffix: '' },
+  { label: 'Committees', value: 15, suffix: '+' },
+  { label: 'Seasons of Excellence', value: 7, suffix: '' },
 ];
 
 export default function AboutSection() {
