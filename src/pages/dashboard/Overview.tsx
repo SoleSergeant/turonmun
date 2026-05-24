@@ -49,11 +49,11 @@ function Overview() {
       }
 
       try {
-        console.log('Overview querying applications for email:', user.email);
+        console.log('Overview querying applications for user_id:', user.id);
         const { data: app, error } = await (supabase as any)
           .from('applications')
           .select('*')
-          .eq('email', user.email)
+          .eq('user_id', user.id)
           .order('created_at', { ascending: false })
           .limit(1)
           .single();
@@ -116,30 +116,30 @@ function Overview() {
   const isReviewed = !!application?.reviewed_at || isApproved || isPaid;
 
   const applicationSteps = [
-    { 
-      name: 'Submitted', 
-      status: 'completed' as "completed" | "current" | "pending", 
-      date: application?.created_at ? new Date(application.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : null 
+    {
+      name: 'Submitted',
+      status: 'completed' as "completed" | "current" | "pending",
+      date: application?.created_at ? new Date(application.created_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : null
     },
-    { 
-      name: 'Reviewed', 
-      status: (isReviewed ? 'completed' : 'current') as "completed" | "current" | "pending", 
-      date: application?.reviewed_at ? new Date(application.reviewed_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : null 
+    {
+      name: 'Reviewed',
+      status: (isReviewed ? 'completed' : 'current') as "completed" | "current" | "pending",
+      date: application?.reviewed_at ? new Date(application.reviewed_at).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : null
     },
-    { 
-      name: 'Payment', 
-      status: (isPaid ? 'completed' : isReviewed ? 'current' : 'pending') as "completed" | "current" | "pending", 
-      date: null 
+    {
+      name: 'Confirmation',
+      status: (isApproved ? 'completed' : isReviewed ? 'current' : 'pending') as "completed" | "current" | "pending",
+      date: null
     },
-    { 
-      name: 'Confirmed', 
-      status: (isApproved ? 'completed' : isPaid ? 'current' : 'pending') as "completed" | "current" | "pending", 
-      date: null 
+    {
+      name: 'Payment',
+      status: (isPaid ? 'completed' : isApproved ? 'current' : 'pending') as "completed" | "current" | "pending",
+      date: null
     },
-    { 
-      name: 'Allocated', 
-      status: (isAllocated ? 'completed' : isApproved ? 'current' : 'pending') as "completed" | "current" | "pending", 
-      date: null 
+    {
+      name: 'Allocated',
+      status: (isAllocated ? 'completed' : isPaid ? 'current' : 'pending') as "completed" | "current" | "pending",
+      date: null
     },
   ];
 
