@@ -64,7 +64,8 @@ export function useMunCommand({ committeeId, isChair = false }: UseMunCommandOpt
       .select('*')
       .eq('session_id', sessionId)
       .order('created_at', { ascending: false });
-    setMotions((data || []) as Motion[]);
+    // Only overwrite state when we actually got rows back — never clear with an empty result
+    if (data && data.length > 0) setMotions(data as Motion[]);
   }, []);
 
   const loadVotes = useCallback(async (motionId: string) => {
@@ -141,16 +142,13 @@ export function useMunCommand({ committeeId, isChair = false }: UseMunCommandOpt
         const sid = sessionRef.current?.id;
         if (!sid) return;
         const updated = payload.new as Motion | undefined;
-        // If we have full payload data, update state directly without a round-trip
-        if (updated && updated.session_id === sid) {
-          if (payload.eventType === 'INSERT') {
-            setMotions(prev => prev.find(m => m.id === updated.id) ? prev : [updated, ...prev]);
-          } else if (payload.eventType === 'UPDATE') {
-            setMotions(prev => prev.map(m => m.id === updated.id ? updated : m));
-          }
-        } else {
-          // Fallback for deletes or missing payload
-          loadMotions(sid);
+        if (!updated) return; // DELETE — ignore, optimistic state is source of truth
+        // If session_id is present but doesn't match, it's a different committee — skip
+        if (updated.session_id && updated.session_id !== sid) return;
+        if (payload.eventType === 'INSERT') {
+          setMotions(prev => prev.find(m => m.id === updated.id) ? prev : [updated, ...prev]);
+        } else if (payload.eventType === 'UPDATE') {
+          setMotions(prev => prev.map(m => m.id === updated.id ? { ...m, ...updated } : m));
         }
       })
       .on('postgres_changes', {
@@ -158,7 +156,7 @@ export function useMunCommand({ committeeId, isChair = false }: UseMunCommandOpt
         schema: 'public',
         table: 'votes',
       }, () => {
-        if (sessionRef.current?.id) loadMotions(sessionRef.current.id);
+        // votes table changes don't need to reload motions — resolution is manual
       })
       .on('postgres_changes', {
         event: '*',
