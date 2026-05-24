@@ -119,12 +119,19 @@ export default function CommandCenter() {
   const timerBarColor = rem <= 10 ? '#f87171' : rem <= 30 ? '#fbbf24' : '#34d399';
 
   const queuedIds = new Set(speakers.filter(s => s.status !== 'done').map(s => s.application_id));
-  const filteredDelegates = applications.filter(app =>
-    !queuedIds.has(app.id) &&
-    (!speakerSearch ||
-      app.full_name.toLowerCase().includes(speakerSearch.toLowerCase()) ||
-      (app.country ?? '').toLowerCase().includes(speakerSearch.toLowerCase()))
-  );
+  const filteredDelegates = applications.filter(app => {
+    if (queuedIds.has(app.id)) return false;
+    // Hide delegates explicitly marked absent in roll call
+    const att = attendance.find(a => a.application_id === app.id);
+    if (att?.status === 'absent') return false;
+    if (speakerSearch) {
+      return (
+        app.full_name.toLowerCase().includes(speakerSearch.toLowerCase()) ||
+        (app.country ?? '').toLowerCase().includes(speakerSearch.toLowerCase())
+      );
+    }
+    return true;
+  });
 
   const presentCount = attendance.filter(a => a.status === 'present').length;
   const quorum = Math.ceil(applications.length / 2);
