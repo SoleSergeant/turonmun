@@ -145,25 +145,11 @@ const Registration = () => {
   };
 
   const calculateFee = () => {
-    const baseFee = 80000; // 80K UZS
-    let discount = 0;
-
-    // Apply IELTS discount (10K) — show in UI immediately on selection
-    if (formData.discountEligibility.includes('IELTS')) {
-      discount += 10000;
-    }
-
-    // Apply SAT discount (10K) — show in UI immediately on selection
-    if (formData.discountEligibility.includes('SAT')) {
-      discount += 10000;
-    }
-
-    const finalFee = baseFee - discount;
-
+    const baseFee = 90000; // 90K UZS — Season 6
     return {
       originalFee: baseFee,
-      discount,
-      finalFee
+      discount: 0,
+      finalFee: baseFee
     };
   };
 
@@ -218,25 +204,6 @@ const Registration = () => {
         toast({
           title: "Missing Confirmation",
           description: "Please agree to the fee and terms to proceed",
-          variant: "destructive",
-        });
-        return;
-      }
-      
-      // Validate that files are uploaded for selected discounts
-      if (formData.discountEligibility.includes('IELTS') && !ieltsFile) {
-        toast({
-          title: "IELTS Certificate Missing",
-          description: "Please upload your IELTS certificate to receive the discount.",
-          variant: "destructive",
-        });
-        return;
-      }
-      
-      if (formData.discountEligibility.includes('SAT') && !satFile) {
-        toast({
-          title: "SAT Certificate Missing",
-          description: "Please upload your SAT certificate to receive the discount.",
           variant: "destructive",
         });
         return;
@@ -303,19 +270,9 @@ const Registration = () => {
     try {
       // Upload files
       let photoUrl = null;
-      let ieltsUrl = null;
-      let satUrl = null;
 
       if (photoFile) {
         photoUrl = await uploadFile(photoFile, 'photos');
-      }
-
-      if (ieltsFile) {
-        ieltsUrl = await uploadFile(ieltsFile, 'certificates');
-      }
-
-      if (satFile) {
-        satUrl = await uploadFile(satFile, 'certificates');
       }
 
       // Calculate final fee
@@ -347,17 +304,16 @@ const Registration = () => {
           motivation: `Interest: ${formData.issueInterest}`,
           dietary_restrictions: formData.dietaryRestrictions || null,
           emergency_contact_relation: formData.telegramUsername,
-          has_ielts: formData.discountEligibility.includes('IELTS'),
-          has_sat: formData.discountEligibility.includes('SAT'),
-          discount_eligibility: formData.discountEligibility.join(', '),
+          has_ielts: false,
+          has_sat: false,
+          discount_eligibility: 'None',
           fee_agreement: formData.feeAgreement,
           final_confirmation: formData.finalConfirmation,
           payment_amount: fee.finalFee,
-          // Removed status payload to rely on secure database defaults
           photo_url: photoUrl,
-          ielts_certificate_url: ieltsUrl,
-          sat_certificate_url: satUrl,
-          certificate_url: ieltsUrl || satUrl,
+          ielts_certificate_url: null,
+          sat_certificate_url: null,
+          certificate_url: null,
           notes: `
 Date of Birth: ${formData.dateOfBirth}
 Gender: ${formData.gender || 'Not Specified'}
@@ -368,13 +324,9 @@ Telegram: ${formData.telegramUsername}
 Phone: ${formData.phone}
 Country/City: ${formData.countryAndCity}
 Photo URL: ${photoUrl || 'N/A'}
-IELTS URL: ${ieltsUrl || 'N/A'}
-SAT URL: ${satUrl || 'N/A'}
-IELTS Score: ${formData.ieltsScore || 'N/A'}
-SAT Score: ${formData.satScore || 'N/A'}
           `.trim(),
-          ielts_score: formData.ieltsScore ? parseFloat(formData.ieltsScore) : null,
-          sat_score: formData.satScore ? parseInt(formData.satScore) : null,
+          ielts_score: null,
+          sat_score: null,
         } as any)
         .select();
 
@@ -426,11 +378,7 @@ SAT Score: ${formData.satScore || 'N/A'}
           prevStep={prevStep}
           handleSubmit={handleSubmit}
           photoFile={photoFile}
-          ieltsFile={ieltsFile}
-          satFile={satFile}
           updatePhotoFile={setPhotoFile}
-          updateIeltsCertificate={setIeltsFile}
-          updateSatCertificate={setSatFile}
         />
       </main>
       <Footer />
