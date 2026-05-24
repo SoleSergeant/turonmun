@@ -87,7 +87,6 @@ export default function CommandCenter() {
   const [unmodTopic, setUnmodTopic] = useState('');
 
   // Motion form
-  const [motionProposerName, setMotionProposerName] = useState('');
   const [motionProposerCountry, setMotionProposerCountry] = useState('');
   const [motionType, setMotionType] = useState<MotionType>('moderated_caucus');
   const [motionDesc, setMotionDesc] = useState('');
@@ -158,12 +157,12 @@ export default function CommandCenter() {
   };
 
   const handleProposeMotion = async () => {
-    if (!motionProposerName.trim() || !motionDesc.trim()) return;
+    if (!motionProposerCountry.trim() || !motionDesc.trim()) return;
     await proposeMotion(
-      '', motionProposerName, motionProposerCountry,
+      '', motionProposerCountry, motionProposerCountry,
       motionType, motionDesc, motionSpeakingTime, motionTotalTime
     );
-    setMotionProposerName(''); setMotionProposerCountry(''); setMotionDesc('');
+    setMotionProposerCountry(''); setMotionDesc('');
     setShowNewMotion(false);
   };
 
@@ -833,12 +832,8 @@ export default function CommandCenter() {
               {showNewMotion && (
                 <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
                   <div className="mb-6 bg-white/5 rounded-2xl border border-white/10 p-5 space-y-4">
-                    <div className="grid grid-cols-2 gap-3">
-                      <input type="text" placeholder="Proposer name *" value={motionProposerName} onChange={e => setMotionProposerName(e.target.value)}
-                        className="bg-white/10 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm placeholder-white/20 focus:outline-none focus:border-diplomatic-400/40" />
-                      <input type="text" placeholder="Country" value={motionProposerCountry} onChange={e => setMotionProposerCountry(e.target.value)}
-                        className="bg-white/10 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm placeholder-white/20 focus:outline-none focus:border-diplomatic-400/40" />
-                    </div>
+                    <input type="text" placeholder="Country *" value={motionProposerCountry} onChange={e => setMotionProposerCountry(e.target.value)}
+                      className="w-full bg-white/10 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm placeholder-white/20 focus:outline-none focus:border-diplomatic-400/40" />
 
                     <select value={motionType} onChange={e => setMotionType(e.target.value as MotionType)}
                       className="w-full bg-white/10 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-diplomatic-400/40">
@@ -866,7 +861,7 @@ export default function CommandCenter() {
                       </div>
                     )}
 
-                    <button onClick={handleProposeMotion} disabled={!motionProposerName.trim() || !motionDesc.trim()}
+                    <button onClick={handleProposeMotion} disabled={!motionProposerCountry.trim() || !motionDesc.trim()}
                       className="w-full py-2.5 bg-diplomatic-400/20 text-diplomatic-400 border border-diplomatic-400/30 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-diplomatic-400/30 transition-all disabled:opacity-30">
                       Submit Motion
                     </button>
@@ -887,7 +882,7 @@ export default function CommandCenter() {
                       <div>
                         <span className="text-gold-400 text-[9px] font-black uppercase tracking-widest animate-pulse">● Active Voting Procedure</span>
                         <h4 className="text-white text-lg font-black">{activeMotion.description}</h4>
-                        <p className="text-white/40 text-xs">by {activeMotion.proposer_name} ({activeMotion.proposer_country})</p>
+                        <p className="text-white/40 text-xs">{activeMotion.proposer_country}</p>
                       </div>
                     </div>
 
