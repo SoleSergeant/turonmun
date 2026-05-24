@@ -18,7 +18,7 @@ const faqItems: FAQItem[] = [
   },
   {
     question: 'How much does participation cost?',
-    answer: 'Participation fees vary depending on whether you are registering as an individual delegate or as part of a delegation. Early bird rates and discounts for returning delegates are available. Please check the Registration page for current pricing details.'
+    answer: 'Participation fees vary depending on whether you are applying as an individual delegate or as part of a delegation. Early bird rates and discounts for returning delegates are available. Please check the Application page for current pricing details.'
   },
   {
     question: 'What is the conference language?',
@@ -48,7 +48,7 @@ export default function FAQSection() {
           <span className="chip mb-2">Questions?</span>
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Frequently Asked Questions</h2>
           <p className="text-neutral-600">
-            Find answers to common questions about our MUN conference, registration process, and more.
+            Find answers to common questions about our MUN conference, application process, and more.
           </p>
         </div>
         

@@ -90,15 +90,15 @@ const ConfirmationStep: React.FC<ConfirmationStepProps> = ({ fee }) => {
           <Check size={24} className="text-green-600" strokeWidth={2} />
         </div>
 
-        <h2 className="text-2xl font-display font-semibold mb-4">Registration Completed!</h2>
+        <h2 className="text-2xl font-display font-semibold mb-4">Application Completed!</h2>
         <p className="text-neutral-600 mb-4 max-w-md mx-auto">
-          Thank you for registering for our Model United Nations conference. We&apos;ve sent a confirmation email to your inbox with payment instructions and further details.
+          Thank you for applying to our Model United Nations conference. We&apos;ve sent a confirmation email to your inbox with payment instructions and further details.
         </p>
 
         <div className="max-w-md mx-auto mb-8 p-4 bg-neutral-50 rounded-lg border border-neutral-200">
           <h3 className="font-semibold text-lg mb-2">Payment Summary</h3>
           <div className="flex justify-between mb-1">
-            <span className="text-neutral-600">Registration Fee:</span>
+            <span className="text-neutral-600">Application Fee:</span>
             <span>{fee.originalFee.toLocaleString()} UZS</span>
           </div>
           {fee.discount > 0 && (

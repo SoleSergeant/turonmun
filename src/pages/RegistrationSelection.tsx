@@ -43,16 +43,16 @@ const RegistrationSelection = () => {
                 >
                   <div className="flex items-center justify-center gap-2 mb-4">
                     <AlertTriangle className="w-5 h-5 text-gold-400" />
-                    <span className="text-gold-400 font-semibold text-lg">Registration Opening Soon</span>
+                    <span className="text-gold-400 font-semibold text-lg">Application Opening Soon</span>
                   </div>
 
                   <p className="text-xl text-white/80 max-w-2xl mx-auto mb-6">
-                    Registration for the next TuronMUN season is not yet open.
+                    Applications for the next TuronMUN season are not yet open.
                     Stay tuned for announcements on Delegate, Chair, and Observer roles.
                   </p>
 
                   <p className="text-white/60 max-w-xl mx-auto">
-                    Follow us on social media to be the first to know when registration opens!
+                    Follow us on social media to be the first to know when applications open!
                   </p>
                 </motion.div>
 

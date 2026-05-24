@@ -50,10 +50,10 @@ const Communications = () => {
   const [templates] = useState<EmailTemplate[]>([
     {
       id: '1',
-      name: 'Registration Confirmation',
+      name: 'Application Confirmation',
       subject: 'Welcome to TuronMUN Season 6!',
-      content: 'Dear {name}, thank you for registering for TuronMUN Season 6...',
-      type: 'registration',
+      content: 'Dear {name}, thank you for applying to TuronMUN Season 6...',
+      type: 'application',
       created_at: '2024-01-15'
     },
     {

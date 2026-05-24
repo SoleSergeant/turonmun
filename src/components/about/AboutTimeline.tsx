@@ -14,10 +14,10 @@ const timelineEvents = [
   },
   {
     year: 'July 1, 2024',
-    title: 'Season 1 Registration Opens',
+    title: 'Season 1 Application Opens',
     description: 'Launching our first season with great enthusiasm and participation.',
     milestones: [
-      'Registration for first season begins',
+      'Application for first season begins',
       '80 delegates from across Uzbekistan participated',
       'Held on July 28, 2024'
     ]

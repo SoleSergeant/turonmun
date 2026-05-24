@@ -33,14 +33,14 @@ class AIService {
   private getDemoResponse(message: string): string {
     const lowerMessage = message.toLowerCase();
     
-    // Registration related
-    if (lowerMessage.includes('register') || lowerMessage.includes('registration') || lowerMessage.includes('sign up')) {
-      return 'To register for TuronMUN, visit our registration page and fill out the application form. You\'ll need to provide your personal information, committee preferences, and experience. Early registration is recommended as spots fill up quickly!';
+    // Application related
+    if (lowerMessage.includes('apply') || lowerMessage.includes('application') || lowerMessage.includes('sign up')) {
+      return 'To apply for TuronMUN, visit our application page and fill out the application form. You\'ll need to provide your personal information, committee preferences, and experience. Early application is recommended as spots fill up quickly!';
     }
 
     // Committee related
     if (lowerMessage.includes('committee') || lowerMessage.includes('committees')) {
-      return 'TuronMUN offers several committees including UNGA, ECOSOC, HRC, and WTO. Each committee focuses on different global issues. You can express your preferences during registration, and assignments are made based on experience and availability.';
+      return 'TuronMUN offers several committees including UNGA, ECOSOC, HRC, and WTO. Each committee focuses on different global issues. You can express your preferences during application, and assignments are made based on experience and availability.';
     }
 
     // Position papers
@@ -60,7 +60,7 @@ class AIService {
 
     // Fees/payment
     if (lowerMessage.includes('fee') || lowerMessage.includes('payment') || lowerMessage.includes('cost')) {
-      return 'Registration fees vary based on delegate status and early bird discounts. Payment can be made online through our secure payment system. Scholarships are available for deserving delegates - check our website for details.';
+      return 'Application fees vary based on delegate status and early bird discounts. Payment can be made online through our secure payment system. Scholarships are available for deserving delegates - check our website for details.';
     }
 
     // Dress code
@@ -84,7 +84,7 @@ class AIService {
     }
 
     // Default response
-    return `I understand you're asking about: "${message}". For specific details about TuronMUN 2025, I recommend checking our official website or contacting our team at admin@turonmun.com. Is there anything specific about MUN procedures, registration, or conference logistics I can help you with?`;
+    return `I understand you're asking about: "${message}". For specific details about TuronMUN 2025, I recommend checking our official website or contacting our team at admin@turonmun.com. Is there anything specific about MUN procedures, application, or conference logistics I can help you with?`;
   }
 }
 

@@ -57,7 +57,7 @@ const RegistrationContent: React.FC<RegistrationContentProps> = ({
           transition={{ delay: 0.2 }}
           className="chip-gold mb-3"
         >
-          Delegate Registration
+          Delegate Application
         </motion.span>
         <h1 className="text-4xl md:text-5xl font-display font-bold text-diplomatic-900 mb-6">
           Join the Global Dialogue

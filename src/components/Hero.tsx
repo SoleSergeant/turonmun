@@ -342,7 +342,7 @@ const Hero = () => {
                   variants={transitionVariants.fadeVariants}
                 >
                   <h2 className="text-xl sm:text-2xl font-display font-bold text-white mb-1 sm:mb-2">COMING SOON</h2>
-                  <p className="text-sm sm:text-base text-white/70">Registration will open soon. Stay tuned!</p>
+                  <p className="text-sm sm:text-base text-white/70">Applications will open soon. Stay tuned!</p>
                 </motion.div>
 
                 <motion.div
