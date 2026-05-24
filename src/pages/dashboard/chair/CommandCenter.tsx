@@ -158,12 +158,14 @@ export default function CommandCenter() {
 
   const handleProposeMotion = async () => {
     if (!motionProposerCountry.trim() || !motionDesc.trim()) return;
-    await proposeMotion(
+    const newMotion = await proposeMotion(
       '', motionProposerCountry, motionProposerCountry,
       motionType, motionDesc, motionSpeakingTime, motionTotalTime
     );
     setMotionProposerCountry(''); setMotionDesc('');
     setShowNewMotion(false);
+    // Immediately open voting so the chair can see the voting panel right away
+    if (newMotion?.id) await openVoting(newMotion.id);
   };
 
   const handleCustomTimer = () => {
@@ -927,10 +929,7 @@ export default function CommandCenter() {
                     <p className="text-white/30 text-[9px] uppercase tracking-wider font-bold">{MOTION_TYPE_LABELS[m.motion_type]} · {m.proposer_country}</p>
                   </div>
                   {m.status === 'proposed' && (
-                    <button onClick={() => openVoting(m.id)}
-                      className="px-3 py-1.5 bg-gold-400/20 text-gold-400 border border-gold-400/30 rounded-lg text-[9px] font-black uppercase tracking-widest hover:bg-gold-400 hover:text-diplomatic-950 transition-all">
-                      Open Vote
-                    </button>
+                    <span className="text-white/20 text-[9px] font-bold uppercase tracking-widest">Pending</span>
                   )}
                   {(m.status === 'passed' || m.status === 'failed') && (
                     <div className="text-right flex-shrink-0">

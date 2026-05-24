@@ -437,6 +437,7 @@ export function useMunCommand({ committeeId, isChair = false }: UseMunCommandOpt
       setMotions(prev => [data as Motion, ...prev]);
       await logEvent('motion_proposed', `New motion by ${proposerCountry}: ${description}`);
     }
+    return (data as Motion) ?? null;
   }, [session, logEvent]);
 
   const secondMotion = useCallback(async (motionId: string, applicationId: string) => {
