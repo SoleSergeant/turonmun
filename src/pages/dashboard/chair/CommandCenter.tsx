@@ -576,8 +576,8 @@ export default function CommandCenter() {
         )}
       </AnimatePresence>
 
-      {/* ── Main Grid: Timer + Speakers ────────────────────────────────────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+      {/* ── Main Grid: Timer + Speakers (GSL / Mod only) ──────────────────── */}
+      {(session.current_mode === 'gsl' || session.current_mode === 'moderated_caucus') && <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
 
         {/* Timer Panel */}
         <motion.div variants={iv} className="lg:col-span-5">
@@ -855,10 +855,10 @@ export default function CommandCenter() {
             )}
           </div>
         </motion.div>
-      </div>
+      </div>}
 
-      {/* ── Bottom: Motions + Log ───────────────────────────────────────────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+      {/* ── Voting mode: motions + log ────────────────────────────────────── */}
+      {session.current_mode === 'voting' && <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
 
         {/* Motions Panel */}
         <motion.div variants={iv} className="lg:col-span-8">
@@ -983,7 +983,7 @@ export default function CommandCenter() {
           </div>
         </motion.div>
 
-        {/* Activity Log */}
+        {/* Activity Log — only shown in voting mode alongside motions */}
         <motion.div variants={iv} className="lg:col-span-4">
           <div className="glass-card p-6 border border-white/15 h-full flex flex-col">
             <h3 className="text-white/30 text-[10px] font-bold uppercase tracking-[0.2em] mb-5 flex items-center gap-2">
@@ -1006,7 +1006,17 @@ export default function CommandCenter() {
           </div>
         </motion.div>
 
-      </div>
+      </div>}
+
+      {/* ── Suspension banner ─────────────────────────────────────────────── */}
+      {session.current_mode === 'suspension' && (
+        <motion.div variants={iv} className="glass-card p-10 border border-white/10 text-center">
+          <p className="text-white/30 text-xs font-black uppercase tracking-widest mb-2">Session</p>
+          <h3 className="text-white text-3xl font-black mb-1">Suspended</h3>
+          <p className="text-white/30 text-sm">The session is currently suspended. Switch to another mode to resume proceedings.</p>
+        </motion.div>
+      )}
+
     </motion.div>
   );
 }
