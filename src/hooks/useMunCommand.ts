@@ -354,14 +354,16 @@ export function useMunCommand({ committeeId, isChair = false }: UseMunCommandOpt
 
   // ─── Attendance Actions ─────────────────────────────────
 
-  const markAttendance = useCallback(async (applicationId: string, status: AttendanceStatus) => {
+  const markAttendance = useCallback(async (applicationId: string, status: AttendanceStatus, isVoting = true) => {
     if (!session) return;
-    // Optimistic update — flip the card immediately without waiting for realtime
+    // Optimistic update — flip immediately without waiting for realtime
     setAttendance(prev => {
       const exists = prev.find(a => a.application_id === applicationId && a.session_id === session.id);
       if (exists) {
         return prev.map(a =>
-          a.application_id === applicationId && a.session_id === session.id ? { ...a, status } : a
+          a.application_id === applicationId && a.session_id === session.id
+            ? { ...a, status, is_voting: isVoting }
+            : a
         );
       }
       return [...prev, {
@@ -369,7 +371,7 @@ export function useMunCommand({ committeeId, isChair = false }: UseMunCommandOpt
         session_id: session.id,
         application_id: applicationId,
         status,
-        is_voting: true,
+        is_voting: isVoting,
         updated_at: new Date().toISOString(),
       } as Attendance];
     });
@@ -378,6 +380,7 @@ export function useMunCommand({ committeeId, isChair = false }: UseMunCommandOpt
       session_id: session.id,
       application_id: applicationId,
       status,
+      is_voting: isVoting,
       updated_at: new Date().toISOString()
     });
   }, [session]);

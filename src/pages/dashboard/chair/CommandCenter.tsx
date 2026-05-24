@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
+import { getCountryCode } from '@/utils/countryCodes';
 import {
   Play, Pause, RotateCcw, SkipForward, UserPlus, X, Gavel, Vote,
   Users, Mic, MicOff, Radio, Check, Zap, Activity, GripVertical,
@@ -185,6 +186,26 @@ export default function CommandCenter() {
     setDraggedId(null); setDragOverId(null);
   };
 
+  // ── Roll Call helpers ────────────────────────────────────────────────────────
+  const getRollStatus = (appId: string): 'PV' | 'P' | 'A' => {
+    const att = attendance.find(a => a.application_id === appId);
+    if (!att || att.status === 'absent') return 'A';
+    return att.is_voting ? 'PV' : 'P';
+  };
+
+  const handleRollStatus = (appId: string, type: 'PV' | 'P' | 'A') => {
+    if (type === 'PV') markAttendance(appId, 'present', true);
+    else if (type === 'P') markAttendance(appId, 'present', false);
+    else markAttendance(appId, 'absent', false);
+  };
+
+  const handleSetAll = (type: 'PV' | 'A') => {
+    applications.forEach(app => handleRollStatus(app.id, type));
+  };
+
+  const pvCount = attendance.filter(a => a.status === 'present' && a.is_voting).length;
+  const pCount  = attendance.filter(a => a.status === 'present' && !a.is_voting).length;
+
   const handleEndSession = async () => {
     await updateSession({ status: 'ended', timer_running: false } as any);
     setShowSummary(true);
@@ -355,76 +376,123 @@ export default function CommandCenter() {
         </button>
       </motion.div>
 
-      {/* ── Roll Call Mode ─────────────────────────────────────────────────── */}
+      {/* ── Roll Call Modal ────────────────────────────────────────────────── */}
       <AnimatePresence>
         {session.current_mode === 'roll_call' && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.97 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.97 }}
-            className="glass-card p-8 border-gold-400/20 bg-gold-400/5 relative overflow-hidden"
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
           >
-            <div className="absolute top-0 right-0 p-8 opacity-5"><Users size={180} className="text-gold-400" /></div>
-            <div className="relative z-10">
-              <div className="flex items-center justify-between mb-8">
-                <div>
-                  <h3 className="text-gold-400 text-xl font-display font-black uppercase tracking-widest mb-1">Roll Call</h3>
-                  <p className="text-white/40 text-xs">Click each delegate card to mark them present.</p>
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }}
+              className="bg-white rounded-2xl shadow-2xl w-full max-w-lg flex flex-col overflow-hidden"
+              style={{ maxHeight: '85vh' }}
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200">
+                <h3 className="text-base font-semibold text-gray-900">Roll Call</h3>
+                <button onClick={() => setMode('gsl')} className="text-gray-400 hover:text-gray-600 transition-colors">
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+
+              {/* Stats */}
+              <div className="flex justify-center gap-10 py-4 border-b border-gray-100">
+                {/* PV */}
+                <div className="flex items-center gap-2">
+                  <svg width="22" height="22" viewBox="0 0 22 22">
+                    <circle cx="11" cy="11" r="10" fill="#0f766e" />
+                  </svg>
+                  <span className="text-gray-600 text-sm font-medium">{pvCount}</span>
                 </div>
-                <div className="flex gap-6">
-                  <div className="text-center">
-                    <p className="text-emerald-400 text-2xl font-black">{presentCount}</p>
-                    <p className="text-white/30 text-[9px] font-bold uppercase tracking-widest">Present</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-gold-400 text-2xl font-black">{quorum}</p>
-                    <p className="text-white/30 text-[9px] font-bold uppercase tracking-widest">Quorum</p>
-                  </div>
-                  <div className="text-center">
-                    <p className={`text-2xl font-black ${presentCount >= quorum ? 'text-emerald-400' : 'text-red-400'}`}>
-                      {presentCount >= quorum ? '✓' : '✗'}
-                    </p>
-                    <p className="text-white/30 text-[9px] font-bold uppercase tracking-widest">Quorum Met</p>
-                  </div>
+                {/* P */}
+                <div className="flex items-center gap-2">
+                  <svg width="22" height="22" viewBox="0 0 22 22">
+                    <circle cx="11" cy="11" r="10" fill="none" stroke="#0f766e" strokeWidth="2" />
+                    <path d="M11 1 A10 10 0 0 1 11 21 Z" fill="#0f766e" />
+                  </svg>
+                  <span className="text-gray-600 text-sm font-medium">{pCount}</span>
+                </div>
+                {/* A */}
+                <div className="flex items-center gap-2">
+                  <svg width="22" height="22" viewBox="0 0 22 22">
+                    <circle cx="11" cy="11" r="10" fill="none" stroke="#0f766e" strokeWidth="2" />
+                    <path d="M11 1 A10 10 0 0 1 16 19 Z" fill="#0f766e" />
+                  </svg>
+                  <span className="text-gray-600 text-sm font-medium">
+                    {applications.length - pvCount - pCount}
+                  </span>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3 max-h-[40vh] overflow-y-auto pr-2">
-                {applications.map(app => {
-                  const att = attendance.find(a => a.application_id === app.id);
-                  const isPresent = att?.status === 'present';
-                  return (
-                    <div
-                      key={app.id}
-                      onClick={() => markAttendance(app.id, isPresent ? 'absent' : 'present')}
-                      className={`p-3 rounded-xl border transition-all cursor-pointer select-none ${
-                        isPresent
-                          ? 'bg-emerald-500/10 border-emerald-500/30 ring-1 ring-emerald-500/20'
-                          : 'bg-white/5 border-white/10 hover:border-white/20'
-                      }`}
-                    >
-                      <div className="flex items-center justify-between mb-1">
-                        <span className="text-[10px] text-white/30 font-bold uppercase truncate max-w-[80%]">{app.country}</span>
-                        {isPresent && <Check className="h-3 w-3 text-emerald-400 flex-shrink-0" />}
-                      </div>
-                      <p className={`text-xs font-bold truncate ${isPresent ? 'text-white' : 'text-white/40'}`}>{app.full_name}</p>
-                    </div>
-                  );
-                })}
-                {applications.length === 0 && (
-                  <div className="col-span-full text-center py-8 text-white/20 text-xs">
+              {/* Bulk actions */}
+              <div className="flex gap-3 px-5 py-3 border-b border-gray-100">
+                <button
+                  onClick={() => handleSetAll('PV')}
+                  className="flex-1 py-2 rounded-full border border-teal-600 text-teal-700 text-xs font-semibold uppercase tracking-wider hover:bg-teal-50 transition-colors"
+                >
+                  Set All Present
+                </button>
+                <button
+                  onClick={() => handleSetAll('A')}
+                  className="flex-1 py-2 rounded-full border border-teal-600 text-teal-700 text-xs font-semibold uppercase tracking-wider hover:bg-teal-50 transition-colors"
+                >
+                  Set All Absent
+                </button>
+              </div>
+
+              {/* Delegate list */}
+              <div className="overflow-y-auto flex-1">
+                {applications.length === 0 ? (
+                  <div className="text-center py-12 text-gray-400 text-sm">
                     No delegates assigned to this committee yet.
                   </div>
+                ) : (
+                  applications.map(app => {
+                    const status = getRollStatus(app.id);
+                    const code = getCountryCode(app.country ?? '').toLowerCase();
+                    return (
+                      <div key={app.id} className="flex items-center gap-3 px-5 py-3 border-b border-gray-100 last:border-0">
+                        <img
+                          src={`https://flagcdn.com/24x18/${code}.png`}
+                          onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                          alt=""
+                          className="w-6 h-4 object-cover rounded-sm flex-shrink-0"
+                        />
+                        <span className="flex-1 text-sm text-gray-800 font-medium truncate">{app.country || app.full_name}</span>
+                        <div className="flex gap-1">
+                          {(['PV', 'P', 'A'] as const).map(type => (
+                            <button
+                              key={type}
+                              onClick={() => handleRollStatus(app.id, type)}
+                              className={`w-9 h-8 rounded border text-xs font-bold transition-all ${
+                                status === type
+                                  ? type === 'PV' ? 'bg-teal-50 border-teal-600 text-teal-700'
+                                  : type === 'P'  ? 'bg-yellow-50 border-yellow-500 text-yellow-700'
+                                  :                 'bg-red-50 border-red-500 text-red-600'
+                                  : 'border-gray-300 text-gray-400 hover:border-gray-400'
+                              }`}
+                            >
+                              {type}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })
                 )}
               </div>
 
-              <div className="mt-8 flex justify-center">
+              {/* Done */}
+              <div className="p-4 border-t border-gray-200">
                 <button
                   onClick={() => setMode('gsl')}
-                  className="bg-gold-400 hover:bg-gold-500 text-diplomatic-950 px-10 py-3 rounded-xl font-black uppercase tracking-widest text-xs shadow-lg transition-all"
+                  className="w-full py-3 bg-teal-800 hover:bg-teal-900 text-white rounded-xl font-bold uppercase tracking-widest text-sm transition-colors"
                 >
-                  Confirm Attendance &amp; Start GSL
+                  Done
                 </button>
               </div>
-            </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
