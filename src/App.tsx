@@ -185,6 +185,17 @@ const App = () => {
         <Route path="/seasons/camu" element={<SeasonCAMU />} />
         <Route path="/mun-command" element={<MunCommand />} />
 
+        {/* Chair login & dashboard (non-subdomain access) */}
+        <Route path="/chair-login" element={<ChairLogin />} />
+        <Route path="/chair-dashboard" element={<ChairRoute><ChairDashboardLayout /></ChairRoute>}>
+          <Route index element={<ChairOverview />} />
+          <Route path="command" element={<CommandCenter />} />
+          <Route path="announcements" element={<ChairAnnouncements />} />
+          <Route path="papers" element={<ChairPositionPapers />} />
+          <Route path="schedule" element={<ChairSchedule />} />
+          <Route path="delegates" element={<ChairDelegates />} />
+        </Route>
+
         <Route path="/dashboard" element={<Dashboard />}>
           <Route index element={<Overview />} />
           <Route path="application" element={<MyApplication />} />
