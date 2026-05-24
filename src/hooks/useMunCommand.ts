@@ -255,7 +255,11 @@ export function useMunCommand({ committeeId, isChair = false }: UseMunCommandOpt
   }, [updateSession, logEvent]);
 
   const pauseTimer = useCallback(async () => {
-    await updateSession({ timer_running: false });
+    // Save the current local remaining time so DB doesn't snap back to original
+    await updateSession({
+      timer_running: false,
+      timer_remaining: sessionRef.current?.timer_remaining ?? 0,
+    });
   }, [updateSession]);
 
   const resumeTimer = useCallback(async () => {
@@ -265,10 +269,11 @@ export function useMunCommand({ committeeId, isChair = false }: UseMunCommandOpt
   }, [updateSession, session]);
 
   const resetTimer = useCallback(async () => {
+    // Reset to the last set duration, not 0
+    const duration = sessionRef.current?.timer_duration ?? 0;
     await updateSession({
-      timer_duration: 0,
-      timer_remaining: 0,
       timer_running: false,
+      timer_remaining: duration,
       timer_started_at: null,
     });
   }, [updateSession]);
