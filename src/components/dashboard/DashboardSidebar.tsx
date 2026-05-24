@@ -18,7 +18,6 @@ const navigationItems = [
   { name: 'Overview', href: '/dashboard', icon: Home },
   { name: 'My Application', href: '/dashboard/application', icon: FileText },
   { name: 'My Committee', href: '/dashboard/committee', icon: Users },
-  { name: 'Live Session', href: '/dashboard/live', icon: Radio },
 ];
 
 export default function DashboardSidebar({ isOpen, onClose }: DashboardSidebarProps) {
