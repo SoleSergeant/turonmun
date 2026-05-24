@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Clock, AlertTriangle, ArrowRight } from 'lucide-react';
+import { Users, ArrowRight, Shield } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 
@@ -11,71 +11,76 @@ const RegistrationSelection = () => {
       <Navbar />
       <main className="flex-grow pt-20">
         <div className="relative overflow-hidden py-16 md:py-24 bg-gradient-to-br from-diplomatic-900 via-diplomatic-800 to-diplomatic-700 min-h-screen">
-          <div className="absolute inset-0 opacity-50"></div>
-
           <div className="relative container mx-auto px-4 h-full flex items-center justify-center">
-            <div className="w-full max-w-3xl">
+            <div className="w-full max-w-4xl">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6 }}
-                className="text-center"
+                className="text-center mb-12"
               >
-                {/* Closed Icon */}
+                <h1 className="text-4xl md:text-6xl font-display font-bold text-white mb-4">
+                  Apply Now
+                </h1>
+                <p className="text-white/70 text-lg max-w-xl mx-auto">
+                  Choose your role for the upcoming TuronMUN season and begin your application.
+                </p>
+              </motion.div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto">
+                {/* Delegate */}
                 <motion.div
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  transition={{ duration: 0.5, type: "spring", stiffness: 200 }}
-                  className="mx-auto mb-8 w-24 h-24 rounded-full bg-gold-400/20 border-2 border-gold-400/40 flex items-center justify-center"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.1 }}
                 >
-                  <Clock className="w-12 h-12 text-gold-400" />
+                  <Link
+                    to="/register/delegate"
+                    className="group block backdrop-blur-lg bg-white/10 hover:bg-white/20 border border-white/20 hover:border-gold-400/60 rounded-3xl p-8 transition-all duration-300"
+                  >
+                    <div className="w-14 h-14 rounded-2xl bg-gold-400/20 border border-gold-400/40 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                      <Users className="w-7 h-7 text-gold-400" />
+                    </div>
+                    <h2 className="text-2xl font-bold text-white mb-2">Delegate</h2>
+                    <p className="text-white/60 text-sm mb-6">
+                      Represent a country in one of our committees. Debate, draft resolutions, and practise diplomacy.
+                    </p>
+                    <span className="inline-flex items-center gap-2 text-gold-400 font-semibold text-sm group-hover:gap-3 transition-all">
+                      Apply as Delegate <ArrowRight size={16} />
+                    </span>
+                  </Link>
                 </motion.div>
 
-                <h1 className="text-4xl md:text-6xl font-display font-bold text-white mb-6">
-                  Coming Soon
-                </h1>
-
+                {/* Chair */}
                 <motion.div
-                  initial={{ opacity: 0, y: 10 }}
+                  initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: 0.2 }}
-                  className="backdrop-blur-lg bg-white/10 border border-white/20 rounded-3xl p-8 md:p-12 mb-8"
                 >
-                  <div className="flex items-center justify-center gap-2 mb-4">
-                    <AlertTriangle className="w-5 h-5 text-gold-400" />
-                    <span className="text-gold-400 font-semibold text-lg">Application Opening Soon</span>
+                  <div className="relative block backdrop-blur-lg bg-white/5 border border-white/10 rounded-3xl p-8 opacity-60 cursor-not-allowed select-none">
+                    <div className="w-14 h-14 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center mb-6">
+                      <Shield className="w-7 h-7 text-white/40" />
+                    </div>
+                    <h2 className="text-2xl font-bold text-white mb-2">Chair / Staff</h2>
+                    <p className="text-white/40 text-sm mb-6">
+                      Lead a committee as a chair or join the secretariat. Applications open separately.
+                    </p>
+                    <span className="inline-flex items-center gap-2 text-white/30 font-semibold text-sm">
+                      Coming Soon
+                    </span>
                   </div>
-
-                  <p className="text-xl text-white/80 max-w-2xl mx-auto mb-6">
-                    Applications for the next TuronMUN season are not yet open.
-                    Stay tuned for announcements on Delegate, Chair, and Observer roles.
-                  </p>
-
-                  <p className="text-white/60 max-w-xl mx-auto">
-                    Follow us on social media to be the first to know when applications open!
-                  </p>
                 </motion.div>
+              </div>
 
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 0.4 }}
-                  className="flex flex-col sm:flex-row gap-4 justify-center"
-                >
-                  <Link
-                    to="/"
-                    className="inline-flex items-center justify-center gap-2 font-semibold py-4 px-8 rounded-2xl transition-all duration-300 bg-white/20 hover:bg-white/30 text-white border border-white/30 hover:border-white/50 backdrop-blur-sm"
-                  >
-                    Back to Home
-                  </Link>
-                  <Link
-                    to="/contact"
-                    className="inline-flex items-center justify-center gap-2 font-semibold py-4 px-8 rounded-2xl transition-all duration-300 bg-gold-500 hover:bg-gold-600 text-black border border-gold-400"
-                  >
-                    Contact Us
-                    <ArrowRight size={16} />
-                  </Link>
-                </motion.div>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.6, delay: 0.4 }}
+                className="text-center mt-10"
+              >
+                <Link to="/" className="text-white/50 hover:text-white/80 text-sm transition-colors">
+                  ← Back to Home
+                </Link>
               </motion.div>
             </div>
           </div>
