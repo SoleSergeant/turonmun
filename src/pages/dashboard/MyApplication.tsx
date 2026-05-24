@@ -85,37 +85,37 @@ export default function MyApplication() {
   const isReviewed = !!application?.reviewed_at || isApproved || isPaid;
 
   const applicationStatus = {
-    current: isAllocated ? 'completed' : isApproved ? 'allocated' : isPaid ? 'confirmed' : isReviewed ? 'payment' : 'review',
+    current: isAllocated ? 'completed' : isPaid ? 'allocated' : isApproved ? 'payment' : isReviewed ? 'confirmed' : 'review',
     steps: [
-      { 
-        name: 'Application Submitted', 
-        status: 'completed' as "completed" | "current" | "pending", 
-        date: application?.created_at || null, 
-        description: 'Your application has been received' 
+      {
+        name: 'Application Submitted',
+        status: 'completed' as "completed" | "current" | "pending",
+        date: application?.created_at || null,
+        description: 'Your application has been received'
       },
-      { 
-        name: 'Reviewed', 
-        status: (isReviewed ? 'completed' : 'current') as "completed" | "current" | "pending", 
-        date: application?.reviewed_at || null, 
-        description: 'Application reviewed by the team' 
+      {
+        name: 'Reviewed',
+        status: (isReviewed ? 'completed' : 'current') as "completed" | "current" | "pending",
+        date: application?.reviewed_at || null,
+        description: 'Application reviewed by the team'
       },
-      { 
-        name: 'Payment', 
-        status: (isPaid ? 'completed' : isReviewed ? 'current' : 'pending') as "completed" | "current" | "pending", 
-        date: null, 
-        description: 'Conference fee payment status' 
+      {
+        name: 'Confirmation',
+        status: (isApproved ? 'completed' : isReviewed ? 'current' : 'pending') as "completed" | "current" | "pending",
+        date: null,
+        description: 'Application confirmed by the team'
       },
-      { 
-        name: 'Confirmation', 
-        status: (isApproved ? 'completed' : isPaid ? 'current' : 'pending') as "completed" | "current" | "pending", 
-        date: null, 
-        description: 'Application confirmation' 
+      {
+        name: 'Payment',
+        status: (isPaid ? 'completed' : isApproved ? 'current' : 'pending') as "completed" | "current" | "pending",
+        date: null,
+        description: 'Conference fee payment'
       },
-      { 
-        name: 'Committee Allocation', 
-        status: (isAllocated ? 'completed' : isApproved ? 'current' : 'pending') as "completed" | "current" | "pending", 
-        date: null, 
-        description: 'Committee and country assignment' 
+      {
+        name: 'Committee Allocation',
+        status: (isAllocated ? 'completed' : isPaid ? 'current' : 'pending') as "completed" | "current" | "pending",
+        date: null,
+        description: 'Committee and country assignment'
       },
     ]
   };
