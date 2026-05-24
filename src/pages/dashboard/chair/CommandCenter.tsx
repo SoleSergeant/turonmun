@@ -325,7 +325,7 @@ export default function CommandCenter() {
 
         <div className="flex gap-3 justify-center">
           <motion.button
-            onClick={createSession}
+            onClick={async () => { await createSession(); setShowSummary(false); }}
             className="bg-gold-400 hover:bg-gold-500 text-diplomatic-950 px-8 py-3 rounded-xl font-bold uppercase tracking-widest text-xs transition-all"
             whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
           >
