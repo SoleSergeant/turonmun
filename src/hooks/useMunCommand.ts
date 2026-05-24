@@ -448,13 +448,15 @@ export function useMunCommand({ committeeId, isChair = false }: UseMunCommandOpt
   }, [session, loadMotions]);
 
   const openVoting = useCallback(async (motionId: string) => {
+    // Optimistic update — flip to 'voting' immediately so the panel appears at once
+    setMotions(prev => prev.map(m => m.id === motionId ? { ...m, status: 'voting' as const } : m));
     await (supabase.from('motions') as any)
       .update({ status: 'voting' })
       .eq('id', motionId);
     await updateSession({ current_mode: 'voting' });
-    await logEvent('voting_opened', `Voting opened for: ${motions.find(m => m.id === motionId)?.description}`);
+    await logEvent('voting_opened', `Voting opened for motion`);
     if (session) await loadMotions(session.id);
-  }, [session, loadMotions, updateSession, logEvent, motions]);
+  }, [session, loadMotions, updateSession, logEvent]);
 
   const castVote = useCallback(async (motionId: string, applicationId: string, choice: VoteChoice) => {
     await (supabase.from('votes') as any)

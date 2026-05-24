@@ -874,7 +874,7 @@ export default function CommandCenter() {
 
             {/* Active Voting */}
             <AnimatePresence>
-              {activeMotion?.status === 'voting' && (
+              {(activeMotion?.status === 'voting' || activeMotion?.status === 'proposed') && (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="mb-6">
                   <div className="glass-panel p-6 rounded-3xl border-gold-400/30 bg-gold-400/5 shadow-[0_0_40px_rgba(247,163,28,0.05)]">
                     <div className="flex items-center gap-3 mb-6">
