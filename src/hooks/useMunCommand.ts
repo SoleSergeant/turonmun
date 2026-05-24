@@ -482,31 +482,17 @@ export function useMunCommand({ committeeId, isChair = false }: UseMunCommandOpt
   }, [loadVotes]);
 
   const closeVoting = useCallback(async (motionId: string) => {
-    // Count votes
-    const { data: voteData } = await (supabase.from('votes') as any)
-      .select('*')
-      .eq('motion_id', motionId);
-
-    const allVotes = (voteData || []) as Vote[];
-    const votesFor = allVotes.filter(v => v.vote === 'for').length;
-    const votesAgainst = allVotes.filter(v => v.vote === 'against').length;
-    const votesAbstain = allVotes.filter(v => v.vote === 'abstain').length;
-
-    const passed = votesFor > votesAgainst;
-
-    await (supabase.from('motions') as any)
-      .update({
-        status: passed ? 'passed' : 'failed',
-        votes_for: votesFor,
-        votes_against: votesAgainst,
-        votes_abstain: votesAbstain,
-      })
-      .eq('id', motionId);
-
-    await updateSession({ current_mode: 'gsl' });
-    await logEvent(passed ? 'motion_passed' : 'motion_failed', `Motion ${passed ? 'PASSED' : 'FAILED'} (${votesFor}-${votesAgainst}-${votesAbstain})`);
+    // Legacy — kept for compatibility
     if (session) await loadMotions(session.id);
-  }, [session, loadMotions, updateSession, logEvent]);
+  }, [session, loadMotions]);
+
+  const resolveMotion = useCallback(async (motionId: string, passed: boolean) => {
+    await (supabase.from('motions') as any)
+      .update({ status: passed ? 'passed' : 'failed' })
+      .eq('id', motionId);
+    await updateSession({ current_mode: 'gsl' });
+    await logEvent(passed ? 'motion_passed' : 'motion_failed', `Motion ${passed ? 'PASSED' : 'FAILED'} — decided by chair`);
+  }, [updateSession, logEvent]);
 
   // ─── Derived state ──────────────────────────────────────
 
@@ -558,6 +544,7 @@ export function useMunCommand({ committeeId, isChair = false }: UseMunCommandOpt
     openVoting,
     castVote,
     closeVoting,
+    resolveMotion,
     loadVotes,
   };
 }

@@ -63,7 +63,7 @@ export default function CommandCenter() {
     session, speakers, loading, currentSpeaker, waitingSpeakers, doneSpeakers,
     motions, activeMotion, votes, attendance, markAttendance, logs,
     createSession, setMode, startTimer, pauseTimer, resumeTimer, resetTimer,
-    addSpeaker, nextSpeaker, removeSpeaker, openVoting, closeVoting, loadVotes,
+    addSpeaker, nextSpeaker, removeSpeaker, openVoting, closeVoting, resolveMotion, loadVotes,
     yieldTo, proposeMotion, updateSession,
   } = useMunCommand({ committeeId, isChair: true });
 
@@ -876,35 +876,31 @@ export default function CommandCenter() {
             <AnimatePresence>
               {(activeMotion?.status === 'voting' || activeMotion?.status === 'proposed') && (
                 <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="mb-6">
-                  <div className="glass-panel p-6 rounded-3xl border-gold-400/30 bg-gold-400/5 shadow-[0_0_40px_rgba(247,163,28,0.05)]">
-                    <div className="flex items-center gap-3 mb-6">
-                      <div className="w-12 h-12 rounded-2xl bg-gold-400/20 flex items-center justify-center border border-gold-400/30">
-                        <Vote className="h-6 w-6 text-gold-400" />
+                  <div className="glass-panel p-6 rounded-3xl border-gold-400/30 bg-gold-400/5">
+                    <div className="flex items-center gap-3 mb-5">
+                      <div className="w-10 h-10 rounded-2xl bg-gold-400/20 flex items-center justify-center border border-gold-400/30 flex-shrink-0">
+                        <Vote className="h-5 w-5 text-gold-400" />
                       </div>
                       <div>
-                        <span className="text-gold-400 text-[9px] font-black uppercase tracking-widest animate-pulse">● Active Voting Procedure</span>
-                        <h4 className="text-white text-lg font-black">{activeMotion.description}</h4>
-                        <p className="text-white/40 text-xs">{activeMotion.proposer_country}</p>
+                        <span className="text-gold-400 text-[9px] font-black uppercase tracking-widest animate-pulse">● Voting in Progress</span>
+                        <h4 className="text-white text-base font-black leading-tight">{activeMotion.description}</h4>
+                        <p className="text-white/40 text-xs">{activeMotion.proposer_country} · {MOTION_TYPE_LABELS[activeMotion.motion_type]}</p>
                       </div>
                     </div>
-
-                    <div className="grid grid-cols-3 gap-3 mb-6">
-                      {[
-                        { label: 'In Favor', count: votes.filter(v => v.vote === 'for').length, color: 'emerald' },
-                        { label: 'Against', count: votes.filter(v => v.vote === 'against').length, color: 'red' },
-                        { label: 'Abstain', count: votes.filter(v => v.vote === 'abstain').length, color: 'white' },
-                      ].map(({ label, count, color }) => (
-                        <div key={label} className={`text-center p-4 rounded-2xl bg-${color}-500/5 border border-${color}-500/20`}>
-                          <p className={`text-4xl font-black text-${color === 'white' ? 'white/50' : `${color}-400`} mb-1`}>{count}</p>
-                          <p className={`text-[9px] font-bold uppercase tracking-widest text-${color === 'white' ? 'white/30' : `${color}-400/60`}`}>{label}</p>
-                        </div>
-                      ))}
+                    <div className="grid grid-cols-2 gap-3">
+                      <button
+                        onClick={() => resolveMotion(activeMotion.id, true)}
+                        className="py-3 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 font-black uppercase tracking-widest text-xs hover:bg-emerald-500/30 transition-all"
+                      >
+                        ✓ Passes
+                      </button>
+                      <button
+                        onClick={() => resolveMotion(activeMotion.id, false)}
+                        className="py-3 rounded-2xl bg-red-500/20 border border-red-500/30 text-red-400 font-black uppercase tracking-widest text-xs hover:bg-red-500/30 transition-all"
+                      >
+                        ✗ Fails
+                      </button>
                     </div>
-
-                    <button onClick={() => closeVoting(activeMotion.id)}
-                      className="w-full py-3 bg-white text-diplomatic-950 rounded-2xl font-black uppercase tracking-widest text-xs shadow-xl hover:scale-[1.02] transition-all">
-                      Finalize Voting Result
-                    </button>
                   </div>
                 </motion.div>
               )}
