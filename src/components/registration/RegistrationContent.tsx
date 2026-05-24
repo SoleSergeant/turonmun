@@ -18,11 +18,7 @@ interface RegistrationContentProps {
   prevStep: () => void;
   handleSubmit: (e: React.FormEvent) => Promise<void>;
   photoFile?: File | null;
-  ieltsFile?: File | null;
-  satFile?: File | null;
   updatePhotoFile?: (file: File | null) => void;
-  updateIeltsCertificate?: (file: File | null) => void;
-  updateSatCertificate?: (file: File | null) => void;
 }
 
 const RegistrationContent: React.FC<RegistrationContentProps> = ({
@@ -35,11 +31,7 @@ const RegistrationContent: React.FC<RegistrationContentProps> = ({
   prevStep,
   handleSubmit,
   photoFile,
-  ieltsFile,
-  satFile,
   updatePhotoFile,
-  updateIeltsCertificate,
-  updateSatCertificate
 }) => {
   const fee = calculateFee();
 
@@ -123,17 +115,13 @@ const RegistrationContent: React.FC<RegistrationContentProps> = ({
           )}
           
           {step === 5 && (
-            <AdditionalInfoStep 
-              formData={formData} 
-              handleChange={handleChange} 
+            <AdditionalInfoStep
+              formData={formData}
+              handleChange={handleChange}
               calculateFee={calculateFee}
               handleSubmit={handleSubmit}
               prevStep={prevStep}
               isSubmitting={isSubmitting}
-              ieltsFile={ieltsFile}
-              satFile={satFile}
-              updateIeltsCertificate={updateIeltsCertificate}
-              updateSatCertificate={updateSatCertificate}
             />
           )}
           

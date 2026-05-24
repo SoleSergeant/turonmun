@@ -292,9 +292,6 @@ const Registration = () => {
       fullName: formData.fullName,
       email: formData.email,
       hasPhoto: !!photoFile,
-      hasIELTS: !!ieltsFile,
-      hasSAT: !!satFile,
-      discounts: formData.discountEligibility
     });
 
     setIsSubmitting(true);
@@ -314,8 +311,6 @@ const Registration = () => {
         full_name: formData.fullName,
         email: formData.email,
         photo: !!photoUrl,
-        ielts: !!ieltsUrl,
-        sat: !!satUrl
       });
       
       // Insert application into database
