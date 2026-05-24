@@ -26,13 +26,13 @@ const RegistrationSelection = () => {
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   transition={{ duration: 0.5, type: "spring", stiffness: 200 }}
-                  className="mx-auto mb-8 w-24 h-24 rounded-full bg-red-500/20 border-2 border-red-400/40 flex items-center justify-center"
+                  className="mx-auto mb-8 w-24 h-24 rounded-full bg-gold-400/20 border-2 border-gold-400/40 flex items-center justify-center"
                 >
-                  <Clock className="w-12 h-12 text-red-400" />
+                  <Clock className="w-12 h-12 text-gold-400" />
                 </motion.div>
 
                 <h1 className="text-4xl md:text-6xl font-display font-bold text-white mb-6">
-                  Registration Closed
+                  Coming Soon
                 </h1>
 
                 <motion.div
@@ -43,16 +43,16 @@ const RegistrationSelection = () => {
                 >
                   <div className="flex items-center justify-center gap-2 mb-4">
                     <AlertTriangle className="w-5 h-5 text-gold-400" />
-                    <span className="text-gold-400 font-semibold text-lg">Deadline Has Passed</span>
+                    <span className="text-gold-400 font-semibold text-lg">Registration Opening Soon</span>
                   </div>
-                  
+
                   <p className="text-xl text-white/80 max-w-2xl mx-auto mb-6">
-                    The registration deadline for TuronMUN 2026 Season 6 has passed. 
-                    All applications are now closed for Delegate, Chair, and Observer roles.
+                    Registration for the next TuronMUN season is not yet open.
+                    Stay tuned for announcements on Delegate, Chair, and Observer roles.
                   </p>
 
                   <p className="text-white/60 max-w-xl mx-auto">
-                    Thank you for your interest! Follow us on social media for updates on future conferences and events.
+                    Follow us on social media to be the first to know when registration opens!
                   </p>
                 </motion.div>
 
