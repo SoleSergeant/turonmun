@@ -1,7 +1,6 @@
 
 import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { useSubdomain } from '@/hooks/use-subdomain';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -27,16 +26,18 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
-  const subdomain = useSubdomain();
-  const isAdminSubdomain = subdomain === 'admin';
+  const isRealAdminSubdomain = window.location.hostname.startsWith('admin.');
+  // If not on a real admin subdomain, always append ?subdomain=admin so
+  // navigation stays within the admin route tree.
+  const suffix = isRealAdminSubdomain ? '' : '?subdomain=admin';
 
   const navItems = [
-    { path: isAdminSubdomain ? '/dashboard' : '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { path: isAdminSubdomain ? '/committees' : '/admin/committees', label: 'Committees', icon: Users },
-    { path: isAdminSubdomain ? '/schedule' : '/admin/schedule', label: 'Schedule', icon: Calendar },
-    { path: isAdminSubdomain ? '/resources' : '/admin/resources', label: 'Resources', icon: FileText },
-    { path: isAdminSubdomain ? '/applications' : '/admin/applications', label: 'Applications', icon: Users },
-    { path: isAdminSubdomain ? '/messages' : '/admin/messages', label: 'Messages', icon: Mail },
+    { path: isRealAdminSubdomain ? '/dashboard' : `/dashboard${suffix}`, label: 'Dashboard', icon: LayoutDashboard },
+    { path: isRealAdminSubdomain ? '/committees' : `/committees${suffix}`, label: 'Committees', icon: Users },
+    { path: isRealAdminSubdomain ? '/schedule' : `/schedule${suffix}`, label: 'Schedule', icon: Calendar },
+    { path: isRealAdminSubdomain ? '/resources' : `/resources${suffix}`, label: 'Resources', icon: FileText },
+    { path: isRealAdminSubdomain ? '/applications' : `/applications${suffix}`, label: 'Applications', icon: Users },
+    { path: isRealAdminSubdomain ? '/messages' : `/messages${suffix}`, label: 'Messages', icon: Mail },
   ];
 
   const handleLogout = async () => {
@@ -46,7 +47,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
         title: "Logged Out",
         description: "You have been successfully logged out",
       });
-      navigate(isAdminSubdomain ? '/' : '/admin');
+      navigate(isRealAdminSubdomain ? '/' : '/?subdomain=admin');
     } catch (error) {
       console.error('Logout error:', error);
       toast({
@@ -103,14 +104,14 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
               <li key={item.path}>
                 <Link
                   to={item.path}
-                  className={`flex items-center px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 group ${location.pathname === item.path
+                  className={`flex items-center px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 group ${location.pathname === item.path.split('?')[0]
                       ? 'bg-white/10 text-white shadow-sm border border-white/5'
                       : 'text-diplomatic-100 hover:bg-white/5 hover:text-white hover:translate-x-1'
                     }`}
                 >
-                  <item.icon size={18} className={`mr-3 transition-colors ${location.pathname === item.path ? 'text-diplomatic-200' : 'text-diplomatic-400 group-hover:text-diplomatic-200'}`} />
+                  <item.icon size={18} className={`mr-3 transition-colors ${location.pathname === item.path.split('?')[0] ? 'text-diplomatic-200' : 'text-diplomatic-400 group-hover:text-diplomatic-200'}`} />
                   <span>{item.label}</span>
-                  {location.pathname === item.path && (
+                  {location.pathname === item.path.split('?')[0] && (
                     <div className="ml-auto w-1.5 h-1.5 rounded-full bg-diplomatic-200 shadow-[0_0_8px_rgba(255,255,255,0.5)]" />
                   )}
                 </Link>
