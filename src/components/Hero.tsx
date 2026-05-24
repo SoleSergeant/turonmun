@@ -341,8 +341,8 @@ const Hero = () => {
                   className="text-center mb-4 sm:mb-6 relative z-10"
                   variants={transitionVariants.fadeVariants}
                 >
-                  <h2 className="text-xl sm:text-2xl font-display font-bold text-white mb-1 sm:mb-2">REGISTRATION CLOSED</h2>
-                  <p className="text-sm sm:text-base text-white/70">The application deadline has passed</p>
+                  <h2 className="text-xl sm:text-2xl font-display font-bold text-white mb-1 sm:mb-2">COMING SOON</h2>
+                  <p className="text-sm sm:text-base text-white/70">Registration will open soon. Stay tuned!</p>
                 </motion.div>
 
                 <motion.div
