@@ -1,0 +1,30 @@
+# https://www.robotstxt.org/robotstxt.html
+User-agent: *
+Allow: /
+
+# Disallow admin and sensitive areas
+Disallow: /admin/
+Disallow: /admin/*
+Disallow: /api/
+Disallow: /private/
+Disallow: /*?* # Disallow URL parameters
+Disallow: /*?$
+Disallow: /*.json$
+Disallow: /*.xml$
+
+# Sitemap location - Update with your domain
+Sitemap: https://turonmun.uz/sitemap.xml
+
+# Crawl-delay: 10 # Uncomment if needed to limit crawl rate
+
+# Allow all bots
+User-agent: Googlebot
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Slurp
+Allow: /
+
+# Additional bots can be added as needed
