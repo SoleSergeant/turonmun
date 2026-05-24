@@ -300,7 +300,7 @@ export function useMunCommand({ committeeId, isChair = false }: UseMunCommandOpt
     }
   }, [session, speakers.length]);
 
-  const nextSpeaker = useCallback(async () => {
+  const nextSpeaker = useCallback(async (bonusSeconds = 0) => {
     if (!session) return;
     // Mark the current speaker as done
     const currentSpeaker = speakers.find(s => s.status === 'speaking');
@@ -315,18 +315,19 @@ export function useMunCommand({ committeeId, isChair = false }: UseMunCommandOpt
       await (supabase.from('speakers_list') as any)
         .update({ status: 'speaking', spoke_at: new Date().toISOString() })
         .eq('id', next.id);
-      // Start the speaker's timer
-      await startTimer(next.speaking_time);
-      await updateSession({ 
+      const totalTime = next.speaking_time + bonusSeconds;
+      await startTimer(totalTime);
+      await updateSession({
         current_speaker_id: next.id,
         yield_type: 'none',
-        yield_target_id: null 
+        yield_target_id: null,
       });
-      await logEvent('speaker_started', `${next.delegate_name} (${next.delegate_country}) is now speaking`);
+      await logEvent('speaker_started',
+        `${next.delegate_name} (${next.delegate_country}) is now speaking${bonusSeconds > 0 ? ` (+${bonusSeconds}s bonus)` : ''}`
+      );
     } else {
-      await updateSession({ current_speaker_id: null });
+      await updateSession({ current_speaker_id: null, timer_running: false, timer_remaining: 0, yield_type: 'none' });
     }
-    // Reload
     await loadSpeakers(session.id);
   }, [session, speakers, startTimer, updateSession, loadSpeakers]);
 
@@ -339,23 +340,26 @@ export function useMunCommand({ committeeId, isChair = false }: UseMunCommandOpt
     await addSpeaker(applicationId, name, country);
   }, [addSpeaker]);
 
-  const yieldTo = useCallback(async (type: YieldType, targetId: string | null = null) => {
+  const yieldTo = useCallback(async (type: YieldType) => {
     if (!session) return;
-    await updateSession({
-      yield_type: type,
-      yield_target_id: targetId
-    });
-    
-    let msg = `Speaker yielded to ${type}`;
-    if (type === 'delegate' && targetId) {
-      msg = `Speaker yielded to another delegate`;
-    }
-    await logEvent('yield', msg, { type, targetId });
-    
+
     if (type === 'chair') {
-      await pauseTimer();
+      // Remaining time is lost — next speaker starts with their own time
+      await logEvent('yield', 'Yielded to chair — remaining time forfeited');
+      await nextSpeaker(0);
+
+    } else if (type === 'questions') {
+      // Open to POI — stay on current speaker, timer keeps running
+      await updateSession({ yield_type: 'questions' });
+      await logEvent('yield', 'Floor open to Points of Information');
+
+    } else if (type === 'delegate') {
+      // Next speaker gets their own time PLUS current remaining time
+      const remaining = sessionRef.current?.timer_remaining ?? 0;
+      await logEvent('yield', `Yielded to next delegate with ${remaining}s bonus`);
+      await nextSpeaker(remaining);
     }
-  }, [session, updateSession, logEvent, pauseTimer]);
+  }, [session, nextSpeaker, updateSession, logEvent]);
 
   // ─── Attendance Actions ─────────────────────────────────
 

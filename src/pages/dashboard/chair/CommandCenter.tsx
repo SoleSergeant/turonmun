@@ -739,17 +739,25 @@ export default function CommandCenter() {
                   </div>
                 </div>
                 <div className="grid grid-cols-3 gap-2 relative z-10">
-                  {(['chair', 'questions', 'delegate'] as const).map(type => (
-                    <button key={type} onClick={() => yieldTo(type)}
-                      className={`py-2 rounded-xl border text-[9px] font-black uppercase tracking-widest transition-all ${
-                        session.yield_type === type
-                          ? 'bg-gold-400 text-diplomatic-950 border-gold-400 shadow-[0_0_15px_rgba(247,163,28,0.3)]'
-                          : 'bg-white/5 border-white/10 text-white/40 hover:text-white hover:bg-white/10'
-                      }`}
-                    >
-                      Yield to {type === 'questions' ? 'Q&A' : type}
-                    </button>
-                  ))}
+                  {/* Yield to Chair — immediate, loses remaining time */}
+                  <button onClick={() => yieldTo('chair')}
+                    className="py-2 rounded-xl border text-[9px] font-black uppercase tracking-widest transition-all bg-white/5 border-white/10 text-white/40 hover:text-white hover:bg-white/10">
+                    Yield to Chair
+                  </button>
+                  {/* Open to POI — stays, timer keeps running, highlighted when active */}
+                  <button onClick={() => yieldTo('questions')}
+                    className={`py-2 rounded-xl border text-[9px] font-black uppercase tracking-widest transition-all ${
+                      session.yield_type === 'questions'
+                        ? 'bg-gold-400 text-diplomatic-950 border-gold-400 shadow-[0_0_15px_rgba(247,163,28,0.3)]'
+                        : 'bg-white/5 border-white/10 text-white/40 hover:text-white hover:bg-white/10'
+                    }`}>
+                    Open to POI
+                  </button>
+                  {/* Yield to Delegate — next speaker gets time + remaining */}
+                  <button onClick={() => yieldTo('delegate')}
+                    className="py-2 rounded-xl border text-[9px] font-black uppercase tracking-widest transition-all bg-white/5 border-white/10 text-white/40 hover:text-white hover:bg-white/10">
+                    Yield to Delegate
+                  </button>
                 </div>
               </div>
             ) : (
