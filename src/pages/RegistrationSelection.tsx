@@ -34,21 +34,18 @@ const RegistrationSelection = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: 0.1 }}
                 >
-                  <Link
-                    to="/register/delegate"
-                    className="group block backdrop-blur-lg bg-white/10 hover:bg-white/20 border border-white/20 hover:border-gold-400/60 rounded-3xl p-8 transition-all duration-300"
-                  >
-                    <div className="w-14 h-14 rounded-2xl bg-gold-400/20 border border-gold-400/40 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                      <Users className="w-7 h-7 text-gold-400" />
+                  <div className="relative block backdrop-blur-lg bg-white/5 border border-white/10 rounded-3xl p-8 opacity-60 cursor-not-allowed select-none">
+                    <div className="w-14 h-14 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center mb-6">
+                      <Users className="w-7 h-7 text-white/40" />
                     </div>
                     <h2 className="text-2xl font-bold text-white mb-2">Delegate</h2>
-                    <p className="text-white/60 text-sm mb-6">
+                    <p className="text-white/40 text-sm mb-6">
                       Represent a country in one of our committees. Debate, draft resolutions, and practise diplomacy.
                     </p>
-                    <span className="inline-flex items-center gap-2 text-gold-400 font-semibold text-sm group-hover:gap-3 transition-all">
-                      Apply as Delegate <ArrowRight size={16} />
+                    <span className="inline-flex items-center gap-2 text-white/30 font-semibold text-sm">
+                      Coming Soon
                     </span>
-                  </Link>
+                  </div>
                 </motion.div>
 
                 {/* Chair */}
