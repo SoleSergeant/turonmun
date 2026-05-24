@@ -137,8 +137,21 @@ export function useMunCommand({ committeeId, isChair = false }: UseMunCommandOpt
         event: '*',
         schema: 'public',
         table: 'motions',
-      }, () => {
-        if (sessionRef.current?.id) loadMotions(sessionRef.current.id);
+      }, (payload: any) => {
+        const sid = sessionRef.current?.id;
+        if (!sid) return;
+        const updated = payload.new as Motion | undefined;
+        // If we have full payload data, update state directly without a round-trip
+        if (updated && updated.session_id === sid) {
+          if (payload.eventType === 'INSERT') {
+            setMotions(prev => prev.find(m => m.id === updated.id) ? prev : [updated, ...prev]);
+          } else if (payload.eventType === 'UPDATE') {
+            setMotions(prev => prev.map(m => m.id === updated.id ? updated : m));
+          }
+        } else {
+          // Fallback for deletes or missing payload
+          loadMotions(sid);
+        }
       })
       .on('postgres_changes', {
         event: '*',
@@ -455,8 +468,8 @@ export function useMunCommand({ committeeId, isChair = false }: UseMunCommandOpt
       .eq('id', motionId);
     await updateSession({ current_mode: 'voting' });
     await logEvent('voting_opened', `Voting opened for motion`);
-    if (session) await loadMotions(session.id);
-  }, [session, loadMotions, updateSession, logEvent]);
+    // No loadMotions here — optimistic update + realtime payload handler keeps state correct
+  }, [updateSession, logEvent]);
 
   const castVote = useCallback(async (motionId: string, applicationId: string, choice: VoteChoice) => {
     await (supabase.from('votes') as any)

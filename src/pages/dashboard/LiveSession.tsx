@@ -45,11 +45,11 @@ export default function LiveSession() {
   // Load delegate's application to get committee
   useEffect(() => {
     const loadApp = async () => {
-      if (!user?.email) return;
+      if (!user?.id) return;
       const { data } = await (supabase
         .from('applications') as any)
         .select('*')
-        .eq('email', user.email)
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(1)
         .single();
