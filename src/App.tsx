@@ -27,6 +27,7 @@ import Season2 from "./pages/seasons/Season2";
 import Season3 from "./pages/seasons/Season3";
 import Season4 from "./pages/seasons/Season4";
 import Season5 from "./pages/seasons/Season5";
+import Season6 from "./pages/seasons/Season6";
 import SeasonCAMU from "./pages/seasons/SeasonCAMU";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -180,6 +181,7 @@ const App = () => {
         <Route path="/seasons/3" element={<Season3 />} />
         <Route path="/seasons/4" element={<Season4 />} />
         <Route path="/seasons/Season5" element={<Season5 />} />
+        <Route path="/seasons/6" element={<Season6 />} />
         <Route path="/seasons/camu" element={<SeasonCAMU />} />
         <Route path="/mun-command" element={<MunCommand />} />
 

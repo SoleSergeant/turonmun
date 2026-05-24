@@ -20,7 +20,8 @@ export const navLinks = [
       { name: 'Season 3', path: '/seasons/3' },
       { name: 'Season 4', path: '/seasons/4' },
       { name: 'Season 5', path: '/seasons/Season5' },
-      { name: 'TuronMUN x CAMU', path: '/seasons/camu' }
+      { name: 'TuronMUN x CAMU', path: '/seasons/camu' },
+      { name: 'Season 6', path: '/seasons/6' }
     ]
   },
   { name: 'Contact', path: '/contact' },
