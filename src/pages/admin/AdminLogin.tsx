@@ -28,7 +28,8 @@ const AdminLogin = () => {
 
         if (!adminError && adminData) {
           const isAdminSubdomain = window.location.hostname.startsWith('admin.');
-          navigate(isAdminSubdomain ? '/dashboard' : '/admin/dashboard');
+          const hasSubdomainParam = new URLSearchParams(window.location.search).get('subdomain') === 'admin';
+          navigate(isAdminSubdomain ? '/dashboard' : hasSubdomainParam ? '/dashboard?subdomain=admin' : '/admin/dashboard');
         }
       }
     };
@@ -97,7 +98,8 @@ const AdminLogin = () => {
             description: "Welcome to the admin dashboard",
           });
           const isAdminSubdomain = window.location.hostname.startsWith('admin.');
-          navigate(isAdminSubdomain ? '/dashboard' : '/admin/dashboard');
+          const hasSubdomainParam = new URLSearchParams(window.location.search).get('subdomain') === 'admin';
+          navigate(isAdminSubdomain ? '/dashboard' : hasSubdomainParam ? '/dashboard?subdomain=admin' : '/admin/dashboard');
         }
       }
     } catch (error: any) {

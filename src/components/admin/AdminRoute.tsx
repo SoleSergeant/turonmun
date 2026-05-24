@@ -73,7 +73,8 @@ const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
 
   if (!isAuthenticated && !loading) {
      const isAdminSubdomain = window.location.hostname.startsWith('admin.');
-     return <Navigate to={isAdminSubdomain ? "/" : "/admin"} replace />;
+     const hasSubdomainParam = new URLSearchParams(window.location.search).get('subdomain') === 'admin';
+     return <Navigate to={isAdminSubdomain ? '/' : hasSubdomainParam ? '/?subdomain=admin' : '/admin'} replace />;
   }
 
   return <>{children}</>;
