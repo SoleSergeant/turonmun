@@ -39,7 +39,7 @@ const itemVariants = {
 };
 
 export default function MyApplication() {
-  const { user } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const [application, setApplication] = useState<Tables<'applications'> | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
@@ -50,7 +50,10 @@ export default function MyApplication() {
 
   useEffect(() => {
     const loadApplication = async () => {
-      if (!user?.email) {
+      // Wait for auth to finish initialising before doing anything
+      if (authLoading) return;
+
+      if (!user?.id) {
         setLoading(false);
         return;
       }
@@ -77,7 +80,7 @@ export default function MyApplication() {
     };
 
     loadApplication();
-  }, [user]);
+  }, [user, authLoading]);
 
   const isAllocated = !!application?.assigned_committee_id;
   const isApproved = application?.status === 'approved' || isAllocated;
@@ -129,7 +132,7 @@ export default function MyApplication() {
     method: 'Bank transfer',
   };
 
-  if (loading) {
+  if (loading || authLoading) {
     return (
       <div className="flex items-center justify-center min-h-64">
         <p className="text-white/60">Loading your application...</p>
