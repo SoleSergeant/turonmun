@@ -6,7 +6,7 @@ import {
   Play, Pause, RotateCcw, SkipForward, UserPlus, X, Gavel, Vote,
   Users, Mic, MicOff, Radio, Check, Zap, Activity, GripVertical,
   Search, CheckCircle2, ChevronRight, Trophy, ClipboardList,
-  AlertCircle, Minus,
+  AlertCircle, Minus, Maximize2, Minimize2,
 } from 'lucide-react';
 import { useOutletContext } from 'react-router-dom';
 import { useMunCommand } from '@/hooks/useMunCommand';
@@ -85,6 +85,7 @@ export default function CommandCenter() {
 
   // Unmod caucus topic
   const [unmodTopic, setUnmodTopic] = useState('');
+  const [unmodFullscreen, setUnmodFullscreen] = useState(false);
 
   // Motion form
   const [motionProposerCountry, setMotionProposerCountry] = useState('');
@@ -508,27 +509,70 @@ export default function CommandCenter() {
       {/* ── Unmoderated Caucus Banner ──────────────────────────────────────── */}
       <AnimatePresence>
         {session.current_mode === 'unmoderated_caucus' && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
-            className="glass-card p-6 border-blue-400/20 bg-blue-400/5"
-          >
-            <div className="flex flex-col md:flex-row md:items-center gap-4">
-              <div className="flex-1">
-                <p className="text-blue-400 text-[10px] font-bold uppercase tracking-widest mb-1">Unmoderated Caucus</p>
-                <h4 className="text-white text-xl font-black">Informal Consultation Period</h4>
-                <input
-                  type="text"
-                  value={unmodTopic}
-                  onChange={e => setUnmodTopic(e.target.value)}
-                  placeholder="Topic / purpose of caucus..."
-                  className="mt-2 w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm placeholder-white/20 focus:outline-none focus:border-blue-400/40"
-                />
+          <>
+            {/* Fullscreen overlay */}
+            <AnimatePresence>
+              {unmodFullscreen && (
+                <motion.div
+                  initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                  className="fixed inset-0 z-50 bg-diplomatic-950 flex flex-col items-center justify-center gap-8 p-12"
+                >
+                  <p className="text-blue-400 text-xs font-black uppercase tracking-[0.3em]">Unmoderated Caucus</p>
+                  <div className={`text-[12rem] font-mono font-black ${timerColor} leading-none tracking-tighter`}>
+                    {formatTime(session.timer_remaining)}
+                  </div>
+                  {unmodTopic && (
+                    <p className="text-white/50 text-2xl font-semibold text-center max-w-2xl">{unmodTopic}</p>
+                  )}
+                  <input
+                    type="text"
+                    value={unmodTopic}
+                    onChange={e => setUnmodTopic(e.target.value)}
+                    placeholder="Topic / purpose of caucus..."
+                    className="w-full max-w-xl bg-white/5 border border-white/10 rounded-xl px-5 py-3 text-white text-base placeholder-white/20 focus:outline-none focus:border-blue-400/40 text-center"
+                  />
+                  <button
+                    onClick={() => setUnmodFullscreen(false)}
+                    className="absolute top-6 right-6 p-3 rounded-xl bg-white/5 border border-white/10 text-white/40 hover:text-white hover:bg-white/10 transition-all"
+                  >
+                    <Minimize2 className="h-5 w-5" />
+                  </button>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Inline banner */}
+            <motion.div
+              initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}
+              className="glass-card p-6 border-blue-400/20 bg-blue-400/5"
+            >
+              <div className="flex flex-col md:flex-row md:items-center gap-4">
+                <div className="flex-1">
+                  <p className="text-blue-400 text-[10px] font-bold uppercase tracking-widest mb-1">Unmoderated Caucus</p>
+                  <h4 className="text-white text-xl font-black">Informal Consultation Period</h4>
+                  <input
+                    type="text"
+                    value={unmodTopic}
+                    onChange={e => setUnmodTopic(e.target.value)}
+                    placeholder="Topic / purpose of caucus..."
+                    className="mt-2 w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm placeholder-white/20 focus:outline-none focus:border-blue-400/40"
+                  />
+                </div>
+                <div className="flex items-center gap-4">
+                  <div className={`text-6xl font-mono font-black ${timerColor}`}>
+                    {formatTime(session.timer_remaining)}
+                  </div>
+                  <button
+                    onClick={() => setUnmodFullscreen(true)}
+                    className="p-2.5 rounded-xl bg-white/5 border border-white/10 text-white/40 hover:text-white hover:bg-white/10 transition-all flex-shrink-0"
+                    title="Fullscreen"
+                  >
+                    <Maximize2 className="h-5 w-5" />
+                  </button>
+                </div>
               </div>
-              <div className={`text-6xl font-mono font-black ${timerColor} text-center`}>
-                {formatTime(session.timer_remaining)}
-              </div>
-            </div>
-          </motion.div>
+            </motion.div>
+          </>
         )}
       </AnimatePresence>
 
