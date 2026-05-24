@@ -33,10 +33,11 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
 
   const navItems = [
     { path: isRealAdminSubdomain ? '/dashboard' : `/dashboard${suffix}`, label: 'Dashboard', icon: LayoutDashboard },
-    { path: isRealAdminSubdomain ? '/committees' : `/committees${suffix}`, label: 'Committees', icon: Users },
+    { path: isRealAdminSubdomain ? '/applications' : `/applications${suffix}`, label: 'Applications', icon: FileText },
+    { path: isRealAdminSubdomain ? '/delegates' : `/delegates${suffix}`, label: 'Delegates', icon: Users },
+    { path: isRealAdminSubdomain ? '/committees' : `/committees${suffix}`, label: 'Committees', icon: Globe },
     { path: isRealAdminSubdomain ? '/schedule' : `/schedule${suffix}`, label: 'Schedule', icon: Calendar },
     { path: isRealAdminSubdomain ? '/resources' : `/resources${suffix}`, label: 'Resources', icon: FileText },
-    { path: isRealAdminSubdomain ? '/applications' : `/applications${suffix}`, label: 'Applications', icon: Users },
     { path: isRealAdminSubdomain ? '/messages' : `/messages${suffix}`, label: 'Messages', icon: Mail },
   ];
 

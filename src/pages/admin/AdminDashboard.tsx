@@ -108,13 +108,14 @@ const AdminDashboard = () => {
   const rejected = applicationsByStatus['rejected'] || 0;
 
   const isAdminSubdomain = window.location.hostname.startsWith('admin.');
+  const s = isAdminSubdomain ? '' : '?subdomain=admin';
 
   const navCards = [
     {
       title: 'Delegate Management',
       description: 'View, filter, and manage all delegate applications and assignments',
       icon: Users,
-      path: isAdminSubdomain ? '/delegates' : '/admin/delegates',
+      path: `/delegates${s}`,
       gradient: 'from-blue-500 to-blue-600',
       badge: counts.applications > 0 ? `${counts.applications} total` : null,
     },
@@ -122,7 +123,7 @@ const AdminDashboard = () => {
       title: 'Committee Management',
       description: 'Create committees, assign chairs, upload background guides',
       icon: Globe,
-      path: isAdminSubdomain ? '/committees' : '/admin/committees',
+      path: `/committees${s}`,
       gradient: 'from-indigo-500 to-indigo-600',
       badge: counts.committees > 0 ? `${counts.committees} active` : null,
     },
@@ -130,7 +131,7 @@ const AdminDashboard = () => {
       title: 'Country Matrix',
       description: 'Manage country-committee assignments and availability',
       icon: MapPin,
-      path: isAdminSubdomain ? '/country-matrix' : '/admin/country-matrix',
+      path: `/country-matrix${s}`,
       gradient: 'from-teal-500 to-teal-600',
       badge: null,
     },
@@ -138,7 +139,7 @@ const AdminDashboard = () => {
       title: 'Applications',
       description: 'Review, approve, reject and manage incoming applications',
       icon: UserCheck,
-      path: isAdminSubdomain ? '/applications' : '/admin/applications',
+      path: `/applications${s}`,
       gradient: 'from-purple-500 to-purple-600',
       badge: pending > 0 ? `${pending} pending` : null,
     },
@@ -146,7 +147,7 @@ const AdminDashboard = () => {
       title: 'Chairperson Panel',
       description: 'Manage chair accounts, roles and permissions',
       icon: Shield,
-      path: isAdminSubdomain ? '/chairs' : '/admin/chairs',
+      path: `/chairs${s}`,
       gradient: 'from-orange-500 to-orange-600',
       badge: null,
     },
@@ -154,7 +155,7 @@ const AdminDashboard = () => {
       title: 'Analytics Dashboard',
       description: 'Registration trends, committee balance and demographics',
       icon: BarChart3,
-      path: isAdminSubdomain ? '/analytics' : '/admin/analytics',
+      path: `/analytics${s}`,
       gradient: 'from-pink-500 to-rose-500',
       badge: null,
     },
@@ -162,7 +163,7 @@ const AdminDashboard = () => {
       title: 'Messages',
       description: 'Read and respond to contact form submissions',
       icon: Mail,
-      path: isAdminSubdomain ? '/messages' : '/admin/messages',
+      path: `/messages${s}`,
       gradient: 'from-red-500 to-red-600',
       badge: counts.unread_messages > 0 ? `${counts.unread_messages} unread` : null,
     },
@@ -170,7 +171,7 @@ const AdminDashboard = () => {
       title: 'Schedule',
       description: 'Manage conference schedule and events',
       icon: Calendar,
-      path: isAdminSubdomain ? '/schedule' : '/admin/schedule',
+      path: `/schedule${s}`,
       gradient: 'from-green-500 to-emerald-600',
       badge: null,
     },
