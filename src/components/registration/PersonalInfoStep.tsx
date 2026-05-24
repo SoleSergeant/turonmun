@@ -42,7 +42,7 @@ const PersonalInfoStep: React.FC<PersonalInfoStepProps> = ({
       <p className="text-neutral-600 mb-6">Please provide your basic information for registration</p>
 
       <div className="space-y-6">
-        {/* Full Name */}
+        {/* Full Name — pre-filled from account */}
         <div className="form-group">
           <label htmlFor="fullName" className="block text-sm font-medium text-neutral-700 mb-1">
             Full Name <span className="text-red-500">*</span>
@@ -64,10 +64,11 @@ const PersonalInfoStep: React.FC<PersonalInfoStepProps> = ({
           </div>
         </div>
 
-        {/* Email Address */}
+        {/* Email — locked to signed-in account */}
         <div className="form-group">
           <label htmlFor="email" className="block text-sm font-medium text-neutral-700 mb-1">
             Email Address <span className="text-red-500">*</span>
+            <span className="ml-2 text-xs text-diplomatic-500 font-normal">(from your account)</span>
           </label>
           <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -78,9 +79,8 @@ const PersonalInfoStep: React.FC<PersonalInfoStepProps> = ({
               id="email"
               name="email"
               value={formData.email}
-              onChange={handleChange}
-              className="pl-10 w-full px-4 py-3 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-diplomatic-300 focus:border-transparent transition-all"
-              placeholder="Enter your email address"
+              readOnly
+              className="pl-10 w-full px-4 py-3 border border-neutral-200 rounded-lg bg-neutral-50 text-neutral-500 cursor-not-allowed"
               required
             />
           </div>

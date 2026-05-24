@@ -5,16 +5,18 @@ import Footer from '../components/Footer';
 import RegistrationContent from '../components/registration/RegistrationContent';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from "@/hooks/use-toast";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
+import { useAuth } from '@/hooks/useAuth';
 
 const Registration = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
-  const [ieltsFile, setIeltsFile] = useState<File | null>(null);
-  const [satFile, setSatFile] = useState<File | null>(null);
+  const [alreadyApplied, setAlreadyApplied] = useState(false);
+  const [checkingApplication, setCheckingApplication] = useState(true);
 
   const [formData, setFormData] = useState({
     // Personal Information
@@ -99,6 +101,36 @@ const Registration = () => {
       description: "Skipped to step 5 for file upload testing.",
     });
   };
+
+  // Auto-fill name & email from signed-in user, and check for existing application
+  useEffect(() => {
+    if (!user) return;
+
+    const email = user.email ?? '';
+    const fullName = user.user_metadata?.full_name ?? user.user_metadata?.name ?? '';
+
+    setFormData(prev => ({
+      ...prev,
+      email,
+      fullName,
+    }));
+
+    // Check if user already submitted an application
+    const checkExisting = async () => {
+      const { data } = await supabase
+        .from('applications')
+        .select('id')
+        .eq('email', email)
+        .limit(1);
+
+      if (data && data.length > 0) {
+        setAlreadyApplied(true);
+      }
+      setCheckingApplication(false);
+    };
+
+    checkExisting();
+  }, [user]);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -363,6 +395,42 @@ Photo URL: ${photoUrl || 'N/A'}
       setIsSubmitting(false);
     }
   };
+
+  if (checkingApplication) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-diplomatic-600 border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  if (alreadyApplied) {
+    return (
+      <div className="page-transition-container min-h-screen flex flex-col bg-gradient-to-b from-white to-diplomatic-50">
+        <Navbar />
+        <main className="flex-grow pt-20 pb-12 flex items-center justify-center">
+          <div className="text-center max-w-md mx-auto px-4">
+            <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <h2 className="text-2xl font-bold text-diplomatic-900 mb-3">Already Applied</h2>
+            <p className="text-neutral-600 mb-6">
+              You have already submitted an application with this account. Each person may only apply once.
+            </p>
+            <Link
+              to="/dashboard"
+              className="inline-block bg-diplomatic-700 text-white px-6 py-3 rounded-lg font-medium hover:bg-diplomatic-800 transition-colors"
+            >
+              View My Application
+            </Link>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
 
   return (
     <div className="page-transition-container min-h-screen flex flex-col bg-gradient-to-b from-white to-diplomatic-50">
