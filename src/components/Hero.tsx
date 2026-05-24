@@ -361,7 +361,7 @@ const Hero = () => {
                     className="flex items-center text-sm sm:text-base text-white"
                   >
                     <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-gold-400 mr-2.5" />
-                    <span>March 21, 2026</span>
+                    <span>TBD</span>
                   </motion.div>
 
                   <motion.div
@@ -369,7 +369,7 @@ const Hero = () => {
                     className="flex items-center text-sm sm:text-base text-white"
                   >
                     <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-gold-400 mr-2.5" />
-                    <span>23:59</span>
+                    <span>TBD</span>
                   </motion.div>
 
                   <motion.div
@@ -377,7 +377,7 @@ const Hero = () => {
                     className="flex items-center text-sm sm:text-base text-white"
                   >
                     <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-gold-400 mr-2.5" />
-                    <span>Registan Private School</span>
+                    <span>TBD</span>
                   </motion.div>
 
                   <motion.div
@@ -385,7 +385,7 @@ const Hero = () => {
                     className="flex items-center text-sm sm:text-base text-white"
                   >
                     <Users className="w-4 h-4 sm:w-5 sm:h-5 text-gold-400 mr-2.5" />
-                    <span>80 Delegates</span>
+                    <span>TBD</span>
                   </motion.div>
                 </motion.div>
 
