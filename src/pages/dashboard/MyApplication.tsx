@@ -56,11 +56,11 @@ export default function MyApplication() {
       }
 
       try {
-        console.log('Querying applications for email:', user.email);
+        console.log('Querying applications for user_id:', user.id);
         const { data, error } = await supabase
           .from('applications')
           .select('*')
-          .eq('email', user.email)
+          .eq('user_id', user.id)
           .order('created_at', { ascending: false })
           .limit(1)
           .single();

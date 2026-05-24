@@ -120,7 +120,7 @@ const Registration = () => {
       const { data } = await supabase
         .from('applications')
         .select('id')
-        .eq('email', email)
+        .eq('user_id', user.id)
         .limit(1);
 
       if (data && data.length > 0) {
@@ -317,6 +317,7 @@ const Registration = () => {
       const { data, error } = await supabase
         .from('applications')
         .insert({
+          user_id: user?.id ?? null,
           full_name: formData.fullName,
           email: formData.email,
           phone: formData.phone || '',
