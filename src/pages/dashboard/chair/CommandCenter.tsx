@@ -590,15 +590,39 @@ export default function CommandCenter() {
             </div>
 
             {/* Custom Timer */}
-            <div className="flex items-center gap-2 bg-white/5 rounded-xl border border-white/10 p-3">
-              <span className="text-white/30 text-[9px] font-bold uppercase tracking-widest">Custom</span>
-              <input type="number" min={0} max={99} value={customMins} onChange={e => setCustomMins(parseInt(e.target.value) || 0)}
-                className="w-12 bg-white/10 border border-white/10 rounded-lg px-2 py-1.5 text-white text-center text-sm font-bold focus:outline-none focus:border-gold-400/40" />
-              <span className="text-white/20 font-bold">:</span>
-              <input type="number" min={0} max={59} value={customSecs} onChange={e => setCustomSecs(parseInt(e.target.value) || 0)}
-                className="w-12 bg-white/10 border border-white/10 rounded-lg px-2 py-1.5 text-white text-center text-sm font-bold focus:outline-none focus:border-gold-400/40" />
-              <button onClick={handleCustomTimer} className="flex-1 py-1.5 rounded-lg bg-gold-400/20 border border-gold-400/30 text-gold-400 text-[10px] font-bold uppercase tracking-widest hover:bg-gold-400/30 transition-all">
-                Set
+            <div className="border-t border-white/10 pt-4 space-y-3">
+              <p className="text-white/30 text-[9px] font-bold uppercase tracking-widest text-center">Custom</p>
+              <div className="grid grid-cols-2 gap-2">
+                {/* Minutes */}
+                <div className="bg-white/5 rounded-xl border border-white/10 p-2">
+                  <p className="text-white/20 text-[8px] uppercase tracking-widest text-center mb-2">min</p>
+                  <div className="flex items-center gap-1">
+                    <button onClick={() => setCustomMins(m => Math.max(0, m - 1))}
+                      className="w-8 h-8 bg-white/5 rounded-lg text-white/40 hover:text-white hover:bg-white/10 text-lg font-bold flex items-center justify-center transition-all">−</button>
+                    <span className="flex-1 text-center text-white text-3xl font-black tabular-nums">
+                      {String(customMins).padStart(2, '0')}
+                    </span>
+                    <button onClick={() => setCustomMins(m => Math.min(99, m + 1))}
+                      className="w-8 h-8 bg-white/5 rounded-lg text-white/40 hover:text-white hover:bg-white/10 text-lg font-bold flex items-center justify-center transition-all">+</button>
+                  </div>
+                </div>
+                {/* Seconds */}
+                <div className="bg-white/5 rounded-xl border border-white/10 p-2">
+                  <p className="text-white/20 text-[8px] uppercase tracking-widest text-center mb-2">sec</p>
+                  <div className="flex items-center gap-1">
+                    <button onClick={() => setCustomSecs(s => Math.max(0, s - 15))}
+                      className="w-8 h-8 bg-white/5 rounded-lg text-white/40 hover:text-white hover:bg-white/10 text-[10px] font-bold flex items-center justify-center transition-all">−15</button>
+                    <span className="flex-1 text-center text-white text-3xl font-black tabular-nums">
+                      {String(customSecs).padStart(2, '0')}
+                    </span>
+                    <button onClick={() => setCustomSecs(s => Math.min(59, s + 15))}
+                      className="w-8 h-8 bg-white/5 rounded-lg text-white/40 hover:text-white hover:bg-white/10 text-[10px] font-bold flex items-center justify-center transition-all">+15</button>
+                  </div>
+                </div>
+              </div>
+              <button onClick={handleCustomTimer}
+                className="w-full py-2.5 rounded-xl bg-gold-400/20 border border-gold-400/30 text-gold-400 text-xs font-black uppercase tracking-widest hover:bg-gold-400/30 transition-all">
+                Set Timer
               </button>
             </div>
           </div>
