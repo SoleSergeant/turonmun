@@ -429,26 +429,50 @@ export function useMunCommand({ committeeId, isChair = false }: UseMunCommandOpt
     speakingTime?: number,
     totalTime?: number,
   ) => {
-    if (!session) return;
-    const { data, error } = await (supabase
-      .from('motions') as any)
-      .insert({
-        session_id: session.id,
-        proposed_by: applicationId,
-        proposer_name: proposerName,
-        proposer_country: proposerCountry,
-        motion_type: motionType,
-        description,
-        speaking_time: speakingTime || null,
-        total_time: totalTime || null,
-      })
-      .select('*')
-      .single();
-    if (!error && data) {
-      setMotions(prev => [data as Motion, ...prev]);
-      await logEvent('motion_proposed', `New motion by ${proposerCountry}: ${description}`);
-    }
-    return (data as Motion) ?? null;
+    if (!session) return null;
+
+    // Generate a client-side UUID so we can add to state immediately and
+    // insert to the DB with the same ID — completely bypasses any RLS SELECT
+    // restriction that would otherwise cause `data` to come back null.
+    const localId = crypto.randomUUID();
+    const optimisticMotion: Motion = {
+      id: localId,
+      session_id: session.id,
+      proposed_by: applicationId || null,
+      proposer_name: proposerName,
+      proposer_country: proposerCountry || null,
+      motion_type: motionType,
+      description,
+      speaking_time: speakingTime || null,
+      total_time: totalTime || null,
+      status: 'proposed',
+      seconded_by: null,
+      votes_for: 0,
+      votes_against: 0,
+      votes_abstain: 0,
+      created_at: new Date().toISOString(),
+    };
+
+    // Add to state immediately — the UI updates before any DB round-trip
+    setMotions(prev => [optimisticMotion, ...prev]);
+
+    // Persist with the same client-generated ID (no .select() — avoids RLS SELECT block)
+    await (supabase.from('motions') as any).insert({
+      id: localId,
+      session_id: session.id,
+      proposed_by: applicationId || null,
+      proposer_name: proposerName,
+      proposer_country: proposerCountry || null,
+      motion_type: motionType,
+      description,
+      speaking_time: speakingTime || null,
+      total_time: totalTime || null,
+    });
+
+    await logEvent('motion_proposed', `New motion by ${proposerCountry}: ${description}`);
+
+    // Return the optimistic motion — callers can use .id immediately
+    return optimisticMotion;
   }, [session, logEvent]);
 
   const secondMotion = useCallback(async (motionId: string, applicationId: string) => {

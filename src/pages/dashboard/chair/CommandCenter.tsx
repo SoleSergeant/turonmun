@@ -857,156 +857,177 @@ export default function CommandCenter() {
         </motion.div>
       </div>}
 
-      {/* ── Voting mode: motions + log ────────────────────────────────────── */}
-      {session.current_mode === 'voting' && <div className="grid grid-cols-1 lg:grid-cols-12 gap-5">
+      {/* ── Voting mode: Motions ──────────────────────────────────────────── */}
+      {session.current_mode === 'voting' && (
+        <motion.div variants={iv} className="space-y-4">
 
-        {/* Motions Panel */}
-        <motion.div variants={iv} className="lg:col-span-8">
-          <div className="glass-card p-6 border border-white/15">
-            <div className="flex items-center justify-between mb-5">
-              <h3 className="text-white/30 text-[10px] font-bold uppercase tracking-[0.2em]">Motions &amp; Voting</h3>
-              <button
-                onClick={() => setShowNewMotion(s => !s)}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-diplomatic-400/20 border border-diplomatic-400/30 text-diplomatic-400 rounded-lg text-[10px] font-bold uppercase tracking-widest hover:bg-diplomatic-400/30 transition-all"
-              >
-                <Gavel className="h-3.5 w-3.5" /> {showNewMotion ? 'Cancel' : 'New Motion'}
-              </button>
+          {/* Header bar */}
+          <div className="glass-card p-5 border border-white/15 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-diplomatic-400/20 border border-diplomatic-400/30 flex items-center justify-center flex-shrink-0">
+                <Vote className="h-4 w-4 text-diplomatic-400" />
+              </div>
+              <div>
+                <h3 className="text-white font-black text-base leading-none">Voting Procedure</h3>
+                <p className="text-white/30 text-[10px] font-bold uppercase tracking-widest mt-0.5">
+                  {motions.filter(m => m.status === 'passed' || m.status === 'failed').length} resolved · {motions.length} total
+                </p>
+              </div>
             </div>
+            <button
+              onClick={() => setShowNewMotion(s => !s)}
+              className="flex items-center gap-1.5 px-4 py-2 bg-diplomatic-400/20 border border-diplomatic-400/30 text-diplomatic-400 rounded-xl text-[10px] font-bold uppercase tracking-widest hover:bg-diplomatic-400/30 transition-all"
+            >
+              <Gavel className="h-3.5 w-3.5" /> {showNewMotion ? 'Cancel' : 'New Motion'}
+            </button>
+          </div>
 
-            {/* New Motion Form */}
-            <AnimatePresence>
-              {showNewMotion && (
-                <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
-                  <div className="mb-6 bg-white/5 rounded-2xl border border-white/10 p-5 space-y-4">
-                    <input type="text" placeholder="Country *" value={motionProposerCountry} onChange={e => setMotionProposerCountry(e.target.value)}
-                      className="w-full bg-white/10 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm placeholder-white/20 focus:outline-none focus:border-diplomatic-400/40" />
+          {/* New Motion Form */}
+          <AnimatePresence>
+            {showNewMotion && (
+              <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} className="overflow-hidden">
+                <div className="glass-card p-6 border border-diplomatic-400/20 bg-diplomatic-400/5 space-y-4">
+                  <p className="text-diplomatic-300 text-[10px] font-black uppercase tracking-widest">Propose a Motion</p>
 
-                    <select value={motionType} onChange={e => setMotionType(e.target.value as MotionType)}
-                      className="w-full bg-white/10 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-diplomatic-400/40">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <input
+                      type="text" placeholder="Proposing country *"
+                      value={motionProposerCountry} onChange={e => setMotionProposerCountry(e.target.value)}
+                      className="bg-white/10 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm placeholder-white/20 focus:outline-none focus:border-diplomatic-400/40"
+                    />
+                    <select
+                      value={motionType} onChange={e => setMotionType(e.target.value as MotionType)}
+                      className="bg-white/10 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-diplomatic-400/40"
+                    >
                       {Object.entries(MOTION_TYPE_LABELS).map(([k, v]) => (
                         <option key={k} value={k} className="bg-diplomatic-900">{v}</option>
                       ))}
                     </select>
-
-                    <input type="text" placeholder="Motion description *" value={motionDesc} onChange={e => setMotionDesc(e.target.value)}
-                      onKeyDown={e => e.key === 'Enter' && handleProposeMotion()}
-                      className="w-full bg-white/10 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm placeholder-white/20 focus:outline-none focus:border-diplomatic-400/40" />
-
-                    {(motionType === 'moderated_caucus') && (
-                      <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <label className="text-white/30 text-[9px] font-bold uppercase tracking-widest block mb-1.5">Total Caucus Time (sec)</label>
-                          <input type="number" min={60} max={3600} value={motionTotalTime} onChange={e => setMotionTotalTime(parseInt(e.target.value) || 600)}
-                            className="w-full bg-white/10 border border-white/10 rounded-xl px-4 py-2 text-white text-sm focus:outline-none" />
-                        </div>
-                        <div>
-                          <label className="text-white/30 text-[9px] font-bold uppercase tracking-widest block mb-1.5">Per Speaker Time (sec)</label>
-                          <input type="number" min={10} max={600} value={motionSpeakingTime} onChange={e => setMotionSpeakingTime(parseInt(e.target.value) || 60)}
-                            className="w-full bg-white/10 border border-white/10 rounded-xl px-4 py-2 text-white text-sm focus:outline-none" />
-                        </div>
-                      </div>
-                    )}
-
-                    <button onClick={handleProposeMotion} disabled={!motionProposerCountry.trim() || !motionDesc.trim()}
-                      className="w-full py-2.5 bg-diplomatic-400/20 text-diplomatic-400 border border-diplomatic-400/30 rounded-xl text-xs font-bold uppercase tracking-widest hover:bg-diplomatic-400/30 transition-all disabled:opacity-30">
-                      Submit Motion
-                    </button>
                   </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
 
-            {/* Active Voting */}
-            <AnimatePresence>
-              {(activeMotion?.status === 'voting' || activeMotion?.status === 'proposed') && (
-                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="mb-6">
-                  <div className="glass-panel p-6 rounded-3xl border-gold-400/30 bg-gold-400/5">
-                    <div className="flex items-center gap-3 mb-5">
-                      <div className="w-10 h-10 rounded-2xl bg-gold-400/20 flex items-center justify-center border border-gold-400/30 flex-shrink-0">
-                        <Vote className="h-5 w-5 text-gold-400" />
+                  <input
+                    type="text" placeholder="Motion description / topic *"
+                    value={motionDesc} onChange={e => setMotionDesc(e.target.value)}
+                    onKeyDown={e => e.key === 'Enter' && handleProposeMotion()}
+                    className="w-full bg-white/10 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm placeholder-white/20 focus:outline-none focus:border-diplomatic-400/40"
+                  />
+
+                  {motionType === 'moderated_caucus' && (
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-white/30 text-[9px] font-bold uppercase tracking-widest block mb-1.5">Total Time (sec)</label>
+                        <input type="number" min={60} max={3600} value={motionTotalTime}
+                          onChange={e => setMotionTotalTime(parseInt(e.target.value) || 600)}
+                          className="w-full bg-white/10 border border-white/10 rounded-xl px-4 py-2 text-white text-sm focus:outline-none" />
                       </div>
                       <div>
-                        <span className="text-gold-400 text-[9px] font-black uppercase tracking-widest animate-pulse">● Voting in Progress</span>
-                        <h4 className="text-white text-base font-black leading-tight">{activeMotion.description}</h4>
-                        <p className="text-white/40 text-xs">{activeMotion.proposer_country} · {MOTION_TYPE_LABELS[activeMotion.motion_type]}</p>
+                        <label className="text-white/30 text-[9px] font-bold uppercase tracking-widest block mb-1.5">Per Speaker (sec)</label>
+                        <input type="number" min={10} max={600} value={motionSpeakingTime}
+                          onChange={e => setMotionSpeakingTime(parseInt(e.target.value) || 60)}
+                          className="w-full bg-white/10 border border-white/10 rounded-xl px-4 py-2 text-white text-sm focus:outline-none" />
                       </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <button
-                        onClick={() => resolveMotion(activeMotion.id, true)}
-                        className="py-3 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 font-black uppercase tracking-widest text-xs hover:bg-emerald-500/30 transition-all"
-                      >
-                        ✓ Passes
-                      </button>
-                      <button
-                        onClick={() => resolveMotion(activeMotion.id, false)}
-                        className="py-3 rounded-2xl bg-red-500/20 border border-red-500/30 text-red-400 font-black uppercase tracking-widest text-xs hover:bg-red-500/30 transition-all"
-                      >
-                        ✗ Fails
-                      </button>
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            {/* Motions List */}
-            <div className="space-y-2 max-h-64 overflow-y-auto pr-1">
-              {motions.filter(m => m.status !== 'voting').length === 0 && !activeMotion && (
-                <div className="text-center py-8">
-                  <Gavel className="h-8 w-8 text-white/10 mx-auto mb-3" />
-                  <p className="text-white/20 text-[10px] uppercase tracking-widest font-bold">No motions yet</p>
-                </div>
-              )}
-              {motions.filter(m => m.status !== 'voting').map(m => (
-                <div key={m.id} className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/5">
-                  <div className={`w-2.5 h-2.5 rounded-full flex-shrink-0 ${
-                    m.status === 'passed' ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.4)]' :
-                    m.status === 'failed' ? 'bg-red-400' : 'bg-white/20'
-                  }`} />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-white font-semibold text-sm truncate">{m.description}</p>
-                    <p className="text-white/30 text-[9px] uppercase tracking-wider font-bold">{MOTION_TYPE_LABELS[m.motion_type]} · {m.proposer_country}</p>
-                  </div>
-                  {m.status === 'proposed' && (
-                    <span className="text-white/20 text-[9px] font-bold uppercase tracking-widest">Pending</span>
                   )}
-                  {(m.status === 'passed' || m.status === 'failed') && (
-                    <div className="text-right flex-shrink-0">
-                      <p className={`text-xs font-black uppercase ${m.status === 'passed' ? 'text-emerald-400' : 'text-red-400'}`}>{m.status}</p>
-                      <p className="text-[10px] text-white/20 font-mono">{m.votes_for}-{m.votes_against}-{m.votes_abstain}</p>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        </motion.div>
 
-        {/* Activity Log — only shown in voting mode alongside motions */}
-        <motion.div variants={iv} className="lg:col-span-4">
-          <div className="glass-card p-6 border border-white/15 h-full flex flex-col">
-            <h3 className="text-white/30 text-[10px] font-bold uppercase tracking-[0.2em] mb-5 flex items-center gap-2">
-              <Activity className="h-3 w-3" /> Session Log
+                  <button
+                    onClick={handleProposeMotion}
+                    disabled={!motionProposerCountry.trim() || !motionDesc.trim()}
+                    className="w-full py-3 bg-diplomatic-400/30 text-diplomatic-300 border border-diplomatic-400/40 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-diplomatic-400/40 transition-all disabled:opacity-30"
+                  >
+                    Submit &amp; Open for Vote
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* ── Active Motion — Voting Decision ──────────────────────────────── */}
+          <AnimatePresence>
+            {activeMotion && (activeMotion.status === 'voting' || activeMotion.status === 'proposed') && (
+              <motion.div
+                key={activeMotion.id}
+                initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -12 }}
+                className="glass-card p-8 border-2 border-gold-400/30 bg-gold-400/5"
+              >
+                {/* Type badge + live indicator */}
+                <div className="flex flex-wrap items-center gap-2 mb-6">
+                  <span className="px-3 py-1 rounded-full bg-gold-400/20 border border-gold-400/30 text-gold-400 text-[10px] font-black uppercase tracking-widest">
+                    {MOTION_TYPE_LABELS[activeMotion.motion_type]}
+                  </span>
+                  <span className="flex items-center gap-1.5 text-gold-300 text-[10px] font-bold uppercase tracking-widest">
+                    <span className="w-1.5 h-1.5 rounded-full bg-gold-400 inline-block animate-pulse" />
+                    Vote in Progress
+                  </span>
+                </div>
+
+                {/* Description */}
+                <h2 className="text-white text-2xl font-black mb-2 leading-snug">{activeMotion.description}</h2>
+                <p className="text-white/40 text-sm mb-8">
+                  Proposed by <span className="text-white/70 font-bold">{activeMotion.proposer_country}</span>
+                </p>
+
+                {/* Pass / Fail decision */}
+                <div className="grid grid-cols-2 gap-4">
+                  <motion.button
+                    onClick={() => resolveMotion(activeMotion.id, true)}
+                    whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
+                    className="flex flex-col items-center justify-center gap-2 py-6 rounded-2xl bg-emerald-500/20 border-2 border-emerald-500/40 text-emerald-400 hover:bg-emerald-500/30 hover:border-emerald-500/70 transition-all"
+                  >
+                    <Check className="h-7 w-7" />
+                    <span className="font-black uppercase tracking-widest text-sm">Passes</span>
+                  </motion.button>
+                  <motion.button
+                    onClick={() => resolveMotion(activeMotion.id, false)}
+                    whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}
+                    className="flex flex-col items-center justify-center gap-2 py-6 rounded-2xl bg-red-500/20 border-2 border-red-500/40 text-red-400 hover:bg-red-500/30 hover:border-red-500/70 transition-all"
+                  >
+                    <X className="h-7 w-7" />
+                    <span className="font-black uppercase tracking-widest text-sm">Fails</span>
+                  </motion.button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* ── Motion History ───────────────────────────────────────────────── */}
+          <div className="glass-card p-6 border border-white/15">
+            <h3 className="text-white/30 text-[10px] font-bold uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
+              <Gavel className="h-3 w-3" /> Motion History
             </h3>
-            <div className="flex-1 space-y-3 overflow-y-auto pr-1 max-h-[400px]">
-              {logs.length === 0 && (
-                <p className="text-white/10 text-xs text-center py-8 italic">Activity will appear here...</p>
-              )}
-              {logs.map(log => (
-                <div key={log.id} className="relative pl-5 pb-3 last:pb-0 border-l border-white/5">
-                  <div className="absolute left-[-4px] top-0.5 w-2 h-2 rounded-full bg-white/20 flex-shrink-0" />
-                  <p className="text-white/25 text-[9px] font-bold uppercase tracking-widest mb-0.5">
-                    {new Date(log.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-                  </p>
-                  <p className="text-white/60 text-xs leading-relaxed">{log.message}</p>
-                </div>
-              ))}
-            </div>
+            {motions.filter(m => m.status !== 'voting' && m.status !== 'proposed').length === 0 ? (
+              <div className="text-center py-10">
+                <Gavel className="h-10 w-10 text-white/5 mx-auto mb-3" />
+                <p className="text-white/20 text-[10px] uppercase tracking-widest font-bold">No resolved motions yet</p>
+                <p className="text-white/10 text-[9px] mt-1">Submit a motion and decide its outcome above</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {motions.filter(m => m.status !== 'voting' && m.status !== 'proposed').map(m => (
+                  <div key={m.id} className="flex items-center gap-4 p-4 rounded-xl bg-white/5 border border-white/5">
+                    <div className={`w-3 h-3 rounded-full flex-shrink-0 ${
+                      m.status === 'passed'
+                        ? 'bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.4)]'
+                        : 'bg-red-400'
+                    }`} />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white font-semibold text-sm truncate">{m.description}</p>
+                      <p className="text-white/30 text-[9px] uppercase tracking-wider font-bold mt-0.5">
+                        {MOTION_TYPE_LABELS[m.motion_type]} · {m.proposer_country}
+                      </p>
+                    </div>
+                    <span className={`text-sm font-black uppercase flex-shrink-0 ${
+                      m.status === 'passed' ? 'text-emerald-400' : 'text-red-400'
+                    }`}>
+                      {m.status}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
-        </motion.div>
 
-      </div>}
+        </motion.div>
+      )}
 
       {/* ── Suspension banner ─────────────────────────────────────────────── */}
       {session.current_mode === 'suspension' && (

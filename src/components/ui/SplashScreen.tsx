@@ -60,7 +60,7 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
                                 TuronMUN
                             </h1>
                             <p className="text-gold-400 text-sm md:text-base font-medium tracking-widest uppercase opacity-90">
-                                Season 6
+                                2-Year Anniversary
                             </p>
                         </motion.div>
 
