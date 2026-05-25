@@ -58,13 +58,16 @@ const Committees = () => {
                     }
                   };
 
+                  // Center the last card when there's an odd total (lone card on the last row)
+                  const isLastOdd = index === committees.length - 1 && committees.length % 2 !== 0;
+
                   return (
                     <motion.div
                       key={committee.id}
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.3, delay: index * 0.05 }}
-                      className="committee-detail-card h-96"
+                      className={`committee-detail-card h-96 ${isLastOdd ? 'md:col-span-2 md:justify-self-center md:w-1/2' : ''}`}
                     >
                       <CommitteeCard 
                         name={committee.name}
