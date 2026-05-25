@@ -300,8 +300,6 @@ const Hero = () => {
               className="relative z-10 glass-card p-4 sm:p-6 shadow-2xl"
               whileHover={{
                 scale: 1.02,
-                rotateY: 2,
-                rotateX: -2,
                 transition: { type: "spring", stiffness: 300, damping: 20 }
               }}
             >
