@@ -91,8 +91,8 @@ export default function CommandCenter() {
   const [motionProposerCountry, setMotionProposerCountry] = useState('');
   const [motionType, setMotionType] = useState<MotionType>('moderated_caucus');
   const [motionDesc, setMotionDesc] = useState('');
-  const [motionSpeakingTime, setMotionSpeakingTime] = useState(60);
-  const [motionTotalTime, setMotionTotalTime] = useState(600);
+  const [motionSpeakingTime, setMotionSpeakingTime] = useState('60');
+  const [motionTotalTime, setMotionTotalTime] = useState('600');
 
   // Drag reorder
   const [draggedId, setDraggedId] = useState<string | null>(null);
@@ -168,7 +168,9 @@ export default function CommandCenter() {
     if (!motionProposerCountry.trim() || !motionDesc.trim()) return;
     const newMotion = await proposeMotion(
       '', motionProposerCountry, motionProposerCountry,
-      motionType, motionDesc, motionSpeakingTime, motionTotalTime
+      motionType, motionDesc,
+      parseInt(motionSpeakingTime) || 60,
+      parseInt(motionTotalTime) || 600,
     );
     setMotionProposerCountry(''); setMotionDesc('');
     setShowNewMotion(false);
@@ -936,14 +938,14 @@ export default function CommandCenter() {
                     <div className="grid grid-cols-2 gap-3">
                       <div>
                         <label className="text-white/30 text-[9px] font-bold uppercase tracking-widest block mb-1.5">Total Time (sec)</label>
-                        <input type="number" min={60} max={3600} value={motionTotalTime}
-                          onChange={e => setMotionTotalTime(parseInt(e.target.value) || 600)}
+                        <input type="number" min={1} value={motionTotalTime}
+                          onChange={e => setMotionTotalTime(e.target.value)}
                           className="w-full bg-white/10 border border-white/10 rounded-xl px-4 py-2 text-white text-sm focus:outline-none" />
                       </div>
                       <div>
                         <label className="text-white/30 text-[9px] font-bold uppercase tracking-widest block mb-1.5">Per Speaker (sec)</label>
-                        <input type="number" min={10} max={600} value={motionSpeakingTime}
-                          onChange={e => setMotionSpeakingTime(parseInt(e.target.value) || 60)}
+                        <input type="number" min={1} value={motionSpeakingTime}
+                          onChange={e => setMotionSpeakingTime(e.target.value)}
                           className="w-full bg-white/10 border border-white/10 rounded-xl px-4 py-2 text-white text-sm focus:outline-none" />
                       </div>
                     </div>
