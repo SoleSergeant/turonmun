@@ -25,7 +25,6 @@ export const navLinks = [
     ]
   },
   { name: 'Contact', path: '/contact' },
-  { name: 'MUN Command', path: '/mun-command' },
 ];
 
 export const authLinks = [
