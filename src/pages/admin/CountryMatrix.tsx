@@ -730,11 +730,16 @@ const CountryMatrix = () => {
                                     defaultValue=""
                                   >
                                     <option value="" disabled>Assign delegate...</option>
-                                    {delegates.map(delegate => (
-                                      <option key={delegate.id} value={delegate.id}>
-                                        {delegate.full_name}{delegate.institution ? ` (${delegate.institution})` : ''}
-                                      </option>
-                                    ))}
+                                    {delegates
+                                      .filter(d => !matrix.some(m =>
+                                        m.committees[committee.id]?.assigned &&
+                                        m.committees[committee.id]?.delegateId === d.id
+                                      ))
+                                      .map(delegate => (
+                                        <option key={delegate.id} value={delegate.id}>
+                                          {delegate.full_name}{delegate.institution ? ` (${delegate.institution})` : ''}
+                                        </option>
+                                      ))}
                                   </select>
                                 </div>
                               )}
