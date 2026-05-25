@@ -73,6 +73,25 @@ const Resources = () => {
   const isVideo = (url: string) =>
     url.includes('youtu') || url.includes('vimeo') || url.includes('youtube');
 
+  const getViewerUrl = (url: string): string => {
+    const lower = url.toLowerCase();
+    if (lower.endsWith('.docx') || lower.endsWith('.pptx') || lower.endsWith('.xlsx') ||
+        lower.endsWith('.doc') || lower.endsWith('.ppt')) {
+      // Microsoft Office Online viewer — opens without downloading
+      return `https://view.officeapps.live.com/op/view.aspx?src=${encodeURIComponent(url)}`;
+    }
+    // PDFs and videos open directly in the browser
+    return url;
+  };
+
+  const getFileLabel = (url: string): string => {
+    const lower = url.toLowerCase();
+    if (isVideo(url)) return 'Watch';
+    if (lower.endsWith('.pptx') || lower.endsWith('.ppt')) return 'View Slides';
+    if (lower.endsWith('.docx') || lower.endsWith('.doc')) return 'View Online';
+    return 'View PDF';
+  };
+
   return (
     <div className="page-transition-container min-h-screen flex flex-col">
       <Navbar />
@@ -153,7 +172,7 @@ const Resources = () => {
                         {items.map(resource => (
                           <a
                             key={resource.id}
-                            href={resource.file_url}
+                            href={getViewerUrl(resource.file_url)}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="group flex flex-col justify-between p-5 bg-white rounded-xl border border-neutral-100 shadow-subtle hover:shadow-elegant hover:border-diplomatic-200 transition-all"
@@ -168,11 +187,11 @@ const Resources = () => {
                             </div>
                             <div className="flex items-center justify-between mt-4 pt-3 border-t border-neutral-100">
                               <span className="text-xs text-neutral-400 uppercase tracking-wide font-medium">
-                                {isVideo(resource.file_url) ? 'Watch' : resource.file_type?.includes('presentation') || resource.file_type?.includes('pptx') ? 'Slides' : 'PDF'}
+                                {getFileLabel(resource.file_url)}
                               </span>
                               {isVideo(resource.file_url)
                                 ? <ArrowRight size={16} className="text-neutral-400 group-hover:text-diplomatic-600 transition-colors group-hover:translate-x-0.5" />
-                                : <Download size={16} className="text-neutral-400 group-hover:text-diplomatic-600 transition-colors" />
+                                : <ArrowRight size={16} className="text-neutral-400 group-hover:text-diplomatic-600 transition-colors group-hover:translate-x-0.5" />
                               }
                             </div>
                           </a>
