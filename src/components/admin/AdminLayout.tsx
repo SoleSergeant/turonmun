@@ -12,7 +12,8 @@ import {
   LogOut,
   Menu,
   X,
-  Globe
+  Globe,
+  Bell
 } from 'lucide-react';
 
 interface AdminLayoutProps {
@@ -38,6 +39,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
     { path: isRealAdminSubdomain ? '/committees' : `/committees${suffix}`, label: 'Committees', icon: Globe },
     { path: isRealAdminSubdomain ? '/schedule' : `/schedule${suffix}`, label: 'Schedule', icon: Calendar },
     { path: isRealAdminSubdomain ? '/resources' : `/resources${suffix}`, label: 'Resources', icon: FileText },
+    { path: isRealAdminSubdomain ? '/announcements' : `/announcements${suffix}`, label: 'Announcements', icon: Bell },
     { path: isRealAdminSubdomain ? '/messages' : `/messages${suffix}`, label: 'Messages', icon: Mail },
   ];
 
