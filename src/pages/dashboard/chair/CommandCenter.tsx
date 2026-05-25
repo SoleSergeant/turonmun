@@ -304,8 +304,8 @@ export default function CommandCenter() {
               {doneSpeakers.map((s, i) => (
                 <div key={s.id} className="flex items-center gap-3 p-2 rounded-lg bg-white/5">
                   <span className="text-white/20 text-xs w-5 text-right">{i + 1}.</span>
-                  <span className="text-white text-sm font-medium flex-1">{s.delegate_name}</span>
-                  <span className="text-white/40 text-xs">{s.delegate_country}</span>
+                  <span className="text-white text-sm font-medium flex-1">{s.delegate_country || s.delegate_name}</span>
+                  <span className="text-white/40 text-xs">{s.delegate_country ? s.delegate_name : ''}</span>
                 </div>
               ))}
             </div>
@@ -357,15 +357,22 @@ export default function CommandCenter() {
 
       {/* ── Session Status Bar ─────────────────────────────────────────────── */}
       <motion.div variants={iv} className="glass-card p-4 border border-white/15 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-3">
-          <div className="relative">
+        <div className="flex items-center gap-3 min-w-0">
+          <div className="relative flex-shrink-0">
             <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping" />
             <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-400" />
             <Radio className="h-5 w-5 text-emerald-400" />
           </div>
-          <span className="text-white font-bold text-sm uppercase tracking-widest hidden sm:inline">{committeeName}</span>
-          <span className="text-white/20 mx-1 hidden sm:inline">•</span>
-          <span className="text-gold-400 font-bold text-xs uppercase tracking-widest">{SESSION_MODE_LABELS[session.current_mode]}</span>
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="text-white font-bold text-sm uppercase tracking-widest hidden sm:inline">{committeeName}</span>
+              <span className="text-white/20 hidden sm:inline">•</span>
+              <span className="text-gold-400 font-bold text-xs uppercase tracking-widest">{SESSION_MODE_LABELS[session.current_mode]}</span>
+            </div>
+            {session.current_topic && (
+              <p className="text-white/55 text-xs font-medium mt-0.5 hidden sm:block truncate max-w-lg">{session.current_topic}</p>
+            )}
+          </div>
         </div>
 
         <div className="flex flex-wrap gap-1.5">
@@ -589,17 +596,7 @@ export default function CommandCenter() {
         {/* Timer Panel */}
         <motion.div variants={iv} className="lg:col-span-5">
           <div className="glass-card p-8 border border-white/15 h-full flex flex-col">
-            <h3 className="text-white/30 text-[10px] font-bold uppercase tracking-[0.2em] mb-2 text-center">Session Timer</h3>
-
-            {/* Mod caucus topic */}
-            {session.current_mode === 'moderated_caucus' && session.current_topic && (
-              <p className="text-white font-semibold text-sm text-center mb-6 px-2 leading-snug">
-                {session.current_topic}
-              </p>
-            )}
-            {!(session.current_mode === 'moderated_caucus' && session.current_topic) && (
-              <div className="mb-6" />
-            )}
+            <h3 className="text-white/30 text-[10px] font-bold uppercase tracking-[0.2em] mb-8 text-center">Session Timer</h3>
 
             {/* Circular Timer */}
             <div className="relative w-56 h-56 mx-auto mb-8 flex-shrink-0">
@@ -756,8 +753,10 @@ export default function CommandCenter() {
                                 className="w-full flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/5 hover:bg-gold-400/10 hover:border-gold-400/20 transition-all text-left group"
                               >
                                 <div className="flex-1 min-w-0">
-                                  <p className="text-white font-bold text-sm truncate">{app.full_name}</p>
-                                  <p className="text-white/30 text-[10px] uppercase tracking-wider">{app.country}</p>
+                                  <p className="text-white font-bold text-sm truncate">{app.country || app.full_name}</p>
+                                  {app.country && (
+                                    <p className="text-white/30 text-[10px] uppercase tracking-wider truncate">{app.full_name}</p>
+                                  )}
                                 </div>
                                 <ChevronRight className="h-4 w-4 text-white/20 group-hover:text-gold-400 transition-colors" />
                               </button>
@@ -796,8 +795,10 @@ export default function CommandCenter() {
                   </div>
                   <div>
                     <p className="text-emerald-400 text-[10px] font-bold uppercase tracking-[0.2em] mb-0.5">Floor is Open</p>
-                    <h4 className="text-white text-xl font-black">{currentSpeaker.delegate_name}</h4>
-                    <p className="text-white/40 text-sm">{currentSpeaker.delegate_country}</p>
+                    <h4 className="text-white text-xl font-black">{currentSpeaker.delegate_country || currentSpeaker.delegate_name}</h4>
+                    {currentSpeaker.delegate_country && (
+                      <p className="text-white/40 text-sm">{currentSpeaker.delegate_name}</p>
+                    )}
                   </div>
                 </div>
                 <div className="grid grid-cols-3 gap-2 relative z-10">
@@ -854,8 +855,10 @@ export default function CommandCenter() {
                   <GripVertical className="h-4 w-4 text-white/15 group-hover:text-white/30 flex-shrink-0" />
                   <div className="w-6 h-6 rounded-md bg-white/5 flex items-center justify-center text-[10px] font-black text-white/30 border border-white/10">{idx + 1}</div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-white font-bold text-sm truncate">{s.delegate_name}</p>
-                    <p className="text-white/30 text-[10px] uppercase tracking-wider">{s.delegate_country}</p>
+                    <p className="text-white font-bold text-sm truncate">{s.delegate_country || s.delegate_name}</p>
+                    {s.delegate_country && (
+                      <p className="text-white/30 text-[10px] uppercase tracking-wider truncate">{s.delegate_name}</p>
+                    )}
                   </div>
                   <span className="text-white/20 font-mono text-xs">{formatTime(s.speaking_time)}</span>
                   <button onClick={() => removeSpeaker(s.id)} className="opacity-0 group-hover:opacity-100 p-1 text-red-400/50 hover:text-red-400 transition-all">
