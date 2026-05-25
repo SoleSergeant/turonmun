@@ -11,6 +11,7 @@ import {
   Users,
   ChevronRight
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import CountdownTimer from '@/components/CountdownTimer';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -176,7 +177,7 @@ function Overview() {
               Welcome back, <span className="text-gold-400">{displayName}</span>! 👋
             </h1>
             <p className="text-white/60 text-sm md:text-base max-w-xl">
-              Ready to make your mark at TuronMUN Season 6? Your diplomatic journey continues here.
+              Your diplomatic journey continues here. Stay on top of your application and conference schedule.
             </p>
           </div>
           <div className="hidden md:block flex-shrink-0">
@@ -443,9 +444,9 @@ function Overview() {
                 <p className="text-white/50 text-xs">Stay synchronized with the conference flow</p>
               </div>
             </div>
-            <button className="hidden sm:block text-xs text-gold-400 hover:text-gold-300 font-bold uppercase tracking-wider transition-colors">
+            <Link to="/schedule" className="hidden sm:block text-xs text-gold-400 hover:text-gold-300 font-bold uppercase tracking-wider transition-colors">
               Full Schedule →
-            </button>
+            </Link>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -461,7 +462,7 @@ function Overview() {
                 </div>
                 <div className="flex items-center text-white/50 text-[10px] font-medium uppercase tracking-widest">
                   <Calendar className="w-3 h-3 mr-1.5" />
-                  {event.event_date}
+                  {new Date(`${event.event_date}T00:00:00`).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
                 </div>
               </div>
             ))}
@@ -473,9 +474,9 @@ function Overview() {
           </div>
 
           <div className="mt-6 sm:hidden">
-            <button className="w-full text-center text-gold-400 hover:text-gold-300 text-xs font-bold uppercase tracking-widest py-3 bg-white/5 rounded-lg border border-white/10 transition-colors">
+            <Link to="/schedule" className="block w-full text-center text-gold-400 hover:text-gold-300 text-xs font-bold uppercase tracking-widest py-3 bg-white/5 rounded-lg border border-white/10 transition-colors">
               View Master Schedule
-            </button>
+            </Link>
           </div>
         </motion.div>
       </div>

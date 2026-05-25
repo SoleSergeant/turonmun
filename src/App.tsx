@@ -2,13 +2,14 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-router-dom";
 import { HelmetProvider } from "react-helmet-async";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import { useEffect, useState } from 'react';
 import { SecretMessage, useSecretMessage } from "@/components/easter-egg/SecretMessage";
 import AIAssistant from "@/components/ai/AIAssistant";
+import { useSubdomain } from "./hooks/use-subdomain";
 
 // Import animations
 import '@/styles/animations.css';
@@ -102,19 +103,14 @@ const ScrollToTop = () => {
     // Scroll to top when pathname changes
     window.scrollTo(0, 0);
 
-    // Log page view for analytics
-    if (typeof window.gtag !== 'undefined') {
-      window.gtag('config', 'YOUR_GA_MEASUREMENT_ID', {
-        page_path: pathname,
-      });
+    // GA page-view tracking (gtag injected by Vercel Analytics or external script)
+    if (typeof window.gtag === 'function') {
+      window.gtag('event', 'page_view', { page_path: pathname });
     }
   }, [pathname]);
 
   return null;
 };
-
-import { useSubdomain } from "./hooks/use-subdomain";
-import { Navigate } from "react-router-dom";
 
 const App = () => {
   const { isOpen, closeMessage } = useSecretMessage();
