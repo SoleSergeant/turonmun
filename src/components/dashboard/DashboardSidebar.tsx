@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   Home,
   FileText,
@@ -9,6 +9,7 @@ import {
   LogOut,
   Radio
 } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 interface DashboardSidebarProps {
   isOpen: boolean;
   onClose: () => void;
@@ -22,10 +23,11 @@ const navigationItems = [
 
 export default function DashboardSidebar({ isOpen, onClose }: DashboardSidebarProps) {
   const location = useLocation();
+  const navigate = useNavigate();
 
   const handleLogout = async () => {
-    // Mock logout for UI preview
-    console.log('Logout clicked - would redirect to login');
+    await supabase.auth.signOut();
+    navigate('/login');
   };
 
   return (
@@ -51,7 +53,7 @@ export default function DashboardSidebar({ isOpen, onClose }: DashboardSidebarPr
               </div>
               <div className="flex flex-col">
                 <span className="text-white font-display font-bold text-base tracking-tight">TuronMUN</span>
-                <span className="text-[10px] text-diplomatic-200 font-medium tracking-wider uppercase">Season 6</span>
+                <span className="text-[10px] text-diplomatic-200 font-medium tracking-wider uppercase">2-Year Anniversary</span>
               </div>
             </Link>
           </div>
@@ -121,7 +123,7 @@ export default function DashboardSidebar({ isOpen, onClose }: DashboardSidebarPr
               </div>
               <div className="flex flex-col">
                 <span className="text-white font-display font-bold text-base tracking-tight">TuronMUN</span>
-                <span className="text-[10px] text-diplomatic-200 font-medium tracking-wider uppercase">Season 6</span>
+                <span className="text-[10px] text-diplomatic-200 font-medium tracking-wider uppercase">2-Year Anniversary</span>
               </div>
             </Link>
             <button

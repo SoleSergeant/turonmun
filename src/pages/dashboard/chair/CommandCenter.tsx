@@ -576,6 +576,7 @@ export default function CommandCenter() {
                     type="text"
                     value={unmodTopic}
                     onChange={e => setUnmodTopic(e.target.value)}
+                    onBlur={() => updateSession({ current_topic: unmodTopic })}
                     placeholder="Topic / purpose of caucus..."
                     className="w-full max-w-xl bg-white/5 border border-white/10 rounded-xl px-5 py-3 text-white text-base placeholder-white/20 focus:outline-none focus:border-blue-400/40 text-center"
                   />
@@ -602,6 +603,7 @@ export default function CommandCenter() {
                     type="text"
                     value={unmodTopic}
                     onChange={e => setUnmodTopic(e.target.value)}
+                    onBlur={() => updateSession({ current_topic: unmodTopic })}
                     placeholder="Topic / purpose of caucus..."
                     className="mt-2 w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm placeholder-white/20 focus:outline-none focus:border-blue-400/40"
                   />
@@ -1007,7 +1009,7 @@ export default function CommandCenter() {
 
                   <button
                     onClick={handleProposeMotion}
-                    disabled={!motionProposerCountry.trim() || !motionDesc.trim()}
+                    disabled={!motionProposerCountry.trim() || (motionType !== 'unmoderated_caucus' && !motionDesc.trim())}
                     className="w-full py-3 bg-diplomatic-400/30 text-diplomatic-300 border border-diplomatic-400/40 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-diplomatic-400/40 transition-all disabled:opacity-30"
                   >
                     Submit &amp; Open for Vote

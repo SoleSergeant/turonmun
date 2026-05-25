@@ -95,7 +95,7 @@ function LiveSessionContent({
     );
   }
 
-  if (!session || session.status === 'inactive') {
+  if (!session || session.status === 'inactive' || session.status === 'ended') {
     return (
       <div className="flex items-center justify-center py-20">
         <div className="text-center">
