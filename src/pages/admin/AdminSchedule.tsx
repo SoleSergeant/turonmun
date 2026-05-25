@@ -29,8 +29,10 @@ const typeColors: Record<string, string> = {
 };
 
 const AdminSchedule = () => {
+  const todayISO = () => new Date().toISOString().slice(0, 10);
+
   const [scheduleEvents, setScheduleEvents] = useState<ScheduleEvent[]>([]);
-  const [conferenceDate, setConferenceDate] = useState<string>('');
+  const [conferenceDate, setConferenceDate] = useState<string>(todayISO());
   const [loading, setLoading] = useState(true);
   const [editingEvent, setEditingEvent] = useState<ScheduleEvent | null>(null);
   const [isSubmittingEvent, setIsSubmittingEvent] = useState(false);
@@ -135,13 +137,15 @@ const AdminSchedule = () => {
     e.preventDefault();
     if (!editingEvent) return;
 
+    const effectiveDate = conferenceDate || todayISO();
+
     try {
       setIsSubmittingEvent(true);
 
       const payload = {
         title: editingEvent.title,
         description: editingEvent.description || null,
-        event_date: conferenceDate || editingEvent.event_date,
+        event_date: effectiveDate,
         start_time: editingEvent.start_time,
         end_time: editingEvent.end_time,
         location: editingEvent.location || null,
