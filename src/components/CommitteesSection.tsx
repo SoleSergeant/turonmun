@@ -115,7 +115,7 @@ export default function CommitteesSection() {
           </motion.p>
         </motion.div>
         
-        <motion.div 
+        <motion.div
           className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"
           variants={containerVariants}
           initial="hidden"
@@ -123,9 +123,23 @@ export default function CommitteesSection() {
           viewport={{ once: true, margin: "-50px" }}
         >
           {loading ? (
-            <div className="col-span-full flex justify-center py-12">
-              <div className="loader w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-            </div>
+            // Skeleton cards — same grid slot size as real cards
+            <>
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="h-96 rounded-xl overflow-hidden bg-neutral-100 animate-pulse">
+                  <div className="h-3/5 bg-neutral-200" />
+                  <div className="p-4 space-y-3">
+                    <div className="h-4 bg-neutral-200 rounded w-1/3" />
+                    <div className="h-3 bg-neutral-200 rounded w-full" />
+                    <div className="h-3 bg-neutral-200 rounded w-5/6" />
+                    <div className="flex gap-2 mt-4">
+                      <div className="h-5 bg-neutral-200 rounded-full w-16" />
+                      <div className="h-5 bg-neutral-200 rounded-full w-20" />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </>
           ) : (
             committees.map((committee, idx) => (
               <motion.div 

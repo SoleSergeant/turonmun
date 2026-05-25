@@ -29,11 +29,20 @@ export const useCommittees = () => {
   const fetchCommittees = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('committees')
-        .select('*')
-        .eq('is_active', true) // Only show active committees to public
-        .order('name', { ascending: true });
+
+      // Timeout: fall back to static data if Supabase takes more than 5 s
+      const timeout = new Promise<never>((_, reject) =>
+        setTimeout(() => reject(new Error('timeout')), 5000)
+      );
+
+      const { data, error } = await Promise.race([
+        supabase
+          .from('committees')
+          .select('*')
+          .eq('is_active', true)
+          .order('name', { ascending: true }),
+        timeout,
+      ]) as any;
         
       if (error) throw error;
       
