@@ -1,14 +1,10 @@
 import * as React from 'react';
-import { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronRight, Calendar, Clock, MapPin, Users } from 'lucide-react';
-import CountdownTimer from './CountdownTimer';
+import { useState, useEffect } from 'react';
+import { motion } from 'framer-motion';
+import { ChevronRight, Calendar, Clock, MapPin, Users, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { CustomButton } from './ui/custom-button';
 import { transitionVariants } from '@/lib/transition-utils';
-
-const conferenceDate = new Date('2026-03-21T23:59:00');
-const conferenceLocation = 'Registan Private School';
 
 const phrases = [
   "Shaping Tomorrow's Leaders",
@@ -221,8 +217,8 @@ const Hero = () => {
                 whileTap={{ scale: 0.95 }}
                 className="w-full sm:w-auto"
               >
-                <CustomButton to="/about" variant="accent" size="lg" className="group w-full sm:w-auto">
-                  Learn More
+                <CustomButton to="/register" variant="accent" size="lg" className="group w-full sm:w-auto">
+                  Apply Now
                   <ChevronRight className="transition-transform group-hover:translate-x-1" size={16} />
                 </CustomButton>
               </motion.div>
@@ -259,48 +255,38 @@ const Hero = () => {
             >
               <style>{`@keyframes hero-badges-marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }`}</style>
               <div className="relative overflow-hidden rounded-full glass-panel border border-gold-400/20 shadow-gold">
-                <div className="absolute inset-0 bg-gradient-to-r from-gold-400/5 via-diplomatic-400/5 to-gold-400/5"></div>
+                <div className="absolute inset-0 bg-gradient-to-r from-gold-400/5 via-diplomatic-400/5 to-gold-400/5 pointer-events-none" />
+                {/* Fade masks on edges */}
+                <div className="absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-diplomatic-900/60 to-transparent z-10 pointer-events-none rounded-l-full" />
+                <div className="absolute inset-y-0 right-0 w-8 bg-gradient-to-l from-diplomatic-900/60 to-transparent z-10 pointer-events-none rounded-r-full" />
                 <div
-                  className="flex items-center gap-8 px-6 py-3 text-xs sm:text-sm text-white/90 whitespace-nowrap relative z-10"
-                  style={{
-                    animation: 'hero-badges-marquee 32s linear infinite',
-                  }}
+                  className="flex items-center gap-8 px-6 py-3 text-xs sm:text-sm text-white/90 whitespace-nowrap relative z-0"
+                  style={{ animation: 'hero-badges-marquee 32s linear infinite' }}
                 >
-                  <span className="inline-flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-gold-400" />
-                    Ranked top on mymun charts
-                  </span>
-                  <span className="inline-flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-gold-400" />
-                    Top social conference
-                  </span>
-                  <span className="inline-flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-gold-400" />
-                    Best small conference
-                  </span>
-                  <span className="inline-flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-gold-400" />
-                    Top logistics conference
-                  </span>
-                  <span className="inline-flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-gold-400" />
-                    Central Asia's leading MUN experience
-                  </span>
-                  <span className="inline-flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-gold-400" />
-                    Expert academic & chairing team
-                  </span>
+                  {/* Two identical sets — second set makes it loop seamlessly */}
+                  {[0, 1].map(set => (
+                    <React.Fragment key={set}>
+                      <span className="inline-flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-gold-400" />Ranked top on MyMUN charts</span>
+                      <span className="inline-flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-gold-400" />Best social conference</span>
+                      <span className="inline-flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-gold-400" />Best small conference</span>
+                      <span className="inline-flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-gold-400" />Best logistics conference</span>
+                      <span className="inline-flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-gold-400" />Central Asia's leading MUN</span>
+                      <span className="inline-flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-gold-400" />Expert academic &amp; chairing team</span>
+                      <span className="inline-flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-gold-400" />6 successful seasons</span>
+                    </React.Fragment>
+                  ))}
                 </div>
               </div>
             </motion.div>
           </motion.div>
 
           <motion.div
-            className="relative mt-0 mb-8 lg:mb-0 lg:mt-0 px-4 sm:px-0 order-1 lg:order-2 hidden lg:block"
+            className="relative mt-0 mb-8 lg:mb-0 lg:mt-0 px-4 sm:px-0 order-1 lg:order-2 block"
             variants={transitionVariants.scaleVariants}
             initial="initial"
             animate="animate"
           >
+            {/* Corner accents — desktop only */}
             <motion.div
               className="absolute top-5 left-0 w-32 h-32 border-t-2 border-l-2 border-gold-400/30 -translate-x-8 -translate-y-8 rounded-tl-3xl hidden sm:block"
               variants={transitionVariants.slideInUp}
@@ -319,86 +305,89 @@ const Hero = () => {
                 transition: { type: "spring", stiffness: 300, damping: 20 }
               }}
             >
-              <div className="absolute inset-0 bg-gradient-to-br from-diplomatic-800/50 to-diplomatic-900/50 rounded-xl"></div>
-              <div className="absolute inset-0 bg-noise opacity-10 mix-blend-soft-light rounded-xl"></div>
+              <div className="absolute inset-0 bg-gradient-to-br from-diplomatic-800/50 to-diplomatic-900/50 rounded-xl" />
+              <div className="absolute inset-0 bg-noise opacity-10 mix-blend-soft-light rounded-xl" />
 
-              <div className="absolute -top-6 -left-6 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-diplomatic-800 border-4 border-diplomatic-700 flex items-center justify-center">
-                <div className="w-4 h-4 sm:w-6 sm:h-6 rounded-full bg-gradient-to-br from-gold-400 to-gold-500 animate-pulse"></div>
+              {/* Decorative pulse dots */}
+              <div className="absolute -top-6 -left-6 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-diplomatic-800 border-4 border-diplomatic-700 flex items-center justify-center hidden sm:flex">
+                <div className="w-4 h-4 sm:w-6 sm:h-6 rounded-full bg-gradient-to-br from-gold-400 to-gold-500 animate-pulse" />
               </div>
-
-              <div className="absolute -bottom-6 -right-6 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-diplomatic-800 border-4 border-diplomatic-700 flex items-center justify-center">
-                <div className="w-4 h-4 sm:w-6 sm:h-6 rounded-full bg-gradient-to-br from-gold-400 to-gold-500 animate-pulse"></div>
+              <div className="absolute -bottom-6 -right-6 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-diplomatic-800 border-4 border-diplomatic-700 flex items-center justify-center hidden sm:flex">
+                <div className="w-4 h-4 sm:w-6 sm:h-6 rounded-full bg-gradient-to-br from-gold-400 to-gold-500 animate-pulse" />
               </div>
+              <div className="absolute top-1/2 left-0 transform -translate-y-1/2 -translate-x-4 w-2 h-16 bg-diplomatic-700 rounded-r-full hidden sm:block" />
+              <div className="absolute top-1/2 right-0 transform -translate-y-1/2 translate-x-4 w-2 h-16 bg-diplomatic-700 rounded-l-full hidden sm:block" />
 
-              <div className="absolute top-1/2 left-0 transform -translate-y-1/2 -translate-x-4 w-2 h-16 bg-diplomatic-700 rounded-r-full hidden sm:block"></div>
-              <div className="absolute top-1/2 right-0 transform -translate-y-1/2 translate-x-4 w-2 h-16 bg-diplomatic-700 rounded-l-full hidden sm:block"></div>
+              <div className="relative z-10 bg-diplomatic-800/80 backdrop-blur-sm rounded-lg p-4 sm:p-6 border border-white/5 shadow-inner">
+                <div className="absolute inset-0 bg-gradient-to-br from-transparent to-black/20 rounded-lg" />
+                <div className="absolute inset-0 bg-noise opacity-10 mix-blend-soft-light rounded-lg" />
 
-              <div className="relative z-10 bg-diplomatic-800/80 backdrop-blur-sm rounded-lg p-4 sm:p-5 border border-white/5 shadow-inner">
-                <div className="absolute inset-0 bg-gradient-to-br from-transparent to-black/20 rounded-lg"></div>
-                <div className="absolute inset-0 bg-noise opacity-10 mix-blend-soft-light rounded-lg"></div>
-
+                {/* Header */}
                 <motion.div
-                  className="text-center mb-4 sm:mb-6 relative z-10"
+                  className="text-center mb-5 relative z-10"
                   variants={transitionVariants.fadeVariants}
                 >
-                  <h2 className="text-xl sm:text-2xl font-display font-bold text-white mb-1 sm:mb-2">COMING SOON</h2>
-                  <p className="text-sm sm:text-base text-white/70">Applications will open soon. Stay tuned!</p>
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gold-400/15 border border-gold-400/30 text-gold-300 text-xs font-semibold uppercase tracking-widest mb-3">
+                    <Sparkles size={11} />
+                    Next Season
+                  </span>
+                  <h2 className="text-xl sm:text-2xl font-display font-bold text-white mb-1">
+                    Coming Soon
+                  </h2>
+                  <p className="text-sm text-white/60">
+                    Season 7 details will be announced shortly.
+                  </p>
                 </motion.div>
 
+                {/* Info rows */}
+                <motion.div
+                  variants={transitionVariants.staggerContainerVariants}
+                  className="space-y-3 relative z-10 mb-5"
+                >
+                  {[
+                    { icon: Calendar, label: 'Date',     value: 'To be announced' },
+                    { icon: Clock,    label: 'Duration',  value: 'To be announced' },
+                    { icon: MapPin,   label: 'Location',  value: 'Fergana, Uzbekistan' },
+                    { icon: Users,    label: 'Delegates', value: 'To be announced' },
+                  ].map(({ icon: Icon, label, value }) => (
+                    <motion.div
+                      key={label}
+                      variants={transitionVariants.staggerItemVariants}
+                      className="flex items-center gap-2.5 text-sm"
+                    >
+                      <Icon className="w-4 h-4 text-gold-400 flex-shrink-0" />
+                      <span className="text-white/50 w-16 flex-shrink-0">{label}</span>
+                      <span className={value === 'To be announced' ? 'text-white/40 italic' : 'text-white font-medium'}>
+                        {value}
+                      </span>
+                    </motion.div>
+                  ))}
+                </motion.div>
+
+                {/* Apply button */}
                 <motion.div
                   variants={transitionVariants.fadeVariants}
                   className="relative z-10"
                 >
-                  <CountdownTimer targetDate={conferenceDate} />
+                  <Link
+                    to="/register"
+                    className="block w-full text-center bg-gradient-to-r from-gold-500 to-gold-400 hover:from-gold-400 hover:to-gold-300 text-diplomatic-900 font-bold py-3 px-4 rounded-lg transition-all duration-200 text-sm shadow-gold hover:shadow-lg hover:-translate-y-0.5"
+                  >
+                    Apply for Season 7
+                  </Link>
                 </motion.div>
 
+                {/* Footer link */}
                 <motion.div
-                  variants={transitionVariants.staggerContainerVariants}
-                  className="mt-6 space-y-3 relative z-10"
-                >
-                  <motion.div
-                    variants={transitionVariants.staggerItemVariants}
-                    className="flex items-center text-sm sm:text-base text-white"
-                  >
-                    <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-gold-400 mr-2.5" />
-                    <span>TBD</span>
-                  </motion.div>
-
-                  <motion.div
-                    variants={transitionVariants.staggerItemVariants}
-                    className="flex items-center text-sm sm:text-base text-white"
-                  >
-                    <Clock className="w-4 h-4 sm:w-5 sm:h-5 text-gold-400 mr-2.5" />
-                    <span>TBD</span>
-                  </motion.div>
-
-                  <motion.div
-                    variants={transitionVariants.staggerItemVariants}
-                    className="flex items-center text-sm sm:text-base text-white"
-                  >
-                    <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-gold-400 mr-2.5" />
-                    <span>TBD</span>
-                  </motion.div>
-
-                  <motion.div
-                    variants={transitionVariants.staggerItemVariants}
-                    className="flex items-center text-sm sm:text-base text-white"
-                  >
-                    <Users className="w-4 h-4 sm:w-5 sm:h-5 text-gold-400 mr-2.5" />
-                    <span>TBD</span>
-                  </motion.div>
-                </motion.div>
-
-                <motion.div
-                  className="mt-6 pt-6 border-t border-white/10 text-center relative z-10"
+                  className="mt-4 pt-4 border-t border-white/10 text-center relative z-10"
                   variants={transitionVariants.fadeVariants}
                 >
                   <Link
-                    to="/schedule"
-                    className="text-gold-400 hover:text-gold-500 text-sm font-medium inline-flex items-center gap-1"
+                    to="/past-conferences"
+                    className="text-white/40 hover:text-gold-400 text-xs font-medium inline-flex items-center gap-1 transition-colors"
                   >
-                    View Full Schedule
-                    <ChevronRight size={14} />
+                    View past seasons
+                    <ChevronRight size={12} />
                   </Link>
                 </motion.div>
               </div>

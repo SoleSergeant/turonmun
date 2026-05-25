@@ -1,13 +1,14 @@
 export const navLinks = [
   { name: 'Home', path: '/' },
   { name: 'About', path: '/about' },
-  { 
-    name: 'Event Updates', 
+  {
+    name: 'Event Updates',
     path: '/event-updates',
     hasDropdown: true,
     dropdownItems: [
       { name: 'Committees', path: '/committees' },
       { name: 'Schedule', path: '/schedule' },
+      { name: 'Resources', path: '/resources' },
     ]
   },
   { 
