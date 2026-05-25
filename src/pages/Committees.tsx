@@ -44,15 +44,15 @@ const Committees = () => {
               {loading ? (
                 <>
                   {Array.from({ length: 4 }).map((_, i) => (
-                    <div key={i} className="h-96 rounded-xl overflow-hidden bg-neutral-100 animate-pulse">
-                      <div className="h-3/5 bg-neutral-200" />
+                    <div key={i} className="h-96 rounded-xl overflow-hidden bg-neutral-200 animate-pulse">
+                      <div className="h-3/5 bg-neutral-300" />
                       <div className="p-5 space-y-3">
-                        <div className="h-4 bg-neutral-200 rounded w-1/3" />
-                        <div className="h-3 bg-neutral-200 rounded w-full" />
-                        <div className="h-3 bg-neutral-200 rounded w-5/6" />
+                        <div className="h-4 bg-neutral-300 rounded w-1/3" />
+                        <div className="h-3 bg-neutral-300 rounded w-full" />
+                        <div className="h-3 bg-neutral-300 rounded w-5/6" />
                         <div className="flex gap-2 mt-4">
-                          <div className="h-5 bg-neutral-200 rounded-full w-16" />
-                          <div className="h-5 bg-neutral-200 rounded-full w-20" />
+                          <div className="h-5 bg-neutral-300 rounded-full w-16" />
+                          <div className="h-5 bg-neutral-300 rounded-full w-20" />
                         </div>
                       </div>
                     </div>
