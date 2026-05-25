@@ -871,7 +871,7 @@ export default function CommandCenter() {
                   onDragOver={e => handleDragOver(e, s.id)}
                   onDrop={() => handleDrop(s.id)}
                   onDragEnd={() => { setDraggedId(null); setDragOverId(null); }}
-                  className={`flex items-center gap-3 p-3 rounded-xl border transition-all group cursor-grab active:cursor-grabbing ${
+                  className={`relative overflow-hidden flex items-center gap-3 p-3 rounded-xl border transition-all group cursor-grab active:cursor-grabbing ${
                     dragOverId === s.id && draggedId !== s.id
                       ? 'border-gold-400/40 bg-gold-400/10'
                       : draggedId === s.id
@@ -879,16 +879,27 @@ export default function CommandCenter() {
                         : 'bg-white/5 border-white/5 hover:border-white/15'
                   }`}
                 >
-                  <GripVertical className="h-4 w-4 text-white/15 group-hover:text-white/30 flex-shrink-0" />
-                  <div className="w-6 h-6 rounded-md bg-white/5 flex items-center justify-center text-[10px] font-black text-white/30 border border-white/10">{idx + 1}</div>
-                  <div className="flex-1 min-w-0">
+                  {/* Country flag background */}
+                  {s.delegate_country && (
+                    <img
+                      src={`https://flagcdn.com/w160/${getCountryCode(s.delegate_country).toLowerCase()}.png`}
+                      alt=""
+                      aria-hidden
+                      onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                      className="absolute right-0 top-0 h-full w-auto object-cover opacity-[0.07] pointer-events-none select-none"
+                      style={{ maskImage: 'linear-gradient(to left, black 40%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to left, black 40%, transparent 100%)' }}
+                    />
+                  )}
+                  <GripVertical className="h-4 w-4 text-white/15 group-hover:text-white/30 flex-shrink-0 relative z-10" />
+                  <div className="w-6 h-6 rounded-md bg-white/5 flex items-center justify-center text-[10px] font-black text-white/30 border border-white/10 relative z-10">{idx + 1}</div>
+                  <div className="flex-1 min-w-0 relative z-10">
                     <p className="text-white font-bold text-sm truncate">{s.delegate_country || s.delegate_name}</p>
                     {s.delegate_country && (
                       <p className="text-white/30 text-[10px] uppercase tracking-wider truncate">{s.delegate_name}</p>
                     )}
                   </div>
-                  <span className="text-white/20 font-mono text-xs">{formatTime(s.speaking_time)}</span>
-                  <button onClick={() => removeSpeaker(s.id)} className="opacity-0 group-hover:opacity-100 p-1 text-red-400/50 hover:text-red-400 transition-all">
+                  <span className="text-white/20 font-mono text-xs relative z-10">{formatTime(s.speaking_time)}</span>
+                  <button onClick={() => removeSpeaker(s.id)} className="opacity-0 group-hover:opacity-100 p-1 text-red-400/50 hover:text-red-400 transition-all relative z-10">
                     <X className="h-3.5 w-3.5" />
                   </button>
                 </motion.div>
