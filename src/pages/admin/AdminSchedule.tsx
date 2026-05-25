@@ -171,10 +171,9 @@ const AdminSchedule = () => {
 
       setEditingEvent(null);
       fetchSchedule();
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error saving event:', error);
-      const msg = error?.message || error?.details || error?.hint || JSON.stringify(error);
-      toast({ title: 'Error saving event', description: msg, variant: 'destructive' });
+      toast({ title: 'Error', description: 'Failed to save event', variant: 'destructive' });
     } finally {
       setIsSubmittingEvent(false);
     }
