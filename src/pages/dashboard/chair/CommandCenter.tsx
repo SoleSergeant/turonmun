@@ -63,7 +63,7 @@ export default function CommandCenter() {
     session, speakers, loading, currentSpeaker, waitingSpeakers, doneSpeakers,
     motions, activeMotion, votes, attendance, markAttendance, logs,
     createSession, setMode, startTimer, pauseTimer, resumeTimer, resetTimer,
-    addSpeaker, nextSpeaker, removeSpeaker, openVoting, closeVoting, resolveMotion, loadVotes,
+    addSpeaker, nextSpeaker, removeSpeaker, openVoting, resolveMotion, loadVotes,
     yieldTo, proposeMotion, updateSession,
   } = useMunCommand({ committeeId, isChair: true });
 
@@ -77,7 +77,7 @@ export default function CommandCenter() {
   const [speakerSearch, setSpeakerSearch] = useState('');
   const [manualName, setManualName] = useState('');
   const [manualCountry, setManualCountry] = useState('');
-  const [speakerTime, setSpeakerTime] = useState(60);
+  const [speakerTime, setSpeakerTime] = useState('60');
 
   // Custom timer
   const [customMins, setCustomMins] = useState(1);
@@ -101,22 +101,40 @@ export default function CommandCenter() {
   const [draggedId, setDraggedId] = useState<string | null>(null);
   const [dragOverId, setDragOverId] = useState<string | null>(null);
 
-  // ── Load MUN-assigned countries from country_assignments ────────────────────
+  // ── Load MUN-assigned countries from country_assignments (live) ─────────────
   useEffect(() => {
     if (!committeeId) return;
-    (supabase.from('country_assignments') as any)
-      .select('application_id, country_name')
-      .eq('committee_id', committeeId)
-      .then(({ data }: { data: any[] | null }) => {
-        if (!data) return;
-        const map: Record<string, string> = {};
-        data.forEach((r: any) => {
-          if (r.application_id && (r.country_name || r.country)) {
-            map[r.application_id] = r.country_name || r.country;
-          }
+
+    const loadCountries = () => {
+      (supabase.from('country_assignments') as any)
+        .select('application_id, country_name')
+        .eq('committee_id', committeeId)
+        .then(({ data }: { data: any[] | null }) => {
+          if (!data) return;
+          const map: Record<string, string> = {};
+          data.forEach((r: any) => {
+            if (r.application_id && (r.country_name || r.country)) {
+              map[r.application_id] = r.country_name || r.country;
+            }
+          });
+          setAssignedCountries(map);
         });
-        setAssignedCountries(map);
-      });
+    };
+
+    loadCountries();
+
+    // Stay in sync if admin assigns/changes countries while session is live
+    const channel = supabase
+      .channel(`country-assignments-${committeeId}`)
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'country_assignments',
+        filter: `committee_id=eq.${committeeId}`,
+      }, () => { loadCountries(); })
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
   }, [committeeId]); // eslint-disable-line
 
   // ── Sound on timer zero ──────────────────────────────────────────────────────
@@ -169,9 +187,12 @@ export default function CommandCenter() {
   const getAssignedCountry = (app: Tables<'applications'>) =>
     assignedCountries[app.id] || app.country || '';
 
+  // Sorted list of unique assigned country names (for the motion proposer dropdown)
+  const assignedCountryNames = [...new Set(Object.values(assignedCountries))].sort();
+
   // ── Handlers ────────────────────────────────────────────────────────────────
   const handleAddFromList = async (app: Tables<'applications'>) => {
-    await addSpeaker(app.id, app.full_name, getAssignedCountry(app), speakerTime);
+    await addSpeaker(app.id, app.full_name, getAssignedCountry(app), parseInt(speakerTime) || 60);
     setShowAddSpeaker(false);
     setSpeakerSearch('');
   };
@@ -184,7 +205,7 @@ export default function CommandCenter() {
       delegate_name: manualName.trim(),
       delegate_country: manualCountry.trim() || null,
       position: speakers.length,
-      speaking_time: speakerTime,
+      speaking_time: parseInt(speakerTime) || 60,
     });
     setManualName(''); setManualCountry('');
     setShowAddSpeaker(false);
@@ -566,8 +587,29 @@ export default function CommandCenter() {
                   className="fixed inset-0 z-50 bg-diplomatic-950 flex flex-col items-center justify-center gap-8 p-12"
                 >
                   <p className="text-blue-400 text-xs font-black uppercase tracking-[0.3em]">Unmoderated Caucus</p>
-                  <div className={`text-[12rem] font-mono font-black ${timerColor} leading-none tracking-tighter`}>
+                  <div className={`text-[12rem] font-mono font-black ${timerColor} leading-none tracking-tighter tabular-nums`}>
                     {formatTime(session.timer_remaining)}
+                  </div>
+                  {/* Timer controls */}
+                  <div className="flex items-center gap-4">
+                    {!session.timer_running ? (
+                      <button onClick={resumeTimer}
+                        className="w-16 h-16 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 flex items-center justify-center hover:bg-emerald-500/30 transition-all"
+                        title="Start">
+                        <Play className="h-8 w-8 ml-1" />
+                      </button>
+                    ) : (
+                      <button onClick={pauseTimer}
+                        className="w-16 h-16 rounded-2xl bg-amber-500/20 border border-amber-500/30 text-amber-400 flex items-center justify-center hover:bg-amber-500/30 transition-all"
+                        title="Pause">
+                        <Pause className="h-8 w-8" />
+                      </button>
+                    )}
+                    <button onClick={resetTimer}
+                      className="w-12 h-12 rounded-2xl bg-white/5 border border-white/10 text-white/40 flex items-center justify-center hover:bg-white/10 transition-all"
+                      title="Reset">
+                      <RotateCcw className="h-5 w-5" />
+                    </button>
                   </div>
                   {unmodTopic && (
                     <p className="text-white/50 text-2xl font-semibold text-center max-w-2xl">{unmodTopic}</p>
@@ -608,9 +650,29 @@ export default function CommandCenter() {
                     className="mt-2 w-full bg-white/5 border border-white/10 rounded-lg px-3 py-2 text-white text-sm placeholder-white/20 focus:outline-none focus:border-blue-400/40"
                   />
                 </div>
-                <div className="flex items-center gap-4">
-                  <div className={`text-6xl font-mono font-black ${timerColor}`}>
+                <div className="flex items-center gap-3 flex-shrink-0">
+                  <div className={`text-6xl font-mono font-black ${timerColor} tabular-nums`}>
                     {formatTime(session.timer_remaining)}
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    {!session.timer_running ? (
+                      <button onClick={resumeTimer}
+                        className="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 flex items-center justify-center hover:bg-emerald-500/30 transition-all"
+                        title="Start">
+                        <Play className="h-4 w-4 ml-0.5" />
+                      </button>
+                    ) : (
+                      <button onClick={pauseTimer}
+                        className="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/30 text-amber-400 flex items-center justify-center hover:bg-amber-500/30 transition-all"
+                        title="Pause">
+                        <Pause className="h-4 w-4" />
+                      </button>
+                    )}
+                    <button onClick={resetTimer}
+                      className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 text-white/40 flex items-center justify-center hover:bg-white/10 transition-all"
+                      title="Reset">
+                      <RotateCcw className="h-3.5 w-3.5" />
+                    </button>
                   </div>
                   <button
                     onClick={() => setUnmodFullscreen(true)}
@@ -759,11 +821,11 @@ export default function CommandCenter() {
                     <div className="flex items-center gap-3">
                       <span className="text-white/30 text-[9px] font-bold uppercase tracking-widest">Speaking time:</span>
                       {[30, 60, 90, 120].map(t => (
-                        <button key={t} onClick={() => setSpeakerTime(t)} className={`px-2 py-1 rounded text-[10px] font-bold transition-all ${speakerTime === t ? 'bg-gold-400 text-diplomatic-950' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}>
+                        <button key={t} onClick={() => setSpeakerTime(String(t))} className={`px-2 py-1 rounded text-[10px] font-bold transition-all ${parseInt(speakerTime) === t ? 'bg-gold-400 text-diplomatic-950' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}>
                           {t >= 60 ? `${t/60}m` : `${t}s`}
                         </button>
                       ))}
-                      <input type="number" min={10} max={600} value={speakerTime} onChange={e => setSpeakerTime(parseInt(e.target.value) || 60)}
+                      <input type="number" min={10} max={600} value={speakerTime} onChange={e => setSpeakerTime(e.target.value)}
                         className="w-16 bg-white/10 border border-white/10 rounded-lg px-2 py-1 text-white text-center text-xs font-bold focus:outline-none" />
                       <span className="text-white/20 text-[9px]">sec</span>
                     </div>
@@ -962,11 +1024,24 @@ export default function CommandCenter() {
                   <p className="text-diplomatic-300 text-[10px] font-black uppercase tracking-widest">Propose a Motion</p>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <input
-                      type="text" placeholder="Proposing country *"
-                      value={motionProposerCountry} onChange={e => setMotionProposerCountry(e.target.value)}
-                      className="bg-white/10 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm placeholder-white/20 focus:outline-none focus:border-diplomatic-400/40"
-                    />
+                    {assignedCountryNames.length > 0 ? (
+                      <select
+                        value={motionProposerCountry}
+                        onChange={e => setMotionProposerCountry(e.target.value)}
+                        className="bg-white/10 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-diplomatic-400/40"
+                      >
+                        <option value="" className="bg-diplomatic-900 text-white/40">Select proposing country *</option>
+                        {assignedCountryNames.map(c => (
+                          <option key={c} value={c} className="bg-diplomatic-900">{c}</option>
+                        ))}
+                      </select>
+                    ) : (
+                      <input
+                        type="text" placeholder="Proposing country *"
+                        value={motionProposerCountry} onChange={e => setMotionProposerCountry(e.target.value)}
+                        className="bg-white/10 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm placeholder-white/20 focus:outline-none focus:border-diplomatic-400/40"
+                      />
+                    )}
                     <select
                       value={motionType} onChange={e => setMotionType(e.target.value as MotionType)}
                       className="bg-white/10 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-diplomatic-400/40"

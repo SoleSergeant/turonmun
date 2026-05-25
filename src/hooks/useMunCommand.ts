@@ -346,7 +346,7 @@ export function useMunCommand({ committeeId, isChair = false }: UseMunCommandOpt
       await updateSession({ current_speaker_id: null, timer_running: false, timer_remaining: 0, yield_type: 'none' });
     }
     await loadSpeakers(session.id);
-  }, [session, speakers, startTimer, updateSession, loadSpeakers]);
+  }, [session, speakers, updateSession, loadSpeakers]);
 
   const removeSpeaker = useCallback(async (speakerId: string) => {
     await (supabase.from('speakers_list') as any).delete().eq('id', speakerId);
@@ -503,10 +503,7 @@ export function useMunCommand({ committeeId, isChair = false }: UseMunCommandOpt
     await loadVotes(motionId);
   }, [loadVotes]);
 
-  const closeVoting = useCallback(async (motionId: string) => {
-    // Legacy — kept for compatibility
-    if (session) await loadMotions(session.id);
-  }, [session, loadMotions]);
+  // closeVoting removed — resolution is handled entirely by resolveMotion
 
   const resolveMotion = useCallback(async (motionId: string, passed: boolean) => {
     const motion = motions.find(m => m.id === motionId);
@@ -609,7 +606,6 @@ export function useMunCommand({ committeeId, isChair = false }: UseMunCommandOpt
     secondMotion,
     openVoting,
     castVote,
-    closeVoting,
     resolveMotion,
     loadVotes,
   };
