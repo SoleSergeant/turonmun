@@ -89,6 +89,7 @@ export default function CommandCenter() {
 
   // Motion form
   const [motionProposerCountry, setMotionProposerCountry] = useState('');
+  const [showCountryDropdown, setShowCountryDropdown] = useState(false);
   const [motionType, setMotionType] = useState<MotionType>('moderated_caucus');
   const [motionDesc, setMotionDesc] = useState('');
   const [motionSpeakingTime, setMotionSpeakingTime] = useState('60');
@@ -1024,24 +1025,41 @@ export default function CommandCenter() {
                   <p className="text-diplomatic-300 text-[10px] font-black uppercase tracking-widest">Propose a Motion</p>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {assignedCountryNames.length > 0 ? (
-                      <select
-                        value={motionProposerCountry}
-                        onChange={e => setMotionProposerCountry(e.target.value)}
-                        className="bg-white/10 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-diplomatic-400/40"
-                      >
-                        <option value="" className="bg-diplomatic-900 text-white/40">Select proposing country *</option>
-                        {assignedCountryNames.map(c => (
-                          <option key={c} value={c} className="bg-diplomatic-900">{c}</option>
-                        ))}
-                      </select>
-                    ) : (
+                    {/* Searchable country combobox */}
+                    <div className="relative">
                       <input
-                        type="text" placeholder="Proposing country *"
-                        value={motionProposerCountry} onChange={e => setMotionProposerCountry(e.target.value)}
-                        className="bg-white/10 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm placeholder-white/20 focus:outline-none focus:border-diplomatic-400/40"
+                        type="text"
+                        placeholder="Proposing country *"
+                        value={motionProposerCountry}
+                        onChange={e => { setMotionProposerCountry(e.target.value); setShowCountryDropdown(true); }}
+                        onFocus={() => setShowCountryDropdown(true)}
+                        onBlur={() => setTimeout(() => setShowCountryDropdown(false), 150)}
+                        className="w-full bg-white/10 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm placeholder-white/20 focus:outline-none focus:border-diplomatic-400/40"
                       />
-                    )}
+                      {showCountryDropdown && (() => {
+                        const filtered = assignedCountryNames.filter(c =>
+                          c.toLowerCase().includes(motionProposerCountry.toLowerCase())
+                        );
+                        return filtered.length > 0 ? (
+                          <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-diplomatic-900 border border-white/15 rounded-xl shadow-2xl overflow-hidden max-h-52 overflow-y-auto">
+                            {filtered.map(c => (
+                              <button
+                                key={c}
+                                type="button"
+                                onMouseDown={() => { setMotionProposerCountry(c); setShowCountryDropdown(false); }}
+                                className={`w-full px-4 py-2.5 text-left text-sm transition-colors ${
+                                  motionProposerCountry === c
+                                    ? 'bg-diplomatic-400/30 text-white font-bold'
+                                    : 'text-white/80 hover:bg-white/10'
+                                }`}
+                              >
+                                {c}
+                              </button>
+                            ))}
+                          </div>
+                        ) : null;
+                      })()}
+                    </div>
                     <select
                       value={motionType} onChange={e => setMotionType(e.target.value as MotionType)}
                       className="bg-white/10 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm focus:outline-none focus:border-diplomatic-400/40"
