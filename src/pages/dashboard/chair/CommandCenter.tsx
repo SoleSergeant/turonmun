@@ -502,7 +502,7 @@ export default function CommandCenter() {
                   applications.map(app => {
                     const status = getRollStatus(app.id);
                     const munCountry = getAssignedCountry(app);
-                    const code = getCountryCode(munCountry || app.country ?? '').toLowerCase();
+                    const code = getCountryCode(munCountry || (app.country ?? '')).toLowerCase();
                     return (
                       <div key={app.id} className="flex items-center gap-3 px-5 py-3 border-b border-gray-100 last:border-0">
                         <img
