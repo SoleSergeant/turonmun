@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Globe, Users, Award, PenTool, Calendar, Trophy, Flag, Sparkles, Mail, Linkedin, Twitter, Send } from 'lucide-react';
+import { Globe, Users, Award, PenTool, Calendar, Trophy, Flag, Sparkles, Mail, Linkedin, Twitter, Send, ChevronRight } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { CustomButton } from '@/components/ui/custom-button';
 import AboutMission from '@/components/about/AboutMission';
@@ -53,17 +53,15 @@ export default function About() {
                   Join Our Community
                 </CustomButton>
               </motion.div>
-              <motion.a
-                href="https://t.me/TuronMUN"
-                target="_blank"
-                rel="noreferrer"
+              <motion.div
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-lg bg-[#0088cc] hover:bg-[#0077b5] text-white font-semibold transition-colors"
               >
-                <Send size={20} />
-                Join Telegram
-              </motion.a>
+                <CustomButton variant="outline" size="lg" to="/past-conferences">
+                  <span>Past Conferences</span>
+                  <ChevronRight size={18} className="ml-1" />
+                </CustomButton>
+              </motion.div>
             </motion.div>
           </motion.div>
         </div>

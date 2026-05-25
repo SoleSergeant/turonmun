@@ -25,21 +25,30 @@ export default function SchedulePreview() {
       <section className="section bg-white">
         <div className="container">
           <div className="text-center mb-12">
-            <motion.div
-              whileHover={{ scale: 1.05, y: -2 }}
-              transition={{ type: "spring", stiffness: 400, damping: 10 }}
-              className="inline-block"
-            >
-              <span className="glass-panel px-4 py-2 text-sm font-medium text-diplomatic-700 border border-diplomatic-300/50 shadow-subtle mb-2 inline-block rounded-full">Event Schedule</span>
-            </motion.div>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Conference Agenda</h2>
-            <p className="text-neutral-600 max-w-2xl mx-auto">
-              Here's a preview of our event schedule. For the complete agenda and details, please visit the Schedule page.
-            </p>
+            <div className="h-8 bg-neutral-200 rounded-full w-32 mx-auto mb-3 animate-pulse" />
+            <div className="h-9 bg-neutral-200 rounded w-64 mx-auto mb-4 animate-pulse" />
+            <div className="h-4 bg-neutral-200 rounded w-96 mx-auto animate-pulse" />
           </div>
-          
-          <div className="flex justify-center items-center py-12">
-            <div className="loader w-8 h-8 border-4 border-diplomatic-500 border-t-transparent rounded-full animate-spin"></div>
+
+          <div className="max-w-3xl mx-auto glass-panel p-5 sm:p-6 animate-pulse">
+            {/* Day header skeleton */}
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-9 h-9 bg-neutral-300 rounded-md" />
+              <div className="space-y-1.5">
+                <div className="h-4 bg-neutral-300 rounded w-36" />
+                <div className="h-3 bg-neutral-200 rounded w-24" />
+              </div>
+            </div>
+            {/* Event row skeletons */}
+            <div className="border-l-2 border-neutral-200 pl-6 ml-3 space-y-6">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div key={i} className="space-y-1.5">
+                  <div className="h-3 bg-neutral-200 rounded w-20" />
+                  <div className="h-4 bg-neutral-300 rounded w-3/4" />
+                  <div className="h-3 bg-neutral-200 rounded w-1/2" />
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </section>

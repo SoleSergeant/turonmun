@@ -24,23 +24,8 @@ const NavbarLogo: React.FC<NavbarLogoProps> = ({ scrolled }) => {
         />
       </motion.div>
       <div className={scrolled ? "text-white" : "text-white"}>
-        <motion.span 
-          className="font-bold text-white"
-          animate={{ scale: [1, 1.05, 1] }}
-          transition={{ duration: 2, repeat: Infinity, repeatType: "reverse" }}
-        >
-          TURON
-        </motion.span>
-        <motion.span
-          initial={{ opacity: 1 }}
-          animate={{ 
-            opacity: [1, 0.8, 1],
-            y: [0, -1, 0]
-          }}
-          transition={{ duration: 2, repeat: Infinity, repeatType: "reverse", delay: 1 }}
-        >
-          MUN
-        </motion.span>
+        <span className="font-bold text-white">TURON</span>
+        <span>MUN</span>
       </div>
     </Link>
   );

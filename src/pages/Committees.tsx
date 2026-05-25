@@ -31,7 +31,7 @@ const Committees = () => {
               transition={{ duration: 0.3 }}
               className="mb-12 text-center"
             >
-              <span className="inline-block px-3 py-1 bg-gold-100 text-gold-600 rounded-full text-sm font-medium mb-3">TURON x CAMU MUN</span>
+              <span className="inline-block px-3 py-1 bg-gold-100 text-gold-600 rounded-full text-sm font-medium mb-3">Season 7</span>
               <h1 className="text-4xl md:text-5xl font-display font-bold text-diplomatic-900 mb-6">
                 Our Committees
               </h1>

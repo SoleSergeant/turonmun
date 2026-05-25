@@ -22,7 +22,7 @@ const faqItems: FAQItem[] = [
   },
   {
     question: 'What is the conference language?',
-    answer: 'The official language of the conference is English. All committee sessions, documentation, and communication will be conducted in English.'
+    answer: 'The conference is conducted primarily in English. Most committee sessions, documentation, and communication are in English. Each season also features one Russian-language committee for participants more comfortable in Russian.'
   },
   {
     question: 'Do I need previous MUN experience to participate?',

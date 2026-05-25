@@ -47,7 +47,7 @@ export default function Footer() {
             </li>
             <li>
               <Link to="/register" className="text-blue-200 hover:text-white transition-colors inline-flex items-center">
-                <ArrowRight size={14} className="mr-2 opacity-70" /> Application (Closed)
+                <ArrowRight size={14} className="mr-2 opacity-70" /> Application (Coming Soon)
               </Link>
             </li>
             <li>
@@ -78,8 +78,7 @@ export default function Footer() {
             <li className="flex items-start">
               <MapPin className="mr-3 shrink-0 mt-1 text-blue-300" size={18} />
               <span className="text-blue-200 text-sm sm:text-base">
-                TuronMUN Conference Center<br />
-                Fergana, Uzbekistan<br />
+                Fergana, Uzbekistan
               </span>
             </li>
           </ul>
@@ -116,7 +115,7 @@ export default function Footer() {
       <div className="mt-12 pt-8 border-t border-blue-800/50 text-center text-blue-400 text-sm">
         <div className="flex flex-col md:flex-row justify-between items-center">
           <p> {currentYear} TuronMUN. All rights reserved.</p>
-          <p className="mt-2 md:mt-0">Coded & created by <a href="https://t.me/samandar_vibe" target="_blank" rel="noopener" className="underline hover:text-white">Numonov Samandar</a> & Asadbek Abdukhalilov • 2025.</p>
+          <p className="mt-2 md:mt-0">Coded & created by <a href="https://t.me/samandar_vibe" target="_blank" rel="noopener" className="underline hover:text-white">Numonov Samandar</a> & Asadbek Abdukhalilov • {currentYear}.</p>
         </div>
       </div>
     </div>

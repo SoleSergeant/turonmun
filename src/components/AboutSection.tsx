@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import FeatureCard from './FeatureCard';
 import { Users, Award, Globe, PenTool } from 'lucide-react';
 import { Badge } from './ui/badge';
 import { Card, CardContent } from './ui/card';
-import { motion } from 'framer-motion';
+import { motion, useInView } from 'framer-motion';
 
 const features = [
   {
@@ -49,8 +49,12 @@ export default function AboutSection() {
   
 
   const [counts, setCounts] = useState(stats.map(() => 0));
+  const statsRef = useRef<HTMLDivElement>(null);
+  const isInView = useInView(statsRef, { once: true, margin: '-80px' });
 
   useEffect(() => {
+    if (!isInView) return;
+
     let animationFrame: number;
     const duration = 1400;
     const start = performance.now();
@@ -68,7 +72,7 @@ export default function AboutSection() {
     animationFrame = requestAnimationFrame(tick);
 
     return () => cancelAnimationFrame(animationFrame);
-  }, []);
+  }, [isInView]);
 
   return (
     <section className="relative py-24 md:py-32 overflow-hidden bg-gradient-to-b from-neutral-50 via-white to-neutral-100 border-y border-neutral-200">
@@ -111,7 +115,8 @@ export default function AboutSection() {
               </p>
             </div>
 
-            <motion.div 
+            <motion.div
+              ref={statsRef}
               className="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6"
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
