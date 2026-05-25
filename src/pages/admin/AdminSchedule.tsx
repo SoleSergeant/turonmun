@@ -77,7 +77,7 @@ const AdminSchedule = () => {
       setIsUpdatingDate(true);
       const { error } = await supabase
         .from('schedule_events')
-        .update({ event_date: newDate, updated_at: new Date().toISOString() })
+        .update({ event_date: newDate })
         .neq('id', '00000000-0000-0000-0000-000000000000'); // update all rows
 
       if (error) throw error;
@@ -152,7 +152,6 @@ const AdminSchedule = () => {
         event_type: editingEvent.event_type,
         committee_id: editingEvent.committee_id,
         is_mandatory: editingEvent.is_mandatory,
-        updated_at: new Date().toISOString(),
       };
 
       if (editingEvent.id) {
