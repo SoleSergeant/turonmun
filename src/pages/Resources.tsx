@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
-import { Book, FileText, Video, Download, BookOpen, ArrowRight, BookMarked, Scale, PenLine, Loader2 } from 'lucide-react';
+import { Book, FileText, Video, Download, BookOpen, ArrowRight, BookMarked, Scale, PenLine, LayoutTemplate, FlaskConical, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 
 interface Resource {
@@ -16,15 +16,17 @@ interface Resource {
 }
 
 const CATEGORY_CONFIG: Record<string, { label: string; icon: React.ElementType; anchor: string; description: string }> = {
-  handbook:           { label: 'Delegate Handbook',        icon: BookMarked, anchor: 'handbook',   description: 'The official TuronMUN guide covering procedures, rules, and delegate etiquette.' },
-  rop:                { label: 'Rules of Procedure',       icon: Scale,      anchor: 'rop',        description: 'Official rules governing committee sessions and debate.' },
-  position_paper:     { label: 'Position Paper & Resolution', icon: PenLine, anchor: 'papers',    description: 'Templates, guides, and samples for writing position papers and resolutions.' },
-  'Delegate Guides':  { label: 'Delegate Guides',          icon: Book,       anchor: 'guides',     description: 'Research guides and preparation materials for all delegates.' },
-  'Committee Materials': { label: 'Committee Materials',   icon: FileText,   anchor: 'committee',  description: 'Background guides and topic briefs for all committees.' },
-  'Video Tutorials':  { label: 'Video Tutorials',          icon: Video,      anchor: 'videos',     description: 'Visual walkthroughs to help you master MUN skills.' },
+  handbook:              { label: 'Delegate Handbook',           icon: BookMarked,    anchor: 'handbook',   description: 'The official TuronMUN guide covering procedures, rules, and delegate etiquette.' },
+  rop:                   { label: 'Rules of Procedure',          icon: Scale,         anchor: 'rop',        description: 'Official rules governing committee sessions and debate.' },
+  position_paper:        { label: 'Position Paper & Resolution', icon: PenLine,       anchor: 'papers',     description: 'Templates, guides, and samples for writing position papers and resolutions.' },
+  'Delegate Guides':     { label: 'Delegate Guides',             icon: Book,          anchor: 'guides',     description: 'Research guides and preparation materials for all delegates.' },
+  'Committee Materials': { label: 'Committee Materials',         icon: FileText,      anchor: 'committee',  description: 'Background guides and topic briefs for all committees.' },
+  templates:             { label: 'Templates',                   icon: LayoutTemplate,anchor: 'templates',  description: 'Ready-to-use document templates for delegates.' },
+  samples:               { label: 'Samples',                     icon: FlaskConical,  anchor: 'samples',    description: 'Sample documents to reference when preparing your submissions.' },
+  'Video Tutorials':     { label: 'Video Tutorials',             icon: Video,         anchor: 'videos',     description: 'Visual walkthroughs to help you master MUN skills.' },
 };
 
-const CATEGORY_ORDER = ['handbook', 'rop', 'position_paper', 'Delegate Guides', 'Committee Materials', 'Video Tutorials'];
+const CATEGORY_ORDER = ['handbook', 'rop', 'position_paper', 'Delegate Guides', 'Committee Materials', 'templates', 'samples', 'Video Tutorials'];
 
 const Resources = () => {
   const [resources, setResources] = useState<Resource[]>([]);
