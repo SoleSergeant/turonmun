@@ -71,48 +71,33 @@ const transform = (committee: any) => {
 };
 
 export const useCommittees = () => {
-  const [committees, setCommittees] = useState<Committee[]>([]);
-  const [loading, setLoading] = useState(true);
+  // Always start with static fallback — no blank period, no skeleton wait
+  const [committees, setCommittees] = useState<Committee[]>(STATIC_FALLBACK);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
 
-    // Hard 5-second timer — if Supabase hasn't responded, show fallback
-    const fallbackTimer = setTimeout(() => {
-      if (!cancelled) {
-        cancelled = true;
-        setCommittees(STATIC_FALLBACK);
-        setLoading(false);
-      }
-    }, 5000);
-
+    // Silently try to fetch live data in the background.
+    // If Supabase returns real active committees, swap in the live data.
+    // If it fails or returns nothing, we keep the static fallback already shown.
     supabase
       .from('committees')
       .select('*')
       .eq('is_active', true)
       .order('name', { ascending: true })
       .then(({ data, error }) => {
-        clearTimeout(fallbackTimer);
-        if (cancelled) return; // timeout already handled it
-        cancelled = true;
-
-        if (error || !data || data.length === 0) {
-          setCommittees(STATIC_FALLBACK);
-        } else {
+        if (cancelled) return;
+        if (!error && data && data.length > 0) {
           setCommittees(data.map(transform));
         }
-        setLoading(false);
+        // On error / empty result: keep the static fallback already in state
       })
       .catch(() => {
-        clearTimeout(fallbackTimer);
-        if (cancelled) return;
-        cancelled = true;
-        setCommittees(STATIC_FALLBACK);
-        setLoading(false);
+        // Silently ignore — static fallback is already displayed
       });
 
     return () => {
-      clearTimeout(fallbackTimer);
       cancelled = true;
     };
   }, []);

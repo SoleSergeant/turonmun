@@ -5,12 +5,10 @@ import CommitteeCard from '../components/CommitteeCard';
 import NewsletterForm from '../components/NewsletterForm';
 import { motion } from 'framer-motion';
 import { Globe, FileBarChart, Landmark, Shield } from 'lucide-react';
-import { useToast } from "../hooks/use-toast";
 import { useCommittees } from '../hooks/useCommittees';
 
 const Committees = () => {
-  const { toast } = useToast();
-  const { committees, loading } = useCommittees();
+  const { committees } = useCommittees();
   
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -41,60 +39,41 @@ const Committees = () => {
             </motion.div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8 mb-16">
-              {loading ? (
-                <>
-                  {Array.from({ length: 4 }).map((_, i) => (
-                    <div key={i} className="h-96 rounded-xl overflow-hidden bg-neutral-200 animate-pulse">
-                      <div className="h-3/5 bg-neutral-300" />
-                      <div className="p-5 space-y-3">
-                        <div className="h-4 bg-neutral-300 rounded w-1/3" />
-                        <div className="h-3 bg-neutral-300 rounded w-full" />
-                        <div className="h-3 bg-neutral-300 rounded w-5/6" />
-                        <div className="flex gap-2 mt-4">
-                          <div className="h-5 bg-neutral-300 rounded-full w-16" />
-                          <div className="h-5 bg-neutral-300 rounded-full w-20" />
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </>
-              ) : (
-                committees.map((committee, index) => {
-                  // Map icon based on abbreviation
-                  const getIcon = (abbr?: string) => {
-                    switch (abbr) {
-                      case 'UNGA': return Globe;
-                      case 'WTO': return FileBarChart;
-                      case 'ECOSOC': return Landmark;
-                      case 'HRC': return Shield;
-                      default: return Globe;
-                    }
-                  };
+              {committees.map((committee, index) => {
+                // Map icon based on abbreviation
+                const getIcon = (abbr?: string) => {
+                  switch (abbr) {
+                    case 'UNGA': return Globe;
+                    case 'WTO': return FileBarChart;
+                    case 'ECOSOC': return Landmark;
+                    case 'HRC': return Shield;
+                    default: return Globe;
+                  }
+                };
 
-                  // Center the last card when there's an odd total (lone card on the last row)
-                  const isLastOdd = index === committees.length - 1 && committees.length % 2 !== 0;
+                // Center the last card when there's an odd total (lone card on the last row)
+                const isLastOdd = index === committees.length - 1 && committees.length % 2 !== 0;
 
-                  return (
-                    <motion.div
-                      key={committee.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ duration: 0.3, delay: index * 0.05 }}
-                      className={`committee-detail-card h-96 ${isLastOdd ? 'md:col-span-2 md:justify-self-center md:w-1/2' : ''}`}
-                    >
-                      <CommitteeCard 
-                        name={committee.name}
-                        abbreviation={committee.abbreviation || ''}
-                        description={committee.description}
-                        topics={committee.topics}
-                        imageUrl={committee.imageUrl}
-                        icon={getIcon(committee.abbreviation)}
-                        chairs={committee.chairs}
-                      />
-                    </motion.div>
-                  );
-                })
-              )}
+                return (
+                  <motion.div
+                    key={committee.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.3, delay: index * 0.05 }}
+                    className={`committee-detail-card h-96 ${isLastOdd ? 'md:col-span-2 md:justify-self-center md:w-1/2' : ''}`}
+                  >
+                    <CommitteeCard
+                      name={committee.name}
+                      abbreviation={committee.abbreviation || ''}
+                      description={committee.description}
+                      topics={committee.topics}
+                      imageUrl={committee.imageUrl}
+                      icon={getIcon(committee.abbreviation)}
+                      chairs={committee.chairs}
+                    />
+                  </motion.div>
+                );
+              })}
             </div>
             
             <motion.div
