@@ -815,18 +815,26 @@ export default function CommandCenter() {
             {/* Current Speaker */}
             {currentSpeaker ? (
               <div className="glass-panel p-5 rounded-2xl border-emerald-500/20 bg-emerald-500/5 mb-5 relative overflow-hidden">
-                <div className="absolute top-0 right-0 p-3 opacity-10"><Mic size={70} className="text-emerald-400" /></div>
-                <div className="flex items-center gap-4 relative z-10 mb-5">
-                  <div className="w-14 h-14 rounded-2xl bg-emerald-500/20 flex items-center justify-center border border-emerald-500/30 flex-shrink-0">
-                    <Mic className="h-7 w-7 text-emerald-400 animate-pulse" />
+                {/* Large flag background */}
+                {currentSpeaker.delegate_country && (
+                  <img
+                    src={`https://flagcdn.com/w320/${getCountryCode(currentSpeaker.delegate_country).toLowerCase()}.png`}
+                    alt=""
+                    aria-hidden
+                    onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
+                    className="absolute right-0 top-0 h-full w-auto object-cover opacity-25 pointer-events-none select-none"
+                    style={{ maskImage: 'linear-gradient(to left, black 10%, transparent 75%)', WebkitMaskImage: 'linear-gradient(to left, black 10%, transparent 75%)' }}
+                  />
+                )}
+                <div className="relative z-10 mb-5">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Mic className="h-3.5 w-3.5 text-emerald-400 animate-pulse" />
+                    <p className="text-emerald-400 text-[10px] font-bold uppercase tracking-[0.2em]">Floor is Open</p>
                   </div>
-                  <div>
-                    <p className="text-emerald-400 text-[10px] font-bold uppercase tracking-[0.2em] mb-0.5">Floor is Open</p>
-                    <h4 className="text-white text-xl font-black">{currentSpeaker.delegate_country || currentSpeaker.delegate_name}</h4>
-                    {currentSpeaker.delegate_country && (
-                      <p className="text-white/40 text-sm">{currentSpeaker.delegate_name}</p>
-                    )}
-                  </div>
+                  <h4 className="text-white text-3xl font-black leading-none mb-1">{currentSpeaker.delegate_country || currentSpeaker.delegate_name}</h4>
+                  {currentSpeaker.delegate_country && (
+                    <p className="text-white/40 text-sm">{currentSpeaker.delegate_name}</p>
+                  )}
                 </div>
                 <div className="grid grid-cols-3 gap-2 relative z-10">
                   {/* Yield to Chair — immediate, loses remaining time */}
@@ -886,7 +894,7 @@ export default function CommandCenter() {
                       alt=""
                       aria-hidden
                       onError={e => { (e.target as HTMLImageElement).style.display = 'none'; }}
-                      className="absolute right-0 top-0 h-full w-auto object-cover opacity-[0.07] pointer-events-none select-none"
+                      className="absolute right-0 top-0 h-full w-auto object-cover opacity-20 pointer-events-none select-none"
                       style={{ maskImage: 'linear-gradient(to left, black 40%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to left, black 40%, transparent 100%)' }}
                     />
                   )}
@@ -898,7 +906,6 @@ export default function CommandCenter() {
                       <p className="text-white/30 text-[10px] uppercase tracking-wider truncate">{s.delegate_name}</p>
                     )}
                   </div>
-                  <span className="text-white/20 font-mono text-xs relative z-10">{formatTime(s.speaking_time)}</span>
                   <button onClick={() => removeSpeaker(s.id)} className="opacity-0 group-hover:opacity-100 p-1 text-red-400/50 hover:text-red-400 transition-all relative z-10">
                     <X className="h-3.5 w-3.5" />
                   </button>
