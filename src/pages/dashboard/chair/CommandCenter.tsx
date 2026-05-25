@@ -1009,9 +1009,28 @@ export default function CommandCenter() {
 
                 {/* Description */}
                 <h2 className="text-white text-2xl font-black mb-2 leading-snug">{activeMotion.description}</h2>
-                <p className="text-white/40 text-sm mb-8">
+                <p className="text-white/40 text-sm mb-4">
                   Proposed by <span className="text-white/70 font-bold">{activeMotion.proposer_country}</span>
                 </p>
+
+                {/* Time details */}
+                {(activeMotion.total_time || activeMotion.speaking_time) && (
+                  <div className="flex items-center gap-3 mb-8">
+                    {activeMotion.total_time && (
+                      <div className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-center">
+                        <p className="text-white/30 text-[9px] font-bold uppercase tracking-widest mb-1">Total Time</p>
+                        <p className="text-white font-black text-lg font-mono">{formatTime(activeMotion.total_time)}</p>
+                      </div>
+                    )}
+                    {activeMotion.speaking_time && (
+                      <div className="flex-1 bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-center">
+                        <p className="text-white/30 text-[9px] font-bold uppercase tracking-widest mb-1">Per Speaker</p>
+                        <p className="text-white font-black text-lg font-mono">{formatTime(activeMotion.speaking_time)}</p>
+                      </div>
+                    )}
+                  </div>
+                )}
+                {!(activeMotion.total_time || activeMotion.speaking_time) && <div className="mb-8" />}
 
                 {/* Pass / Fail decision */}
                 <div className="grid grid-cols-2 gap-4">
