@@ -205,11 +205,11 @@ export default function ChairAnnouncements() {
           <select
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value as any)}
-            className="px-4 py-2 glass-panel text-white border-white/20 focus:border-gold-400/50 focus:ring-1 focus:ring-gold-400/50 transition-all rounded-lg"
+            className="px-4 py-2 bg-diplomatic-900 text-white border border-white/20 focus:border-gold-400/50 focus:ring-1 focus:ring-gold-400/50 transition-all rounded-lg"
           >
-            <option value="all">All Status</option>
-            <option value="sent">Sent</option>
-            <option value="draft">Draft</option>
+            <option value="all" className="bg-diplomatic-900">All Status</option>
+            <option value="sent" className="bg-diplomatic-900">Sent</option>
+            <option value="draft" className="bg-diplomatic-900">Draft</option>
           </select>
           <button
             onClick={() => setShowNewModal(true)}

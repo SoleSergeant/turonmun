@@ -221,20 +221,20 @@ export default function ChairPositionPapers() {
         <select
           value={filterStatus}
           onChange={(e) => setFilterStatus(e.target.value as any)}
-          className="px-4 py-2 glass-panel text-white border-white/20 focus:border-gold-400/50 focus:ring-1 focus:ring-gold-400/50 transition-all rounded-lg"
+          className="px-4 py-2 bg-diplomatic-900 text-white border border-white/20 focus:border-gold-400/50 focus:ring-1 focus:ring-gold-400/50 transition-all rounded-lg"
         >
-          <option value="all">All Status</option>
-          <option value="submitted">Submitted</option>
-          <option value="draft">Draft</option>
+          <option value="all" className="bg-diplomatic-900">All Status</option>
+          <option value="submitted" className="bg-diplomatic-900">Submitted</option>
+          <option value="draft" className="bg-diplomatic-900">Draft</option>
         </select>
         <select
           value={filterCommittee}
           onChange={(e) => setFilterCommittee(e.target.value)}
-          className="px-4 py-2 glass-panel text-white border-white/20 focus:border-gold-400/50 focus:ring-1 focus:ring-gold-400/50 transition-all rounded-lg"
+          className="px-4 py-2 bg-diplomatic-900 text-white border border-white/20 focus:border-gold-400/50 focus:ring-1 focus:ring-gold-400/50 transition-all rounded-lg"
         >
-          <option value="all">All Committees</option>
+          <option value="all" className="bg-diplomatic-900">All Committees</option>
           {committees.map((committee) => (
-            <option key={committee.id} value={committee.id}>
+            <option key={committee.id} value={committee.id} className="bg-diplomatic-900">
               {committee.name}
             </option>
           ))}
