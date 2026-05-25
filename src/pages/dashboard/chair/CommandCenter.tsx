@@ -94,9 +94,30 @@ export default function CommandCenter() {
   const [motionSpeakingTime, setMotionSpeakingTime] = useState('60');
   const [motionTotalTime, setMotionTotalTime] = useState('600');
 
+  // MUN-assigned countries (applicationId → country name from country_assignments table)
+  const [assignedCountries, setAssignedCountries] = useState<Record<string, string>>({});
+
   // Drag reorder
   const [draggedId, setDraggedId] = useState<string | null>(null);
   const [dragOverId, setDragOverId] = useState<string | null>(null);
+
+  // ── Load MUN-assigned countries from country_assignments ────────────────────
+  useEffect(() => {
+    if (!committeeId) return;
+    (supabase.from('country_assignments') as any)
+      .select('application_id, country_name')
+      .eq('committee_id', committeeId)
+      .then(({ data }: { data: any[] | null }) => {
+        if (!data) return;
+        const map: Record<string, string> = {};
+        data.forEach((r: any) => {
+          if (r.application_id && (r.country_name || r.country)) {
+            map[r.application_id] = r.country_name || r.country;
+          }
+        });
+        setAssignedCountries(map);
+      });
+  }, [committeeId]); // eslint-disable-line
 
   // ── Sound on timer zero ──────────────────────────────────────────────────────
   const prevRemaining = useRef(0);
@@ -132,9 +153,10 @@ export default function CommandCenter() {
     const att = attendance.find(a => a.application_id === app.id);
     if (att?.status === 'absent') return false;
     if (speakerSearch) {
+      const assigned = assignedCountries[app.id] || app.country || '';
       return (
         app.full_name.toLowerCase().includes(speakerSearch.toLowerCase()) ||
-        (app.country ?? '').toLowerCase().includes(speakerSearch.toLowerCase())
+        assigned.toLowerCase().includes(speakerSearch.toLowerCase())
       );
     }
     return true;
@@ -143,9 +165,13 @@ export default function CommandCenter() {
   const presentCount = attendance.filter(a => a.status === 'present').length;
   const quorum = Math.ceil(applications.length / 2);
 
+  // Returns the MUN-assigned country for a delegate, falling back to their residential country
+  const getAssignedCountry = (app: Tables<'applications'>) =>
+    assignedCountries[app.id] || app.country || '';
+
   // ── Handlers ────────────────────────────────────────────────────────────────
   const handleAddFromList = async (app: Tables<'applications'>) => {
-    await addSpeaker(app.id, app.full_name, app.country ?? '', speakerTime);
+    await addSpeaker(app.id, app.full_name, getAssignedCountry(app), speakerTime);
     setShowAddSpeaker(false);
     setSpeakerSearch('');
   };
@@ -475,7 +501,8 @@ export default function CommandCenter() {
                 ) : (
                   applications.map(app => {
                     const status = getRollStatus(app.id);
-                    const code = getCountryCode(app.country ?? '').toLowerCase();
+                    const munCountry = getAssignedCountry(app);
+                    const code = getCountryCode(munCountry || app.country ?? '').toLowerCase();
                     return (
                       <div key={app.id} className="flex items-center gap-3 px-5 py-3 border-b border-gray-100 last:border-0">
                         <img
@@ -484,7 +511,7 @@ export default function CommandCenter() {
                           alt=""
                           className="w-6 h-4 object-cover rounded-sm flex-shrink-0"
                         />
-                        <span className="flex-1 text-sm text-gray-800 font-medium truncate">{app.country || app.full_name}</span>
+                        <span className="flex-1 text-sm text-gray-800 font-medium truncate">{munCountry || app.full_name}</span>
                         <div className="flex gap-1">
                           {(['PV', 'P', 'A'] as const).map(type => (
                             <button
@@ -755,10 +782,8 @@ export default function CommandCenter() {
                                 className="w-full flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/5 hover:bg-gold-400/10 hover:border-gold-400/20 transition-all text-left group"
                               >
                                 <div className="flex-1 min-w-0">
-                                  <p className="text-white font-bold text-sm truncate">{app.country || app.full_name}</p>
-                                  {app.country && (
-                                    <p className="text-white/30 text-[10px] uppercase tracking-wider truncate">{app.full_name}</p>
-                                  )}
+                                  <p className="text-white font-bold text-sm truncate">{getAssignedCountry(app) || app.full_name}</p>
+                                  <p className="text-white/30 text-[10px] uppercase tracking-wider truncate">{app.full_name}</p>
                                 </div>
                                 <ChevronRight className="h-4 w-4 text-white/20 group-hover:text-gold-400 transition-colors" />
                               </button>
