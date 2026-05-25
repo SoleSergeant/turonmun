@@ -191,10 +191,15 @@ export default function CommandCenter() {
   };
 
   const handleProposeMotion = async () => {
-    if (!motionProposerCountry.trim() || !motionDesc.trim()) return;
+    if (!motionProposerCountry.trim()) return;
+    // Unmod doesn't need a description — auto-label it
+    const descToSubmit = motionType === 'unmoderated_caucus'
+      ? (motionDesc.trim() || 'Unmoderated Caucus')
+      : motionDesc.trim();
+    if (motionType !== 'unmoderated_caucus' && !descToSubmit) return;
     const newMotion = await proposeMotion(
       '', motionProposerCountry, motionProposerCountry,
-      motionType, motionDesc,
+      motionType, descToSubmit,
       parseInt(motionSpeakingTime) || 60,
       parseInt(motionTotalTime) || 600,
     );
@@ -970,14 +975,18 @@ export default function CommandCenter() {
                     </select>
                   </div>
 
-                  <input
-                    type="text" placeholder="Motion description / topic *"
-                    value={motionDesc} onChange={e => setMotionDesc(e.target.value)}
-                    onKeyDown={e => e.key === 'Enter' && handleProposeMotion()}
-                    className="w-full bg-white/10 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm placeholder-white/20 focus:outline-none focus:border-diplomatic-400/40"
-                  />
+                  {/* Description — hidden for unmoderated caucus (no topic needed) */}
+                  {motionType !== 'unmoderated_caucus' && (
+                    <input
+                      type="text" placeholder="Motion description / topic *"
+                      value={motionDesc} onChange={e => setMotionDesc(e.target.value)}
+                      onKeyDown={e => e.key === 'Enter' && handleProposeMotion()}
+                      className="w-full bg-white/10 border border-white/10 rounded-xl px-4 py-2.5 text-white text-sm placeholder-white/20 focus:outline-none focus:border-diplomatic-400/40"
+                    />
+                  )}
 
-                  {motionType === 'moderated_caucus' && (
+                  {/* Time fields — total for both mod & unmod, per-speaker only for mod */}
+                  {(motionType === 'moderated_caucus' || motionType === 'unmoderated_caucus') && (
                     <div className="grid grid-cols-2 gap-3">
                       <div>
                         <label className="text-white/30 text-[9px] font-bold uppercase tracking-widest block mb-1.5">Total Time (sec)</label>
@@ -985,12 +994,14 @@ export default function CommandCenter() {
                           onChange={e => setMotionTotalTime(e.target.value)}
                           className="w-full bg-white/10 border border-white/10 rounded-xl px-4 py-2 text-white text-sm focus:outline-none" />
                       </div>
-                      <div>
-                        <label className="text-white/30 text-[9px] font-bold uppercase tracking-widest block mb-1.5">Per Speaker (sec)</label>
-                        <input type="number" min={1} value={motionSpeakingTime}
-                          onChange={e => setMotionSpeakingTime(e.target.value)}
-                          className="w-full bg-white/10 border border-white/10 rounded-xl px-4 py-2 text-white text-sm focus:outline-none" />
-                      </div>
+                      {motionType === 'moderated_caucus' && (
+                        <div>
+                          <label className="text-white/30 text-[9px] font-bold uppercase tracking-widest block mb-1.5">Per Speaker (sec)</label>
+                          <input type="number" min={1} value={motionSpeakingTime}
+                            onChange={e => setMotionSpeakingTime(e.target.value)}
+                            className="w-full bg-white/10 border border-white/10 rounded-xl px-4 py-2 text-white text-sm focus:outline-none" />
+                        </div>
+                      )}
                     </div>
                   )}
 
