@@ -73,10 +73,13 @@ const Resources = () => {
   const isVideo = (url: string) =>
     url.includes('youtu') || url.includes('vimeo') || url.includes('youtube');
 
+  // Strip query params before checking extension (Supabase URLs may have ?token=... appended)
+  const getExt = (url: string): string =>
+    url.split('?')[0].split('.').pop()?.toLowerCase() ?? '';
+
   const getViewerUrl = (url: string): string => {
-    const lower = url.toLowerCase();
-    if (lower.endsWith('.docx') || lower.endsWith('.pptx') || lower.endsWith('.xlsx') ||
-        lower.endsWith('.doc') || lower.endsWith('.ppt')) {
+    const ext = getExt(url);
+    if (['docx', 'pptx', 'xlsx', 'doc', 'ppt'].includes(ext)) {
       // Microsoft Office Online viewer — opens without downloading
       return `https://view.officeapps.live.com/op/view.aspx?src=${encodeURIComponent(url)}`;
     }
@@ -85,10 +88,11 @@ const Resources = () => {
   };
 
   const getFileLabel = (url: string): string => {
-    const lower = url.toLowerCase();
     if (isVideo(url)) return 'Watch';
-    if (lower.endsWith('.pptx') || lower.endsWith('.ppt')) return 'View Slides';
-    if (lower.endsWith('.docx') || lower.endsWith('.doc')) return 'View Online';
+    const ext = getExt(url);
+    if (ext === 'pptx' || ext === 'ppt') return 'View Slides';
+    if (ext === 'docx' || ext === 'doc') return 'View Document';
+    if (ext === 'xlsx' || ext === 'xls') return 'View Spreadsheet';
     return 'View PDF';
   };
 

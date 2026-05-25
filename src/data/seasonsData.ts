@@ -224,49 +224,6 @@ export const seasonsData = [
     ]
   },
   {
-    id: "season6",
-    year: "2026",
-    title: "Season Six",
-    date: "March 29, 2026",
-    endDate: "March 29, 2026",
-    location: "Registan Private School, Fergana",
-    route: "/seasons/6",
-    theme: "The Rising Labyrinth II",
-    description: "A season of growth and new milestones, expanding our impact and bringing together future leaders for one of our most ambitious conferences yet.",
-    color: "from-diplomatic-700 to-diplomatic-900",
-    accentColor: "bg-diplomatic-700",
-    lightBg: "bg-diplomatic-50",
-    mediumBg: "bg-diplomatic-100",
-    borderColor: "border-diplomatic-400",
-    textColor: "text-diplomatic-950",
-    secondaryTextColor: "text-diplomatic-800",
-    patternStyle: "dots",
-    statistics: {
-      committees: 4,
-      participants: 80,
-      location: "Registan Private School, Fergana",
-    },
-    experience: "Season 6 continued TuronMUN's legacy of excellence, bringing together 80 elite delegates from across Uzbekistan for an intensive and inspiring diplomatic experience.",
-    milestone: "Continued partnership with SATashkent and introduced new awarding strategies, raising the bar for delegate recognition and academic excellence.",
-    highlights: [
-      "80 delegates from across Uzbekistan",
-      "4 specialized committees",
-      "Continued partnership with SATashkent",
-      "New awarding strategies introduced"
-    ],
-    organizers: [
-      { name: "To be announced", role: "Secretary-General", image: "https://randomuser.me/api/portraits/lego/1.jpg" },
-      { name: "To be announced", role: "Deputy Secretary-General", image: "https://randomuser.me/api/portraits/lego/2.jpg" },
-      { name: "To be announced", role: "Chief of Staff", image: "https://randomuser.me/api/portraits/lego/3.jpg" }
-    ],
-    photos: [
-      { url: "seasons/season 6/1.JPG", caption: "Opening Ceremony" },
-      { url: "seasons/season 6/2.JPG", caption: "Committee Sessions" },
-      { url: "seasons/season 6/3.JPG", caption: "Delegates in Action" },
-      { url: "seasons/season 6/4.JPG", caption: "Award Ceremony" }
-    ]
-  },
-  {
     id: "season5",
     year: "2025",
     title: "Season Five",
@@ -308,6 +265,49 @@ export const seasonsData = [
       { url: "seasons/Season 5/1.jpg", caption: "Opening Ceremony" },
       { url: "seasons/Season 5/2.jpg", caption: "Committee Sessions" },
       { url: "seasons/Season 5/3.jpg", caption: "Delegates in Action" }
+    ]
+  },
+  {
+    id: "season6",
+    year: "2026",
+    title: "Season Six",
+    date: "March 29, 2026",
+    endDate: "March 29, 2026",
+    location: "Registan Private School, Fergana",
+    route: "/seasons/6",
+    theme: "The Rising Labyrinth II",
+    description: "A season of growth and new milestones, expanding our impact and bringing together future leaders for one of our most ambitious conferences yet.",
+    color: "from-diplomatic-700 to-diplomatic-900",
+    accentColor: "bg-diplomatic-700",
+    lightBg: "bg-diplomatic-50",
+    mediumBg: "bg-diplomatic-100",
+    borderColor: "border-diplomatic-400",
+    textColor: "text-diplomatic-950",
+    secondaryTextColor: "text-diplomatic-800",
+    patternStyle: "dots",
+    statistics: {
+      committees: 4,
+      participants: 80,
+      location: "Registan Private School, Fergana",
+    },
+    experience: "Season 6 continued TuronMUN's legacy of excellence, bringing together 80 elite delegates from across Uzbekistan for an intensive and inspiring diplomatic experience.",
+    milestone: "Continued partnership with SATashkent and introduced new awarding strategies, raising the bar for delegate recognition and academic excellence.",
+    highlights: [
+      "80 delegates from across Uzbekistan",
+      "4 specialized committees",
+      "Continued partnership with SATashkent",
+      "New awarding strategies introduced"
+    ],
+    organizers: [
+      { name: "To be announced", role: "Secretary-General", image: "https://randomuser.me/api/portraits/lego/1.jpg" },
+      { name: "To be announced", role: "Deputy Secretary-General", image: "https://randomuser.me/api/portraits/lego/2.jpg" },
+      { name: "To be announced", role: "Chief of Staff", image: "https://randomuser.me/api/portraits/lego/3.jpg" }
+    ],
+    photos: [
+      { url: "seasons/season 6/1.JPG", caption: "Opening Ceremony" },
+      { url: "seasons/season 6/2.JPG", caption: "Committee Sessions" },
+      { url: "seasons/season 6/3.JPG", caption: "Delegates in Action" },
+      { url: "seasons/season 6/4.JPG", caption: "Award Ceremony" }
     ]
   }
 ];

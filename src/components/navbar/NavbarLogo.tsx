@@ -17,17 +17,10 @@ const NavbarLogo: React.FC<NavbarLogoProps> = ({ scrolled }) => {
         transition={{ duration: 0.5, type: "spring", stiffness: 300 }}
         className="w-10 h-10 rounded-full bg-diplomatic-800 flex items-center justify-center overflow-hidden shadow-glow relative"
       >
-        <motion.div 
-          className="absolute inset-0 bg-gradient-to-r from-diplomatic-700/0 via-diplomatic-700/20 to-diplomatic-700/0"
-          animate={{ x: ["-100%", "200%"] }}
-          transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
-        />
-        <motion.img 
-          src="/lovable-uploads/58911c41-3ed8-4807-8789-5df7d2fff02c.png" 
-          alt="TuronMUN Logo" 
+        <img
+          src="/lovable-uploads/58911c41-3ed8-4807-8789-5df7d2fff02c.png"
+          alt="TuronMUN Logo"
           className="w-8 h-8 object-contain"
-          animate={{ rotate: 360 }}
-          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
         />
       </motion.div>
       <div className={scrolled ? "text-white" : "text-white"}>
