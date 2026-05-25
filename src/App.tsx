@@ -45,7 +45,6 @@ import AdminSchedule from "./pages/admin/AdminSchedule";
 import AdminResources from "./pages/admin/AdminResources";
 import AdminApplications from "./pages/admin/AdminApplications";
 import AdminMessages from "./pages/admin/AdminMessages";
-import AdminAnnouncements from "./pages/admin/AdminAnnouncements";
 import AdminRoute from "./components/admin/AdminRoute";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
 import DelegateManagement from "./pages/admin/DelegateManagement";
@@ -128,7 +127,6 @@ const App = () => {
           <Route path="/schedule" element={<AdminRoute><AdminSchedule /></AdminRoute>} />
           <Route path="/resources" element={<AdminRoute><AdminResources /></AdminRoute>} />
           <Route path="/applications" element={<AdminRoute><AdminApplications /></AdminRoute>} />
-          <Route path="/announcements" element={<AdminRoute><AdminAnnouncements /></AdminRoute>} />
           <Route path="/messages" element={<AdminRoute><AdminMessages /></AdminRoute>} />
           <Route path="/delegates" element={<AdminRoute><DelegateManagement /></AdminRoute>} />
           <Route path="/country-matrix" element={<AdminRoute><CountryMatrix /></AdminRoute>} />
