@@ -17,8 +17,8 @@ interface ScheduleItem {
 export default function SchedulePreview() {
   const { scheduleData, loading, error } = useSchedule();
 
-  // Take only first 2 days for preview
-  const previewData = scheduleData.slice(0, 2);
+  // One-day conference: show the single day's first 5 events as a preview
+  const day = scheduleData[0] ?? null;
 
   if (loading) {
     return (
@@ -46,7 +46,7 @@ export default function SchedulePreview() {
     );
   }
 
-  if (scheduleData.length === 0) {
+  if (!day) {
     return (
       <section className="section bg-white">
         <div className="container">
@@ -89,26 +89,22 @@ export default function SchedulePreview() {
         </div>
         
         <div className="max-w-3xl mx-auto">
-          {previewData.map((day, dayIndex) => (
-            <div 
-              key={dayIndex}
-              className="mb-8 animate-fade-in opacity-0 glass-panel p-5 sm:p-6" 
-              style={{ animationDelay: `${0.2 * dayIndex}s`, animationFillMode: 'forwards' }}
-            >
+          {day && (
+            <div className="mb-8 animate-fade-in opacity-0 glass-panel p-5 sm:p-6" style={{ animationFillMode: 'forwards' }}>
               <div className="flex items-center gap-2 mb-4">
                 <div className="p-2 bg-white/80 rounded-md text-diplomatic-700">
                   <Calendar size={20} />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-xl">{day.day}</h3>
+                  <h3 className="font-semibold text-xl">Conference Day</h3>
                   <p className="text-neutral-500 text-sm">{day.date}</p>
                 </div>
               </div>
-              
+
               <div className="border-l-2 border-white/40 pl-6 ml-3 space-y-6">
-                {day.events.slice(0, 4).map((event, eventIndex) => (
-                  <div 
-                    key={eventIndex} 
+                {day.events.slice(0, 5).map((event, eventIndex) => (
+                  <div
+                    key={eventIndex}
                     className="relative before:content-[''] before:absolute before:w-3 before:h-3 before:bg-diplomatic-500 before:rounded-full before:-left-[32px] before:top-2"
                   >
                     <div className="flex items-start gap-2 mb-1">
@@ -121,16 +117,16 @@ export default function SchedulePreview() {
                     )}
                   </div>
                 ))}
-                {day.events.length > 4 && (
+                {day.events.length > 5 && (
                   <div className="relative before:content-[''] before:absolute before:w-3 before:h-3 before:bg-diplomatic-300 before:rounded-full before:-left-[32px] before:top-2">
                     <p className="text-neutral-500 text-sm italic">
-                      +{day.events.length - 4} more events...
+                      +{day.events.length - 5} more events on the full schedule...
                     </p>
                   </div>
                 )}
               </div>
             </div>
-          ))}
+          )}
           
           <div className="text-center mt-8">
             <Link to="/schedule" className="btn-secondary">

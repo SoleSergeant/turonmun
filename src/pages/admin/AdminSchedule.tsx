@@ -291,18 +291,6 @@ const AdminSchedule = () => {
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Capacity (optional)</label>
-                <input
-                  type="number"
-                  name="capacity"
-                  value={editingEvent.capacity || ''}
-                  onChange={handleEventChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md"
-                  placeholder="Max participants"
-                />
-              </div>
-
               <div className="flex items-center">
                 <Checkbox
                   id="is_mandatory"
@@ -426,11 +414,6 @@ const AdminSchedule = () => {
                                 {event.is_mandatory && (
                                   <span className="px-2 py-1 text-xs bg-red-100 text-red-800 rounded-full">
                                     Mandatory
-                                  </span>
-                                )}
-                                {event.capacity && (
-                                  <span className="text-xs text-gray-500">
-                                    Capacity: {event.registered_count || 0}/{event.capacity}
                                   </span>
                                 )}
                               </div>

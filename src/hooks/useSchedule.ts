@@ -42,16 +42,15 @@ const eventTypeToCategory = (eventType: string | null): 'general' | 'committee' 
 };
 
 const formatDate = (dateString: string): string => {
-  const date = new Date(dateString);
+  // Append T00:00:00 so the date is parsed as local time, not UTC midnight
+  // (without this, "2026-03-21" in UTC+5 renders as March 20)
+  const date = new Date(`${dateString}T00:00:00`);
   return date.toLocaleDateString('en-US', {
+    weekday: 'long',
     year: 'numeric',
     month: 'long',
-    day: 'numeric'
+    day: 'numeric',
   });
-};
-
-const getDayLabel = (dateString: string, index: number): string => {
-  return `Day ${index + 1}`;
 };
 
 export const useSchedule = () => {
@@ -84,11 +83,13 @@ export const useSchedule = () => {
         });
 
         // Transform grouped events into ScheduleDay format
-        const transformedSchedule: ScheduleDay[] = Object.entries(groupedEvents).map(
-          ([date, dayEvents], index) => ({
-            day: getDayLabel(date, index),
+        // Sort date keys explicitly so ordering is guaranteed regardless of object key insertion order
+        const transformedSchedule: ScheduleDay[] = Object.keys(groupedEvents)
+          .sort()
+          .map((date, index) => ({
+            day: `Day ${index + 1}`,
             date: formatDate(date),
-            events: dayEvents.map((event) => ({
+            events: groupedEvents[date].map((event) => ({
               time: `${event.start_time} - ${event.end_time}`,
               title: event.title,
               location: event.location || undefined,
@@ -97,8 +98,7 @@ export const useSchedule = () => {
               eventType: event.event_type || undefined,
               isMandatory: event.is_mandatory || undefined,
             })),
-          })
-        );
+          }));
 
         setScheduleData(transformedSchedule);
       } catch (err) {
