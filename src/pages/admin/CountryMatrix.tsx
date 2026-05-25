@@ -732,8 +732,7 @@ const CountryMatrix = () => {
                                     <option value="" disabled>Assign delegate...</option>
                                     {delegates
                                       .filter(d => !matrix.some(m =>
-                                        m.committees[committee.id]?.assigned &&
-                                        m.committees[committee.id]?.delegateId === d.id
+                                        Object.values(m.committees).some(c => c.assigned && c.delegateId === d.id)
                                       ))
                                       .map(delegate => (
                                         <option key={delegate.id} value={delegate.id}>
