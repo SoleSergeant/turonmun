@@ -522,13 +522,13 @@ export function useMunCommand({ committeeId, isChair = false }: UseMunCommandOpt
 
     if (passed && motion) {
       if (motion.motion_type === 'moderated_caucus') {
-        // Switch to mod caucus, load the motion's total time, set topic
-        const duration = motion.total_time ?? 600;
+        // Load per-speaker time into the timer — that's what the chair actually uses each turn
+        const speakerDuration = motion.speaking_time ?? 60;
         await updateSession({
           current_mode: 'moderated_caucus',
           current_topic: motion.description,
-          timer_duration: duration,
-          timer_remaining: duration,
+          timer_duration: speakerDuration,
+          timer_remaining: speakerDuration,
           timer_running: false,
           timer_started_at: null,
         });

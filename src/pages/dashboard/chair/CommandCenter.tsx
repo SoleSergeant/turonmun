@@ -1111,9 +1111,6 @@ export default function CommandCenter() {
         <motion.div variants={iv} className="glass-card p-10 border border-white/10 text-center">
           <p className="text-white/30 text-xs font-black uppercase tracking-widest mb-2">Session</p>
           <h3 className="text-white text-3xl font-black mb-3">Suspended</h3>
-          {session.current_topic && (
-            <p className="text-white/70 text-lg font-semibold mb-3">{session.current_topic}</p>
-          )}
           <p className="text-white/30 text-sm">The session is currently suspended. Switch to another mode to resume proceedings.</p>
         </motion.div>
       )}
