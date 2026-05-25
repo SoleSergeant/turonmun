@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import { supabase } from '@/integrations/supabase/client';
-import { PlusCircle, Edit, Trash2, Clock, Calendar, MapPin } from 'lucide-react';
+import { PlusCircle, Edit, Trash2, Clock, MapPin, Calendar } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Checkbox } from '@/components/ui/checkbox';
 
@@ -16,17 +16,25 @@ interface ScheduleEvent {
   event_type: string | null;
   committee_id: string | null;
   is_mandatory: boolean | null;
-  capacity: number | null;
-  registered_count: number | null;
   created_at: string | null;
   updated_at: string | null;
 }
 
+const typeColors: Record<string, string> = {
+  ceremony: 'bg-yellow-100 text-yellow-800',
+  session:  'bg-blue-100 text-blue-800',
+  social:   'bg-green-100 text-green-800',
+  meal:     'bg-orange-100 text-orange-800',
+  break:    'bg-gray-100 text-gray-700',
+};
+
 const AdminSchedule = () => {
   const [scheduleEvents, setScheduleEvents] = useState<ScheduleEvent[]>([]);
+  const [conferenceDate, setConferenceDate] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [editingEvent, setEditingEvent] = useState<ScheduleEvent | null>(null);
   const [isSubmittingEvent, setIsSubmittingEvent] = useState(false);
+  const [isUpdatingDate, setIsUpdatingDate] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -36,55 +44,74 @@ const AdminSchedule = () => {
   const fetchSchedule = async () => {
     try {
       setLoading(true);
-
       const { data: events, error } = await supabase
         .from('schedule_events')
         .select('*')
-        .order('event_date', { ascending: true });
+        .order('start_time', { ascending: true });
 
       if (error) throw error;
 
-      setScheduleEvents(events || []);
+      const sorted = events || [];
+      setScheduleEvents(sorted);
+
+      // Derive conference date from the first event, or keep current
+      if (sorted.length > 0) {
+        setConferenceDate(sorted[0].event_date);
+      }
     } catch (error) {
       console.error('Error fetching schedule:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load schedule",
-        variant: "destructive",
-      });
+      toast({ title: 'Error', description: 'Failed to load schedule', variant: 'destructive' });
     } finally {
       setLoading(false);
     }
   };
 
-  const handleEventChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value, type } = e.target;
-    const checked = (e.target as HTMLInputElement).checked;
+  // Update ALL events to the new conference date
+  const handleConferenceDateChange = async (newDate: string) => {
+    setConferenceDate(newDate);
+    if (!newDate || scheduleEvents.length === 0) return;
 
-    setEditingEvent(prev => prev ? {
-      ...prev,
-      [name]: type === 'checkbox' ? checked : value
-    } : null);
+    try {
+      setIsUpdatingDate(true);
+      const { error } = await supabase
+        .from('schedule_events')
+        .update({ event_date: newDate, updated_at: new Date().toISOString() })
+        .neq('id', '00000000-0000-0000-0000-000000000000'); // update all rows
+
+      if (error) throw error;
+
+      setScheduleEvents(prev => prev.map(e => ({ ...e, event_date: newDate })));
+      toast({ title: 'Date updated', description: 'All events moved to the new date.' });
+    } catch (error) {
+      console.error('Error updating conference date:', error);
+      toast({ title: 'Error', description: 'Failed to update conference date', variant: 'destructive' });
+    } finally {
+      setIsUpdatingDate(false);
+    }
+  };
+
+  const handleEventChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setEditingEvent(prev => prev ? { ...prev, [name]: value } : null);
   };
 
   const handleCreateEvent = () => {
-    const newEvent: ScheduleEvent = {
+    setEditingEvent({
       id: '',
       title: '',
       description: '',
-      event_date: '',
+      event_date: conferenceDate,
       start_time: '',
       end_time: '',
       location: '',
       event_type: 'session',
       committee_id: null,
       is_mandatory: true,
-      capacity: null,
-      registered_count: 0,
       created_at: null,
       updated_at: null,
-    };
-    setEditingEvent(newEvent);
+    });
   };
 
   const handleEditEvent = (event: ScheduleEvent) => {
@@ -92,125 +119,86 @@ const AdminSchedule = () => {
   };
 
   const handleDeleteEvent = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this event?')) return;
-
+    if (!confirm('Delete this event?')) return;
     try {
-      const { error } = await supabase
-        .from('schedule_events')
-        .delete()
-        .eq('id', id);
-
+      const { error } = await supabase.from('schedule_events').delete().eq('id', id);
       if (error) throw error;
-
-      setScheduleEvents(prev => prev.filter(event => event.id !== id));
-
-      toast({
-        title: "Success",
-        description: "Event deleted successfully",
-      });
+      setScheduleEvents(prev => prev.filter(e => e.id !== id));
+      toast({ title: 'Deleted', description: 'Event removed.' });
     } catch (error) {
       console.error('Error deleting event:', error);
-      toast({
-        title: "Error",
-        description: "Failed to delete event",
-        variant: "destructive",
-      });
+      toast({ title: 'Error', description: 'Failed to delete event', variant: 'destructive' });
     }
   };
 
   const handleSubmitEvent = async (e: React.FormEvent) => {
     e.preventDefault();
-
     if (!editingEvent) return;
 
     try {
       setIsSubmittingEvent(true);
 
+      const payload = {
+        title: editingEvent.title,
+        description: editingEvent.description || null,
+        event_date: conferenceDate || editingEvent.event_date,
+        start_time: editingEvent.start_time,
+        end_time: editingEvent.end_time,
+        location: editingEvent.location || null,
+        event_type: editingEvent.event_type,
+        committee_id: editingEvent.committee_id,
+        is_mandatory: editingEvent.is_mandatory,
+        updated_at: new Date().toISOString(),
+      };
+
       if (editingEvent.id) {
-        // Update
         const { error } = await supabase
           .from('schedule_events')
-          .update({
-            title: editingEvent.title,
-            description: editingEvent.description,
-            event_date: editingEvent.event_date,
-            start_time: editingEvent.start_time,
-            end_time: editingEvent.end_time,
-            location: editingEvent.location,
-            event_type: editingEvent.event_type,
-            committee_id: editingEvent.committee_id,
-            is_mandatory: editingEvent.is_mandatory,
-            capacity: editingEvent.capacity,
-            updated_at: new Date().toISOString(),
-          })
+          .update(payload)
           .eq('id', editingEvent.id);
-
         if (error) throw error;
-
-        toast({
-          title: "Success",
-          description: "Event updated successfully",
-        });
+        toast({ title: 'Updated', description: 'Event updated.' });
       } else {
-        // Create
         const { error } = await supabase
           .from('schedule_events')
-          .insert({
-            title: editingEvent.title,
-            description: editingEvent.description,
-            event_date: editingEvent.event_date,
-            start_time: editingEvent.start_time,
-            end_time: editingEvent.end_time,
-            location: editingEvent.location,
-            event_type: editingEvent.event_type,
-            committee_id: editingEvent.committee_id,
-            is_mandatory: editingEvent.is_mandatory,
-            capacity: editingEvent.capacity,
-          });
-
+          .insert({ ...payload });
         if (error) throw error;
-
-        toast({
-          title: "Success",
-          description: "Event created successfully",
-        });
+        toast({ title: 'Created', description: 'Event added to schedule.' });
       }
 
       setEditingEvent(null);
       fetchSchedule();
     } catch (error) {
       console.error('Error saving event:', error);
-      toast({
-        title: "Error",
-        description: "Failed to save event",
-        variant: "destructive",
-      });
+      toast({ title: 'Error', description: 'Failed to save event', variant: 'destructive' });
     } finally {
       setIsSubmittingEvent(false);
     }
   };
 
-  // Group events by date
-  const groupedEvents = scheduleEvents.reduce((acc, event) => {
-    const date = event.event_date;
-    if (!acc[date]) {
-      acc[date] = [];
-    }
-    acc[date].push(event);
-    return acc;
-  }, {} as Record<string, ScheduleEvent[]>);
+  const formattedDate = conferenceDate
+    ? new Date(`${conferenceDate}T00:00:00`).toLocaleDateString('en-US', {
+        weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+      })
+    : null;
 
   return (
     <AdminLayout title="Schedule Management">
       {loading && !editingEvent ? (
         <div className="flex items-center justify-center h-64">
-          <div className="loader w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+          <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
         </div>
       ) : editingEvent ? (
+        /* ── Event form ── */
         <div className="bg-white p-6 rounded-lg shadow-sm">
-          <h2 className="text-xl font-semibold mb-6">
-            {editingEvent.id ? 'Edit Event' : 'Create Event'}
+          <h2 className="text-xl font-semibold mb-1">
+            {editingEvent.id ? 'Edit Event' : 'Add Event'}
           </h2>
+          {formattedDate && (
+            <p className="text-sm text-gray-500 mb-6 flex items-center gap-1.5">
+              <Calendar size={14} /> {formattedDate}
+            </p>
+          )}
 
           <form onSubmit={handleSubmitEvent} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -244,30 +232,6 @@ const AdminSchedule = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
-                <input
-                  type="date"
-                  name="event_date"
-                  value={editingEvent.event_date}
-                  onChange={handleEventChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
-                <input
-                  type="text"
-                  name="location"
-                  value={editingEvent.location || ''}
-                  onChange={handleEventChange}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-md"
-                  placeholder="e.g. Main Auditorium"
-                />
-              </div>
-
-              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Start Time</label>
                 <input
                   type="time"
@@ -291,18 +255,29 @@ const AdminSchedule = () => {
                 />
               </div>
 
-              <div className="flex items-center">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                <input
+                  type="text"
+                  name="location"
+                  value={editingEvent.location || ''}
+                  onChange={handleEventChange}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-md"
+                  placeholder="e.g. Main Auditorium"
+                />
+              </div>
+
+              <div className="flex items-center mt-6">
                 <Checkbox
                   id="is_mandatory"
                   checked={editingEvent.is_mandatory || false}
                   onCheckedChange={(checked) => {
-                    setEditingEvent(prev => prev ? {
-                      ...prev,
-                      is_mandatory: checked === true
-                    } : null);
+                    setEditingEvent(prev => prev ? { ...prev, is_mandatory: checked === true } : null);
                   }}
                 />
-                <label htmlFor="is_mandatory" className="ml-2 text-sm text-gray-700 cursor-pointer">Mandatory Event</label>
+                <label htmlFor="is_mandatory" className="ml-2 text-sm text-gray-700 cursor-pointer">
+                  Mandatory for all delegates
+                </label>
               </div>
             </div>
 
@@ -314,7 +289,7 @@ const AdminSchedule = () => {
                 onChange={handleEventChange}
                 rows={3}
                 className="w-full px-4 py-2 border border-gray-300 rounded-md"
-                placeholder="Event description..."
+                placeholder="Short description of the event…"
               />
             </div>
 
@@ -332,115 +307,126 @@ const AdminSchedule = () => {
                 className="px-4 py-2 bg-diplomatic-700 text-white rounded-md hover:bg-diplomatic-800"
                 disabled={isSubmittingEvent}
               >
-                {isSubmittingEvent ? 'Saving...' : editingEvent.id ? 'Update Event' : 'Create Event'}
+                {isSubmittingEvent ? 'Saving…' : editingEvent.id ? 'Update Event' : 'Add Event'}
               </button>
             </div>
           </form>
         </div>
       ) : (
+        /* ── List view ── */
         <>
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-semibold">Schedule Events</h2>
+          {/* Conference date bar */}
+          <div className="bg-white rounded-lg shadow-sm p-4 mb-6 flex flex-col sm:flex-row sm:items-center gap-3">
+            <div className="flex items-center gap-2 text-gray-700 font-medium">
+              <Calendar size={18} className="text-diplomatic-600" />
+              Conference Date
+            </div>
+            <div className="flex items-center gap-3 flex-1">
+              <input
+                type="date"
+                value={conferenceDate}
+                onChange={e => handleConferenceDateChange(e.target.value)}
+                className="px-3 py-1.5 border border-gray-300 rounded-md text-sm"
+                disabled={isUpdatingDate}
+              />
+              {formattedDate && (
+                <span className="text-sm text-gray-500">{formattedDate}</span>
+              )}
+              {isUpdatingDate && (
+                <div className="w-4 h-4 border-2 border-diplomatic-500 border-t-transparent rounded-full animate-spin" />
+              )}
+            </div>
             <button
               onClick={handleCreateEvent}
-              className="btn bg-diplomatic-700 text-white py-2 px-4 rounded-md hover:bg-diplomatic-800 flex items-center"
+              className="bg-diplomatic-700 text-white py-2 px-4 rounded-md hover:bg-diplomatic-800 flex items-center text-sm"
             >
-              <PlusCircle size={18} className="mr-2" /> Add Event
+              <PlusCircle size={16} className="mr-2" /> Add Event
             </button>
           </div>
 
+          {/* Timeline */}
           {scheduleEvents.length === 0 ? (
             <div className="bg-white p-8 rounded-lg shadow-sm text-center">
-              <p className="text-gray-500 mb-4">No events found</p>
+              <Clock size={40} className="mx-auto text-gray-300 mb-3" />
+              <p className="text-gray-500 mb-4">No events yet</p>
               <button
                 onClick={handleCreateEvent}
                 className="text-diplomatic-600 hover:text-diplomatic-800 font-medium"
               >
-                Create your first event
+                Add the first event
               </button>
             </div>
           ) : (
-            <div className="space-y-6">
-              {Object.entries(groupedEvents).map(([date, events]) => (
-                <div key={date} className="bg-white rounded-lg shadow-sm overflow-hidden">
-                  <div className="bg-diplomatic-50 p-4">
-                    <div className="flex items-center">
-                      <Calendar size={18} className="text-diplomatic-600 mr-2" />
-                      <h3 className="text-lg font-semibold">{new Date(date).toLocaleDateString('en-US', {
-                        weekday: 'long',
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                      })}</h3>
-                    </div>
-                  </div>
+            <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+              {/* Header */}
+              <div className="bg-diplomatic-50 px-5 py-3 border-b border-diplomatic-100">
+                <p className="text-sm text-diplomatic-700 font-medium">
+                  {scheduleEvents.length} event{scheduleEvents.length !== 1 ? 's' : ''} · sorted by start time
+                </p>
+              </div>
 
-                  <div className="divide-y divide-gray-100">
-                    {events.map((event) => (
-                      <div key={event.id} className="p-4 hover:bg-gray-50">
-                        <div className="flex justify-between items-start">
-                          <div className="flex">
-                            <div className="bg-diplomatic-100 rounded-full p-2 mr-3">
-                              <Clock size={16} className="text-diplomatic-700" />
+              <div className="divide-y divide-gray-100">
+                {scheduleEvents.map((event) => (
+                  <div key={event.id} className="flex items-start gap-4 p-4 hover:bg-gray-50 group">
+                    {/* Time column */}
+                    <div className="w-28 flex-shrink-0 pt-0.5">
+                      <div className="flex items-center gap-1 text-diplomatic-700 font-semibold text-sm">
+                        <Clock size={13} />
+                        {event.start_time}
+                      </div>
+                      <div className="text-gray-400 text-xs mt-0.5 pl-[17px]">– {event.end_time}</div>
+                    </div>
+
+                    {/* Content */}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <h4 className="font-semibold text-gray-900">{event.title}</h4>
+                          {event.location && (
+                            <div className="flex items-center gap-1 text-gray-500 text-xs mt-0.5">
+                              <MapPin size={11} />
+                              {event.location}
                             </div>
-                            <div>
-                              <div className="flex items-center">
-                                <span className="font-medium text-diplomatic-800">
-                                  {event.start_time} - {event.end_time}
-                                </span>
-                                {event.location && (
-                                  <>
-                                    <span className="mx-2 text-gray-400">•</span>
-                                    <div className="flex items-center">
-                                      <MapPin size={14} className="text-gray-400 mr-1" />
-                                      <span className="text-gray-500">{event.location}</span>
-                                    </div>
-                                  </>
-                                )}
-                              </div>
-                              <h4 className="mt-1 font-semibold">{event.title}</h4>
-                              {event.description && (
-                                <p className="mt-1 text-sm text-gray-600">{event.description}</p>
-                              )}
-                              <div className="flex items-center mt-2 space-x-2">
-                                <span className={`px-2 py-1 text-xs rounded-full ${event.event_type === 'ceremony' ? 'bg-gold-100 text-gold-800' :
-                                  event.event_type === 'session' ? 'bg-diplomatic-100 text-diplomatic-800' :
-                                    event.event_type === 'social' ? 'bg-green-100 text-green-800' :
-                                      event.event_type === 'meal' ? 'bg-orange-100 text-orange-800' :
-                                        'bg-gray-100 text-gray-800'
-                                  }`}>
-                                  {event.event_type}
-                                </span>
-                                {event.is_mandatory && (
-                                  <span className="px-2 py-1 text-xs bg-red-100 text-red-800 rounded-full">
-                                    Mandatory
-                                  </span>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                          <div className="flex items-center">
-                            <button
-                              onClick={() => handleEditEvent(event)}
-                              className="mr-2 p-2 rounded-md text-diplomatic-600 hover:bg-diplomatic-50"
-                              title="Edit Event"
-                            >
-                              <Edit size={16} />
-                            </button>
-                            <button
-                              onClick={() => handleDeleteEvent(event.id)}
-                              className="p-2 rounded-md text-red-600 hover:bg-red-50"
-                              title="Delete Event"
-                            >
-                              <Trash2 size={16} />
-                            </button>
+                          )}
+                          {event.description && (
+                            <p className="text-sm text-gray-500 mt-1 line-clamp-2">{event.description}</p>
+                          )}
+                          <div className="flex items-center gap-2 mt-1.5">
+                            <span className={`px-2 py-0.5 text-xs rounded-full font-medium ${typeColors[event.event_type || ''] || 'bg-gray-100 text-gray-700'}`}>
+                              {event.event_type || 'other'}
+                            </span>
+                            {event.is_mandatory && (
+                              <span className="px-2 py-0.5 text-xs bg-red-100 text-red-700 rounded-full font-medium">
+                                Mandatory
+                              </span>
+                            )}
                           </div>
                         </div>
+
+                        {/* Actions */}
+                        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            type="button"
+                            onClick={() => handleEditEvent(event)}
+                            className="p-2 rounded-md text-diplomatic-600 hover:bg-diplomatic-50"
+                            title="Edit"
+                          >
+                            <Edit size={15} />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteEvent(event.id)}
+                            className="p-2 rounded-md text-red-500 hover:bg-red-50"
+                            title="Delete"
+                          >
+                            <Trash2 size={15} />
+                          </button>
+                        </div>
                       </div>
-                    ))}
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           )}
         </>
