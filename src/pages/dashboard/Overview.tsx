@@ -50,7 +50,6 @@ function Overview() {
       }
 
       try {
-        console.log('Overview querying applications for user_id:', user.id);
         const { data: app, error } = await (supabase as any)
           .from('applications')
           .select('*')
@@ -104,6 +103,15 @@ function Overview() {
 
     loadData();
   }, [user]);
+
+  // Pinned document URLs from resources table
+  const handbook       = resources.find(r => r.category === 'handbook');
+  const rop            = resources.find(r => r.category === 'rop');
+  const positionPaper  = resources.find(r => r.category === 'position_paper');
+
+  const openFile = (url?: string) => {
+    if (url) window.open(url, '_blank', 'noopener,noreferrer');
+  };
 
   const displayName = (application?.full_name || (user?.user_metadata as any)?.full_name || user?.email || 'Delegate');
   const displayCountry = assignment?.country_name || 'Not assigned yet';
@@ -384,15 +392,30 @@ function Overview() {
                 </p>
                 
                 <div className="grid grid-cols-2 gap-2">
-                   <button className="flex items-center gap-2 px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-[10px] text-white/80 font-bold uppercase tracking-wider transition-all">
+                  <button
+                    onClick={() => openFile(handbook?.file_url)}
+                    disabled={!handbook}
+                    className="flex items-center gap-2 px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-[10px] text-white/80 font-bold uppercase tracking-wider transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                    title={handbook ? 'Open Delegate Handbook' : 'Not yet uploaded'}
+                  >
                     <FileText size={14} className="text-gold-400" />
                     Handbook
                   </button>
-                  <button className="flex items-center gap-2 px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-[10px] text-white/80 font-bold uppercase tracking-wider transition-all">
+                  <button
+                    onClick={() => openFile(rop?.file_url)}
+                    disabled={!rop}
+                    className="flex items-center gap-2 px-3 py-2 bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg text-[10px] text-white/80 font-bold uppercase tracking-wider transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                    title={rop ? 'Open Rules of Procedure' : 'Not yet uploaded'}
+                  >
                     <FileText size={14} className="text-gold-400" />
                     ROP
                   </button>
-                  <button className="col-span-2 flex items-center justify-center gap-2 px-3 py-2 bg-gold-400/10 hover:bg-gold-400/20 border border-gold-400/20 rounded-lg text-[10px] text-gold-400 font-bold uppercase tracking-wider transition-all">
+                  <button
+                    onClick={() => openFile(positionPaper?.file_url)}
+                    disabled={!positionPaper}
+                    className="col-span-2 flex items-center justify-center gap-2 px-3 py-2 bg-gold-400/10 hover:bg-gold-400/20 border border-gold-400/20 rounded-lg text-[10px] text-gold-400 font-bold uppercase tracking-wider transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                    title={positionPaper ? 'Open Position Paper Template' : 'Not yet uploaded'}
+                  >
                     <FileText size={14} />
                     Position Paper Template
                   </button>
