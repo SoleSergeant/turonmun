@@ -181,43 +181,33 @@ const Contact = () => {
               {/* Map & Info */}
               <div className="order-1 lg:order-2">
                 <div className="bg-white rounded-2xl shadow-elegant border border-neutral-100 overflow-hidden">
-                  {/* Venue image */}
+                  {/* Conference photo */}
                   <div className="aspect-video bg-neutral-100 overflow-hidden">
                     <img
-                      src="/images/venue.jfif"
-                      alt="TuronMUN Conference Venue"
+                      src="/lovable-uploads/mun-action-1.jpg"
+                      alt="TuronMUN Conference"
                       className="w-full h-full object-cover"
                     />
                   </div>
 
                   <div className="p-6">
-                    <h3 className="text-xl font-display font-semibold mb-2">Conference Venue</h3>
-                    <p className="text-neutral-600 mb-4">
-                      Our season 6 will be held on Registan Private School, a prestigious educational institution.
+                    <h3 className="text-xl font-display font-semibold mb-1">Conference Venue</h3>
+                    <span className="inline-block text-xs font-bold uppercase tracking-widest text-amber-600 bg-amber-50 border border-amber-200 rounded-full px-3 py-0.5 mb-3">
+                      To Be Announced
+                    </span>
+                    <p className="text-neutral-600 mb-5">
+                      The venue for TuronMUN 2-Year Anniversary has not yet been confirmed. We will announce the location as soon as it is finalised — stay tuned!
                     </p>
-                    <div className="flex items-start mb-4">
-                      <MapPin size={18} className="text-diplomatic-600 mt-1 mr-2" />
-                      <div>
-                        <p className="text-neutral-700">
-                          Registan Private School<br />
-                          Fergana, Uzbekistan
-                        </p>
-                        <a
-                          href="https://maps.app.goo.gl/aYhWpFmS3rWkVioz9"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-diplomatic-600 hover:text-diplomatic-700 text-sm font-medium mt-1 inline-block"
-                        >
-                          View on Maps →
-                        </a>
-                      </div>
+                    <div className="flex items-center mb-3">
+                      <MapPin size={18} className="text-diplomatic-600 mr-2 flex-shrink-0" />
+                      <p className="text-neutral-500 text-sm">Fergana, Uzbekistan</p>
                     </div>
                     <div className="flex items-center mb-2">
-                      <Mail size={18} className="text-diplomatic-600 mr-2" />
+                      <Mail size={18} className="text-diplomatic-600 mr-2 flex-shrink-0" />
                       <p className="text-neutral-700">admin@turonmun.com</p>
                     </div>
                     <div className="flex items-center">
-                      <Phone size={18} className="text-diplomatic-600 mr-2" />
+                      <Phone size={18} className="text-diplomatic-600 mr-2 flex-shrink-0" />
                       <p className="text-neutral-700">+998903672103</p>
                     </div>
                   </div>
