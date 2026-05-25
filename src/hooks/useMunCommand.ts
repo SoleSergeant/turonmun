@@ -551,8 +551,7 @@ export function useMunCommand({ committeeId, isChair = false }: UseMunCommandOpt
         });
       }
     } else {
-      // Motion failed → return to GSL
-      await updateSession({ current_mode: 'gsl' });
+      // Motion failed → stay in voting mode, waiting for the next motion
     }
 
     await logEvent(
