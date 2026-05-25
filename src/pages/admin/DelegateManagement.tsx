@@ -657,7 +657,8 @@ const DelegateManagement = () => {
                               {delegate.assigned_country}
                             </div>
                             <button
-                              onClick={() => navigate('/admin/country-matrix')}
+                              type="button"
+                              onClick={() => navigate('/country-matrix')}
                               className="text-[10px] text-blue-500 hover:underline mt-1"
                             >
                               View in Matrix →
