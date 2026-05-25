@@ -509,12 +509,57 @@ export function useMunCommand({ committeeId, isChair = false }: UseMunCommandOpt
   }, [session, loadMotions]);
 
   const resolveMotion = useCallback(async (motionId: string, passed: boolean) => {
+    const motion = motions.find(m => m.id === motionId);
+
+    // Optimistic flip so history updates instantly
+    setMotions(prev => prev.map(m =>
+      m.id === motionId ? { ...m, status: passed ? 'passed' as const : 'failed' as const } : m
+    ));
+
     await (supabase.from('motions') as any)
       .update({ status: passed ? 'passed' : 'failed' })
       .eq('id', motionId);
-    await updateSession({ current_mode: 'gsl' });
-    await logEvent(passed ? 'motion_passed' : 'motion_failed', `Motion ${passed ? 'PASSED' : 'FAILED'} — decided by chair`);
-  }, [updateSession, logEvent]);
+
+    if (passed && motion) {
+      if (motion.motion_type === 'moderated_caucus') {
+        // Switch to mod caucus, load the motion's total time, set topic
+        const duration = motion.total_time ?? 600;
+        await updateSession({
+          current_mode: 'moderated_caucus',
+          current_topic: motion.description,
+          timer_duration: duration,
+          timer_remaining: duration,
+          timer_running: false,
+          timer_started_at: null,
+        });
+      } else if (motion.motion_type === 'unmoderated_caucus') {
+        // Switch to unmod caucus, load the motion's total time, set topic
+        const duration = motion.total_time ?? 300;
+        await updateSession({
+          current_mode: 'unmoderated_caucus',
+          current_topic: motion.description,
+          timer_duration: duration,
+          timer_remaining: duration,
+          timer_running: false,
+          timer_started_at: null,
+        });
+      } else {
+        // suspension, adjournment, closure_of_debate, other → suspension
+        await updateSession({
+          current_mode: 'suspension',
+          current_topic: motion.description,
+        });
+      }
+    } else {
+      // Motion failed → return to GSL
+      await updateSession({ current_mode: 'gsl' });
+    }
+
+    await logEvent(
+      passed ? 'motion_passed' : 'motion_failed',
+      `Motion ${passed ? 'PASSED' : 'FAILED'}: ${motion?.description ?? ''}`
+    );
+  }, [motions, updateSession, logEvent]);
 
   // ─── Derived state ──────────────────────────────────────
 

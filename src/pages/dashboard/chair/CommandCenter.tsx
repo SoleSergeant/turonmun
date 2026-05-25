@@ -111,6 +111,13 @@ export default function CommandCenter() {
     if (activeMotion?.status === 'voting') loadVotes(activeMotion.id);
   }, [activeMotion?.id, activeMotion?.status]); // eslint-disable-line
 
+  // ── Sync unmod topic from session when mode switches ────────────────────────
+  useEffect(() => {
+    if (session?.current_mode === 'unmoderated_caucus' && session.current_topic) {
+      setUnmodTopic(session.current_topic);
+    }
+  }, [session?.current_mode, session?.current_topic]); // eslint-disable-line
+
   // ── Derived ─────────────────────────────────────────────────────────────────
   const timerPct = session && session.timer_duration > 0
     ? (session.timer_remaining / session.timer_duration) * 100 : 0;
@@ -582,7 +589,17 @@ export default function CommandCenter() {
         {/* Timer Panel */}
         <motion.div variants={iv} className="lg:col-span-5">
           <div className="glass-card p-8 border border-white/15 h-full flex flex-col">
-            <h3 className="text-white/30 text-[10px] font-bold uppercase tracking-[0.2em] mb-8 text-center">Session Timer</h3>
+            <h3 className="text-white/30 text-[10px] font-bold uppercase tracking-[0.2em] mb-2 text-center">Session Timer</h3>
+
+            {/* Mod caucus topic */}
+            {session.current_mode === 'moderated_caucus' && session.current_topic && (
+              <p className="text-white font-semibold text-sm text-center mb-6 px-2 leading-snug">
+                {session.current_topic}
+              </p>
+            )}
+            {!(session.current_mode === 'moderated_caucus' && session.current_topic) && (
+              <div className="mb-6" />
+            )}
 
             {/* Circular Timer */}
             <div className="relative w-56 h-56 mx-auto mb-8 flex-shrink-0">
@@ -1033,7 +1050,10 @@ export default function CommandCenter() {
       {session.current_mode === 'suspension' && (
         <motion.div variants={iv} className="glass-card p-10 border border-white/10 text-center">
           <p className="text-white/30 text-xs font-black uppercase tracking-widest mb-2">Session</p>
-          <h3 className="text-white text-3xl font-black mb-1">Suspended</h3>
+          <h3 className="text-white text-3xl font-black mb-3">Suspended</h3>
+          {session.current_topic && (
+            <p className="text-white/70 text-lg font-semibold mb-3">{session.current_topic}</p>
+          )}
           <p className="text-white/30 text-sm">The session is currently suspended. Switch to another mode to resume proceedings.</p>
         </motion.div>
       )}
