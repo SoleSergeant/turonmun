@@ -181,9 +181,17 @@ const AdminApplications = () => {
   const filterApplications = () => {
     let filtered = [...applications];
 
-    // Apply application type filter (delegate / chair)
+    // Apply application type filter
+    // Uses application_type column when available (post-migration 009),
+    // otherwise falls back to the "APPLICATION TYPE: chair" notes marker.
     if (typeFilter !== 'all') {
-      filtered = filtered.filter(app => (app as any).application_type === typeFilter);
+      filtered = filtered.filter(app => {
+        const colType = (app as any).application_type;
+        if (colType) return colType === typeFilter;
+        // Fallback: infer from notes
+        const isChair = (app as any).notes?.includes('APPLICATION TYPE: chair');
+        return typeFilter === 'chair' ? isChair : !isChair;
+      });
     }
 
     // Apply status filter
@@ -582,7 +590,7 @@ const AdminApplications = () => {
                           <div className="mb-4">
                             <div className="flex items-center gap-2 mb-1.5">
                               <h4 className="font-semibold text-gray-900 text-lg">{app.full_name}</h4>
-                              {(app as any).application_type === 'chair' ? (
+                              {((app as any).application_type === 'chair' || (app as any).notes?.includes('APPLICATION TYPE: chair')) ? (
                                 <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 border border-purple-200 font-bold">Chair/Co-Chair</span>
                               ) : (
                                 <span className="text-[10px] px-2 py-0.5 rounded-full bg-sky-100 text-sky-700 border border-sky-200 font-bold">Delegate</span>

@@ -66,14 +66,16 @@ export default function ChairApplication() {
       fullName: user.user_metadata?.full_name ?? user.user_metadata?.name ?? '',
     }));
 
-    // Check for existing chair application
+    // Check for existing chair application by looking for the notes marker
+    // (application_type column may not exist yet — migration 009 pending)
     (supabase.from('applications') as any)
-      .select('id')
+      .select('id, notes')
       .eq('user_id', user.id)
-      .eq('application_type', 'chair')
-      .limit(1)
+      .limit(20)
       .then(({ data }: { data: any[] | null }) => {
-        if (data && data.length > 0) setAlreadyApplied(true);
+        if (data?.some((a: any) => a.notes?.includes('APPLICATION TYPE: chair'))) {
+          setAlreadyApplied(true);
+        }
       });
   }, [user]);
 
@@ -120,9 +122,10 @@ export default function ChairApplication() {
 
     setIsSubmitting(true);
     try {
-      const { error } = await (supabase.from('applications') as any).insert({
+      // Build the base payload — no application_type column yet (migration 009 pending)
+      // Type is identified via the "APPLICATION TYPE: chair" prefix in notes.
+      const payload: Record<string, any> = {
         user_id: user?.id ?? null,
-        application_type: 'chair',
         full_name: formData.fullName,
         email: formData.email,
         telegram_username: formData.telegramUsername,
@@ -141,12 +144,14 @@ export default function ChairApplication() {
         final_confirmation: true,
         payment_amount: 0,
         notes: [
+          'APPLICATION TYPE: chair',
           `Role Preference: ${formData.rolePreference}`,
           `Previous Chair Experience: ${formData.previousChairExperience || 'None'}`,
           `Leadership Example: ${formData.leadershipExample || 'N/A'}`,
         ].join('\n'),
-      } as any);
+      };
 
+      const { error } = await (supabase.from('applications') as any).insert(payload);
       if (error) throw error;
 
       setSubmitted(true);
