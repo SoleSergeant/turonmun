@@ -122,9 +122,7 @@ export default function ChairApplication() {
 
     setIsSubmitting(true);
     try {
-      // Build the base payload — no application_type column yet (migration 009 pending)
-      // Type is identified via the "APPLICATION TYPE: chair" prefix in notes.
-      const payload: Record<string, any> = {
+      const basePayload: Record<string, any> = {
         user_id: user?.id ?? null,
         full_name: formData.fullName,
         email: formData.email,
@@ -143,6 +141,8 @@ export default function ChairApplication() {
         fee_agreement: true,
         final_confirmation: true,
         payment_amount: 0,
+        // Notes always carry the type marker so the admin filter works
+        // regardless of whether the application_type column exists.
         notes: [
           'APPLICATION TYPE: chair',
           `Role Preference: ${formData.rolePreference}`,
@@ -151,7 +151,19 @@ export default function ChairApplication() {
         ].join('\n'),
       };
 
-      const { error } = await (supabase.from('applications') as any).insert(payload);
+      // Try inserting with application_type column (migration 009).
+      // If the column doesn't exist yet, fall back to base payload alone —
+      // the notes marker is enough for the admin to identify chair applications.
+      let { error } = await (supabase.from('applications') as any)
+        .insert({ ...basePayload, application_type: 'chair' });
+
+      if (error?.message?.includes('application_type')) {
+        // Column not yet created — retry without it
+        const { error: retryError } = await (supabase.from('applications') as any)
+          .insert(basePayload);
+        error = retryError;
+      }
+
       if (error) throw error;
 
       setSubmitted(true);

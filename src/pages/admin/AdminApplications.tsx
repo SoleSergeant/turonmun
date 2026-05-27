@@ -181,15 +181,14 @@ const AdminApplications = () => {
   const filterApplications = () => {
     let filtered = [...applications];
 
-    // Apply application type filter
-    // Uses application_type column when available (post-migration 009),
-    // otherwise falls back to the "APPLICATION TYPE: chair" notes marker.
+    // Apply application type filter.
+    // Notes marker is the ground truth (always written at submit time).
+    // application_type column is used as a secondary signal when notes is absent.
     if (typeFilter !== 'all') {
       filtered = filtered.filter(app => {
-        const colType = (app as any).application_type;
-        if (colType) return colType === typeFilter;
-        // Fallback: infer from notes
-        const isChair = (app as any).notes?.includes('APPLICATION TYPE: chair');
+        const notesIsChair = !!(app as any).notes?.includes('APPLICATION TYPE: chair');
+        const colIsChair = (app as any).application_type === 'chair';
+        const isChair = notesIsChair || colIsChair;
         return typeFilter === 'chair' ? isChair : !isChair;
       });
     }
