@@ -9,7 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 
 const COMMITTEES = ['UNGA', 'WTO', 'ECOSOC', 'HRC'];
-const ROLES = ['Chair', 'Co-Chair', 'Director', 'Rapporteur'];
+const ROLES = ['Chair', 'Co-Chair'];
 const EXPERIENCE_LEVELS = ['None', '1 conference', '2-3 conferences', '4+ conferences'];
 
 interface ChairFormData {
@@ -214,10 +214,10 @@ export default function ChairApplication() {
           <div className="text-center mb-8 mt-6">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-diplomatic-100 text-diplomatic-700 text-sm font-semibold mb-4">
               <Shield className="w-4 h-4" />
-              Chair / Staff Application
+              Chair Application
             </div>
             <h1 className="text-3xl md:text-4xl font-display font-bold text-diplomatic-900 mb-2">
-              Apply as Chair or Staff
+              Apply as Chair or Co-Chair
             </h1>
             <p className="text-neutral-500 text-sm">Season 7 — Lead a committee and shape the TuronMUN experience</p>
           </div>

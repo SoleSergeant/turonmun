@@ -486,7 +486,7 @@ const AdminApplications = () => {
                         >
                           <option value="all">All Types</option>
                           <option value="delegate">Delegates</option>
-                          <option value="chair">Chairs / Staff</option>
+                          <option value="chair">Chairs / Co-Chairs</option>
                         </select>
                       </div>
 
@@ -583,7 +583,7 @@ const AdminApplications = () => {
                             <div className="flex items-center gap-2 mb-1.5">
                               <h4 className="font-semibold text-gray-900 text-lg">{app.full_name}</h4>
                               {(app as any).application_type === 'chair' ? (
-                                <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 border border-purple-200 font-bold">Chair</span>
+                                <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 border border-purple-200 font-bold">Chair/Co-Chair</span>
                               ) : (
                                 <span className="text-[10px] px-2 py-0.5 rounded-full bg-sky-100 text-sky-700 border border-sky-200 font-bold">Delegate</span>
                               )}
