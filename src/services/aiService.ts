@@ -35,7 +35,7 @@ class AIService {
     
     // Application related
     if (lowerMessage.includes('apply') || lowerMessage.includes('application') || lowerMessage.includes('sign up')) {
-      return 'To apply for TuronMUN, visit our application page and fill out the application form. You\'ll need to provide your personal information, committee preferences, and experience. Early application is recommended as spots fill up quickly!';
+      return 'Applications for TuronMUN Season 7 are not yet open. Follow us on Telegram (@TuronMUN) to be notified the moment applications open. In the meantime, you can explore our past committees and resources to prepare!';
     }
 
     // Committee related
@@ -50,12 +50,12 @@ class AIService {
 
     // Conference dates
     if (lowerMessage.includes('date') || lowerMessage.includes('when') || lowerMessage.includes('schedule')) {
-      return 'TuronMUN 2025 will take place from April 2-4, 2025. The conference includes opening ceremony, committee sessions, and closing ceremony. A detailed schedule is available on our website.';
+      return 'TuronMUN Season 7 dates have not been announced yet. Follow us on Telegram (@TuronMUN) to be the first to know when applications and dates are released. A detailed schedule will be published on our website once confirmed.';
     }
 
     // Venue/location
     if (lowerMessage.includes('venue') || lowerMessage.includes('location') || lowerMessage.includes('where')) {
-      return 'TuronMUN 2025 will be held at the Turon Campus in Tashkent, Uzbekistan. The venue provides modern facilities for committee sessions and social events.';
+      return 'The venue for TuronMUN Season 7 has not been confirmed yet. Previous seasons have been held at Registan Private School and other venues in Tashkent, Uzbekistan. We will announce the Season 7 venue on our website and Telegram channel.';
     }
 
     // Fees/payment
@@ -84,7 +84,7 @@ class AIService {
     }
 
     // Default response
-    return `I understand you're asking about: "${message}". For specific details about TuronMUN 2025, I recommend checking our official website or contacting our team at admin@turonmun.com. Is there anything specific about MUN procedures, application, or conference logistics I can help you with?`;
+    return `I understand you're asking about: "${message}". For specific details about TuronMUN Season 7, I recommend checking our official website or contacting our team at admin@turonmun.com. Is there anything specific about MUN procedures, application, or conference logistics I can help you with?`;
   }
 }
 

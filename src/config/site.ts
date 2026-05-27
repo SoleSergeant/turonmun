@@ -1,11 +1,16 @@
 export const siteConfig = {
   title: import.meta.env.VITE_APP_TITLE || 'Turon Model United Nations',
-  description: import.meta.env.VITE_APP_DESCRIPTION || 'Official website for FPS Model United Nations conferences',
+  description: import.meta.env.VITE_APP_DESCRIPTION || 'Official website for TuronMUN — the leading Model United Nations conference from Central Asia',
   url: import.meta.env.VITE_APP_URL || 'https://TuronMUN.uz',
 
-  conferenceDate: new Date(import.meta.env.VITE_APP_CONFERENCE_DATE || '2025-07-19T00:00:00'),
-  conferenceLocation: import.meta.env.VITE_APP_CONFERENCE_LOCATION || 'Central Asian University',
+  /** Set to a date string (ISO) in .env when Season 7 dates are confirmed */
+  conferenceDate: import.meta.env.VITE_APP_CONFERENCE_DATE
+    ? new Date(import.meta.env.VITE_APP_CONFERENCE_DATE)
+    : null,
+  conferenceLocation: import.meta.env.VITE_APP_CONFERENCE_LOCATION || 'Tashkent, Uzbekistan',
+  /** Toggle registrations open/closed via VITE_APP_REGISTRATION_OPEN=true in .env */
   registrationOpen: import.meta.env.VITE_APP_REGISTRATION_OPEN === 'true',
+  currentSeason: 7,
   social: {
     twitter: 'https://twitter.com/TuronMUN',
     facebook: 'https://facebook.com/TuronMUN',

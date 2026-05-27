@@ -36,6 +36,7 @@ import ResetPassword from "./pages/ResetPassword";
 import ResetPasswordChange from "./pages/ResetPasswordChange";
 import AuthCallback from "./pages/AuthCallback";
 import RegistrationSelection from "./pages/RegistrationSelection";
+import ChairApplication from "./pages/ChairApplication";
 import NotFound from "./pages/NotFound";
 import MunCommand from "./pages/MunCommand";
 import AdminLogin from "./pages/admin/AdminLogin";
@@ -162,6 +163,7 @@ const App = () => {
         <Route path="/committees" element={<Committees />} />
         <Route path="/register" element={<RegistrationSelection />} />
         <Route path="/register/delegate" element={<ProtectedRoute><Registration /></ProtectedRoute>} />
+        <Route path="/register/chair" element={<ProtectedRoute><ChairApplication /></ProtectedRoute>} />
         <Route path="/registration" element={<RegistrationSelection />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />

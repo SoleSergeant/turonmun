@@ -7,7 +7,7 @@ import { CustomButton } from './ui/custom-button';
 import { useCommittees } from '../hooks/useCommittees';
 
 export default function CommitteesSection() {
-  const { committees, loading } = useCommittees();
+  const { committees } = useCommittees();
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {

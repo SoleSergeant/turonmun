@@ -63,6 +63,8 @@ export const checkAuthState = async () => {
 // Helper function to sign out
 export const signOut = async () => {
   try {
+    const { error } = await supabase.auth.signOut();
+    if (error) throw error;
     localStorage.removeItem('admin_session');
     return { success: true, message: 'Signed out successfully' };
   } catch (error: any) {

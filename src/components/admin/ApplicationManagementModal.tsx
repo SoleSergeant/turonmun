@@ -185,6 +185,16 @@ const ApplicationManagementModal: React.FC<ApplicationManagementModalProps> = ({
           </div>
           
           <div className="flex items-center space-x-3">
+            {/* Application type badge */}
+            {(application as any).application_type === 'chair' ? (
+              <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/20 text-purple-200 text-xs font-bold border border-purple-400/30">
+                <Users size={12} /> Chair / Staff
+              </span>
+            ) : (
+              <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-500/20 text-sky-200 text-xs font-bold border border-sky-400/30">
+                <BadgeCheck size={12} /> Delegate
+              </span>
+            )}
             <div className={`flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-semibold border ${getStatusColor(application.status)}`}>
               {getStatusIcon(application.status)}
               <span className="capitalize">{application.status}</span>

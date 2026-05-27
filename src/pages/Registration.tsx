@@ -177,11 +177,11 @@ const Registration = () => {
   };
 
   const calculateFee = () => {
-    const baseFee = 90000; // 90K UZS — Season 6
+    const baseFee = Number(import.meta.env.VITE_APP_DELEGATE_FEE ?? 90000);
     return {
       originalFee: baseFee,
       discount: 0,
-      finalFee: baseFee
+      finalFee: baseFee,
     };
   };
 
@@ -250,32 +250,24 @@ const Registration = () => {
   };
 
   const uploadFile = async (file: File, folder: string): Promise<string | null> => {
-    console.log(`[Upload] Starting upload for ${folder}/${file.name} (${file.size} bytes)`);
     try {
       const fileExt = file.name.split('.').pop();
       const fileName = `${Math.random().toString(36).substring(2)}_${Date.now()}.${fileExt}`;
       const filePath = `${folder}/${fileName}`;
 
-      console.log(`[Upload] Uploading to bucket: applications, path: ${filePath}`);
       const { data, error: uploadError } = await supabase.storage
         .from('applications')
         .upload(filePath, file);
 
-      if (uploadError) {
-        console.error(`[Upload] Storage error for ${folder}:`, uploadError);
-        throw uploadError;
-      }
-      
-      console.log(`[Upload] Upload successful for ${folder}:`, data);
+      if (uploadError) throw uploadError;
 
       const { data: { publicUrl } } = supabase.storage
         .from('applications')
         .getPublicUrl(filePath);
 
-      console.log(`[Upload] Public URL generated for ${folder}: ${publicUrl}`);
       return publicUrl;
     } catch (error) {
-      console.error(`[Upload] Catch block error for ${folder}:`, error);
+      console.error(`Upload failed for ${folder}:`, error);
       return null;
     }
   };
@@ -286,14 +278,6 @@ const Registration = () => {
       e.stopPropagation();
     }
     
-    console.log('[Submit] Form submission started');
-    console.log('[Submit] Current Step:', step);
-    console.log('[Submit] FormData Summary:', {
-      fullName: formData.fullName,
-      email: formData.email,
-      hasPhoto: !!photoFile,
-    });
-
     setIsSubmitting(true);
 
     try {
@@ -307,12 +291,6 @@ const Registration = () => {
       // Calculate final fee
       const fee = calculateFee();
 
-      console.log('[Submit] Inserting into database...', {
-        full_name: formData.fullName,
-        email: formData.email,
-        photo: !!photoUrl,
-      });
-      
       // Insert application into database
       const { data, error } = await supabase
         .from('applications')
@@ -358,14 +336,7 @@ Photo URL: ${photoUrl || 'N/A'}
         } as any)
         .select();
 
-      console.log('[Submit] Database response:', { data, error });
-
-      if (error) {
-        console.error('[Submit] Database error details:', error);
-        throw error;
-      }
-
-      console.log('[Submit] Submission successful!');
+      if (error) throw error;
 
       toast({
         title: "Application Submitted!",
@@ -447,16 +418,18 @@ Photo URL: ${photoUrl || 'N/A'}
       </main>
       <Footer />
 
-      {/* Dev Helper - Fill Test Data */}
-      <div className="fixed bottom-6 right-6 z-[9999]">
-        <button
-          onClick={fillTestData}
-          className="bg-diplomatic-800 text-white px-5 py-2.5 rounded-full text-xs font-bold hover:bg-diplomatic-900 shadow-2xl border border-white/20 transition-all active:scale-95"
-          type="button"
-        >
-          DEBUG: Fill Test Data
-        </button>
-      </div>
+      {/* Dev Helper - Fill Test Data (development only) */}
+      {import.meta.env.DEV && (
+        <div className="fixed bottom-6 right-6 z-[9999]">
+          <button
+            onClick={fillTestData}
+            className="bg-diplomatic-800 text-white px-5 py-2.5 rounded-full text-xs font-bold hover:bg-diplomatic-900 shadow-2xl border border-white/20 transition-all active:scale-95"
+            type="button"
+          >
+            DEBUG: Fill Test Data
+          </button>
+        </div>
+      )}
     </div>
   );
 };

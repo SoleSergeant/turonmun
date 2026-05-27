@@ -23,13 +23,6 @@ export default function ChairRoute({ children }: ChairRouteProps) {
           return;
         }
 
-        // Temporary override: allow specific superadmin email to always access chair dashboard
-        if (user.email === 'numonovsamandarferps@gmail.com') {
-          setIsChair(true);
-          setLoading(false);
-          return;
-        }
-
         // Check if user is an admin with chair role
         const { data: adminUser, error } = await supabase
           .from('admin_users')

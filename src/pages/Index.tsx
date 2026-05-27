@@ -10,6 +10,7 @@ import SchedulePreview from '../components/SchedulePreview';
 import FAQSection from '../components/FAQSection';
 import SponsorsSection from '../components/SponsorsSection';
 import Footer from '../components/Footer';
+import ErrorBoundary from '../components/ErrorBoundary';
 import { seasonsData } from '../data/seasonsData';
 
 // Get the latest season data
@@ -98,25 +99,35 @@ const Index = () => {
         animate="visible"
       >
         <Hero />
-        
+
         <motion.div variants={sectionVariants}>
-          <AboutSection />
-        </motion.div>
-        
-        <motion.div variants={sectionVariants}>
-          <CommitteesSection />
-        </motion.div>
-        
-        <motion.div variants={sectionVariants}>
-          <SchedulePreview />
+          <ErrorBoundary label="About section">
+            <AboutSection />
+          </ErrorBoundary>
         </motion.div>
 
         <motion.div variants={sectionVariants}>
-          <SponsorsSection />
+          <ErrorBoundary label="Committees section">
+            <CommitteesSection />
+          </ErrorBoundary>
         </motion.div>
-        
+
         <motion.div variants={sectionVariants}>
-          <FAQSection />
+          <ErrorBoundary label="Schedule preview">
+            <SchedulePreview />
+          </ErrorBoundary>
+        </motion.div>
+
+        <motion.div variants={sectionVariants}>
+          <ErrorBoundary label="Sponsors section">
+            <SponsorsSection />
+          </ErrorBoundary>
+        </motion.div>
+
+        <motion.div variants={sectionVariants}>
+          <ErrorBoundary label="FAQ section">
+            <FAQSection />
+          </ErrorBoundary>
         </motion.div>
       </motion.main>
       

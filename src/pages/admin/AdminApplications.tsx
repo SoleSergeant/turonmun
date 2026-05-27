@@ -8,6 +8,7 @@ import {
   XCircle,
   Clock,
   User,
+  Users,
   School,
   MapPin,
   Download,
@@ -76,6 +77,7 @@ const AdminApplications = () => {
   const [modalApplication, setModalApplication] = useState<Application | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [typeFilter, setTypeFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [authChecked, setAuthChecked] = useState(false);
   const [acceptedEmails, setAcceptedEmails] = useState<string>('');
@@ -129,7 +131,7 @@ const AdminApplications = () => {
 
   useEffect(() => {
     filterApplications();
-  }, [applications, statusFilter, searchQuery]);
+  }, [applications, statusFilter, typeFilter, searchQuery]);
 
   const fetchApplications = async () => {
     try {
@@ -178,6 +180,11 @@ const AdminApplications = () => {
 
   const filterApplications = () => {
     let filtered = [...applications];
+
+    // Apply application type filter (delegate / chair)
+    if (typeFilter !== 'all') {
+      filtered = filtered.filter(app => (app as any).application_type === typeFilter);
+    }
 
     // Apply status filter
     if (statusFilter !== 'all') {
@@ -466,7 +473,24 @@ const AdminApplications = () => {
                   <div className="flex flex-col md:flex-row md:items-center justify-between mb-4">
                     <h3 className="text-lg font-semibold mb-2 md:mb-0">Applications Management</h3>
 
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-2 flex-wrap gap-y-2">
+                      {/* Type filter */}
+                      <div className="relative">
+                        <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                          <Users size={14} className="text-gray-400" />
+                        </div>
+                        <select
+                          value={typeFilter}
+                          onChange={(e) => setTypeFilter(e.target.value)}
+                          className="pl-9 pr-4 py-2 border border-gray-300 rounded-md text-sm"
+                        >
+                          <option value="all">All Types</option>
+                          <option value="delegate">Delegates</option>
+                          <option value="chair">Chairs / Staff</option>
+                        </select>
+                      </div>
+
+                      {/* Status filter */}
                       <div className="relative">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                           <Filter size={14} className="text-gray-400" />
@@ -476,7 +500,7 @@ const AdminApplications = () => {
                           onChange={(e) => setStatusFilter(e.target.value)}
                           className="pl-9 pr-4 py-2 border border-gray-300 rounded-md text-sm"
                         >
-                          <option value="all">All Applications</option>
+                          <option value="all">All Statuses</option>
                           <option value="pending">Pending</option>
                           <option value="approved">Approved</option>
                           <option value="rejected">Rejected</option>
@@ -556,7 +580,14 @@ const AdminApplications = () => {
                           </div>
 
                           <div className="mb-4">
-                            <h4 className="font-semibold text-gray-900 text-lg mb-2">{app.full_name}</h4>
+                            <div className="flex items-center gap-2 mb-1.5">
+                              <h4 className="font-semibold text-gray-900 text-lg">{app.full_name}</h4>
+                              {(app as any).application_type === 'chair' ? (
+                                <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 border border-purple-200 font-bold">Chair</span>
+                              ) : (
+                                <span className="text-[10px] px-2 py-0.5 rounded-full bg-sky-100 text-sky-700 border border-sky-200 font-bold">Delegate</span>
+                              )}
+                            </div>
                             <div className="text-sm text-gray-600 mb-2">{app.email}</div>
 
                             <div className="flex flex-col gap-2 text-sm mt-3">

@@ -186,16 +186,30 @@ export function useMunCommand({ committeeId, isChair = false }: UseMunCommandOpt
   }, [session]);
 
   // ─── Local timer countdown ──────────────────────────────
+  // Derive remaining time from DB timestamps so all clients stay in sync.
+  // When the timer is running we compute:
+  //   remaining = timer_remaining_at_start - elapsed_since_start
+  // where elapsed = now - timer_started_at (in seconds).
+  // This means reconnecting clients immediately show the correct time
+  // instead of restarting from the DB snapshot value.
   useEffect(() => {
     if (timerRef.current) clearInterval(timerRef.current);
 
     if (session?.timer_running && session.timer_remaining > 0) {
+      // Snapshot the DB values at the moment the timer started/resumed
+      const startedAt = session.timer_started_at
+        ? new Date(session.timer_started_at).getTime()
+        : Date.now();
+      const remainingAtStart = session.timer_remaining;
+
       timerRef.current = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - startedAt) / 1000);
+        const remaining = Math.max(0, remainingAtStart - elapsed);
+
         setSession(prev => {
           if (!prev || !prev.timer_running) return prev;
-          const remaining = Math.max(0, prev.timer_remaining - 1);
           if (remaining === 0 && isChair) {
-            // Auto-pause when timer hits 0
+            // Auto-pause when timer hits 0 (chair only — avoids race with multiple delegates)
             (supabase.from('committee_sessions') as any)
               .update({ timer_running: false, timer_remaining: 0, updated_at: new Date().toISOString() })
               .eq('id', prev.id)
@@ -203,13 +217,15 @@ export function useMunCommand({ committeeId, isChair = false }: UseMunCommandOpt
           }
           return { ...prev, timer_remaining: remaining };
         });
-      }, 1000);
+
+        if (remaining === 0 && timerRef.current) clearInterval(timerRef.current);
+      }, 500); // tick at 500 ms for smoother display without extra CPU cost
     }
 
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [session?.timer_running, session?.id]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [session?.timer_running, session?.id, session?.timer_started_at]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // ─── Chair Actions ──────────────────────────────────────
 

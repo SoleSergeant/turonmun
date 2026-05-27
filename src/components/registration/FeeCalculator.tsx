@@ -1,8 +1,11 @@
 import React from 'react';
 import { Award } from 'lucide-react';
 
+/** Delegate application fee in UZS. Override via VITE_APP_DELEGATE_FEE env var. */
+export const DELEGATE_FEE = Number(import.meta.env.VITE_APP_DELEGATE_FEE ?? 90000);
+
 const FeeCalculator: React.FC = () => {
-  const fee = 90000;
+  const fee = DELEGATE_FEE;
 
   return (
     <div className="max-w-md mx-auto bg-white p-6 rounded-xl shadow-sm border border-neutral-100 mb-8">
