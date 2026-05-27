@@ -148,31 +148,22 @@ const ChairManagement = () => {
     }
     setAssignLoading(true);
     try {
-      // 1. Approve the application
-      const { error: appErr } = await (supabase.from('applications') as any)
-        .update({ status: 'approved' })
-        .eq('id', assignModal.id);
-      if (appErr) throw appErr;
+      // Single SECURITY DEFINER RPC — bypasses RLS on admin_users safely.
+      // The function: approves the application, upserts into admin_users,
+      // and updates the committee's chair/co_chair name field.
+      const { error } = await supabase.rpc('assign_chair_application', {
+        p_application_id: assignModal.id,
+        p_email:          assignModal.email,
+        p_full_name:      assignModal.full_name,
+        p_role:           assignRole,
+        p_committee_id:   assignCommitteeId,
+      });
+      if (error) throw error;
 
-      // 2. Upsert into admin_users (use email as conflict key)
-      const { error: adminErr } = await (supabase.from('admin_users') as any)
-        .upsert({
-          email: assignModal.email,
-          full_name: assignModal.full_name,
-          role: assignRole,
-          committee_id: assignCommitteeId,
-          password_hash: 'existing_user',
-          is_active: true,
-        }, { onConflict: 'email' });
-      if (adminErr) throw adminErr;
-
-      // 3. Update committee chair/co_chair name field
-      const field = assignRole === 'chair' ? 'chair' : 'co_chair';
-      await (supabase.from('committees') as any)
-        .update({ [field]: assignModal.full_name })
-        .eq('id', assignCommitteeId);
-
-      toast({ title: 'Chair assigned!', description: `${assignModal.full_name} assigned as ${assignRole === 'co_chair' ? 'Co-Chair' : 'Chair'}` });
+      toast({
+        title: 'Chair assigned!',
+        description: `${assignModal.full_name} assigned as ${assignRole === 'co_chair' ? 'Co-Chair' : 'Chair'}`,
+      });
       setAssignModal(null);
       setAssignRole('chair');
       setAssignCommitteeId('');
