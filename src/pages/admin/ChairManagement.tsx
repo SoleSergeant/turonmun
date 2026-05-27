@@ -16,7 +16,11 @@ import {
   Loader2,
   X,
   Search,
-  UserCheck
+  UserCheck,
+  ClipboardList,
+  CheckCircle2,
+  Clock,
+  ChevronDown,
 } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 
@@ -61,6 +65,130 @@ const ChairManagement = () => {
     user_id: '',
   });
 
+  // ── Chair Applications (from applications table) ─────────────────────────
+  interface ChairApp {
+    id: string;
+    full_name: string;
+    email: string;
+    telegram_username?: string;
+    institution?: string;
+    notes?: string;
+    status: string;
+    created_at: string;
+    rolePreference: string;
+    committeePreference1: string;
+    committeePreference2: string;
+    experience: string;
+  }
+  const [chairApps, setChairApps] = useState<ChairApp[]>([]);
+  const [chairAppsLoading, setChairAppsLoading] = useState(true);
+  const [appStatusFilter, setAppStatusFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
+  const [assignModal, setAssignModal] = useState<ChairApp | null>(null);
+  const [assignRole, setAssignRole] = useState('chair');
+  const [assignCommitteeId, setAssignCommitteeId] = useState('');
+  const [assignLoading, setAssignLoading] = useState(false);
+
+  const parseNotes = (notes: string | undefined, label: string) => {
+    if (!notes) return '';
+    const m = notes.match(new RegExp(`${label}:\\s*(.+)`));
+    return m ? m[1].trim() : '';
+  };
+
+  const fetchChairApps = useCallback(async () => {
+    setChairAppsLoading(true);
+    try {
+      const { data, error } = await (supabase.from('applications') as any)
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+
+      const apps: ChairApp[] = (data || [])
+        .filter((a: any) =>
+          a.notes?.includes('APPLICATION TYPE: chair') ||
+          (a as any).application_type === 'chair'
+        )
+        .map((a: any) => ({
+          id: a.id,
+          full_name: a.full_name,
+          email: a.email,
+          telegram_username: a.telegram_username,
+          institution: a.institution,
+          notes: a.notes,
+          status: a.status || 'pending',
+          created_at: a.created_at,
+          rolePreference: parseNotes(a.notes, 'Role Preference') || 'Chair',
+          committeePreference1: a.committee_preference1 || '',
+          committeePreference2: a.committee_preference2 || '',
+          experience: a.experience || '',
+        }));
+
+      setChairApps(apps);
+    } catch (err: any) {
+      console.error('Error fetching chair apps:', err);
+    } finally {
+      setChairAppsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => { fetchChairApps(); }, [fetchChairApps]);
+
+  const handleRejectApp = async (appId: string) => {
+    if (!confirm('Reject this chair application?')) return;
+    await (supabase.from('applications') as any)
+      .update({ status: 'rejected' })
+      .eq('id', appId);
+    fetchChairApps();
+    toast({ title: 'Application rejected' });
+  };
+
+  const handleAcceptAndAssign = async () => {
+    if (!assignModal) return;
+    if (!assignCommitteeId) {
+      toast({ title: 'Please select a committee', variant: 'destructive' }); return;
+    }
+    setAssignLoading(true);
+    try {
+      // 1. Approve the application
+      const { error: appErr } = await (supabase.from('applications') as any)
+        .update({ status: 'approved' })
+        .eq('id', assignModal.id);
+      if (appErr) throw appErr;
+
+      // 2. Upsert into admin_users (use email as conflict key)
+      const { error: adminErr } = await (supabase.from('admin_users') as any)
+        .upsert({
+          email: assignModal.email,
+          full_name: assignModal.full_name,
+          role: assignRole,
+          committee_id: assignCommitteeId,
+          password_hash: 'existing_user',
+          is_active: true,
+        }, { onConflict: 'email' });
+      if (adminErr) throw adminErr;
+
+      // 3. Update committee chair/co_chair name field
+      const field = assignRole === 'chair' ? 'chair' : 'co_chair';
+      await (supabase.from('committees') as any)
+        .update({ [field]: assignModal.full_name })
+        .eq('id', assignCommitteeId);
+
+      toast({ title: 'Chair assigned!', description: `${assignModal.full_name} assigned as ${assignRole === 'co_chair' ? 'Co-Chair' : 'Chair'}` });
+      setAssignModal(null);
+      setAssignRole('chair');
+      setAssignCommitteeId('');
+      fetchChairApps();
+      fetchData();
+    } catch (err: any) {
+      toast({ title: 'Error', description: err.message, variant: 'destructive' });
+    } finally {
+      setAssignLoading(false);
+    }
+  };
+
+  const filteredChairApps = appStatusFilter === 'all'
+    ? chairApps
+    : chairApps.filter(a => a.status === appStatusFilter);
+
   // 'existing' = promote existing user, 'new' = create new account
   const [addMode, setAddMode] = useState<'existing' | 'new'>('existing');
   const [userSearchQuery, setUserSearchQuery] = useState('');
@@ -94,7 +222,7 @@ const ChairManagement = () => {
       const { data: usersData, error: usersError } = await supabase
         .from('admin_users')
         .select('*')
-        .in('role', ['chair', 'co-chair', 'co_chair', 'director']);
+        .in('role', ['chair', 'co-chair', 'co_chair']);
 
       if (usersError) throw usersError;
 
@@ -470,6 +598,133 @@ const ChairManagement = () => {
           </div>
         </div>
 
+        {/* ── Chair Applications ─────────────────────────────────────── */}
+        <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
+          <div className="px-4 py-4 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-2">
+              <ClipboardList className="h-5 w-5 text-indigo-600" />
+              <h3 className="text-lg font-semibold text-gray-900">Chair Applications</h3>
+              <span className="ml-1 text-xs bg-indigo-100 text-indigo-700 rounded-full px-2 py-0.5 font-medium">
+                {chairApps.filter(a => a.status === 'pending').length} pending
+              </span>
+            </div>
+            <div className="flex gap-1">
+              {(['all', 'pending', 'approved', 'rejected'] as const).map(f => (
+                <button
+                  key={f}
+                  onClick={() => setAppStatusFilter(f)}
+                  className={`px-3 py-1.5 rounded text-xs font-medium transition-colors ${
+                    appStatusFilter === f
+                      ? 'bg-indigo-600 text-white'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  {f.charAt(0).toUpperCase() + f.slice(1)}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50 border-b">
+                <tr>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Applicant</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role Pref.</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Committee Prefs</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Applied</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {chairAppsLoading ? (
+                  <tr>
+                    <td colSpan={6} className="px-4 py-8 text-center text-gray-500">
+                      <Loader2 className="h-6 w-6 animate-spin mx-auto mb-2" />
+                      Loading applications...
+                    </td>
+                  </tr>
+                ) : filteredChairApps.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="px-4 py-8 text-center text-gray-500">
+                      No {appStatusFilter !== 'all' ? appStatusFilter + ' ' : ''}chair applications found.
+                    </td>
+                  </tr>
+                ) : (
+                  filteredChairApps.map(app => (
+                    <tr key={app.id} className="hover:bg-gray-50">
+                      <td className="px-4 py-4">
+                        <div className="text-sm font-medium text-gray-900">{app.full_name}</div>
+                        <div className="text-xs text-gray-500">{app.email}</div>
+                        {app.telegram_username && (
+                          <div className="text-xs text-gray-400">@{app.telegram_username}</div>
+                        )}
+                      </td>
+                      <td className="px-4 py-4">
+                        <span className="text-sm text-gray-700">{app.rolePreference || '—'}</span>
+                      </td>
+                      <td className="px-4 py-4">
+                        <div className="text-xs text-gray-600">1st: {app.committeePreference1 || '—'}</div>
+                        <div className="text-xs text-gray-400">2nd: {app.committeePreference2 || '—'}</div>
+                      </td>
+                      <td className="px-4 py-4">
+                        <span className="text-xs text-gray-500">
+                          {new Date(app.created_at).toLocaleDateString()}
+                        </span>
+                      </td>
+                      <td className="px-4 py-4">
+                        <span className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-semibold rounded-full ${
+                          app.status === 'approved'
+                            ? 'bg-green-100 text-green-800'
+                            : app.status === 'rejected'
+                            ? 'bg-red-100 text-red-800'
+                            : 'bg-yellow-100 text-yellow-800'
+                        }`}>
+                          {app.status === 'approved' ? (
+                            <><CheckCircle2 className="h-3 w-3" /> Approved</>
+                          ) : app.status === 'rejected' ? (
+                            <><XCircle className="h-3 w-3" /> Rejected</>
+                          ) : (
+                            <><Clock className="h-3 w-3" /> Pending</>
+                          )}
+                        </span>
+                      </td>
+                      <td className="px-4 py-4">
+                        {app.status === 'pending' ? (
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => {
+                                const rawRole = app.rolePreference.toLowerCase();
+                                const normalised = rawRole.includes('co') ? 'co_chair' : 'chair';
+                                setAssignRole(normalised);
+                                setAssignCommitteeId('');
+                                setAssignModal(app);
+                              }}
+                              className="flex items-center gap-1 px-2 py-1 bg-green-600 text-white text-xs rounded hover:bg-green-700 transition-colors"
+                            >
+                              <UserCheck className="h-3 w-3" />
+                              Accept &amp; Assign
+                            </button>
+                            <button
+                              onClick={() => handleRejectApp(app.id)}
+                              className="flex items-center gap-1 px-2 py-1 bg-red-100 text-red-700 text-xs rounded hover:bg-red-200 transition-colors"
+                            >
+                              <XCircle className="h-3 w-3" />
+                              Reject
+                            </button>
+                          </div>
+                        ) : (
+                          <span className="text-xs text-gray-400 italic">—</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
         {/* Chairs Table */}
         <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
           <div className="overflow-x-auto">
@@ -709,7 +964,6 @@ const ChairManagement = () => {
                       >
                         <option value="chair">Chair</option>
                         <option value="co_chair">Co-Chair</option>
-                        <option value="director">Director</option>
                       </select>
                     </div>
                     <div>
@@ -745,6 +999,78 @@ const ChairManagement = () => {
                     </button>
                   </div>
                 </form>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Accept & Assign Modal */}
+        {assignModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-xl max-w-md w-full shadow-xl">
+              <div className="p-6">
+                <div className="flex justify-between items-start mb-5">
+                  <div>
+                    <h3 className="text-xl font-semibold text-gray-900">Accept &amp; Assign Chair</h3>
+                    <p className="text-sm text-gray-500 mt-0.5">{assignModal.full_name} · {assignModal.email}</p>
+                  </div>
+                  <button onClick={() => setAssignModal(null)} className="text-gray-400 hover:text-gray-600">
+                    <X className="h-5 w-5" />
+                  </button>
+                </div>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Assign as Role</label>
+                    <select
+                      value={assignRole}
+                      onChange={e => setAssignRole(e.target.value)}
+                      className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="chair">Chair</option>
+                      <option value="co_chair">Co-Chair</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Assign to Committee</label>
+                    <select
+                      value={assignCommitteeId}
+                      onChange={e => setAssignCommitteeId(e.target.value)}
+                      className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="">Select a committee…</option>
+                      {committees.map(c => (
+                        <option key={c.id} value={c.id}>{c.name}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {(assignModal.committeePreference1 || assignModal.committeePreference2) && (
+                    <div className="bg-blue-50 rounded-lg p-3 text-xs text-blue-700">
+                      <p className="font-medium mb-1">Applicant's preferred committees:</p>
+                      {assignModal.committeePreference1 && <p>1st choice: {assignModal.committeePreference1}</p>}
+                      {assignModal.committeePreference2 && <p>2nd choice: {assignModal.committeePreference2}</p>}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex justify-end gap-3 pt-5">
+                  <button
+                    onClick={() => setAssignModal(null)}
+                    className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-sm"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleAcceptAndAssign}
+                    disabled={assignLoading || !assignCommitteeId}
+                    className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 flex items-center gap-2 text-sm"
+                  >
+                    {assignLoading && <Loader2 className="h-4 w-4 animate-spin" />}
+                    <CheckCircle2 className="h-4 w-4" />
+                    Accept &amp; Assign
+                  </button>
+                </div>
               </div>
             </div>
           </div>
@@ -791,7 +1117,6 @@ const ChairManagement = () => {
                     >
                       <option value="chair">Chair</option>
                       <option value="co_chair">Co-Chair</option>
-                      <option value="director">Director</option>
                     </select>
                   </div>
                   <div>

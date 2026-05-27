@@ -21,9 +21,9 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
+import { useCommittees } from '@/hooks/useCommittees';
 
 interface DashboardCounts {
-  committees: number;
   schedule_days: number;
   applications: number;
   unread_messages: number;
@@ -34,14 +34,16 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [connectionStatus, setConnectionStatus] = useState<{ success: boolean, message: string } | null>(null);
   const { toast } = useToast();
+  const { committees } = useCommittees();
   const [counts, setCounts] = useState<DashboardCounts>({
-    committees: 0,
     schedule_days: 0,
     applications: 0,
     unread_messages: 0,
     resources: 0,
   });
   const [applicationsByStatus, setApplicationsByStatus] = useState<Record<string, number>>({});
+  const [delegateStats, setDelegateStats] = useState({ total: 0, approved: 0, pending: 0, rejected: 0 });
+  const [chairStats, setChairStats] = useState({ total: 0, approved: 0, pending: 0, rejected: 0 });
   const [recentApplications, setRecentApplications] = useState<any[]>([]);
   const [recentMessages, setRecentMessages] = useState<any[]>([]);
 
@@ -62,21 +64,19 @@ const AdminDashboard = () => {
   const fetchDashboardData = async () => {
     try {
       const [
-        committeesRes, scheduleRes, applicationsRes, unreadRes, resourcesRes,
+        scheduleRes, applicationsRes, unreadRes, resourcesRes,
         recentAppsRes, recentMsgsRes, statusStatsRes
       ] = await Promise.all([
-        supabase.from('committees').select('id', { count: 'exact', head: true }),
         supabase.from('schedule_events').select('id', { count: 'exact', head: true }),
         supabase.from('applications').select('id', { count: 'exact', head: true }),
         supabase.from('contact_messages').select('id', { count: 'exact', head: true }).eq('is_read', false),
         supabase.from('resources').select('id', { count: 'exact', head: true }),
         supabase.from('applications').select('*').order('created_at', { ascending: false }).limit(5),
         supabase.from('contact_messages').select('*').order('created_at', { ascending: false }).limit(5),
-        supabase.from('applications').select('status').not('status', 'is', null),
+        supabase.from('applications').select('status, notes, application_type').not('status', 'is', null),
       ]);
 
       setCounts({
-        committees: committeesRes.count || 0,
         schedule_days: scheduleRes.count || 0,
         applications: applicationsRes.count || 0,
         unread_messages: unreadRes.count || 0,
@@ -87,8 +87,29 @@ const AdminDashboard = () => {
       setRecentMessages(recentMsgsRes.data || []);
 
       if (statusStatsRes.data) {
+        const allApps = statusStatsRes.data as any[];
+
+        // Split by type: notes marker is ground truth, application_type column is secondary
+        const isChairApp = (a: any) =>
+          a.notes?.includes('APPLICATION TYPE: chair') || a.application_type === 'chair';
+
+        const getTypeCounts = (apps: any[]) => {
+          const c = { total: 0, approved: 0, pending: 0, rejected: 0 };
+          apps.forEach(a => {
+            c.total += 1;
+            const s = a.status || 'pending';
+            if (s === 'approved') c.approved += 1;
+            else if (s === 'rejected') c.rejected += 1;
+            else c.pending += 1;
+          });
+          return c;
+        };
+
+        setDelegateStats(getTypeCounts(allApps.filter(a => !isChairApp(a))));
+        setChairStats(getTypeCounts(allApps.filter(isChairApp)));
+
         const statusCounts: Record<string, number> = {};
-        statusStatsRes.data.forEach(app => {
+        allApps.forEach(app => {
           const status = app.status || 'unknown';
           statusCounts[status] = (statusCounts[status] || 0) + 1;
         });
@@ -125,7 +146,7 @@ const AdminDashboard = () => {
       icon: Globe,
       path: `/committees${s}`,
       gradient: 'from-indigo-500 to-indigo-600',
-      badge: counts.committees > 0 ? `${counts.committees} active` : null,
+      badge: committees.length > 0 ? `${committees.length} active` : null,
     },
     {
       title: 'Country Matrix',
@@ -196,54 +217,71 @@ const AdminDashboard = () => {
         <div className="space-y-8">
 
           {/* Stats Row */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            {/* Total Applications */}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+
+            {/* Delegate Stats */}
             <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-sm font-medium text-gray-500">Total Applications</span>
-                <div className="p-2 bg-purple-50 rounded-lg">
-                  <TrendingUp className="h-4 w-4 text-purple-600" />
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <div className="p-2 bg-sky-50 rounded-lg">
+                    <Users className="h-4 w-4 text-sky-600" />
+                  </div>
+                  <span className="text-sm font-semibold text-gray-700">Delegates</span>
+                </div>
+                <span className="text-2xl font-bold text-gray-900">{delegateStats.total}</span>
+              </div>
+              <div className="grid grid-cols-3 gap-2 text-center">
+                <div className="bg-green-50 rounded-lg py-2">
+                  <p className="text-xl font-bold text-green-600">{delegateStats.approved}</p>
+                  <p className="text-[11px] text-gray-400 mt-0.5">Approved</p>
+                </div>
+                <div className="bg-yellow-50 rounded-lg py-2">
+                  <p className="text-xl font-bold text-yellow-600">{delegateStats.pending}</p>
+                  <p className="text-[11px] text-gray-400 mt-0.5">Pending</p>
+                </div>
+                <div className="bg-red-50 rounded-lg py-2">
+                  <p className="text-xl font-bold text-red-500">{delegateStats.rejected}</p>
+                  <p className="text-[11px] text-gray-400 mt-0.5">Rejected</p>
                 </div>
               </div>
-              <p className="text-3xl font-bold text-gray-900">{counts.applications}</p>
-              <p className="text-xs text-gray-400 mt-1">All time</p>
             </div>
 
-            {/* Approved */}
+            {/* Chair Stats */}
             <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-sm font-medium text-gray-500">Approved</span>
-                <div className="p-2 bg-green-50 rounded-lg">
-                  <CheckCircle2 className="h-4 w-4 text-green-600" />
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <div className="p-2 bg-purple-50 rounded-lg">
+                    <Shield className="h-4 w-4 text-purple-600" />
+                  </div>
+                  <span className="text-sm font-semibold text-gray-700">Chairs / Co-Chairs</span>
+                </div>
+                <span className="text-2xl font-bold text-gray-900">{chairStats.total}</span>
+              </div>
+              <div className="grid grid-cols-3 gap-2 text-center">
+                <div className="bg-green-50 rounded-lg py-2">
+                  <p className="text-xl font-bold text-green-600">{chairStats.approved}</p>
+                  <p className="text-[11px] text-gray-400 mt-0.5">Approved</p>
+                </div>
+                <div className="bg-yellow-50 rounded-lg py-2">
+                  <p className="text-xl font-bold text-yellow-600">{chairStats.pending}</p>
+                  <p className="text-[11px] text-gray-400 mt-0.5">Pending</p>
+                </div>
+                <div className="bg-red-50 rounded-lg py-2">
+                  <p className="text-xl font-bold text-red-500">{chairStats.rejected}</p>
+                  <p className="text-[11px] text-gray-400 mt-0.5">Rejected</p>
                 </div>
               </div>
-              <p className="text-3xl font-bold text-green-600">{approved}</p>
-              <p className="text-xs text-gray-400 mt-1">
-                {totalApps > 0 ? `${Math.round((approved / totalApps) * 100)}% acceptance rate` : 'No data'}
-              </p>
-            </div>
-
-            {/* Pending */}
-            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-sm font-medium text-gray-500">Pending Review</span>
-                <div className="p-2 bg-yellow-50 rounded-lg">
-                  <Clock className="h-4 w-4 text-yellow-600" />
-                </div>
-              </div>
-              <p className="text-3xl font-bold text-yellow-600">{pending}</p>
-              <p className="text-xs text-gray-400 mt-1">Awaiting decision</p>
             </div>
 
             {/* Committees */}
-            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
+            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 flex flex-col justify-between">
               <div className="flex items-center justify-between mb-3">
                 <span className="text-sm font-medium text-gray-500">Committees</span>
                 <div className="p-2 bg-blue-50 rounded-lg">
                   <Globe className="h-4 w-4 text-blue-600" />
                 </div>
               </div>
-              <p className="text-3xl font-bold text-blue-600">{counts.committees}</p>
+              <p className="text-3xl font-bold text-blue-600">{committees.length}</p>
               <p className="text-xs text-gray-400 mt-1">Active this year</p>
             </div>
           </div>
