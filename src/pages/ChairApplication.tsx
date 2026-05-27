@@ -140,7 +140,7 @@ export default function ChairApplication() {
         has_ielts: false,
         has_sat: false,
         discount_eligibility: 'None',
-        fee_agreement: 'N/A',
+        fee_agreement: true,
         final_confirmation: true,
         payment_amount: 0,
         notes: [
