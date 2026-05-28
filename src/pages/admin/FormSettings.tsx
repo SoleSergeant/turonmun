@@ -7,10 +7,122 @@ import {
   ToggleLeft, ToggleRight, Calendar, Users, DollarSign,
   Plus, Trash2, GripVertical, Loader2, Save, ClipboardList,
   AlertCircle, CheckCircle2, Clock, RefreshCw, ChevronDown,
+  Eye, X, ChevronLeft, ChevronRight,
 } from 'lucide-react';
+import PersonalInfoStep from '@/components/registration/PersonalInfoStep';
+import PreferencesStep from '@/components/registration/PreferencesStep';
+import CommitteePreferencesStep from '@/components/registration/CommitteePreferencesStep';
+import EssayStep from '@/components/registration/EssayStep';
+import AdditionalInfoStep from '@/components/registration/AdditionalInfoStep';
+import RegistrationSteps from '@/components/registration/RegistrationSteps';
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 const uuid = () => Math.random().toString(36).slice(2, 10);
+
+const BLANK_FORM_DATA = {
+  fullName: '', dateOfBirth: '', gender: '', email: '', phone: '',
+  telegramUsername: '', institution: '', countryAndCity: '', grade: '',
+  munExperience: '', experience: '', previousMUNs: '',
+  delegationType: 'individual', participationType: 'in-person',
+  committee_preference1: '', committee_preference2: '', committee_preference3: '',
+  motivationEssay: '', issueInterest: '',
+  dietaryRestrictions: '', medicalConditions: '', emergencyContact: '',
+  emergencyPhone: '', feeAgreement: '', discountEligibility: [] as string[],
+  finalConfirmation: false, hasIELTS: 'no', hasSAT: 'no',
+  ieltsScore: '', satScore: '', agreeToTerms: false,
+};
+
+// ── Form Preview Modal ──────────────────────────────────────────────────────────
+const FormPreviewModal: React.FC<{ formType: 'delegate' | 'chair'; onClose: () => void }> = ({ formType, onClose }) => {
+  const [step, setStep] = useState(1);
+  const [formData, setFormData] = useState({ ...BLANK_FORM_DATA });
+  const totalSteps = 5;
+  const noop = () => {};
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name, value, type } = e.target;
+    if (type === 'checkbox') {
+      const checked = (e.target as HTMLInputElement).checked;
+      if (name === 'discountEligibility') {
+        setFormData(prev => ({
+          ...prev,
+          discountEligibility: checked
+            ? [...prev.discountEligibility.filter(i => i !== 'None'), value]
+            : prev.discountEligibility.filter(i => i !== value),
+        }));
+      } else {
+        setFormData(prev => ({ ...prev, [name]: checked }));
+      }
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
+    }
+  };
+  const calculateFee = () => ({ originalFee: 90000, discount: 0, finalFee: 90000 });
+
+  return (
+    <div className="fixed inset-0 z-50 flex flex-col bg-white">
+      {/* Preview header */}
+      <div className="flex items-center justify-between px-6 py-3 bg-amber-50 border-b border-amber-200 flex-shrink-0">
+        <div className="flex items-center gap-2 text-amber-800 text-sm font-semibold">
+          <Eye size={16} />
+          <span>Preview Mode — {formType === 'delegate' ? 'Delegate Registration' : 'Chair Application'} (read-only, changes are not saved)</span>
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setStep(s => Math.max(1, s - 1))}
+              disabled={step === 1}
+              className="flex items-center gap-1 px-3 py-1 text-sm bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-40"
+            >
+              <ChevronLeft size={14} /> Prev
+            </button>
+            <span className="text-xs text-gray-500 font-medium">Step {step} / {totalSteps}</span>
+            <button
+              onClick={() => setStep(s => Math.min(totalSteps, s + 1))}
+              disabled={step === totalSteps}
+              className="flex items-center gap-1 px-3 py-1 text-sm bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-40"
+            >
+              Next <ChevronRight size={14} />
+            </button>
+          </div>
+          <button onClick={onClose} className="p-1.5 hover:bg-amber-100 rounded-lg text-amber-700 transition-colors">
+            <X size={20} />
+          </button>
+        </div>
+      </div>
+
+      {/* Form content */}
+      <div className="flex-1 overflow-y-auto bg-gradient-to-b from-white to-diplomatic-50">
+        <div className="container pt-8 pb-16">
+          <RegistrationSteps currentStep={step} />
+          <div className="max-w-3xl mx-auto mt-6">
+            {step === 1 && <PersonalInfoStep formData={formData} handleChange={handleChange} nextStep={noop} />}
+            {step === 2 && <PreferencesStep formData={formData} handleChange={handleChange} nextStep={noop} prevStep={noop} />}
+            {step === 3 && <CommitteePreferencesStep formData={formData} handleChange={handleChange} nextStep={noop} prevStep={noop} />}
+            {step === 4 && <EssayStep formData={formData} handleChange={handleChange} nextStep={noop} prevStep={noop} />}
+            {step === 5 && (
+              <div className="relative">
+                <div className="absolute inset-0 z-10 bg-white/60 backdrop-blur-[2px] rounded-2xl flex items-center justify-center">
+                  <div className="bg-amber-100 border border-amber-300 text-amber-800 px-6 py-4 rounded-xl text-center shadow-sm">
+                    <p className="font-semibold text-sm">Submit step — disabled in preview</p>
+                    <p className="text-xs mt-1 text-amber-600">Applications cannot be submitted from the admin panel</p>
+                  </div>
+                </div>
+                <AdditionalInfoStep
+                  formData={formData}
+                  handleChange={handleChange}
+                  calculateFee={calculateFee}
+                  handleSubmit={async () => {}}
+                  prevStep={noop}
+                  isSubmitting={false}
+                />
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const BLANK_Q: Omit<CustomQuestion, 'id'> = {
   label: '', type: 'text', required: false, options: [],
@@ -33,6 +145,8 @@ const FormSettingsPage = () => {
   // Custom-question being edited
   const [editingQ, setEditingQ] = useState<CustomQuestion | null>(null);
   const [newOptions, setNewOptions] = useState('');
+  // Form preview overlay
+  const [previewOpen, setPreviewOpen] = useState(false);
 
   // ── Fetch ──────────────────────────────────────────────────────────────────
   const loadAll = useCallback(async () => {
@@ -160,6 +274,8 @@ const FormSettingsPage = () => {
   }
 
   return (
+    <>
+      {previewOpen && <FormPreviewModal formType={tab} onClose={() => setPreviewOpen(false)} />}
     <AdminLayout title="Forms Management">
       <div className="space-y-6 max-w-4xl">
 
@@ -171,9 +287,17 @@ const FormSettingsPage = () => {
               {t === 'delegate' ? 'Delegate Registration' : 'Chair Application'}
             </button>
           ))}
-          <button onClick={loadAll} className="ml-auto p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg" title="Refresh">
-            <RefreshCw size={16} />
-          </button>
+          <div className="ml-auto flex items-center gap-2">
+            <button
+              onClick={() => setPreviewOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-amber-700 bg-amber-50 border border-amber-200 rounded-lg hover:bg-amber-100 transition-colors"
+            >
+              <Eye size={15} /> Preview Form
+            </button>
+            <button onClick={loadAll} className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg" title="Refresh">
+              <RefreshCw size={16} />
+            </button>
+          </div>
         </div>
 
         {!draft ? (
@@ -404,6 +528,7 @@ const FormSettingsPage = () => {
         )}
       </div>
     </AdminLayout>
+    </>
   );
 };
 
