@@ -12,7 +12,8 @@ import {
   LogOut,
   Menu,
   X,
-  Globe
+  Globe,
+  ClipboardList,
 } from 'lucide-react';
 
 interface AdminLayoutProps {
@@ -39,6 +40,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
     { path: isRealAdminSubdomain ? '/schedule' : `/schedule${suffix}`, label: 'Schedule', icon: Calendar },
     { path: isRealAdminSubdomain ? '/resources' : `/resources${suffix}`, label: 'Resources', icon: FileText },
     { path: isRealAdminSubdomain ? '/messages' : `/messages${suffix}`, label: 'Messages', icon: Mail },
+    { path: isRealAdminSubdomain ? '/forms' : `/forms${suffix}`, label: 'Forms', icon: ClipboardList },
   ];
 
   const handleLogout = async () => {

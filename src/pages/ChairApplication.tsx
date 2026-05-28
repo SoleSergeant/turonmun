@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link, useNavigate } from 'react-router-dom';
-import { Shield, ChevronRight, ChevronLeft, CheckCircle, Send } from 'lucide-react';
+import { Shield, ChevronRight, ChevronLeft, CheckCircle, Send, AlertCircle, Clock } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
+import { useFormSettings } from '@/hooks/useFormSettings';
 
 const COMMITTEES = ['UNGA', 'WTO', 'ECOSOC', 'HRC'];
 const ROLES = ['Chair', 'Co-Chair'];
@@ -50,6 +51,7 @@ export default function ChairApplication() {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { settings: formSettings, isEffectivelyClosed, closedReason, deadlineSoon } = useFormSettings('chair');
 
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState<ChairFormData>(EMPTY_FORM);
@@ -195,6 +197,29 @@ export default function ChairApplication() {
     );
   }
 
+  if (isEffectivelyClosed) {
+    return (
+      <div className="page-transition-container min-h-screen flex flex-col bg-gradient-to-b from-white to-diplomatic-50">
+        <Navbar />
+        <main className="flex-grow pt-20 pb-12 flex items-center justify-center px-4">
+          <div className="text-center max-w-lg">
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <AlertCircle className="w-8 h-8 text-red-500" />
+            </div>
+            <h2 className="text-2xl font-bold text-diplomatic-900 mb-3">Chair Applications Closed</h2>
+            <p className="text-neutral-600 mb-6">
+              {closedReason ?? 'Chair applications are not currently open.'}
+            </p>
+            <Link to="/" className="inline-block bg-diplomatic-700 text-white px-6 py-3 rounded-lg font-medium hover:bg-diplomatic-800 transition-colors">
+              Back to Home
+            </Link>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
   if (submitted) {
     return (
       <div className="page-transition-container min-h-screen flex flex-col bg-gradient-to-b from-white to-diplomatic-50">
@@ -225,6 +250,12 @@ export default function ChairApplication() {
   return (
     <div className="page-transition-container min-h-screen flex flex-col bg-gradient-to-b from-white to-diplomatic-50">
       <Navbar />
+      {deadlineSoon && formSettings?.deadline && (
+        <div className="bg-amber-50 border-b border-amber-200 px-4 py-2 flex items-center justify-center gap-2 text-amber-800 text-sm">
+          <Clock size={15} />
+          <span>Application deadline: <strong>{new Date(formSettings.deadline).toLocaleString()}</strong></span>
+        </div>
+      )}
       <main className="flex-grow pt-20 pb-12">
         <div className="container max-w-2xl mx-auto px-4">
           {/* Header */}

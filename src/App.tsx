@@ -53,6 +53,7 @@ import CountryMatrix from "./pages/admin/CountryMatrix";
 
 import ChairManagement from "./pages/admin/ChairManagement";
 import AdminAnalytics from "./pages/admin/Analytics";
+import FormSettings from "./pages/admin/FormSettings";
 
 import ImagePreloader from "./components/ImagePreloader";
 import Dashboard from "./pages/Dashboard";
@@ -133,6 +134,7 @@ const App = () => {
           <Route path="/country-matrix" element={<AdminRoute><CountryMatrix /></AdminRoute>} />
           <Route path="/chairs" element={<AdminRoute><ChairManagement /></AdminRoute>} />
           <Route path="/analytics" element={<AdminRoute><AdminAnalytics /></AdminRoute>} />
+          <Route path="/forms" element={<AdminRoute><FormSettings /></AdminRoute>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       );

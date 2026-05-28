@@ -7,11 +7,14 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from "@/hooks/use-toast";
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
+import { useFormSettings } from '@/hooks/useFormSettings';
+import { AlertCircle, Clock } from 'lucide-react';
 
 const Registration = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { settings: formSettings, isEffectivelyClosed, closedReason, deadlineSoon } = useFormSettings('delegate');
   const [step, setStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
@@ -177,11 +180,14 @@ const Registration = () => {
   };
 
   const calculateFee = () => {
-    const baseFee = Number(import.meta.env.VITE_APP_DELEGATE_FEE ?? 90000);
+    const baseFee = formSettings?.fee_amount ?? Number(import.meta.env.VITE_APP_DELEGATE_FEE ?? 90000);
+    const ieltsDiscount = formData.hasIelts ? (formSettings?.ielts_discount ?? 10000) : 0;
+    const satDiscount = formData.hasSat ? (formSettings?.sat_discount ?? 10000) : 0;
+    const discount = ieltsDiscount + satDiscount;
     return {
       originalFee: baseFee,
-      discount: 0,
-      finalFee: baseFee,
+      discount,
+      finalFee: Math.max(0, baseFee - discount),
     };
   };
 
@@ -399,9 +405,40 @@ Photo URL: ${photoUrl || 'N/A'}
     );
   }
 
+  // ── Form closed gate ──────────────────────────────────────────────────────
+  if (isEffectivelyClosed) {
+    return (
+      <div className="page-transition-container min-h-screen flex flex-col bg-gradient-to-b from-white to-diplomatic-50">
+        <Navbar />
+        <main className="flex-grow pt-20 pb-12 flex items-center justify-center">
+          <div className="text-center max-w-lg mx-auto px-6">
+            <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <AlertCircle className="w-8 h-8 text-red-500" />
+            </div>
+            <h2 className="text-2xl font-bold text-diplomatic-900 mb-3">Applications Closed</h2>
+            <p className="text-neutral-600 mb-6">
+              {closedReason ?? 'Delegate applications are not currently open.'}
+            </p>
+            <Link to="/" className="inline-block bg-diplomatic-700 text-white px-6 py-3 rounded-lg font-medium hover:bg-diplomatic-800 transition-colors">
+              Back to Home
+            </Link>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div className="page-transition-container min-h-screen flex flex-col bg-gradient-to-b from-white to-diplomatic-50">
       <Navbar />
+      {/* Deadline soon banner */}
+      {deadlineSoon && formSettings?.deadline && (
+        <div className="bg-amber-50 border-b border-amber-200 px-4 py-2 flex items-center justify-center gap-2 text-amber-800 text-sm">
+          <Clock size={15} />
+          <span>Application deadline: <strong>{new Date(formSettings.deadline).toLocaleString()}</strong></span>
+        </div>
+      )}
       <main className="flex-grow pt-20 pb-12">
         <RegistrationContent
           step={step}
