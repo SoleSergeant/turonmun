@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import ApplicationManagementModal from '@/components/admin/ApplicationManagementModal';
+import ApplicationFormModal, { type AppFormData } from '@/components/admin/ApplicationFormModal';
 import DeleteAllApplicationsModal from '@/components/admin/DeleteAllApplicationsModal';
 import { supabase, checkAuthState } from '@/integrations/supabase/client';
 import {
@@ -28,7 +29,8 @@ import {
   ChevronDown,
   FileText,
   AlertCircle,
-  MessageSquare
+  MessageSquare,
+  Plus,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { exportApplicationsToExcel } from '@/utils/excelExport';
@@ -83,6 +85,7 @@ const AdminApplications = () => {
   const [acceptedEmails, setAcceptedEmails] = useState<string>('');
   const [rejectedEmails, setRejectedEmails] = useState<string>('');
   const [isDeleteAllModalOpen, setIsDeleteAllModalOpen] = useState(false);
+  const [formModal, setFormModal] = useState<{ open: boolean; data: AppFormData | null }>({ open: false, data: null });
   const { toast } = useToast();
 
   useEffect(() => {
@@ -368,6 +371,40 @@ const AdminApplications = () => {
     }
   };
 
+  const handleFormSaved = (saved: any) => {
+    setApplications(prev => {
+      const exists = prev.some(a => a.id === saved.id);
+      const typed = { ...saved, status: (saved.status || 'pending') as 'pending' | 'approved' | 'rejected' };
+      return exists ? prev.map(a => a.id === saved.id ? typed : a) : [typed, ...prev];
+    });
+    // If the view modal is open for the same record, refresh it
+    if (modalApplication?.id === saved.id) setModalApplication(saved);
+  };
+
+  const openEditForm = (app: Application) => {
+    const data: AppFormData = {
+      id: app.id,
+      full_name: app.full_name ?? '',
+      email: app.email ?? '',
+      telegram_username: app.telegram_username ?? '',
+      phone: app.phone ?? '',
+      country: app.country ?? '',
+      institution: app.institution ?? '',
+      date_of_birth: app.date_of_birth ?? '',
+      experience: app.experience ?? 'None',
+      committee_preference1: app.committee_preference1 ?? '',
+      committee_preference2: app.committee_preference2 ?? '',
+      committee_preference3: app.committee_preference3 ?? '',
+      motivation: app.motivation ?? '',
+      has_ielts: app.has_ielts ?? false,
+      has_sat: app.has_sat ?? false,
+      status: app.status ?? 'pending',
+      application_type: ((app as any).application_type ?? ((app.notes?.includes('APPLICATION TYPE: chair') ? 'chair' : 'delegate'))) as 'delegate' | 'chair',
+      notes: app.notes ?? '',
+    };
+    setFormModal({ open: true, data });
+  };
+
   const deleteAllApplications = async () => {
     try {
       const { error } = await supabase
@@ -481,6 +518,12 @@ const AdminApplications = () => {
                     <h3 className="text-lg font-semibold mb-2 md:mb-0">Applications Management</h3>
 
                     <div className="flex items-center space-x-2 flex-wrap gap-y-2">
+                      <button
+                        onClick={() => setFormModal({ open: true, data: null })}
+                        className="flex items-center gap-1.5 px-3 py-2 bg-blue-600 text-white rounded-md text-sm font-medium hover:bg-blue-700 transition-colors"
+                      >
+                        <Plus size={14} /> New Application
+                      </button>
                       {/* Type filter */}
                       <div className="relative">
                         <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -660,14 +703,24 @@ const AdminApplications = () => {
             </div>
           </div>
 
-          {/* Application Management Modal */}
+          {/* Application Form Modal (create / edit) */}
+          {formModal.open && (
+            <ApplicationFormModal
+              application={formModal.data}
+              onClose={() => setFormModal({ open: false, data: null })}
+              onSaved={handleFormSaved}
+            />
+          )}
+
+          {/* Application Management Modal (view) */}
           {modalApplication && (
             <ApplicationManagementModal
               application={modalApplication}
               onClose={() => setModalApplication(null)}
-                  onUpdateStatus={updateApplicationStatus}
-                  onDelete={(id) => setDeleteConfirmId(id)}
-                />
+              onUpdateStatus={updateApplicationStatus}
+              onDelete={(id) => setDeleteConfirmId(id)}
+              onEdit={(app) => { openEditForm(app); setModalApplication(null); }}
+            />
               )}
 
               {/* Delete Confirmation Modal */}
