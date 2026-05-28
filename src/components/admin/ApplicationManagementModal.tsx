@@ -22,7 +22,6 @@ import {
   Hash,
   Cake,
   BadgeCheck,
-  Pencil,
 } from 'lucide-react';
 
 interface Application {
@@ -72,7 +71,6 @@ interface ApplicationManagementModalProps {
   onClose: () => void;
   onUpdateStatus: (id: string, status: 'approved' | 'rejected') => void;
   onDelete: (id: string) => void;
-  onEdit?: (application: Application) => void;
 }
 
 const ApplicationManagementModal: React.FC<ApplicationManagementModalProps> = ({
@@ -80,7 +78,6 @@ const ApplicationManagementModal: React.FC<ApplicationManagementModalProps> = ({
   onClose,
   onUpdateStatus,
   onDelete,
-  onEdit,
 }) => {
   // ── Helpers ──────────────────────────────────────────────
   const calculateAge = (dob: string) => {
@@ -496,15 +493,6 @@ const ApplicationManagementModal: React.FC<ApplicationManagementModalProps> = ({
           </div>
           
           <div className="flex items-center gap-2">
-            {onEdit && (
-              <button
-                onClick={() => onEdit(application)}
-                className="px-5 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold flex items-center gap-2 hover:bg-blue-700 shadow-sm hover:shadow-md transition-all"
-              >
-                <Pencil size={15} /> Edit
-              </button>
-            )}
-
             <button
               onClick={() => onUpdateStatus(application.id, 'approved')}
               disabled={application.status === 'approved'}
