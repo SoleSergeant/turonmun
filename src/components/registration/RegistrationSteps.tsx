@@ -3,15 +3,18 @@ import { Check } from 'lucide-react';
 
 interface RegistrationStepsProps {
   currentStep: number;
+  labels?: string[];   // override the default step labels (5 items); 6th is always "Confirmation"
 }
 
-const RegistrationSteps: React.FC<RegistrationStepsProps> = ({ currentStep }) => {
+const RegistrationSteps: React.FC<RegistrationStepsProps> = ({ currentStep, labels }) => {
+  const defaultLabels = ["Personal Info", "Experience", "Committees", "Essays", "Details"];
+  const resolved = labels && labels.length === 5 ? labels : defaultLabels;
   const steps = [
-    { number: 1, label: "Personal Info" },
-    { number: 2, label: "Experience" },
-    { number: 3, label: "Committees" },
-    { number: 4, label: "Essays" },
-    { number: 5, label: "Details" },
+    { number: 1, label: resolved[0] },
+    { number: 2, label: resolved[1] },
+    { number: 3, label: resolved[2] },
+    { number: 4, label: resolved[3] },
+    { number: 5, label: resolved[4] },
     { number: 6, label: "Confirmation" },
   ];
 

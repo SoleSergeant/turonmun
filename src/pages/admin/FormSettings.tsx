@@ -261,9 +261,10 @@ const CustomQuestionsEditorStep: React.FC<{
 const FormPreviewModal: React.FC<{
   formType: 'delegate' | 'chair';
   customQuestions: CustomQuestion[];
+  stepLabels?: string[];
   onUpdateQuestions: (qs: CustomQuestion[]) => void;
   onClose: () => void;
-}> = ({ formType, customQuestions, onUpdateQuestions, onClose }) => {
+}> = ({ formType, customQuestions, stepLabels, onUpdateQuestions, onClose }) => {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({ ...BLANK_FORM_DATA });
 
@@ -361,7 +362,7 @@ const FormPreviewModal: React.FC<{
       {/* Form content */}
       <div className="flex-1 overflow-y-auto bg-gradient-to-b from-white to-diplomatic-50">
         <div className="container pt-8 pb-16">
-          <RegistrationSteps currentStep={Math.min(step, 5)} />
+          <RegistrationSteps currentStep={Math.min(step, 5)} labels={stepLabels} />
           <div className="max-w-3xl mx-auto mt-6">
             {step === 1 && <PersonalInfoStep formData={formData} handleChange={handleChange} nextStep={noop} />}
             {step === 2 && <PreferencesStep formData={formData} handleChange={handleChange} nextStep={noop} prevStep={noop} />}
@@ -478,6 +479,7 @@ const FormSettingsPage = () => {
           ielts_discount: Number(draft.ielts_discount),
           sat_discount: Number(draft.sat_discount),
           custom_questions: draft.custom_questions,
+          step_labels: draft.step_labels,
         })
         .eq('form_type', tab);
       if (error) throw error;
@@ -557,6 +559,7 @@ const FormSettingsPage = () => {
         <FormPreviewModal
           formType={tab}
           customQuestions={draft?.custom_questions ?? []}
+          stepLabels={draft?.step_labels}
           onUpdateQuestions={qs => setDraft(prev => prev ? { ...prev, custom_questions: qs } : prev)}
           onClose={() => setPreviewOpen(false)}
         />
@@ -701,6 +704,34 @@ const FormSettingsPage = () => {
                 </div>
               </div>
             )}
+
+            {/* ── Step Labels ── */}
+            <div className={sectionCls}>
+              <h3 className="font-semibold text-gray-900 mb-1 flex items-center gap-2">
+                <ClipboardList size={16} className="text-violet-600" /> Step Labels
+              </h3>
+              <p className="text-xs text-gray-400 mb-4">
+                Rename the 5 steps shown in the form progress bar. Changes are reflected immediately in the preview.
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-5 gap-3">
+                {(draft.step_labels ?? ['Personal Info','Experience','Committees','Essays','Details']).map((label, idx) => (
+                  <div key={idx}>
+                    <label className={labelCls}>Step {idx + 1}</label>
+                    <input
+                      type="text"
+                      className={inputCls}
+                      value={label}
+                      placeholder={['Personal Info','Experience','Committees','Essays','Details'][idx]}
+                      onChange={e => {
+                        const updated = [...(draft.step_labels ?? ['Personal Info','Experience','Committees','Essays','Details'])];
+                        updated[idx] = e.target.value;
+                        set('step_labels', updated);
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
 
             {/* ── Custom Questions ── */}
             <div className={sectionCls}>

@@ -451,6 +451,7 @@ Photo URL: ${photoUrl || 'N/A'}
           handleSubmit={handleSubmit}
           photoFile={photoFile}
           updatePhotoFile={setPhotoFile}
+          stepLabels={formSettings?.step_labels}
         />
       </main>
       <Footer />

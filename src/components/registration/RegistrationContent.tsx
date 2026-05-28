@@ -19,6 +19,7 @@ interface RegistrationContentProps {
   handleSubmit: (e: React.FormEvent) => Promise<void>;
   photoFile?: File | null;
   updatePhotoFile?: (file: File | null) => void;
+  stepLabels?: string[];
 }
 
 const RegistrationContent: React.FC<RegistrationContentProps> = ({
@@ -32,6 +33,7 @@ const RegistrationContent: React.FC<RegistrationContentProps> = ({
   handleSubmit,
   photoFile,
   updatePhotoFile,
+  stepLabels,
 }) => {
   const fee = calculateFee();
 
@@ -65,7 +67,7 @@ const RegistrationContent: React.FC<RegistrationContentProps> = ({
         animate={{ opacity: 1 }}
         transition={{ delay: 0.6 }}
       >
-        <RegistrationSteps currentStep={step} />
+        <RegistrationSteps currentStep={step} labels={stepLabels} />
       </motion.div>
       
       {/* Registration form */}

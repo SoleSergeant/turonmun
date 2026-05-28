@@ -11,6 +11,8 @@ export interface CustomQuestion {
   step?: number;        // which step to inject the question into (optional)
 }
 
+export const DEFAULT_STEP_LABELS = ['Personal Info', 'Experience', 'Committees', 'Essays', 'Details'];
+
 export interface FormSettings {
   id: string;
   form_type: 'delegate' | 'chair';
@@ -22,6 +24,7 @@ export interface FormSettings {
   ielts_discount: number;
   sat_discount: number;
   custom_questions: CustomQuestion[];
+  step_labels: string[];           // editable labels for the 5 form steps
   updated_at: string;
   updated_by: string | null;
 }
@@ -36,6 +39,7 @@ const DEFAULTS: Omit<FormSettings, 'id' | 'updated_at' | 'updated_by'> = {
   ielts_discount: 10000,
   sat_discount: 10000,
   custom_questions: [],
+  step_labels: [...DEFAULT_STEP_LABELS],
 };
 
 // ── Hook ───────────────────────────────────────────────────────────────────────
