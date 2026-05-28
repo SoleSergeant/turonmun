@@ -32,12 +32,99 @@ const BLANK_FORM_DATA = {
   ieltsScore: '', satScore: '', agreeToTerms: false,
 };
 
+// ── Custom Questions Step (preview) ────────────────────────────────────────────
+const CustomQuestionsPreviewStep: React.FC<{
+  questions: CustomQuestion[];
+  answers: Record<string, string | boolean>;
+  onChange: (id: string, value: string | boolean) => void;
+}> = ({ questions, answers, onChange }) => {
+  const inputCls2 = 'w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white';
+
+  if (questions.length === 0) {
+    return (
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center text-gray-400 text-sm">
+        No custom questions have been added yet.<br />
+        <span className="text-xs mt-1 block">Add custom questions in the Questions section and save, then preview again.</span>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 space-y-6">
+      <h2 className="text-xl font-bold text-diplomatic-900 mb-2">Additional Questions</h2>
+      <p className="text-sm text-gray-500 -mt-4 mb-4">These are custom questions configured by the organiser.</p>
+      {questions.map(q => (
+        <div key={q.id}>
+          <label className="block text-sm font-medium text-gray-800 mb-1.5">
+            {q.label}
+            {q.required && <span className="text-red-500 ml-1">*</span>}
+          </label>
+
+          {q.type === 'text' && (
+            <input
+              type="text"
+              className={inputCls2}
+              value={(answers[q.id] as string) ?? ''}
+              onChange={e => onChange(q.id, e.target.value)}
+            />
+          )}
+
+          {q.type === 'textarea' && (
+            <textarea
+              rows={4}
+              className={`${inputCls2} resize-none`}
+              value={(answers[q.id] as string) ?? ''}
+              onChange={e => onChange(q.id, e.target.value)}
+            />
+          )}
+
+          {q.type === 'select' && (
+            <select
+              className={inputCls2}
+              value={(answers[q.id] as string) ?? ''}
+              onChange={e => onChange(q.id, e.target.value)}
+            >
+              <option value="">— Select an option —</option>
+              {(q.options ?? []).map(opt => (
+                <option key={opt} value={opt}>{opt}</option>
+              ))}
+            </select>
+          )}
+
+          {q.type === 'checkbox' && (
+            <label className="flex items-center gap-3 cursor-pointer mt-1">
+              <input
+                type="checkbox"
+                className="w-4 h-4 rounded accent-blue-600"
+                checked={(answers[q.id] as boolean) ?? false}
+                onChange={e => onChange(q.id, e.target.checked)}
+              />
+              <span className="text-sm text-gray-700">{q.label}</span>
+            </label>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+};
+
 // ── Form Preview Modal ──────────────────────────────────────────────────────────
-const FormPreviewModal: React.FC<{ formType: 'delegate' | 'chair'; onClose: () => void }> = ({ formType, onClose }) => {
+const FormPreviewModal: React.FC<{
+  formType: 'delegate' | 'chair';
+  customQuestions: CustomQuestion[];
+  onClose: () => void;
+}> = ({ formType, customQuestions, onClose }) => {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({ ...BLANK_FORM_DATA });
-  const totalSteps = 5;
+  const [customAnswers, setCustomAnswers] = useState<Record<string, string | boolean>>({});
+
+  const hasCustomQ = customQuestions.length > 0;
+  // Steps: 1-4 standard, 5 = custom questions (if any), last = submit (disabled)
+  const SUBMIT_STEP = hasCustomQ ? 6 : 5;
+  const totalSteps = SUBMIT_STEP;
+
   const noop = () => {};
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     if (type === 'checkbox') {
@@ -56,7 +143,18 @@ const FormPreviewModal: React.FC<{ formType: 'delegate' | 'chair'; onClose: () =
       setFormData(prev => ({ ...prev, [name]: value }));
     }
   };
+
+  const handleCustomAnswer = (id: string, value: string | boolean) =>
+    setCustomAnswers(prev => ({ ...prev, [id]: value }));
+
   const calculateFee = () => ({ originalFee: 90000, discount: 0, finalFee: 90000 });
+
+  const stepLabel = (s: number) => {
+    if (s === 5 && hasCustomQ) return 'Custom Questions';
+    if (s === SUBMIT_STEP) return 'Confirm & Submit';
+    const labels = ['', 'Personal Info', 'Preferences', 'Committees', 'Essay', 'Confirm & Submit'];
+    return labels[s] ?? `Step ${s}`;
+  };
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-white">
@@ -64,9 +162,25 @@ const FormPreviewModal: React.FC<{ formType: 'delegate' | 'chair'; onClose: () =
       <div className="flex items-center justify-between px-6 py-3 bg-amber-50 border-b border-amber-200 flex-shrink-0">
         <div className="flex items-center gap-2 text-amber-800 text-sm font-semibold">
           <Eye size={16} />
-          <span>Preview Mode — {formType === 'delegate' ? 'Delegate Registration' : 'Chair Application'} (read-only, changes are not saved)</span>
+          <span>
+            Preview — {formType === 'delegate' ? 'Delegate Registration' : 'Chair Application'}
+            {hasCustomQ && <span className="ml-2 text-xs font-normal bg-amber-200 text-amber-900 px-2 py-0.5 rounded-full">{customQuestions.length} custom question{customQuestions.length !== 1 ? 's' : ''} included</span>}
+          </span>
         </div>
         <div className="flex items-center gap-3">
+          {/* Step pills */}
+          <div className="hidden sm:flex items-center gap-1">
+            {Array.from({ length: totalSteps }, (_, i) => i + 1).map(s => (
+              <button
+                key={s}
+                onClick={() => setStep(s)}
+                title={stepLabel(s)}
+                className={`w-7 h-7 rounded-full text-xs font-bold transition-colors ${s === step ? 'bg-amber-600 text-white' : 'bg-white border border-amber-300 text-amber-700 hover:bg-amber-100'}`}
+              >
+                {s}
+              </button>
+            ))}
+          </div>
           <div className="flex items-center gap-2">
             <button
               onClick={() => setStep(s => Math.max(1, s - 1))}
@@ -75,7 +189,7 @@ const FormPreviewModal: React.FC<{ formType: 'delegate' | 'chair'; onClose: () =
             >
               <ChevronLeft size={14} /> Prev
             </button>
-            <span className="text-xs text-gray-500 font-medium">Step {step} / {totalSteps}</span>
+            <span className="text-xs text-gray-500 font-medium sm:hidden">Step {step}/{totalSteps}</span>
             <button
               onClick={() => setStep(s => Math.min(totalSteps, s + 1))}
               disabled={step === totalSteps}
@@ -93,13 +207,24 @@ const FormPreviewModal: React.FC<{ formType: 'delegate' | 'chair'; onClose: () =
       {/* Form content */}
       <div className="flex-1 overflow-y-auto bg-gradient-to-b from-white to-diplomatic-50">
         <div className="container pt-8 pb-16">
-          <RegistrationSteps currentStep={step} />
+          <RegistrationSteps currentStep={Math.min(step, 5)} />
           <div className="max-w-3xl mx-auto mt-6">
             {step === 1 && <PersonalInfoStep formData={formData} handleChange={handleChange} nextStep={noop} />}
             {step === 2 && <PreferencesStep formData={formData} handleChange={handleChange} nextStep={noop} prevStep={noop} />}
             {step === 3 && <CommitteePreferencesStep formData={formData} handleChange={handleChange} nextStep={noop} prevStep={noop} />}
             {step === 4 && <EssayStep formData={formData} handleChange={handleChange} nextStep={noop} prevStep={noop} />}
-            {step === 5 && (
+
+            {/* Custom questions step (only if custom questions exist) */}
+            {hasCustomQ && step === 5 && (
+              <CustomQuestionsPreviewStep
+                questions={customQuestions}
+                answers={customAnswers}
+                onChange={handleCustomAnswer}
+              />
+            )}
+
+            {/* Submit step — always last, always disabled */}
+            {step === SUBMIT_STEP && (
               <div className="relative">
                 <div className="absolute inset-0 z-10 bg-white/60 backdrop-blur-[2px] rounded-2xl flex items-center justify-center">
                   <div className="bg-amber-100 border border-amber-300 text-amber-800 px-6 py-4 rounded-xl text-center shadow-sm">
@@ -275,7 +400,7 @@ const FormSettingsPage = () => {
 
   return (
     <>
-      {previewOpen && <FormPreviewModal formType={tab} onClose={() => setPreviewOpen(false)} />}
+      {previewOpen && <FormPreviewModal formType={tab} customQuestions={draft?.custom_questions ?? []} onClose={() => setPreviewOpen(false)} />}
     <AdminLayout title="Forms Management">
       <div className="space-y-6 max-w-4xl">
 
