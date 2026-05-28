@@ -560,7 +560,7 @@ const FormSettingsPage = () => {
           onUpdateQuestions={qs => setDraft(prev => prev ? { ...prev, custom_questions: qs } : prev)}
           onClose={() => setPreviewOpen(false)}
         />
-      )}}
+      )}
     <AdminLayout title="Forms Management">
       <div className="space-y-6 max-w-4xl">
 
