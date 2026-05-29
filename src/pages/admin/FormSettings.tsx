@@ -1,13 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import { supabase } from '@/integrations/supabase/client';
-import type { FormSettings, CustomQuestion } from '@/hooks/useFormSettings';
+import type { FormSettings, CustomQuestion, FormQuestion } from '@/hooks/useFormSettings';
 import { useToast } from '@/hooks/use-toast';
 import {
   ToggleLeft, ToggleRight, Calendar, Users, DollarSign,
   Plus, Trash2, GripVertical, Loader2, Save, ClipboardList,
-  AlertCircle, CheckCircle2, Clock, RefreshCw, ChevronDown,
-  Eye, X, ChevronLeft, ChevronRight,
+  AlertCircle, CheckCircle2, Clock, RefreshCw, ChevronDown, ChevronUp,
+  Eye, X, ChevronLeft, ChevronRight, EyeOff, Lock,
 } from 'lucide-react';
 import PersonalInfoStep from '@/components/registration/PersonalInfoStep';
 import PreferencesStep from '@/components/registration/PreferencesStep';
@@ -257,6 +257,295 @@ const CustomQuestionsEditorStep: React.FC<{
   );
 };
 
+// ── Form Builder Section ───────────────────────────────────────────────────────
+const DEFAULT_STEP_COUNT = 4; // steps 1-4 are fully configurable; step 5 = fee/confirm
+
+const BLANK_FQ = (): FormQuestion => ({
+  id: Math.random().toString(36).slice(2, 10),
+  step: 1, order: 999,
+  name: `custom_${Math.random().toString(36).slice(2, 6)}`,
+  label: '', type: 'text',
+  placeholder: '', helpText: '',
+  required: false, visible: true, system: false,
+});
+
+const FQ_TYPE_LABELS: Record<string, string> = {
+  text: 'Short text', email: 'Email', tel: 'Phone', date: 'Date',
+  textarea: 'Long text', select: 'Dropdown', file: 'File upload',
+};
+
+const FormBuilderSection: React.FC<{
+  questions: FormQuestion[];
+  stepLabels: string[];
+  onUpdate: (qs: FormQuestion[]) => void;
+}> = ({ questions, stepLabels, onUpdate }) => {
+  const inputE = 'w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white';
+  const [openStep, setOpenStep] = useState<number | null>(null);
+  const [editId, setEditId] = useState<string | null>(null);
+  const [editDraft, setEditDraft] = useState<FormQuestion | null>(null);
+  const [optText, setOptText] = useState('');
+
+  const stepQuestions = (s: number) =>
+    questions.filter(q => q.step === s).sort((a, b) => a.order - b.order);
+
+  const startEdit = (q: FormQuestion) => {
+    setEditDraft({ ...q });
+    setOptText((q.options ?? []).join('\n'));
+    setEditId(q.id);
+  };
+
+  const startNew = (step: number) => {
+    const q = { ...BLANK_FQ(), step };
+    setEditDraft(q);
+    setOptText('');
+    setEditId(q.id);
+  };
+
+  const saveEdit = () => {
+    if (!editDraft || !editDraft.label.trim()) return;
+    const saved: FormQuestion = {
+      ...editDraft,
+      options: editDraft.type === 'select' ? optText.split('\n').map(s => s.trim()).filter(Boolean) : [],
+    };
+    const exists = questions.some(q => q.id === saved.id);
+    const next = exists
+      ? questions.map(q => q.id === saved.id ? saved : q)
+      : [...questions, saved];
+    onUpdate(next);
+    setEditId(null);
+    setEditDraft(null);
+  };
+
+  const cancelEdit = () => { setEditId(null); setEditDraft(null); };
+
+  const toggleVisible = (id: string) =>
+    onUpdate(questions.map(q => q.id === id ? { ...q, visible: !q.visible } : q));
+
+  const deleteQ = (id: string) => {
+    if (!window.confirm('Delete this question?')) return;
+    onUpdate(questions.filter(q => q.id !== id));
+  };
+
+  const moveQ = (id: string, dir: -1 | 1) => {
+    const q = questions.find(x => x.id === id);
+    if (!q) return;
+    const stepQs = stepQuestions(q.step);
+    const idx = stepQs.findIndex(x => x.id === id);
+    const targetIdx = idx + dir;
+    if (targetIdx < 0 || targetIdx >= stepQs.length) return;
+    const other = stepQs[targetIdx];
+    onUpdate(questions.map(x => {
+      if (x.id === id) return { ...x, order: other.order };
+      if (x.id === other.id) return { ...x, order: q.order };
+      return x;
+    }));
+  };
+
+  return (
+    <div className={`${inputCls.replace('w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent', '')} bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden`}>
+      <div className="px-5 py-4 border-b border-gray-100 flex items-center gap-2">
+        <ClipboardList size={16} className="text-violet-600" />
+        <h3 className="font-semibold text-gray-900">Form Builder</h3>
+        <span className="ml-auto text-xs text-gray-400">{questions.filter(q => q.visible).length} visible fields across {DEFAULT_STEP_COUNT} steps</span>
+      </div>
+
+      {Array.from({ length: DEFAULT_STEP_COUNT }, (_, i) => i + 1).map(s => {
+        const sqs = stepQuestions(s);
+        const isOpen = openStep === s;
+        return (
+          <div key={s} className="border-b border-gray-100 last:border-0">
+            {/* Step header */}
+            <button
+              onClick={() => setOpenStep(isOpen ? null : s)}
+              className="w-full flex items-center gap-3 px-5 py-3.5 hover:bg-gray-50 transition-colors text-left"
+            >
+              <span className="w-6 h-6 rounded-full bg-violet-100 text-violet-700 text-xs font-bold flex items-center justify-center flex-shrink-0">{s}</span>
+              <span className="font-medium text-gray-800 text-sm">{stepLabels[s - 1] ?? `Step ${s}`}</span>
+              <span className="ml-auto text-xs text-gray-400 mr-2">{sqs.length} question{sqs.length !== 1 ? 's' : ''}</span>
+              {isOpen ? <ChevronUp size={15} className="text-gray-400" /> : <ChevronDown size={15} className="text-gray-400" />}
+            </button>
+
+            {/* Step content */}
+            {isOpen && (
+              <div className="border-t border-gray-100">
+                {/* Question rows */}
+                {sqs.map((q, idx) => (
+                  <div key={q.id}>
+                    <div className={`flex items-center gap-2 px-5 py-3 ${!q.visible ? 'opacity-50' : 'hover:bg-gray-50'} transition-colors`}>
+                      {/* Reorder */}
+                      <div className="flex flex-col gap-0.5 flex-shrink-0">
+                        <button onClick={() => moveQ(q.id, -1)} disabled={idx === 0}
+                          className="text-gray-300 hover:text-gray-500 disabled:opacity-20 text-[10px] leading-none">▲</button>
+                        <button onClick={() => moveQ(q.id, 1)} disabled={idx === sqs.length - 1}
+                          className="text-gray-300 hover:text-gray-500 disabled:opacity-20 text-[10px] leading-none">▼</button>
+                      </div>
+                      {/* Info */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          {q.system && <Lock size={11} className="text-gray-300 flex-shrink-0" title="Built-in field" />}
+                          <p className="text-sm font-medium text-gray-800 truncate">{q.label || <em className="text-gray-400">Untitled</em>}</p>
+                        </div>
+                        <p className="text-xs text-gray-400">
+                          {FQ_TYPE_LABELS[q.type] ?? q.type}
+                          {q.widget === 'committee_select' ? ' · Committee dropdown' : ''}
+                          {q.widget === 'photo_upload' ? ' · Photo upload' : ''}
+                          {q.required ? ' · Required' : ' · Optional'}
+                        </p>
+                      </div>
+                      {/* Actions */}
+                      <div className="flex items-center gap-1 flex-shrink-0">
+                        <button onClick={() => toggleVisible(q.id)}
+                          className={`p-1.5 rounded-lg transition-colors ${q.visible ? 'text-gray-400 hover:text-gray-700 hover:bg-gray-100' : 'text-orange-400 hover:bg-orange-50'}`}
+                          title={q.visible ? 'Hide field' : 'Show field'}>
+                          {q.visible ? <Eye size={14} /> : <EyeOff size={14} />}
+                        </button>
+                        <button onClick={() => editId === q.id ? cancelEdit() : startEdit(q)}
+                          className={`px-2.5 py-1 text-xs rounded-lg border transition-colors font-medium ${editId === q.id ? 'bg-violet-100 border-violet-300 text-violet-700' : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'}`}>
+                          {editId === q.id ? 'Cancel' : 'Edit'}
+                        </button>
+                        {!q.system && (
+                          <button onClick={() => deleteQ(q.id)}
+                            className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                            <Trash2 size={13} />
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Inline editor */}
+                    {editId === q.id && editDraft && (
+                      <div className="px-5 pb-4 pt-2 bg-violet-50 border-t border-violet-100">
+                        <div className="space-y-3">
+                          <div>
+                            <label className="block text-xs font-semibold text-gray-600 mb-1">Label *</label>
+                            <input className={inputE} value={editDraft.label}
+                              onChange={e => setEditDraft(p => p ? { ...p, label: e.target.value } : p)} />
+                          </div>
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <label className="block text-xs font-semibold text-gray-600 mb-1">Placeholder</label>
+                              <input className={inputE} value={editDraft.placeholder ?? ''}
+                                onChange={e => setEditDraft(p => p ? { ...p, placeholder: e.target.value } : p)} />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-semibold text-gray-600 mb-1">Help text</label>
+                              <input className={inputE} value={editDraft.helpText ?? ''}
+                                onChange={e => setEditDraft(p => p ? { ...p, helpText: e.target.value } : p)} />
+                            </div>
+                          </div>
+                          {!q.system && (
+                            <div className="grid grid-cols-2 gap-3">
+                              <div>
+                                <label className="block text-xs font-semibold text-gray-600 mb-1">Field type</label>
+                                <select className={inputE} value={editDraft.type}
+                                  onChange={e => setEditDraft(p => p ? { ...p, type: e.target.value as FormQuestion['type'] } : p)}>
+                                  {Object.entries(FQ_TYPE_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+                                </select>
+                              </div>
+                              <div className="flex items-end pb-1">
+                                <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                                  <input type="checkbox" className="rounded" checked={editDraft.required}
+                                    onChange={e => setEditDraft(p => p ? { ...p, required: e.target.checked } : p)} />
+                                  Required
+                                </label>
+                              </div>
+                            </div>
+                          )}
+                          {editDraft.type === 'select' && !editDraft.widget && (
+                            <div>
+                              <label className="block text-xs font-semibold text-gray-600 mb-1">Dropdown options (one per line)</label>
+                              <textarea rows={4} className={`${inputE} resize-none font-mono text-xs`}
+                                placeholder={"Option A\nOption B\nOption C"}
+                                value={optText} onChange={e => setOptText(e.target.value)} />
+                            </div>
+                          )}
+                          <div className="flex gap-2 pt-1">
+                            <button onClick={saveEdit} disabled={!editDraft.label.trim()}
+                              className="px-3 py-1.5 bg-violet-600 text-white text-sm rounded-lg hover:bg-violet-700 disabled:opacity-50 font-medium">Save</button>
+                            <button onClick={cancelEdit}
+                              className="px-3 py-1.5 border border-gray-300 text-sm rounded-lg hover:bg-gray-50">Cancel</button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ))}
+
+                {/* New question editor for this step */}
+                {editId !== null && !questions.some(q => q.id === editId) && editDraft?.step === s && editDraft && (
+                  <div className="px-5 py-4 bg-violet-50 border-t border-violet-100">
+                    <p className="text-xs font-bold text-violet-700 uppercase tracking-wide mb-3">New Question — Step {s}</p>
+                    <div className="space-y-3">
+                      <div>
+                        <label className="block text-xs font-semibold text-gray-600 mb-1">Label *</label>
+                        <input className={inputE} placeholder="e.g. LinkedIn Profile"
+                          value={editDraft.label}
+                          onChange={e => setEditDraft(p => p ? { ...p, label: e.target.value } : p)} />
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-xs font-semibold text-gray-600 mb-1">Placeholder</label>
+                          <input className={inputE} value={editDraft.placeholder ?? ''}
+                            onChange={e => setEditDraft(p => p ? { ...p, placeholder: e.target.value } : p)} />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-gray-600 mb-1">Help text</label>
+                          <input className={inputE} value={editDraft.helpText ?? ''}
+                            onChange={e => setEditDraft(p => p ? { ...p, helpText: e.target.value } : p)} />
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-xs font-semibold text-gray-600 mb-1">Field type</label>
+                          <select className={inputE} value={editDraft.type}
+                            onChange={e => setEditDraft(p => p ? { ...p, type: e.target.value as FormQuestion['type'] } : p)}>
+                            {Object.entries(FQ_TYPE_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
+                          </select>
+                        </div>
+                        <div className="flex items-end pb-1">
+                          <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+                            <input type="checkbox" className="rounded" checked={editDraft.required}
+                              onChange={e => setEditDraft(p => p ? { ...p, required: e.target.checked } : p)} />
+                            Required
+                          </label>
+                        </div>
+                      </div>
+                      {editDraft.type === 'select' && (
+                        <div>
+                          <label className="block text-xs font-semibold text-gray-600 mb-1">Options (one per line)</label>
+                          <textarea rows={4} className={`${inputE} resize-none font-mono text-xs`}
+                            placeholder={"Option A\nOption B\nOption C"}
+                            value={optText} onChange={e => setOptText(e.target.value)} />
+                        </div>
+                      )}
+                      <div className="flex gap-2 pt-1">
+                        <button onClick={saveEdit} disabled={!editDraft.label.trim()}
+                          className="px-3 py-1.5 bg-violet-600 text-white text-sm rounded-lg hover:bg-violet-700 disabled:opacity-50 font-medium">Add Question</button>
+                        <button onClick={cancelEdit}
+                          className="px-3 py-1.5 border border-gray-300 text-sm rounded-lg hover:bg-gray-50">Cancel</button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* Add question button */}
+                {!(editId !== null && editDraft?.step === s && !questions.some(q => q.id === editId)) && (
+                  <div className="px-5 py-3 bg-gray-50 border-t border-gray-100">
+                    <button onClick={() => startNew(s)}
+                      className="flex items-center gap-1.5 text-xs font-semibold text-violet-600 hover:text-violet-800 transition-colors">
+                      <Plus size={13} /> Add question to Step {s}
+                    </button>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+};
+
 // ── Form Preview Modal ──────────────────────────────────────────────────────────
 const FormPreviewModal: React.FC<{
   formType: 'delegate' | 'chair';
@@ -480,6 +769,7 @@ const FormSettingsPage = () => {
           sat_discount: Number(draft.sat_discount),
           custom_questions: draft.custom_questions,
           step_labels: draft.step_labels,
+          form_questions: draft.form_questions ?? [],
         })
         .eq('form_type', tab);
       if (error) throw error;
@@ -831,6 +1121,13 @@ const FormSettingsPage = () => {
                 </div>
               )}
             </div>
+
+            {/* ── Form Builder ── */}
+            <FormBuilderSection
+              questions={draft.form_questions ?? []}
+              onUpdate={qs => set('form_questions', qs)}
+              stepLabels={draft.step_labels ?? ['Personal Info','Experience','Committees','Essays','Details']}
+            />
 
             {/* ── Footer save ── */}
             <div className="flex justify-end pb-8">

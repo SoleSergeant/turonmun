@@ -452,6 +452,7 @@ Photo URL: ${photoUrl || 'N/A'}
           photoFile={photoFile}
           updatePhotoFile={setPhotoFile}
           stepLabels={formSettings?.step_labels}
+          formQuestions={formSettings?.form_questions}
         />
       </main>
       <Footer />

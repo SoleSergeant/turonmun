@@ -11,6 +11,23 @@ export interface CustomQuestion {
   step?: number;        // which step to inject the question into (optional)
 }
 
+export interface FormQuestion {
+  id: string;
+  step: number;          // 1-5 which step this belongs to
+  order: number;         // display order within step
+  name: string;          // formData field key
+  label: string;
+  type: 'text' | 'email' | 'tel' | 'date' | 'textarea' | 'select' | 'file';
+  placeholder?: string | null;
+  helpText?: string | null;
+  required: boolean;
+  visible: boolean;
+  options?: string[];    // for select type
+  system?: boolean;      // built-in questions (can hide/edit but not delete)
+  readonly?: boolean;    // e.g. email field
+  widget?: string;       // 'photo_upload' | 'committee_select'
+}
+
 export const DEFAULT_STEP_LABELS = ['Personal Info', 'Experience', 'Committees', 'Essays', 'Details'];
 
 export interface FormSettings {
@@ -25,6 +42,7 @@ export interface FormSettings {
   sat_discount: number;
   custom_questions: CustomQuestion[];
   step_labels: string[];           // editable labels for the 5 form steps
+  form_questions: FormQuestion[];  // full configurable question list
   updated_at: string;
   updated_by: string | null;
 }
@@ -40,6 +58,7 @@ const DEFAULTS: Omit<FormSettings, 'id' | 'updated_at' | 'updated_by'> = {
   sat_discount: 10000,
   custom_questions: [],
   step_labels: [...DEFAULT_STEP_LABELS],
+  form_questions: [],
 };
 
 // ── Hook ───────────────────────────────────────────────────────────────────────
