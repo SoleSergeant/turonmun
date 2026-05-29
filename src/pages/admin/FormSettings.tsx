@@ -9,6 +9,7 @@ import {
   AlertCircle, CheckCircle2, Clock, RefreshCw, ChevronDown, ChevronUp,
   Eye, X, ChevronLeft, ChevronRight, EyeOff, Lock,
 } from 'lucide-react';
+import DynamicFormStep from '@/components/registration/DynamicFormStep';
 import PersonalInfoStep from '@/components/registration/PersonalInfoStep';
 import PreferencesStep from '@/components/registration/PreferencesStep';
 import CommitteePreferencesStep from '@/components/registration/CommitteePreferencesStep';
@@ -550,10 +551,11 @@ const FormBuilderSection: React.FC<{
 const FormPreviewModal: React.FC<{
   formType: 'delegate' | 'chair';
   customQuestions: CustomQuestion[];
+  formQuestions: FormQuestion[];
   stepLabels?: string[];
   onUpdateQuestions: (qs: CustomQuestion[]) => void;
   onClose: () => void;
-}> = ({ formType, customQuestions, stepLabels, onUpdateQuestions, onClose }) => {
+}> = ({ formType, customQuestions, formQuestions, stepLabels, onUpdateQuestions, onClose }) => {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({ ...BLANK_FORM_DATA });
 
@@ -653,10 +655,29 @@ const FormPreviewModal: React.FC<{
         <div className="container pt-8 pb-16">
           <RegistrationSteps currentStep={Math.min(step, 5)} labels={stepLabels} />
           <div className="max-w-3xl mx-auto mt-6">
-            {step === 1 && <PersonalInfoStep formData={formData} handleChange={handleChange} nextStep={noop} />}
-            {step === 2 && <PreferencesStep formData={formData} handleChange={handleChange} nextStep={noop} prevStep={noop} />}
-            {step === 3 && <CommitteePreferencesStep formData={formData} handleChange={handleChange} nextStep={noop} prevStep={noop} />}
-            {step === 4 && <EssayStep formData={formData} handleChange={handleChange} nextStep={noop} prevStep={noop} />}
+            {[1, 2, 3, 4].includes(step) && (() => {
+              const stepQs = formQuestions.filter(q => q.step === step).sort((a, b) => a.order - b.order);
+              const labels = stepLabels ?? ['Personal Info','Experience','Committees','Essays','Details'];
+              if (stepQs.length > 0) {
+                return (
+                  <DynamicFormStep
+                    step={step}
+                    stepTitle={`Page ${step} — ${labels[step - 1]}`}
+                    questions={stepQs}
+                    formData={formData}
+                    handleChange={handleChange}
+                    nextStep={noop}
+                    prevStep={noop}
+                    isFirst={step === 1}
+                  />
+                );
+              }
+              // Fallback if migration not yet run
+              if (step === 1) return <PersonalInfoStep formData={formData} handleChange={handleChange} nextStep={noop} />;
+              if (step === 2) return <PreferencesStep formData={formData} handleChange={handleChange} nextStep={noop} prevStep={noop} />;
+              if (step === 3) return <CommitteePreferencesStep formData={formData} handleChange={handleChange} nextStep={noop} prevStep={noop} />;
+              if (step === 4) return <EssayStep formData={formData} handleChange={handleChange} nextStep={noop} prevStep={noop} />;
+            })()}
 
             {/* Step 5 — Custom Questions editor (always shown so admin can add questions) */}
             {step === QUESTIONS_STEP && (
@@ -849,6 +870,7 @@ const FormSettingsPage = () => {
         <FormPreviewModal
           formType={tab}
           customQuestions={draft?.custom_questions ?? []}
+          formQuestions={draft?.form_questions ?? []}
           stepLabels={draft?.step_labels}
           onUpdateQuestions={qs => setDraft(prev => prev ? { ...prev, custom_questions: qs } : prev)}
           onClose={() => setPreviewOpen(false)}
