@@ -103,9 +103,9 @@ const RegistrationSelection = () => {
                   <div className="w-14 h-14 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center mb-6">
                     <Shield className={`w-7 h-7 ${!chairClosed ? 'text-white' : 'text-white/60'}`} />
                   </div>
-                  <h2 className="text-2xl font-bold text-white mb-2">Chair / Staff</h2>
+                  <h2 className="text-2xl font-bold text-white mb-2">Chair</h2>
                   <p className="text-white/50 text-sm mb-5">
-                    Lead a committee as a chair or join the secretariat. Applications open separately.
+                    Lead a committee as a chair. Shape the debate and guide delegates through the session.
                   </p>
 
                   {loading ? (
