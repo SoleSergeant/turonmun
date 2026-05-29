@@ -128,7 +128,7 @@ const Signup = () => {
                 className="mt-8 p-6 bg-diplomatic-50 rounded-xl border border-diplomatic-200"
               >
                 <p className="text-sm text-diplomatic-700">
-                  <span className="font-semibold">🎓 Tip:</span> Create an account to get early access to Season 6 application when it opens!
+                  <span className="font-semibold">🎓 Tip:</span> Create an account to get early access to Season 7 application when it opens!
                 </p>
               </motion.div>
             </motion.div>

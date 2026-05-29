@@ -24,9 +24,9 @@ import {
 } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
 
-// Constants for secondary client to create users without logging out admin
-const SUPABASE_URL = "https://sasuvkcqdqmmjobmgida.supabase.co";
-const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNhc3V2a2NxZHFtbWpvYm1naWRhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA1MjkwNTEsImV4cCI6MjA2NjEwNTA1MX0.ZbjusSyiN3kBTVM10Ws_nKoqvblBQFvy8kZE6U3IqoQ";
+// Secondary Supabase client — used to create auth users without logging out the current admin session
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
+const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
 
 interface Chair {
   id: string;

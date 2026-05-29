@@ -47,7 +47,7 @@ export default function Footer() {
             </li>
             <li>
               <Link to="/register" className="text-blue-200 hover:text-white transition-colors inline-flex items-center">
-                <ArrowRight size={14} className="mr-2 opacity-70" /> Application (Coming Soon)
+                <ArrowRight size={14} className="mr-2 opacity-70" /> Apply
               </Link>
             </li>
             <li>

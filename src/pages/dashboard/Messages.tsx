@@ -45,11 +45,11 @@ export default function Messages() {
       id: 1,
       from: 'Secretariat Team',
       fromRole: 'secretariat',
-      subject: 'Welcome to TuronMUN Season 6!',
+      subject: 'Welcome to TuronMUN Season 7!',
       preview: 'We are excited to have you join us for this year\'s conference...',
       content: `Dear Alex,
 
-We are thrilled to welcome you to TuronMUN Season 6! Your application has been successfully processed, and we're excited to have you as part of our delegate community.
+We are thrilled to welcome you to TuronMUN Season 7! Your application has been successfully processed, and we're excited to have you as part of our delegate community.
 
 Here are some important next steps:
 1. Review your committee assignment (ECOSOC)

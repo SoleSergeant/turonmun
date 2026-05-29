@@ -53,7 +53,7 @@ export default function DashboardSidebar({ isOpen, onClose }: DashboardSidebarPr
               </div>
               <div className="flex flex-col">
                 <span className="text-white font-display font-bold text-base tracking-tight">TuronMUN</span>
-                <span className="text-[10px] text-diplomatic-200 font-medium tracking-wider uppercase">2-Year Anniversary</span>
+                <span className="text-[10px] text-diplomatic-200 font-medium tracking-wider uppercase">Season 7</span>
               </div>
             </Link>
           </div>
@@ -123,7 +123,7 @@ export default function DashboardSidebar({ isOpen, onClose }: DashboardSidebarPr
               </div>
               <div className="flex flex-col">
                 <span className="text-white font-display font-bold text-base tracking-tight">TuronMUN</span>
-                <span className="text-[10px] text-diplomatic-200 font-medium tracking-wider uppercase">2-Year Anniversary</span>
+                <span className="text-[10px] text-diplomatic-200 font-medium tracking-wider uppercase">Season 7</span>
               </div>
             </Link>
             <button

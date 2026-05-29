@@ -22,7 +22,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 
     if (!user) {
         const redirectParam = encodeURIComponent(location.pathname + location.search);
-        return <Navigate to={`/signup?redirect=${redirectParam}`} replace />;
+        return <Navigate to={`/login?redirect=${redirectParam}`} replace />;
     }
 
     return <>{children}</>;

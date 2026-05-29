@@ -56,7 +56,13 @@ const AdditionalInfoStep: React.FC<AdditionalInfoStepProps> = ({
 
           <div className="mb-4">
             <p className="text-sm text-neutral-700 mb-3">
-              <strong>The delegate application fee is 90,000 UZS. Are you aware of this and ready to pay upon acceptance?</strong>
+              <strong>
+                The delegate application fee is {fee.originalFee.toLocaleString()} UZS
+                {fee.discount > 0 && (
+                  <> — after your discount: <span className="text-green-700">{fee.finalFee.toLocaleString()} UZS</span></>
+                )}
+                . Are you aware of this and ready to pay upon acceptance?
+              </strong>
             </p>
 
             <div className="space-y-2">

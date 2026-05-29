@@ -51,8 +51,8 @@ const Communications = () => {
     {
       id: '1',
       name: 'Application Confirmation',
-      subject: 'Welcome to TuronMUN Season 6!',
-      content: 'Dear {name}, thank you for applying to TuronMUN Season 6...',
+      subject: 'Welcome to TuronMUN Season 7!',
+      content: 'Dear {name}, thank you for applying to TuronMUN Season 7...',
       type: 'application',
       created_at: '2024-01-15'
     },

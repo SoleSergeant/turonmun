@@ -16,6 +16,7 @@ export type Database = {
           password_hash: string
           role: string
           full_name: string | null
+          committee_id: string | null
           created_at: string | null
           updated_at: string | null
           last_login: string | null
@@ -27,6 +28,7 @@ export type Database = {
           password_hash: string
           role?: string
           full_name?: string | null
+          committee_id?: string | null
           created_at?: string | null
           updated_at?: string | null
           last_login?: string | null
@@ -38,6 +40,7 @@ export type Database = {
           password_hash?: string
           role?: string
           full_name?: string | null
+          committee_id?: string | null
           created_at?: string | null
           updated_at?: string | null
           last_login?: string | null
@@ -48,11 +51,14 @@ export type Database = {
       applications: {
         Row: {
           id: string
+          user_id: string | null
           full_name: string
           email: string
           phone: string | null
+          telegram_username: string | null
           institution: string
           country: string
+          date_of_birth: string | null
           experience: string
           committee_preference1: string
           committee_preference2: string
@@ -63,9 +69,18 @@ export type Database = {
           has_sat: boolean | null
           ielts_score: number | null
           sat_score: number | null
+          ielts_certificate_url: string | null
+          sat_certificate_url: string | null
+          certificate_url: string | null
+          photo_url: string | null
+          application_id: string | null
           emergency_contact_name: string | null
           emergency_contact_phone: string | null
           emergency_contact_relation: string | null
+          fee_agreement: string | null
+          discount_eligibility: string | null
+          final_confirmation: boolean | null
+          application_type: string | null
           status: string | null
           assigned_committee_id: string | null
           payment_status: string | null
@@ -79,11 +94,14 @@ export type Database = {
         }
         Insert: {
           id?: string
+          user_id?: string | null
           full_name: string
           email: string
           phone?: string | null
+          telegram_username?: string | null
           institution: string
           country: string
+          date_of_birth?: string | null
           experience: string
           committee_preference1: string
           committee_preference2: string
@@ -94,9 +112,18 @@ export type Database = {
           has_sat?: boolean | null
           ielts_score?: number | null
           sat_score?: number | null
+          ielts_certificate_url?: string | null
+          sat_certificate_url?: string | null
+          certificate_url?: string | null
+          photo_url?: string | null
+          application_id?: string | null
           emergency_contact_name?: string | null
           emergency_contact_phone?: string | null
           emergency_contact_relation?: string | null
+          fee_agreement?: string | null
+          discount_eligibility?: string | null
+          final_confirmation?: boolean | null
+          application_type?: string | null
           status?: string | null
           assigned_committee_id?: string | null
           payment_status?: string | null
@@ -110,11 +137,14 @@ export type Database = {
         }
         Update: {
           id?: string
+          user_id?: string | null
           full_name?: string
           email?: string
           phone?: string | null
+          telegram_username?: string | null
           institution?: string
           country?: string
+          date_of_birth?: string | null
           experience?: string
           committee_preference1?: string
           committee_preference2?: string
@@ -125,9 +155,18 @@ export type Database = {
           has_sat?: boolean | null
           ielts_score?: number | null
           sat_score?: number | null
+          ielts_certificate_url?: string | null
+          sat_certificate_url?: string | null
+          certificate_url?: string | null
+          photo_url?: string | null
+          application_id?: string | null
           emergency_contact_name?: string | null
           emergency_contact_phone?: string | null
           emergency_contact_relation?: string | null
+          fee_agreement?: string | null
+          discount_eligibility?: string | null
+          final_confirmation?: boolean | null
+          application_type?: string | null
           status?: string | null
           assigned_committee_id?: string | null
           payment_status?: string | null

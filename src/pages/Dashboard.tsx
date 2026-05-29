@@ -57,7 +57,7 @@ export default function Dashboard() {
               </div>
             </div>
             <div className="flex flex-col justify-center">
-              <span className="text-sm font-bold text-white tracking-tight leading-none mb-1">TuronMUN Season 6</span>
+              <span className="text-sm font-bold text-white tracking-tight leading-none mb-1">TuronMUN Season 7</span>
               <span className="text-[10px] text-white/60 font-medium tracking-wider uppercase leading-none">Delegate Dashboard</span>
             </div>
           </div>

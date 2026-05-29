@@ -181,8 +181,8 @@ const Registration = () => {
 
   const calculateFee = () => {
     const baseFee = formSettings?.fee_amount ?? Number(import.meta.env.VITE_APP_DELEGATE_FEE ?? 90000);
-    const ieltsDiscount = formData.hasIelts ? (formSettings?.ielts_discount ?? 10000) : 0;
-    const satDiscount = formData.hasSat ? (formSettings?.sat_discount ?? 10000) : 0;
+    const ieltsDiscount = (formData.hasIELTS === 'yes' || formData.hasIELTS === true) ? (formSettings?.ielts_discount ?? 10000) : 0;
+    const satDiscount = (formData.hasSAT === 'yes' || formData.hasSAT === true) ? (formSettings?.sat_discount ?? 10000) : 0;
     const discount = ieltsDiscount + satDiscount;
     return {
       originalFee: baseFee,
@@ -315,10 +315,12 @@ const Registration = () => {
           experience: formData.experience || 'None',
           motivation: `Interest: ${formData.issueInterest}`,
           dietary_restrictions: formData.dietaryRestrictions || null,
-          emergency_contact_relation: formData.telegramUsername,
-          has_ielts: false,
-          has_sat: false,
-          discount_eligibility: 'None',
+          emergency_contact_relation: formData.emergencyContact || null,
+          has_ielts: formData.hasIELTS === 'yes',
+          has_sat: formData.hasSAT === 'yes',
+          discount_eligibility: Array.isArray(formData.discountEligibility)
+            ? formData.discountEligibility.join(', ') || 'None'
+            : formData.discountEligibility || 'None',
           fee_agreement: formData.feeAgreement,
           final_confirmation: formData.finalConfirmation,
           payment_amount: fee.finalFee,

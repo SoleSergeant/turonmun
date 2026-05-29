@@ -8,28 +8,23 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
 import { useFormSettings } from '@/hooks/useFormSettings';
+import { useCommittees } from '@/hooks/useCommittees';
+import DynamicFormStep from '@/components/registration/DynamicFormStep';
+import type { FormQuestion } from '@/hooks/useFormSettings';
 
-const COMMITTEES = ['UNGA', 'WTO', 'ECOSOC', 'HRC'];
+// ── Fallback constants (used when DB form_questions are empty) ──────────────
 const ROLES = ['Chair', 'Co-Chair'];
 const EXPERIENCE_LEVELS = ['None', '1 conference', '2-3 conferences', '4+ conferences'];
 
-interface ChairFormData {
-  fullName: string;
-  email: string;
-  telegramUsername: string;
-  institution: string;
-  countryAndCity: string;
-  rolePreference: string;
-  committeePreference1: string;
-  committeePreference2: string;
-  munExperienceYears: string;
-  previousChairExperience: string;
-  whyChair: string;
-  leadershipExample: string;
-  agreeToTerms: boolean;
-}
+const TOTAL_STEPS = 4;
 
-const EMPTY_FORM: ChairFormData = {
+const STEP_SUBTITLES: Record<number, string> = {
+  1: 'Please provide your basic information',
+  2: 'Select your preferred role and committees',
+  3: 'Tell us about your experience and motivation',
+};
+
+const EMPTY_FORM: Record<string, any> = {
   fullName: '',
   email: '',
   telegramUsername: '',
@@ -45,21 +40,20 @@ const EMPTY_FORM: ChairFormData = {
   agreeToTerms: false,
 };
 
-const TOTAL_STEPS = 4;
-
 export default function ChairApplication() {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { user } = useAuth();
   const { settings: formSettings, isEffectivelyClosed, closedReason, deadlineSoon } = useFormSettings('chair');
+  const { committees, loading: committeesLoading } = useCommittees();
 
   const [step, setStep] = useState(1);
-  const [formData, setFormData] = useState<ChairFormData>(EMPTY_FORM);
+  const [formData, setFormData] = useState<Record<string, any>>(EMPTY_FORM);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [alreadyApplied, setAlreadyApplied] = useState(false);
 
-  // Pre-fill from auth user
+  // Pre-fill name + email from signed-in user, check for existing chair app
   useEffect(() => {
     if (!user) return;
     setFormData(prev => ({
@@ -67,9 +61,6 @@ export default function ChairApplication() {
       email: user.email ?? '',
       fullName: user.user_metadata?.full_name ?? user.user_metadata?.name ?? '',
     }));
-
-    // Check for existing chair application by looking for the notes marker
-    // (application_type column may not exist yet — migration 009 pending)
     (supabase.from('applications') as any)
       .select('id, notes')
       .eq('user_id', user.id)
@@ -83,45 +74,54 @@ export default function ChairApplication() {
 
   useEffect(() => { window.scrollTo(0, 0); }, []);
 
-  const set = (field: keyof ChairFormData, value: string | boolean) => {
+  // ── Change handlers ────────────────────────────────────────────────────────
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
+  ) => {
+    const { name, value, type } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
+    }));
+  };
+
+  const set = (field: string, value: string | boolean) =>
     setFormData(prev => ({ ...prev, [field]: value }));
-  };
 
-  const validate = (): boolean => {
-    if (step === 1) {
-      if (!formData.fullName || !formData.email || !formData.telegramUsername || !formData.institution || !formData.countryAndCity) {
-        toast({ title: 'Missing Information', description: 'Please fill in all required fields.', variant: 'destructive' });
-        return false;
-      }
-    }
-    if (step === 2) {
+  // ── Form-questions helpers (mirrors Registration.tsx) ─────────────────────
+  const questionsForStep = (s: number): FormQuestion[] =>
+    (formSettings?.form_questions ?? [])
+      .filter(q => q.step === s)
+      .sort((a, b) => a.order - b.order);
+
+  const hasDynamicQuestions = (s: number) =>
+    (formSettings?.form_questions ?? []).some(q => q.step === s);
+
+  // ── Navigation ─────────────────────────────────────────────────────────────
+  const nextStep = () => {
+    // Validate only the hardcoded fallback steps (DynamicFormStep validates itself)
+    if (step === 2 && !hasDynamicQuestions(2)) {
       if (!formData.rolePreference || !formData.committeePreference1 || !formData.committeePreference2) {
-        toast({ title: 'Missing Preferences', description: 'Please select your role and committee preferences.', variant: 'destructive' });
-        return false;
+        toast({ title: 'Missing Preferences', description: 'Please select your role and both committee preferences.', variant: 'destructive' });
+        return;
       }
     }
-    if (step === 3) {
+    if (step === 3 && !hasDynamicQuestions(3)) {
       if (!formData.munExperienceYears || !formData.whyChair || formData.whyChair.length < 50) {
-        toast({ title: 'Essay Required', description: 'Please answer all essay questions (minimum 50 characters for main essay).', variant: 'destructive' });
-        return false;
+        toast({ title: 'Essay Required', description: 'Please answer all required questions (min. 50 chars for main essay).', variant: 'destructive' });
+        return;
       }
     }
-    if (step === 4) {
-      if (!formData.agreeToTerms) {
-        toast({ title: 'Agreement Required', description: 'Please agree to the terms to submit.', variant: 'destructive' });
-        return false;
-      }
-    }
-    return true;
+    setStep(s => Math.min(s + 1, TOTAL_STEPS));
   };
-
-  const nextStep = () => { if (validate()) setStep(s => Math.min(s + 1, TOTAL_STEPS)); };
   const prevStep = () => setStep(s => Math.max(s - 1, 1));
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!validate()) return;
-
+  // ── Submit ─────────────────────────────────────────────────────────────────
+  const handleSubmit = async () => {
+    if (!formData.agreeToTerms) {
+      toast({ title: 'Agreement Required', description: 'Please agree to the terms to submit.', variant: 'destructive' });
+      return;
+    }
     setIsSubmitting(true);
     try {
       const basePayload: Record<string, any> = {
@@ -143,8 +143,6 @@ export default function ChairApplication() {
         fee_agreement: true,
         final_confirmation: true,
         payment_amount: 0,
-        // Notes always carry the type marker so the admin filter works
-        // regardless of whether the application_type column exists.
         notes: [
           'APPLICATION TYPE: chair',
           `Role Preference: ${formData.rolePreference}`,
@@ -153,16 +151,11 @@ export default function ChairApplication() {
         ].join('\n'),
       };
 
-      // Try inserting with application_type column (migration 009).
-      // If the column doesn't exist yet, fall back to base payload alone —
-      // the notes marker is enough for the admin to identify chair applications.
       let { error } = await (supabase.from('applications') as any)
         .insert({ ...basePayload, application_type: 'chair' });
 
       if (error?.message?.includes('application_type')) {
-        // Column not yet created — retry without it
-        const { error: retryError } = await (supabase.from('applications') as any)
-          .insert(basePayload);
+        const { error: retryError } = await (supabase.from('applications') as any).insert(basePayload);
         error = retryError;
       }
 
@@ -178,6 +171,7 @@ export default function ChairApplication() {
     }
   };
 
+  // ── Early-return screens ───────────────────────────────────────────────────
   if (alreadyApplied) {
     return (
       <div className="page-transition-container min-h-screen flex flex-col bg-gradient-to-b from-white to-diplomatic-50">
@@ -207,9 +201,7 @@ export default function ChairApplication() {
               <AlertCircle className="w-8 h-8 text-red-500" />
             </div>
             <h2 className="text-2xl font-bold text-diplomatic-900 mb-3">Chair Applications Closed</h2>
-            <p className="text-neutral-600 mb-6">
-              {closedReason ?? 'Chair applications are not currently open.'}
-            </p>
+            <p className="text-neutral-600 mb-6">{closedReason ?? 'Chair applications are not currently open.'}</p>
             <Link to="/" className="inline-block bg-diplomatic-700 text-white px-6 py-3 rounded-lg font-medium hover:bg-diplomatic-800 transition-colors">
               Back to Home
             </Link>
@@ -225,11 +217,7 @@ export default function ChairApplication() {
       <div className="page-transition-container min-h-screen flex flex-col bg-gradient-to-b from-white to-diplomatic-50">
         <Navbar />
         <main className="flex-grow pt-20 flex items-center justify-center px-4">
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="text-center max-w-md"
-          >
+          <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} className="text-center max-w-md">
             <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
               <CheckCircle className="w-10 h-10 text-green-600" />
             </div>
@@ -243,9 +231,15 @@ export default function ChairApplication() {
     );
   }
 
+  // ── Shared CSS helpers ─────────────────────────────────────────────────────
   const inputCls = 'w-full px-4 py-2.5 rounded-lg border border-neutral-200 text-sm focus:outline-none focus:ring-2 focus:ring-diplomatic-400 focus:border-transparent transition-all';
   const labelCls = 'block text-sm font-medium text-diplomatic-800 mb-1';
   const selectCls = `${inputCls} bg-white`;
+
+  // ── Step labels (use DB labels if available, else sensible defaults) ────────
+  const stepLabels = formSettings?.step_labels?.length === 5
+    ? formSettings.step_labels.slice(0, 4)  // chair uses 4 steps
+    : ['Personal Info', 'Role & Committees', 'Experience', 'Review'];
 
   return (
     <div className="page-transition-container min-h-screen flex flex-col bg-gradient-to-b from-white to-diplomatic-50">
@@ -292,110 +286,139 @@ export default function ChairApplication() {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
               transition={{ duration: 0.2 }}
-              className="bg-white rounded-2xl shadow-sm border border-neutral-100 p-6 md:p-8"
             >
-              {step === 1 && (
-                <div className="space-y-4">
+              {/* ── Step 1 ─────────────────────────────────────────────────── */}
+              {step === 1 && (hasDynamicQuestions(1) ? (
+                <DynamicFormStep
+                  step={1}
+                  stepTitle={`Step 1 — ${stepLabels[0]}`}
+                  stepSubtitle={STEP_SUBTITLES[1]}
+                  questions={questionsForStep(1)}
+                  formData={formData}
+                  handleChange={handleChange}
+                  nextStep={nextStep}
+                  prevStep={prevStep}
+                  isFirst
+                />
+              ) : (
+                <div className="bg-white rounded-2xl shadow-sm border border-neutral-100 p-6 md:p-8 space-y-4">
                   <h2 className="text-xl font-bold text-diplomatic-900 mb-4">Personal Information</h2>
                   <div>
                     <label className={labelCls}>Full Name *</label>
-                    <input className={inputCls} value={formData.fullName} onChange={e => set('fullName', e.target.value)} placeholder="Your full name" />
+                    <input className={inputCls} name="fullName" value={formData.fullName} onChange={handleChange} placeholder="Your full name" />
                   </div>
                   <div>
                     <label className={labelCls}>Email Address *</label>
-                    <input className={inputCls} type="email" value={formData.email} onChange={e => set('email', e.target.value)} placeholder="your@email.com" />
+                    <input className={inputCls} type="email" name="email" value={formData.email} onChange={handleChange} placeholder="your@email.com" />
                   </div>
                   <div>
                     <label className={labelCls}>Telegram Username *</label>
-                    <input className={inputCls} value={formData.telegramUsername} onChange={e => set('telegramUsername', e.target.value)} placeholder="@username" />
+                    <input className={inputCls} name="telegramUsername" value={formData.telegramUsername} onChange={handleChange} placeholder="@username" />
                   </div>
                   <div>
                     <label className={labelCls}>Institution / School *</label>
-                    <input className={inputCls} value={formData.institution} onChange={e => set('institution', e.target.value)} placeholder="Your school or university" />
+                    <input className={inputCls} name="institution" value={formData.institution} onChange={handleChange} placeholder="Your school or university" />
                   </div>
                   <div>
                     <label className={labelCls}>Country & City *</label>
-                    <input className={inputCls} value={formData.countryAndCity} onChange={e => set('countryAndCity', e.target.value)} placeholder="e.g. Uzbekistan, Tashkent" />
+                    <input className={inputCls} name="countryAndCity" value={formData.countryAndCity} onChange={handleChange} placeholder="e.g. Uzbekistan, Tashkent" />
                   </div>
                 </div>
-              )}
+              ))}
 
-              {step === 2 && (
-                <div className="space-y-4">
+              {/* ── Step 2 ─────────────────────────────────────────────────── */}
+              {step === 2 && (hasDynamicQuestions(2) ? (
+                <DynamicFormStep
+                  step={2}
+                  stepTitle={`Step 2 — ${stepLabels[1]}`}
+                  stepSubtitle={STEP_SUBTITLES[2]}
+                  questions={questionsForStep(2)}
+                  formData={formData}
+                  handleChange={handleChange}
+                  nextStep={nextStep}
+                  prevStep={prevStep}
+                />
+              ) : (
+                <div className="bg-white rounded-2xl shadow-sm border border-neutral-100 p-6 md:p-8 space-y-4">
                   <h2 className="text-xl font-bold text-diplomatic-900 mb-4">Role & Committee Preferences</h2>
                   <div>
                     <label className={labelCls}>Preferred Role *</label>
-                    <select className={selectCls} value={formData.rolePreference} onChange={e => set('rolePreference', e.target.value)}>
+                    <select className={selectCls} name="rolePreference" value={formData.rolePreference} onChange={handleChange}>
                       <option value="">Select a role</option>
                       {ROLES.map(r => <option key={r} value={r}>{r}</option>)}
                     </select>
                   </div>
                   <div>
                     <label className={labelCls}>First Committee Preference *</label>
-                    <select className={selectCls} value={formData.committeePreference1} onChange={e => set('committeePreference1', e.target.value)}>
-                      <option value="">Select committee</option>
-                      {COMMITTEES.map(c => <option key={c} value={c}>{c}</option>)}
-                    </select>
+                    {committeesLoading ? (
+                      <div className="h-11 bg-neutral-100 animate-pulse rounded-lg" />
+                    ) : (
+                      <select className={selectCls} name="committeePreference1" value={formData.committeePreference1} onChange={handleChange}>
+                        <option value="">Select committee</option>
+                        {committees
+                          .filter(c => c.name !== formData.committeePreference2)
+                          .map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+                      </select>
+                    )}
                   </div>
                   <div>
                     <label className={labelCls}>Second Committee Preference *</label>
-                    <select className={selectCls} value={formData.committeePreference2} onChange={e => set('committeePreference2', e.target.value)}>
-                      <option value="">Select committee</option>
-                      {COMMITTEES.filter(c => c !== formData.committeePreference1).map(c => <option key={c} value={c}>{c}</option>)}
-                    </select>
+                    {committeesLoading ? (
+                      <div className="h-11 bg-neutral-100 animate-pulse rounded-lg" />
+                    ) : (
+                      <select className={selectCls} name="committeePreference2" value={formData.committeePreference2} onChange={handleChange}>
+                        <option value="">Select committee</option>
+                        {committees
+                          .filter(c => c.name !== formData.committeePreference1)
+                          .map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
+                      </select>
+                    )}
                   </div>
                 </div>
-              )}
+              ))}
 
-              {step === 3 && (
-                <div className="space-y-4">
+              {/* ── Step 3 ─────────────────────────────────────────────────── */}
+              {step === 3 && (hasDynamicQuestions(3) ? (
+                <DynamicFormStep
+                  step={3}
+                  stepTitle={`Step 3 — ${stepLabels[2]}`}
+                  stepSubtitle={STEP_SUBTITLES[3]}
+                  questions={questionsForStep(3)}
+                  formData={formData}
+                  handleChange={handleChange}
+                  nextStep={nextStep}
+                  prevStep={prevStep}
+                />
+              ) : (
+                <div className="bg-white rounded-2xl shadow-sm border border-neutral-100 p-6 md:p-8 space-y-4">
                   <h2 className="text-xl font-bold text-diplomatic-900 mb-4">Experience & Essays</h2>
                   <div>
                     <label className={labelCls}>MUN Experience Level *</label>
-                    <select className={selectCls} value={formData.munExperienceYears} onChange={e => set('munExperienceYears', e.target.value)}>
+                    <select className={selectCls} name="munExperienceYears" value={formData.munExperienceYears} onChange={handleChange}>
                       <option value="">Select experience level</option>
                       {EXPERIENCE_LEVELS.map(l => <option key={l} value={l}>{l}</option>)}
                     </select>
                   </div>
                   <div>
-                    <label className={labelCls}>Previous Chair / Staff Experience</label>
-                    <textarea
-                      className={`${inputCls} resize-none`}
-                      rows={3}
-                      value={formData.previousChairExperience}
-                      onChange={e => set('previousChairExperience', e.target.value)}
-                      placeholder="List any previous chairing or staff experience (optional)"
-                    />
+                    <label className={labelCls}>Previous Chair / Staff Experience <span className="text-neutral-400 text-xs font-normal">(Optional)</span></label>
+                    <textarea className={`${inputCls} resize-none`} name="previousChairExperience" rows={3} value={formData.previousChairExperience} onChange={handleChange} placeholder="List any previous chairing or staff experience" />
                   </div>
                   <div>
                     <label className={labelCls}>Why do you want to be a Chair at TuronMUN? *</label>
-                    <textarea
-                      className={`${inputCls} resize-none`}
-                      rows={5}
-                      value={formData.whyChair}
-                      onChange={e => set('whyChair', e.target.value)}
-                      placeholder="Explain your motivation, what you hope to contribute, and why TuronMUN (min. 50 characters)"
-                    />
+                    <textarea className={`${inputCls} resize-none`} name="whyChair" rows={5} value={formData.whyChair} onChange={handleChange} placeholder="Explain your motivation, what you hope to contribute, and why TuronMUN (min. 50 characters)" />
                     <p className="text-xs text-neutral-400 mt-1">{formData.whyChair.length} / 50 min. characters</p>
                   </div>
                   <div>
-                    <label className={labelCls}>Describe a time you led a group through a challenge</label>
-                    <textarea
-                      className={`${inputCls} resize-none`}
-                      rows={4}
-                      value={formData.leadershipExample}
-                      onChange={e => set('leadershipExample', e.target.value)}
-                      placeholder="Optional — but strongly recommended"
-                    />
+                    <label className={labelCls}>Describe a time you led a group through a challenge <span className="text-neutral-400 text-xs font-normal">(Optional)</span></label>
+                    <textarea className={`${inputCls} resize-none`} name="leadershipExample" rows={4} value={formData.leadershipExample} onChange={handleChange} placeholder="Optional — but strongly recommended" />
                   </div>
                 </div>
-              )}
+              ))}
 
+              {/* ── Step 4: Review & Submit (always hardcoded) ─────────────── */}
               {step === 4 && (
-                <div className="space-y-6">
+                <div className="bg-white rounded-2xl shadow-sm border border-neutral-100 p-6 md:p-8 space-y-6">
                   <h2 className="text-xl font-bold text-diplomatic-900 mb-4">Review & Submit</h2>
-
-                  {/* Summary */}
                   <div className="bg-diplomatic-50 rounded-xl p-4 space-y-2 text-sm">
                     {[
                       ['Name', formData.fullName],
@@ -414,12 +437,12 @@ export default function ChairApplication() {
                       </div>
                     ))}
                   </div>
-
                   <label className="flex items-start gap-3 cursor-pointer">
                     <input
                       type="checkbox"
-                      checked={formData.agreeToTerms}
-                      onChange={e => set('agreeToTerms', e.target.checked)}
+                      name="agreeToTerms"
+                      checked={!!formData.agreeToTerms}
+                      onChange={handleChange}
                       className="mt-0.5 w-4 h-4 rounded border-neutral-300 text-diplomatic-700 focus:ring-diplomatic-400"
                     />
                     <span className="text-sm text-neutral-600">
@@ -431,37 +454,32 @@ export default function ChairApplication() {
             </motion.div>
           </AnimatePresence>
 
-          {/* Navigation buttons */}
-          <div className="flex justify-between items-center mt-6">
-            <button
-              type="button"
-              onClick={prevStep}
-              disabled={step === 1}
-              className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-neutral-200 text-neutral-600 font-medium text-sm hover:bg-neutral-50 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-            >
-              <ChevronLeft className="w-4 h-4" /> Back
-            </button>
+          {/* Navigation buttons — shown only for hardcoded steps (DynamicFormStep has its own) */}
+          {(step === 4 || (step <= 3 && !hasDynamicQuestions(step))) && (
+            <div className="flex justify-between items-center mt-6">
+              <button
+                type="button"
+                onClick={prevStep}
+                disabled={step === 1}
+                className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-neutral-200 text-neutral-600 font-medium text-sm hover:bg-neutral-50 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+              >
+                <ChevronLeft className="w-4 h-4" /> Back
+              </button>
 
-            {step < TOTAL_STEPS ? (
-              <button
-                type="button"
-                onClick={nextStep}
-                className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-diplomatic-700 hover:bg-diplomatic-800 text-white font-semibold text-sm transition-colors"
-              >
-                Next <ChevronRight className="w-4 h-4" />
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={handleSubmit}
-                disabled={isSubmitting}
-                className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gold-500 hover:bg-gold-600 text-white font-semibold text-sm transition-colors disabled:opacity-60"
-              >
-                <Send className="w-4 h-4" />
-                {isSubmitting ? 'Submitting…' : 'Submit Application'}
-              </button>
-            )}
-          </div>
+              {step < TOTAL_STEPS ? (
+                <button type="button" onClick={nextStep}
+                  className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-diplomatic-700 hover:bg-diplomatic-800 text-white font-semibold text-sm transition-colors">
+                  Next <ChevronRight className="w-4 h-4" />
+                </button>
+              ) : (
+                <button type="button" onClick={handleSubmit} disabled={isSubmitting}
+                  className="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-gold-500 hover:bg-gold-600 text-white font-semibold text-sm transition-colors disabled:opacity-60">
+                  <Send className="w-4 h-4" />
+                  {isSubmitting ? 'Submitting…' : 'Submit Application'}
+                </button>
+              )}
+            </div>
+          )}
 
           <p className="text-center text-xs text-neutral-400 mt-4">
             <Link to="/register" className="hover:text-neutral-600 transition-colors">← Back to Registration</Link>

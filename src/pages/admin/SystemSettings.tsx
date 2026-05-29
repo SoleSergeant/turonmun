@@ -18,7 +18,7 @@ const SystemSettings = () => {
   const [activeTab, setActiveTab] = useState('general');
   const [settings, setSettings] = useState({
     // General Settings
-    siteName: 'TuronMUN Season 6',
+    siteName: 'TuronMUN Season 7',
     siteDescription: 'International Model United Nations Conference',
     contactEmail: 'admin@turonmun.org',
     supportEmail: 'support@turonmun.org',
