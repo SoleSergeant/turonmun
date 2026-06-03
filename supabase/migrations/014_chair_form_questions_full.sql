@@ -1,0 +1,23 @@
+-- 014_chair_form_questions_full.sql
+-- Replace the 4-question Step-1 stub from 013 with a complete
+-- question set covering steps 1–3 for the chair form.
+-- Step 4 is the review/submit step — rendered in code, no DB questions needed.
+
+UPDATE public.form_settings
+SET form_questions = '[
+  {"id":"c1_fullName",   "step":1,"order":1,"name":"fullName",              "label":"Full Name",                                        "type":"text",    "placeholder":"Enter your full name",                                            "helpText":null,                                              "required":true, "visible":true,"system":true},
+  {"id":"c1_email",      "step":1,"order":2,"name":"email",                 "label":"Email Address",                                    "type":"email",   "placeholder":null,                                                              "helpText":"Taken from your account — cannot be changed",     "required":true, "visible":true,"system":true,"readonly":true},
+  {"id":"c1_telegram",   "step":1,"order":3,"name":"telegramUsername",      "label":"Telegram Username",                                "type":"text",    "placeholder":"e.g., @username",                                                 "helpText":"Format: @username",                               "required":true, "visible":true,"system":true},
+  {"id":"c1_institution","step":1,"order":4,"name":"institution",           "label":"Institution of Study or Workplace",                "type":"text",    "placeholder":"School, university, or workplace",                                "helpText":null,                                              "required":true, "visible":true,"system":true},
+  {"id":"c1_country",    "step":1,"order":5,"name":"countryAndCity",        "label":"Country and City",                                 "type":"text",    "placeholder":"e.g. Uzbekistan, Tashkent",                                       "helpText":"Format: Country, City",                           "required":true, "visible":true,"system":true},
+
+  {"id":"c2_role",       "step":2,"order":1,"name":"rolePreference",        "label":"Preferred Role",                                   "type":"select",  "placeholder":"Select a role",                                                   "helpText":"Chair leads the session; Co-Chair assists",       "required":true, "visible":true,"system":true,"options":["Chair","Co-Chair"]},
+  {"id":"c2_comm1",      "step":2,"order":2,"name":"committeePreference1",  "label":"First Committee Preference",                       "type":"select",  "placeholder":"Select your first choice",                                        "helpText":"We will try our best to match your preference",   "required":true, "visible":true,"system":true,"widget":"committee_select"},
+  {"id":"c2_comm2",      "step":2,"order":3,"name":"committeePreference2",  "label":"Second Committee Preference",                      "type":"select",  "placeholder":"Select your second choice",                                       "helpText":null,                                              "required":true, "visible":true,"system":true,"widget":"committee_select"},
+
+  {"id":"c3_experience", "step":3,"order":1,"name":"munExperienceYears",    "label":"MUN Experience Level",                             "type":"select",  "placeholder":"Select experience level",                                         "helpText":null,                                              "required":true, "visible":true,"system":true,"options":["None","1 conference","2-3 conferences","4+ conferences"]},
+  {"id":"c3_prevExp",    "step":3,"order":2,"name":"previousChairExperience","label":"Previous Chair / Staff Experience",               "type":"textarea","placeholder":"List any previous chairing or staff experience (optional)",       "helpText":"Optional — include conference names and your role","required":false,"visible":true,"system":true},
+  {"id":"c3_whyChair",   "step":3,"order":3,"name":"whyChair",              "label":"Why do you want to be a Chair at TuronMUN?",       "type":"textarea","placeholder":"Explain your motivation and what you hope to contribute (min. 50 chars)","helpText":"Minimum 50 characters",                       "required":true, "visible":true,"system":true},
+  {"id":"c3_leadership", "step":3,"order":4,"name":"leadershipExample",     "label":"Describe a time you led a group through a challenge","type":"textarea","placeholder":"Optional — but strongly recommended",                          "helpText":null,                                              "required":false,"visible":true,"system":true}
+]'
+WHERE form_type = 'chair';
