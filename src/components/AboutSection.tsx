@@ -101,7 +101,7 @@ export default function AboutSection() {
             
             <div className="space-y-4">
               <h2 className="text-3xl md:text-4xl font-display font-bold text-diplomatic-900 leading-tight">
-                We are the only MUN from <span className="text-gold-500">Central Asia</span> that topped the <span className="text-gold-500">mymun charts</span>
+                We are the only MUN from <span className="text-gold-500">Central Asia</span> that topped the <span className="text-gold-500">mymun charts</span> <span className="text-gold-500">back-to-back</span>
               </h2>
               <div className="w-20 h-1 bg-gold-400 rounded-full" />
             </div>
