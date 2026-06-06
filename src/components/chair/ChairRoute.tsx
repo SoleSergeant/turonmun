@@ -36,8 +36,13 @@ export default function ChairRoute({ children }: ChairRouteProps) {
           return;
         }
 
-        // Allow access if user is chair, co-chair, director or superadmin
-        const allowedRoles = ['chair', 'co-chair', 'co_chair', 'director', 'superadmin'];
+        // Allow chair / co-chair (the role intended for this dashboard), plus
+        // SG and legacy admin/superadmin for QA + override access.
+        // Academics and registration are explicitly NOT allowed here.
+        const allowedRoles = [
+          'chair', 'co-chair', 'co_chair',
+          'sg', 'admin', 'superadmin', 'director',
+        ];
         const userRole = (adminUser as any)?.role?.toLowerCase();
         const isChairOrAdmin = userRole && allowedRoles.includes(userRole);
         setIsChair(!!isChairOrAdmin);
