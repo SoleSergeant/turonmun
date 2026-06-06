@@ -236,6 +236,14 @@ export default function CommandCenter() {
     if (total > 0) startTimer(total);
   };
 
+  // Extend the running timer by the custom amount (no restart, no reset).
+  const handleAddCustomTime = () => {
+    const add = customMins * 60 + customSecs;
+    if (add <= 0) return;
+    const current = session?.timer_remaining ?? 0;
+    startTimer(current + add);
+  };
+
   const handleDragStart = (id: string) => {
     setDraggedId(id);
   };
@@ -757,9 +765,19 @@ export default function CommandCenter() {
                   <div className="flex items-center gap-1">
                     <button onClick={() => setCustomMins(m => Math.max(0, m - 1))}
                       className="w-8 h-8 bg-white/5 rounded-lg text-white/40 hover:text-white hover:bg-white/10 text-lg font-bold flex items-center justify-center transition-all">−</button>
-                    <span className="flex-1 text-center text-white text-3xl font-black tabular-nums">
-                      {String(customMins).padStart(2, '0')}
-                    </span>
+                    <input
+                      type="number"
+                      inputMode="numeric"
+                      min={0}
+                      max={99}
+                      value={customMins}
+                      onChange={(e) => {
+                        const v = parseInt(e.target.value || '0', 10);
+                        if (!isNaN(v)) setCustomMins(Math.max(0, Math.min(99, v)));
+                      }}
+                      onFocus={(e) => e.target.select()}
+                      className="flex-1 w-0 text-center bg-transparent text-white text-3xl font-black tabular-nums focus:outline-none focus:ring-1 focus:ring-gold-400/40 rounded"
+                    />
                     <button onClick={() => setCustomMins(m => Math.min(99, m + 1))}
                       className="w-8 h-8 bg-white/5 rounded-lg text-white/40 hover:text-white hover:bg-white/10 text-lg font-bold flex items-center justify-center transition-all">+</button>
                   </div>
@@ -768,20 +786,37 @@ export default function CommandCenter() {
                 <div className="bg-white/5 rounded-xl border border-white/10 p-2">
                   <p className="text-white/20 text-[8px] uppercase tracking-widest text-center mb-2">sec</p>
                   <div className="flex items-center gap-1">
-                    <button onClick={() => setCustomSecs(s => Math.max(0, s - 15))}
-                      className="w-8 h-8 bg-white/5 rounded-lg text-white/40 hover:text-white hover:bg-white/10 text-[10px] font-bold flex items-center justify-center transition-all">−15</button>
-                    <span className="flex-1 text-center text-white text-3xl font-black tabular-nums">
-                      {String(customSecs).padStart(2, '0')}
-                    </span>
-                    <button onClick={() => setCustomSecs(s => Math.min(59, s + 15))}
-                      className="w-8 h-8 bg-white/5 rounded-lg text-white/40 hover:text-white hover:bg-white/10 text-[10px] font-bold flex items-center justify-center transition-all">+15</button>
+                    <button onClick={() => setCustomSecs(s => Math.max(0, s - 5))}
+                      className="w-8 h-8 bg-white/5 rounded-lg text-white/40 hover:text-white hover:bg-white/10 text-[10px] font-bold flex items-center justify-center transition-all">−5</button>
+                    <input
+                      type="number"
+                      inputMode="numeric"
+                      min={0}
+                      max={59}
+                      value={customSecs}
+                      onChange={(e) => {
+                        const v = parseInt(e.target.value || '0', 10);
+                        if (!isNaN(v)) setCustomSecs(Math.max(0, Math.min(59, v)));
+                      }}
+                      onFocus={(e) => e.target.select()}
+                      className="flex-1 w-0 text-center bg-transparent text-white text-3xl font-black tabular-nums focus:outline-none focus:ring-1 focus:ring-gold-400/40 rounded"
+                    />
+                    <button onClick={() => setCustomSecs(s => Math.min(59, s + 5))}
+                      className="w-8 h-8 bg-white/5 rounded-lg text-white/40 hover:text-white hover:bg-white/10 text-[10px] font-bold flex items-center justify-center transition-all">+5</button>
                   </div>
                 </div>
               </div>
-              <button onClick={handleCustomTimer}
-                className="w-full py-2.5 rounded-xl bg-gold-400/20 border border-gold-400/30 text-gold-400 text-xs font-black uppercase tracking-widest hover:bg-gold-400/30 transition-all">
-                Set Timer
-              </button>
+              <div className="grid grid-cols-2 gap-2">
+                <button onClick={handleCustomTimer}
+                  className="py-2.5 rounded-xl bg-gold-400/20 border border-gold-400/30 text-gold-400 text-xs font-black uppercase tracking-widest hover:bg-gold-400/30 transition-all">
+                  Set Timer
+                </button>
+                <button onClick={handleAddCustomTime}
+                  className="py-2.5 rounded-xl bg-emerald-400/10 border border-emerald-400/30 text-emerald-300 text-xs font-black uppercase tracking-widest hover:bg-emerald-400/20 transition-all"
+                  title="Extend the currently running timer by this amount">
+                  + Add Time
+                </button>
+              </div>
             </div>
           </div>
         </motion.div>
