@@ -141,11 +141,28 @@ const ApplicationManagementModal: React.FC<ApplicationManagementModalProps> = ({
   const grade           = getFromNotes('Grade');
   const medicalCond     = getFromNotes('Medical Conditions');
   const previousMuns    = application.previous_muns || getFromNotes('Previous MUNs');
-  const telegram        = application.telegram_username || application.emergency_contact_relation || getFromNotes('Telegram');
+  const telegram        = application.telegram_username || getFromNotes('Telegram');
   const phone           = application.phone || getFromNotes('Phone');
   const dob             = application.date_of_birth || getFromNotes('Date of Birth');
   const ieltsScore      = application.ielts_score ?? getFromNotes('IELTS Score');
   const satScore        = application.sat_score ?? getFromNotes('SAT Score');
+
+  // Chair-specific notes fields (only relevant on chair applications)
+  const isChair                 = (application as any).application_type === 'chair'
+                                || (application.notes || '').includes('APPLICATION TYPE: chair');
+  const rolePreference          = getFromNotes('Role Preference');
+  const previousChairExperience = getFromNotes('Previous Chair Experience');
+  const leadershipExample       = getFromNotes('Leadership Example');
+
+  // Emergency contact (delegates only — chair form doesn't ask for these)
+  const emergencyName  = (application as any).emergency_contact_name
+                       || (application as any).emergency_contact_relation;
+  const emergencyPhone = (application as any).emergency_contact_phone;
+
+  // Strip "Interest: " prefix from the delegate essay so it reads cleanly
+  const motivationText = application.motivation?.startsWith('Interest:')
+    ? application.motivation.replace(/^Interest:\s*/, '')
+    : application.motivation;
 
   // ── Detail row component ───────────────────────────────
   const DetailRow = ({ icon: Icon, label, value, color = 'text-gray-400', valueClass = '' }: {
@@ -284,8 +301,42 @@ const ApplicationManagementModal: React.FC<ApplicationManagementModalProps> = ({
                 </div>
               </div>
 
+              {/* Chair-specific responses (only on chair applications) */}
+              {isChair && (rolePreference || previousChairExperience || leadershipExample) && (
+                <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+                  <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-3 flex items-center gap-2">
+                    <Users size={16} className="text-purple-600" /> Chair Application
+                  </h3>
+                  <div className="divide-y divide-gray-100">
+                    {rolePreference && (
+                      <DetailRow icon={BadgeCheck} label="Role Pref." value={
+                        <span className="inline-block px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 text-xs font-bold">
+                          {rolePreference}
+                        </span>
+                      } color="text-purple-400" />
+                    )}
+                    {previousChairExperience && (
+                      <div className="py-3">
+                        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Previous Chair Experience</p>
+                        <p className="text-sm text-gray-700 bg-gray-50 p-3 rounded-lg border border-gray-100 leading-relaxed whitespace-pre-wrap">
+                          {previousChairExperience}
+                        </p>
+                      </div>
+                    )}
+                    {leadershipExample && (
+                      <div className="py-3">
+                        <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Leadership Example</p>
+                        <p className="text-sm text-gray-700 bg-gray-50 p-3 rounded-lg border border-gray-100 leading-relaxed whitespace-pre-wrap">
+                          {leadershipExample}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
               {/* Health & Emergency */}
-              {(medicalCond || application.dietary_restrictions) && (
+              {(medicalCond || application.dietary_restrictions || emergencyName || emergencyPhone) && (
                 <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
                   <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-3 flex items-center gap-2">
                     <Heart size={16} className="text-red-500" /> Health & Emergency
@@ -296,6 +347,14 @@ const ApplicationManagementModal: React.FC<ApplicationManagementModalProps> = ({
                     )}
                     {application.dietary_restrictions && (
                       <DetailRow icon={Heart} label="Dietary" value={application.dietary_restrictions} color="text-orange-400" />
+                    )}
+                    {emergencyName && (
+                      <DetailRow icon={User} label="Emergency" value={emergencyName} color="text-red-400" />
+                    )}
+                    {emergencyPhone && (
+                      <DetailRow icon={Phone} label="Em. Phone" value={
+                        <a href={`tel:${emergencyPhone}`} className="text-blue-600 hover:underline">{emergencyPhone}</a>
+                      } color="text-red-400" />
                     )}
                   </div>
                 </div>
@@ -343,11 +402,13 @@ const ApplicationManagementModal: React.FC<ApplicationManagementModalProps> = ({
                   ))}
                 </div>
 
-                {application.motivation && application.motivation !== 'Not provided' && (
+                {motivationText && motivationText !== 'Not provided' && (
                   <div>
-                    <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Motivation</span>
-                    <p className="text-sm text-gray-700 mt-1.5 bg-gray-50 p-3 rounded-lg border border-gray-100 leading-relaxed max-h-40 overflow-y-auto">
-                      {application.motivation}
+                    <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                      {isChair ? 'Why Chair' : 'Issue of Interest'}
+                    </span>
+                    <p className="text-sm text-gray-700 mt-1.5 bg-gray-50 p-3 rounded-lg border border-gray-100 leading-relaxed max-h-40 overflow-y-auto whitespace-pre-wrap">
+                      {motivationText}
                     </p>
                   </div>
                 )}
