@@ -19,11 +19,17 @@ const calc = (target: Date) => {
 
 const CountdownMini: React.FC<Props> = ({ targetDate, label, accent = 'gold' }) => {
   const [t, setT] = useState(() => calc(targetDate));
+  // Depend on the millisecond timestamp (a stable number), NOT the Date object
+  // reference — otherwise a parent that re-renders frequently (e.g. typing
+  // animation in Hero) hands us a fresh Date every frame, resetting the
+  // 1-second interval before it can ever fire.
+  const targetMs = targetDate.getTime();
 
   useEffect(() => {
-    const id = setInterval(() => setT(calc(targetDate)), 1000);
+    setT(calc(new Date(targetMs)));
+    const id = setInterval(() => setT(calc(new Date(targetMs))), 1000);
     return () => clearInterval(id);
-  }, [targetDate]);
+  }, [targetMs]);
 
   if (!t) return null;
 
