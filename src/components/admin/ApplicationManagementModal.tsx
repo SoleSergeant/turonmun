@@ -164,6 +164,35 @@ const ApplicationManagementModal: React.FC<ApplicationManagementModalProps> = ({
     ? application.motivation.replace(/^Interest:\s*/, '')
     : application.motivation;
 
+  // ── Parse ALL notes lines into rows so admins see every response ────────
+  // Lines that already get their own structured display in the modal are
+  // filtered out (case-insensitive) so we don't duplicate.
+  const ALREADY_SHOWN = new Set([
+    'application type', 'gender', 'grade', 'medical conditions',
+    'previous muns', 'telegram', 'phone', 'country/city',
+    'photo url', 'ielts url', 'sat url', 'date of birth',
+    'ielts score', 'sat score',
+    'role preference', 'previous chair experience', 'leadership example',
+  ]);
+  const allNotesRows: { label: string; value: string }[] = [];
+  if (application.notes) {
+    application.notes.split('\n').forEach((rawLine) => {
+      const line = rawLine.trim();
+      if (!line) return;
+      const m = line.match(/^([^:]+):\s*(.+)$/);
+      if (!m) return;
+      const label = m[1].trim();
+      const value = m[2].trim();
+      // Skip empty / placeholder values
+      if (!value || ['N/A','None','Not Specified','null','-'].includes(value)) return;
+      // Skip URL lines (already extracted into file sections)
+      if (/^https?:\/\//i.test(value)) return;
+      // Skip duplicates of already-displayed info
+      if (ALREADY_SHOWN.has(label.toLowerCase())) return;
+      allNotesRows.push({ label, value });
+    });
+  }
+
   // ── Detail row component ───────────────────────────────
   const DetailRow = ({ icon: Icon, label, value, color = 'text-gray-400', valueClass = '' }: {
     icon: any; label: string; value: React.ReactNode; color?: string; valueClass?: string;
@@ -531,6 +560,16 @@ const ApplicationManagementModal: React.FC<ApplicationManagementModalProps> = ({
                     } color="text-emerald-400" />
                   )}
 
+                  {(application as any).payment_status && (
+                    <DetailRow icon={DollarSign} label="Pay Status" value={
+                      <span className={`inline-block text-xs font-bold px-2 py-0.5 rounded uppercase ${
+                        (application as any).payment_status === 'paid'    ? 'bg-green-100 text-green-700'
+                        : (application as any).payment_status === 'overdue' ? 'bg-red-100 text-red-700'
+                        : 'bg-amber-100 text-amber-700'
+                      }`}>{(application as any).payment_status}</span>
+                    } color="text-emerald-400" />
+                  )}
+
                   {application.discount_eligibility && (
                     <DetailRow icon={Award} label="Discounts" value={application.discount_eligibility} color="text-amber-400" />
                   )}
@@ -542,6 +581,67 @@ const ApplicationManagementModal: React.FC<ApplicationManagementModalProps> = ({
                   } color="text-gray-400" />
                 </div>
               </div>
+
+              {/* All form responses (catch-all — shows ANY notes line we
+                  haven't already surfaced in a dedicated section). Guarantees
+                  no field the applicant filled in is hidden. */}
+              {(allNotesRows.length > 0 || application.unique_delegate_trait ||
+                application.type1_selected_prompt || application.type1_insight_response ||
+                application.type2_selected_prompt || application.type2_political_response) && (
+                <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
+                  <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-3 flex items-center gap-2">
+                    <FileText size={16} className="text-indigo-500" /> All Form Responses
+                  </h3>
+                  <div className="space-y-3">
+                    {application.unique_delegate_trait && (
+                      <div>
+                        <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wide mb-1">Unique Delegate Trait</p>
+                        <p className="text-sm text-gray-700 bg-gray-50 p-3 rounded-lg border border-gray-100 whitespace-pre-wrap">
+                          {application.unique_delegate_trait}
+                        </p>
+                      </div>
+                    )}
+                    {application.type1_selected_prompt && (
+                      <div>
+                        <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wide mb-1">
+                          Insight Prompt: {application.type1_selected_prompt}
+                        </p>
+                        {application.type1_insight_response && (
+                          <p className="text-sm text-gray-700 bg-gray-50 p-3 rounded-lg border border-gray-100 whitespace-pre-wrap">
+                            {application.type1_insight_response}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                    {application.type2_selected_prompt && (
+                      <div>
+                        <p className="text-[11px] font-bold text-gray-500 uppercase tracking-wide mb-1">
+                          Political Prompt: {application.type2_selected_prompt}
+                        </p>
+                        {application.type2_political_response && (
+                          <p className="text-sm text-gray-700 bg-gray-50 p-3 rounded-lg border border-gray-100 whitespace-pre-wrap">
+                            {application.type2_political_response}
+                          </p>
+                        )}
+                      </div>
+                    )}
+                    {allNotesRows.length > 0 && (
+                      <div className="divide-y divide-gray-100">
+                        {allNotesRows.map((row, i) => (
+                          <div key={i} className="flex items-start py-2 gap-3">
+                            <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wide w-32 shrink-0 pt-0.5">
+                              {row.label}
+                            </span>
+                            <span className="text-sm text-gray-800 flex-1 whitespace-pre-wrap">
+                              {row.value}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
 
               {/* Raw Notes (collapsed) */}
               {application.notes && (
