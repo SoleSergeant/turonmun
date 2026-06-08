@@ -766,17 +766,19 @@ export default function CommandCenter() {
                     <button onClick={() => setCustomMins(m => Math.max(0, m - 1))}
                       className="w-8 h-8 bg-white/5 rounded-lg text-white/40 hover:text-white hover:bg-white/10 text-lg font-bold flex items-center justify-center transition-all">−</button>
                     <input
-                      type="number"
+                      type="text"
                       inputMode="numeric"
-                      min={0}
-                      max={99}
+                      pattern="[0-9]*"
                       value={customMins}
                       onChange={(e) => {
-                        const v = parseInt(e.target.value || '0', 10);
+                        // Accept only digits, clamp to 0..99
+                        const digits = e.target.value.replace(/\D/g, '');
+                        const v = parseInt(digits || '0', 10);
                         if (!isNaN(v)) setCustomMins(Math.max(0, Math.min(99, v)));
                       }}
                       onFocus={(e) => e.target.select()}
-                      className="flex-1 w-0 text-center bg-transparent text-white text-3xl font-black tabular-nums focus:outline-none focus:ring-1 focus:ring-gold-400/40 rounded"
+                      title="Click and type a value"
+                      className="flex-1 w-0 text-center bg-white/5 hover:bg-white/10 text-white text-3xl font-black tabular-nums border border-white/10 hover:border-gold-400/40 focus:border-gold-400 focus:outline-none focus:ring-2 focus:ring-gold-400/40 rounded-lg cursor-text transition-colors py-1"
                     />
                     <button onClick={() => setCustomMins(m => Math.min(99, m + 1))}
                       className="w-8 h-8 bg-white/5 rounded-lg text-white/40 hover:text-white hover:bg-white/10 text-lg font-bold flex items-center justify-center transition-all">+</button>
@@ -789,17 +791,18 @@ export default function CommandCenter() {
                     <button onClick={() => setCustomSecs(s => Math.max(0, s - 5))}
                       className="w-8 h-8 bg-white/5 rounded-lg text-white/40 hover:text-white hover:bg-white/10 text-[10px] font-bold flex items-center justify-center transition-all">−5</button>
                     <input
-                      type="number"
+                      type="text"
                       inputMode="numeric"
-                      min={0}
-                      max={59}
+                      pattern="[0-9]*"
                       value={customSecs}
                       onChange={(e) => {
-                        const v = parseInt(e.target.value || '0', 10);
+                        const digits = e.target.value.replace(/\D/g, '');
+                        const v = parseInt(digits || '0', 10);
                         if (!isNaN(v)) setCustomSecs(Math.max(0, Math.min(59, v)));
                       }}
                       onFocus={(e) => e.target.select()}
-                      className="flex-1 w-0 text-center bg-transparent text-white text-3xl font-black tabular-nums focus:outline-none focus:ring-1 focus:ring-gold-400/40 rounded"
+                      title="Click and type a value"
+                      className="flex-1 w-0 text-center bg-white/5 hover:bg-white/10 text-white text-3xl font-black tabular-nums border border-white/10 hover:border-gold-400/40 focus:border-gold-400 focus:outline-none focus:ring-2 focus:ring-gold-400/40 rounded-lg cursor-text transition-colors py-1"
                     />
                     <button onClick={() => setCustomSecs(s => Math.min(59, s + 5))}
                       className="w-8 h-8 bg-white/5 rounded-lg text-white/40 hover:text-white hover:bg-white/10 text-[10px] font-bold flex items-center justify-center transition-all">+5</button>
