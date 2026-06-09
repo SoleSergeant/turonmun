@@ -1,10 +1,75 @@
-import React, { useState, useEffect } from 'react';
-import { PlusCircle, X, Trash2 } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { PlusCircle, X, Trash2, ChevronDown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { COMMON_COUNTRIES } from '@/data/countries';
 import type { CommitteeFormData } from './types';
 import ImageUpload from './ImageUpload';
+
+// ── Compact searchable country picker ─────────────────────────────────────
+// Replaces the native <datalist> which Chrome positions over the sidebar
+// when there are many items. This dropdown opens DIRECTLY below the input,
+// is height-limited with scroll, and closes on outside click.
+const CountryPicker: React.FC<{
+  value: string;
+  onChange: (v: string) => void;
+  options: string[];
+  placeholder?: string;
+}> = ({ value, onChange, options, placeholder }) => {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState('');
+  const wrapRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const onClick = (e: MouseEvent) => {
+      if (wrapRef.current && !wrapRef.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('mousedown', onClick);
+    return () => document.removeEventListener('mousedown', onClick);
+  }, [open]);
+
+  const filtered = options.filter(o => o.toLowerCase().includes(query.toLowerCase())).slice(0, 200);
+
+  return (
+    <div ref={wrapRef} className="relative flex-grow mr-2">
+      <input
+        type="text"
+        value={open ? query : value}
+        onChange={(e) => { setQuery(e.target.value); onChange(e.target.value); if (!open) setOpen(true); }}
+        onFocus={() => { setQuery(value || ''); setOpen(true); }}
+        placeholder={placeholder}
+        className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+      />
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-gray-400 hover:text-gray-600"
+        tabIndex={-1}
+      >
+        <ChevronDown size={16} />
+      </button>
+      {open && (
+        <div className="absolute left-0 right-0 top-full mt-1 z-50 max-h-56 overflow-y-auto bg-white border border-gray-300 rounded-md shadow-lg">
+          {filtered.length === 0 ? (
+            <div className="px-3 py-2 text-sm text-gray-400 italic">No match — keep typing to use as-is</div>
+          ) : (
+            filtered.map(opt => (
+              <button
+                key={opt}
+                type="button"
+                onMouseDown={(e) => { e.preventDefault(); onChange(opt); setOpen(false); }}
+                className={`block w-full text-left px-3 py-1.5 text-sm hover:bg-blue-50 ${opt === value ? 'bg-blue-100 font-semibold' : ''}`}
+              >
+                {opt}
+              </button>
+            ))
+          )}
+        </div>
+      )}
+    </div>
+  );
+};
 
 interface CommitteeFormProps {
   formData: CommitteeFormData;
@@ -206,9 +271,6 @@ const CommitteeForm = ({
         </button>
       </div>
       
-      <datalist id="committee-country-options">
-        {countryOptions.map((c) => <option key={c} value={c} />)}
-      </datalist>
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
@@ -373,12 +435,10 @@ const CommitteeForm = ({
               <div className="space-y-2">
                 {formData.countries.map((country, index) => (
                   <div key={index} className="flex items-center">
-                    <input
-                      type="text"
-                      list="committee-country-options"
+                    <CountryPicker
                       value={country}
-                      onChange={(e) => handleCountryChange(index, e.target.value)}
-                      className="flex-grow px-4 py-2 border border-gray-300 rounded-md mr-2"
+                      onChange={(v) => handleCountryChange(index, v)}
+                      options={countryOptions}
                       placeholder={`Country ${index + 1} (e.g. France)`}
                     />
                     <button
