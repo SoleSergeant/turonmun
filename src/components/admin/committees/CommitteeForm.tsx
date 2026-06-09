@@ -466,18 +466,19 @@ const CommitteeForm = ({
           onImageRemove={handleImageRemove}
         />
         
-        <div className="flex justify-end space-x-4">
+        {/* Sticky action bar — stays visible while scrolling the long form */}
+        <div className="sticky bottom-0 left-0 right-0 -mx-6 -mb-6 px-6 py-4 bg-white border-t border-gray-200 flex justify-end space-x-4 shadow-[0_-4px_12px_rgba(0,0,0,0.04)]">
           <button
             type="button"
             onClick={onCancel}
-            className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+            className="px-5 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 font-medium"
             disabled={isSubmitting}
           >
             Cancel
           </button>
           <button
             type="submit"
-            className="px-4 py-2 bg-diplomatic-700 text-white rounded-md hover:bg-diplomatic-800"
+            className="px-6 py-2 bg-diplomatic-700 text-white rounded-md hover:bg-diplomatic-800 font-semibold shadow-sm"
             disabled={isSubmitting}
           >
             {isSubmitting ? 'Saving...' : formData.id ? 'Update Committee' : 'Create Committee'}
