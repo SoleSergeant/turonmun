@@ -37,7 +37,6 @@ const EMPTY_FORM: Record<string, any> = {
   munExperienceYears: '',
   previousChairExperience: '',
   whyChair: '',
-  leadershipExample: '',
   agreeToTerms: false,
 };
 
@@ -157,7 +156,6 @@ export default function ChairApplication() {
           'APPLICATION TYPE: chair',
           `Role Preference: ${formData.rolePreference}`,
           `Previous Chair Experience: ${formData.previousChairExperience || 'None'}`,
-          `Leadership Example: ${formData.leadershipExample || 'N/A'}`,
         ].join('\n'),
       };
 
@@ -432,10 +430,6 @@ export default function ChairApplication() {
                     <label className={labelCls}>Why do you want to be a Chair at TuronMUN? *</label>
                     <textarea className={`${inputCls} resize-none`} name="whyChair" rows={5} value={formData.whyChair} onChange={handleChange} placeholder="Explain your motivation, what you hope to contribute, and why TuronMUN (min. 50 characters)" />
                     <p className="text-xs text-neutral-400 mt-1">{formData.whyChair.length} / 50 min. characters</p>
-                  </div>
-                  <div>
-                    <label className={labelCls}>Describe a time you led a group through a challenge <span className="text-neutral-400 text-xs font-normal">(Optional)</span></label>
-                    <textarea className={`${inputCls} resize-none`} name="leadershipExample" rows={4} value={formData.leadershipExample} onChange={handleChange} placeholder="Optional — but strongly recommended" />
                   </div>
                 </div>
               ))}
