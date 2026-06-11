@@ -152,11 +152,39 @@ export default function ChairApplication() {
         // and the column defaults aren't reliably set in production.
         status: 'pending',
         payment_status: 'pending',
-        notes: [
-          'APPLICATION TYPE: chair',
-          `Role Preference: ${formData.rolePreference}`,
-          `Previous Chair Experience: ${formData.previousChairExperience || 'None'}`,
-        ].join('\n'),
+        notes: (() => {
+          const hardcoded: Array<[string, string]> = [
+            ['APPLICATION TYPE', 'chair'],
+            ['Role Preference', formData.rolePreference],
+            ['Previous Chair Experience', formData.previousChairExperience || 'None'],
+          ];
+          const hardcodedLabels = new Set(hardcoded.map(([l]) => l.toLowerCase()));
+          // Map every visible dynamic question's answer into notes (skip
+          // fields already promoted to columns or hardcoded above) so the
+          // admin modal can surface every response the applicant gave.
+          const STRUCTURED_KEYS = new Set([
+            'fullName', 'email', 'telegramUsername', 'institution',
+            'countryAndCity', 'committeePreference1', 'committeePreference2',
+            'munExperienceYears', 'whyChair', 'agreeToTerms',
+          ]);
+          const dynamicLines = (formSettings?.form_questions ?? [])
+            .filter(q => q.visible && !STRUCTURED_KEYS.has(q.name))
+            .filter(q => !hardcodedLabels.has(q.label.toLowerCase()))
+            .map(q => {
+              const v = formData[q.name];
+              const str =
+                typeof v === 'boolean' ? (v ? 'Yes' : 'No')
+                : Array.isArray(v) ? v.join(', ')
+                : v == null ? ''
+                : String(v).trim();
+              return str ? `${q.label}: ${str}` : null;
+            })
+            .filter((line): line is string => !!line);
+          return [
+            ...hardcoded.map(([l, v]) => `${l}: ${v}`),
+            ...dynamicLines,
+          ].join('\n');
+        })(),
       };
 
       let { error } = await (supabase.from('applications') as any)

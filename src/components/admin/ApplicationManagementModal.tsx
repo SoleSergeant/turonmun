@@ -267,9 +267,9 @@ const ApplicationManagementModal: React.FC<ApplicationManagementModalProps> = ({
         {/* ─── Content ─── */}
         <div className="flex-1 overflow-y-auto p-6 md:p-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            
+
             {/* ════════ LEFT COLUMN ════════ */}
-            <div className="space-y-5">
+            <div className="space-y-5 min-w-0">
 
               {/* Personal Information */}
               <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
@@ -358,7 +358,7 @@ const ApplicationManagementModal: React.FC<ApplicationManagementModalProps> = ({
                     {previousChairExperience && (
                       <div className="py-3">
                         <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Previous Chair Experience</p>
-                        <p className="text-sm text-gray-700 bg-gray-50 p-3 rounded-lg border border-gray-100 leading-relaxed whitespace-pre-wrap">
+                        <p className="text-sm text-gray-700 bg-gray-50 p-3 rounded-lg border border-gray-100 leading-relaxed whitespace-pre-wrap break-words">
                           {previousChairExperience}
                         </p>
                       </div>
@@ -366,7 +366,7 @@ const ApplicationManagementModal: React.FC<ApplicationManagementModalProps> = ({
                     {leadershipExample && (
                       <div className="py-3">
                         <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Leadership Example</p>
-                        <p className="text-sm text-gray-700 bg-gray-50 p-3 rounded-lg border border-gray-100 leading-relaxed whitespace-pre-wrap">
+                        <p className="text-sm text-gray-700 bg-gray-50 p-3 rounded-lg border border-gray-100 leading-relaxed whitespace-pre-wrap break-words">
                           {leadershipExample}
                         </p>
                       </div>
@@ -421,7 +421,7 @@ const ApplicationManagementModal: React.FC<ApplicationManagementModalProps> = ({
             </div>
 
             {/* ════════ RIGHT COLUMN ════════ */}
-            <div className="space-y-5">
+            <div className="space-y-5 min-w-0">
 
               {/* Committee Preferences */}
               <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
@@ -650,7 +650,7 @@ const ApplicationManagementModal: React.FC<ApplicationManagementModalProps> = ({
                             <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wide w-32 shrink-0 pt-0.5">
                               {row.label}
                             </span>
-                            <span className="text-sm text-gray-800 flex-1 whitespace-pre-wrap">
+                            <span className="text-sm text-gray-800 flex-1 min-w-0 whitespace-pre-wrap break-words">
                               {row.value}
                             </span>
                           </div>
