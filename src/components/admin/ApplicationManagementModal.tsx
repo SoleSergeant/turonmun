@@ -187,19 +187,13 @@ const ApplicationManagementModal: React.FC<ApplicationManagementModalProps> = ({
         [/do you want to be considered.*delegate/i, 'Considered for Delegate'],
       ];
       const label = LABEL_ALIASES.find(([re]) => re.test(rawLabel))?.[1] ?? rawLabel;
-      let value = m[2].trim();
-      // Browsers expose file-input values as "C:\fakepath\name.ext" — strip
-      // the fake prefix so the admin just sees the file name.
-      value = value.replace(/^[A-Za-z]:\\fakepath\\/i, '');
+      const value = m[2].trim();
       // Skip empty / placeholder values
       if (!value || ['N/A','None','Not Specified','null','-'].includes(value)) return;
+      // Skip URL lines (already extracted into file sections)
+      if (/^https?:\/\//i.test(value)) return;
       // Skip duplicates of already-displayed info
       if (ALREADY_SHOWN.has(label.toLowerCase())) return;
-      // Skip URL lines that the dedicated file sections above already
-      // surface (Photo / IELTS / SAT) — but keep any *other* uploaded-file
-      // URL so the admin can actually see what the applicant submitted.
-      const KNOWN_FILE_LABELS = ['photo url', 'ielts url', 'sat url'];
-      if (/^https?:\/\//i.test(value) && KNOWN_FILE_LABELS.includes(label.toLowerCase())) return;
       allNotesRows.push({ label, value });
     });
   }
@@ -656,42 +650,16 @@ const ApplicationManagementModal: React.FC<ApplicationManagementModalProps> = ({
                     )}
                     {allNotesRows.length > 0 && (
                       <div className="divide-y divide-gray-100">
-                        {allNotesRows.map((row, i) => {
-                          const isUrl = /^https?:\/\//i.test(row.value);
-                          const isImage = isUrl && /\.(png|jpe?g|gif|webp|bmp|svg)(\?|#|$)/i.test(row.value);
-                          return (
-                            <div key={i} className="flex items-start py-2 gap-3">
-                              <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wide w-32 shrink-0 pt-0.5">
-                                {row.label}
-                              </span>
-                              <span className="text-sm text-gray-800 flex-1 min-w-0 whitespace-pre-wrap break-words">
-                                {isImage ? (
-                                  <a href={row.value} target="_blank" rel="noopener noreferrer" className="inline-block">
-                                    <img
-                                      src={row.value}
-                                      alt={row.label}
-                                      className="max-h-48 rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow"
-                                    />
-                                    <span className="block text-xs text-blue-600 hover:underline mt-1 flex items-center gap-1">
-                                      Open full size <ExternalLink size={11} />
-                                    </span>
-                                  </a>
-                                ) : isUrl ? (
-                                  <a
-                                    href={row.value}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="text-blue-600 hover:underline flex items-center gap-1 break-all"
-                                  >
-                                    {row.value} <ExternalLink size={12} className="flex-shrink-0" />
-                                  </a>
-                                ) : (
-                                  row.value
-                                )}
-                              </span>
-                            </div>
-                          );
-                        })}
+                        {allNotesRows.map((row, i) => (
+                          <div key={i} className="flex items-start py-2 gap-3">
+                            <span className="text-[11px] font-bold text-gray-500 uppercase tracking-wide w-32 shrink-0 pt-0.5">
+                              {row.label}
+                            </span>
+                            <span className="text-sm text-gray-800 flex-1 min-w-0 whitespace-pre-wrap break-words">
+                              {row.value}
+                            </span>
+                          </div>
+                        ))}
                       </div>
                     )}
                   </div>
