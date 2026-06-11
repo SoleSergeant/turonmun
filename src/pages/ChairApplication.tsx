@@ -49,9 +49,29 @@ export default function ChairApplication() {
 
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState<Record<string, any>>(EMPTY_FORM);
+  const [dynamicFiles, setDynamicFiles] = useState<Record<string, File | null>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [alreadyApplied, setAlreadyApplied] = useState(false);
+
+  const setDynamicFile = (name: string, file: File | null) =>
+    setDynamicFiles(prev => ({ ...prev, [name]: file }));
+
+  // Upload a single file to the 'applications' bucket under chair-files/.
+  // Returns the public URL on success, null on failure.
+  const uploadDynamicFile = async (file: File): Promise<string | null> => {
+    try {
+      const ext = file.name.split('.').pop() ?? 'bin';
+      const path = `chair-files/${Math.random().toString(36).slice(2)}_${Date.now()}.${ext}`;
+      const { error } = await supabase.storage.from('applications').upload(path, file);
+      if (error) throw error;
+      const { data } = supabase.storage.from('applications').getPublicUrl(path);
+      return data.publicUrl;
+    } catch (err) {
+      console.error('Dynamic file upload failed:', err);
+      return null;
+    }
+  };
 
   // Autosave the chair form (survives refresh / accidental close).
   const { restoredAt, clearDraft } = useFormAutosave(
@@ -129,6 +149,15 @@ export default function ChairApplication() {
     }
     setIsSubmitting(true);
     try {
+      // Upload any chosen file-type dynamic question values up-front so we
+      // can include the resulting public URLs in `notes`.
+      const uploadedUrls: Record<string, string> = {};
+      for (const [name, file] of Object.entries(dynamicFiles)) {
+        if (!file) continue;
+        const url = await uploadDynamicFile(file);
+        if (url) uploadedUrls[name] = url;
+      }
+
       const basePayload: Record<string, any> = {
         user_id: user?.id ?? null,
         full_name: formData.fullName,
@@ -171,6 +200,12 @@ export default function ChairApplication() {
             .filter(q => q.visible && !STRUCTURED_KEYS.has(q.name))
             .filter(q => !hardcodedLabels.has(q.label.toLowerCase()))
             .map(q => {
+              // Prefer the uploaded public URL for file-type questions so
+              // admins can open the actual upload.
+              if (q.type === 'file') {
+                const url = uploadedUrls[q.name];
+                return url ? `${q.label}: ${url}` : null;
+              }
               const v = formData[q.name];
               const str =
                 typeof v === 'boolean' ? (v ? 'Yes' : 'No')
@@ -347,6 +382,8 @@ export default function ChairApplication() {
                   questions={questionsForStep(1)}
                   formData={formData}
                   handleChange={handleChange}
+                  dynamicFiles={dynamicFiles}
+                  setDynamicFile={setDynamicFile}
                   nextStep={nextStep}
                   prevStep={prevStep}
                   isFirst
@@ -386,6 +423,8 @@ export default function ChairApplication() {
                   questions={questionsForStep(2)}
                   formData={formData}
                   handleChange={handleChange}
+                  dynamicFiles={dynamicFiles}
+                  setDynamicFile={setDynamicFile}
                   nextStep={nextStep}
                   prevStep={prevStep}
                 />
@@ -437,6 +476,8 @@ export default function ChairApplication() {
                   questions={questionsForStep(3)}
                   formData={formData}
                   handleChange={handleChange}
+                  dynamicFiles={dynamicFiles}
+                  setDynamicFile={setDynamicFile}
                   nextStep={nextStep}
                   prevStep={prevStep}
                 />

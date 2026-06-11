@@ -12,6 +12,10 @@ interface DynamicFormStepProps {
   handleChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => void;
   photoFile?: File | null;
   updatePhotoFile?: (file: File | null) => void;
+  // Optional: capture uploaded File objects for type:'file' dynamic questions
+  // so the parent can upload them on submit (keyed by question name).
+  dynamicFiles?: Record<string, File | null>;
+  setDynamicFile?: (name: string, file: File | null) => void;
   nextStep: () => void;
   prevStep: () => void;
   isFirst?: boolean;
@@ -86,8 +90,10 @@ const FormField: React.FC<{
   handleChange: DynamicFormStepProps['handleChange'];
   photoFile?: File | null;
   updatePhotoFile?: (f: File | null) => void;
+  dynamicFiles?: Record<string, File | null>;
+  setDynamicFile?: (name: string, file: File | null) => void;
   excludeCommittees: string[];
-}> = ({ q, formData, handleChange, photoFile, updatePhotoFile, excludeCommittees }) => {
+}> = ({ q, formData, handleChange, photoFile, updatePhotoFile, dynamicFiles, setDynamicFile, excludeCommittees }) => {
   if (!q.visible) return null;
 
   const sharedCls = 'w-full px-4 py-3 border border-neutral-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-diplomatic-300 focus:border-transparent transition-all';
@@ -105,13 +111,15 @@ const FormField: React.FC<{
     return null; // photo upload removed — not required for applications
   }
 
-  // File inputs need special handling: the browser exposes the value as
-  // "C:\fakepath\filename.ext", which would otherwise get stored in formData
-  // and serialized into notes. There's no upload pipeline wired in here, so
-  // we capture just the file name (purely informational for the admin) and
-  // never let the fake path leak through.
+  // File inputs need special handling: the browser exposes the input's
+  // .value as "C:\fakepath\filename.ext", so we must never bind that string
+  // into formData. Instead we hand the actual File object to the parent via
+  // setDynamicFile (so it can upload on submit) and store the bare file name
+  // in formData purely for display/validation.
   if (q.type === 'file') {
-    const currentName = typeof formData[q.name] === 'string' ? formData[q.name] : '';
+    const pickedFile = dynamicFiles?.[q.name] ?? null;
+    const currentName = pickedFile?.name
+      ?? (typeof formData[q.name] === 'string' ? formData[q.name] : '');
     return (
       <div>
         <label htmlFor={q.name} className="block text-sm font-medium text-neutral-700 mb-1">
@@ -123,7 +131,8 @@ const FormField: React.FC<{
           type="file" id={q.name} name={q.name}
           required={q.required}
           onChange={e => {
-            const file = e.target.files?.[0];
+            const file = e.target.files?.[0] ?? null;
+            setDynamicFile?.(q.name, file);
             const synthetic = {
               target: { name: q.name, value: file?.name ?? '', type: 'text' },
             } as unknown as React.ChangeEvent<HTMLInputElement>;
@@ -184,6 +193,7 @@ const FormField: React.FC<{
 const DynamicFormStep: React.FC<DynamicFormStepProps> = ({
   step, stepTitle, stepSubtitle, questions,
   formData, handleChange, photoFile, updatePhotoFile,
+  dynamicFiles, setDynamicFile,
   nextStep, prevStep, isFirst = false,
 }) => {
   const visible = questions.filter(q => q.visible).sort((a, b) => a.order - b.order);
@@ -214,6 +224,7 @@ const DynamicFormStep: React.FC<DynamicFormStepProps> = ({
           <FormField
             key={q.id} q={q} formData={formData} handleChange={handleChange}
             photoFile={photoFile} updatePhotoFile={updatePhotoFile}
+            dynamicFiles={dynamicFiles} setDynamicFile={setDynamicFile}
             excludeCommittees={selectedCommittees.filter(v => v !== formData[q.name])}
           />
         ))}
