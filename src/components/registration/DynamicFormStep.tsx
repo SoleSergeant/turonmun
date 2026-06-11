@@ -105,6 +105,40 @@ const FormField: React.FC<{
     return null; // photo upload removed — not required for applications
   }
 
+  // File inputs need special handling: the browser exposes the value as
+  // "C:\fakepath\filename.ext", which would otherwise get stored in formData
+  // and serialized into notes. There's no upload pipeline wired in here, so
+  // we capture just the file name (purely informational for the admin) and
+  // never let the fake path leak through.
+  if (q.type === 'file') {
+    const currentName = typeof formData[q.name] === 'string' ? formData[q.name] : '';
+    return (
+      <div>
+        <label htmlFor={q.name} className="block text-sm font-medium text-neutral-700 mb-1">
+          {q.label}
+          {q.required && <span className="text-red-500"> *</span>}
+          {!q.required && <span className="text-neutral-400 text-xs font-normal ml-1">(Optional)</span>}
+        </label>
+        <input
+          type="file" id={q.name} name={q.name}
+          required={q.required}
+          onChange={e => {
+            const file = e.target.files?.[0];
+            const synthetic = {
+              target: { name: q.name, value: file?.name ?? '', type: 'text' },
+            } as unknown as React.ChangeEvent<HTMLInputElement>;
+            handleChange(synthetic);
+          }}
+          className={sharedCls}
+        />
+        {currentName && (
+          <p className="text-xs text-neutral-500 mt-1">Selected: {currentName}</p>
+        )}
+        {q.helpText && <p className="text-xs text-neutral-500 mt-1">{q.helpText}</p>}
+      </div>
+    );
+  }
+
   return (
     <div>
       <label htmlFor={q.name} className="block text-sm font-medium text-neutral-700 mb-1">

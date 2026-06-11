@@ -181,8 +181,16 @@ const ApplicationManagementModal: React.FC<ApplicationManagementModalProps> = ({
       if (!line) return;
       const m = line.match(/^([^:]+):\s*(.+)$/);
       if (!m) return;
-      const label = m[1].trim();
-      const value = m[2].trim();
+      const rawLabel = m[1].trim();
+      // Map verbose question labels to short, scannable ones for admins.
+      const LABEL_ALIASES: Array<[RegExp, string]> = [
+        [/do you want to be considered.*delegate/i, 'Considered for Delegate'],
+      ];
+      const label = LABEL_ALIASES.find(([re]) => re.test(rawLabel))?.[1] ?? rawLabel;
+      let value = m[2].trim();
+      // Browsers expose file-input values as "C:\fakepath\name.ext" — strip
+      // the fake prefix so the admin just sees the file name.
+      value = value.replace(/^[A-Za-z]:\\fakepath\\/i, '');
       // Skip empty / placeholder values
       if (!value || ['N/A','None','Not Specified','null','-'].includes(value)) return;
       // Skip URL lines (already extracted into file sections)
