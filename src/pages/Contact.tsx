@@ -184,23 +184,23 @@ const Contact = () => {
                   {/* Conference photo */}
                   <div className="aspect-video bg-neutral-100 overflow-hidden">
                     <img
-                      src="/lovable-uploads/mun-action-1.jpg"
-                      alt="TuronMUN Conference"
+                      src="/images/camu-venue.jpg"
+                      alt="Central Asian Medical University (CAMU)"
                       className="w-full h-full object-cover"
                     />
                   </div>
 
                   <div className="p-6">
                     <h3 className="text-xl font-display font-semibold mb-1">Conference Venue</h3>
-                    <span className="inline-block text-xs font-bold uppercase tracking-widest text-amber-600 bg-amber-50 border border-amber-200 rounded-full px-3 py-0.5 mb-3">
-                      To Be Announced
+                    <span className="inline-block text-xs font-bold uppercase tracking-widest text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-full px-3 py-0.5 mb-3">
+                      Central Asian Medical University (CAMU)
                     </span>
                     <p className="text-neutral-600 mb-5">
-                      The venue for TuronMUN Season 7 has not yet been confirmed. We will announce the location as soon as it is finalised — stay tuned!
+                      TuronMUN Season 7 will be hosted at Central Asian Medical University (CAMU) in Fergana, Uzbekistan.
                     </p>
                     <div className="flex items-center mb-3">
                       <MapPin size={18} className="text-diplomatic-600 mr-2 flex-shrink-0" />
-                      <p className="text-neutral-500 text-sm">Fergana, Uzbekistan</p>
+                      <p className="text-neutral-500 text-sm">Central Asian Medical University, Fergana, Uzbekistan</p>
                     </div>
                     <div className="flex items-center mb-2">
                       <Mail size={18} className="text-diplomatic-600 mr-2 flex-shrink-0" />
