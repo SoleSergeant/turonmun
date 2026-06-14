@@ -188,8 +188,22 @@ const CommitteeForm = ({
       setIsSubmitting(true);
       
       const filteredTopics = formData.topics.filter(t => t.trim());
-      const filteredCountries = formData.countries.map(c => c.trim()).filter(Boolean);
-      const totalSpots = Number(formData.total_spots) > 0 ? Number(formData.total_spots) : 1;
+      // Dedupe roster case-insensitively, preserving first occurrence order.
+      const seen = new Set<string>();
+      const filteredCountries = formData.countries
+        .map(c => c.trim())
+        .filter(c => {
+          if (!c) return false;
+          const k = c.toLowerCase();
+          if (seen.has(k)) return false;
+          seen.add(k);
+          return true;
+        });
+      // When a roster is configured, total_spots is derived from it (one seat
+      // per country). Without a roster, fall back to the manual number.
+      const totalSpots = filteredCountries.length > 0
+        ? filteredCountries.length
+        : (Number(formData.total_spots) > 0 ? Number(formData.total_spots) : 1);
 
       // Format the committee name with abbreviation if provided
       const fullName = formData.abbreviation
@@ -397,21 +411,32 @@ const CommitteeForm = ({
             leave the country list empty and the allocation screen will use numbered placeholders (Slot 1, Slot 2…).
           </p>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Total Spots</label>
-              <input
-                type="number"
-                name="total_spots"
-                min={1}
-                value={formData.total_spots}
-                onChange={(e) => setFormData(prev => ({ ...prev, total_spots: Number(e.target.value) }))}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md"
-                placeholder="e.g. 20"
-              />
-              <p className="text-xs text-gray-400 mt-1">Number of delegate seats in this committee.</p>
-            </div>
-          </div>
+          {(() => {
+            const rosterCount = formData.countries.map(c => c.trim()).filter(Boolean).length;
+            const rosterMode = rosterCount > 0;
+            return (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Total Spots</label>
+                  <input
+                    type="number"
+                    name="total_spots"
+                    min={1}
+                    value={rosterMode ? rosterCount : formData.total_spots}
+                    onChange={(e) => setFormData(prev => ({ ...prev, total_spots: Number(e.target.value) }))}
+                    disabled={rosterMode}
+                    className={`w-full px-4 py-2 border border-gray-300 rounded-md ${rosterMode ? 'bg-gray-50 text-gray-500 cursor-not-allowed' : ''}`}
+                    placeholder="e.g. 20"
+                  />
+                  <p className="text-xs text-gray-400 mt-1">
+                    {rosterMode
+                      ? `Derived from the country roster below (${rosterCount} ${rosterCount === 1 ? 'country' : 'countries'}).`
+                      : 'Number of delegate seats in this committee.'}
+                  </p>
+                </div>
+              </div>
+            );
+          })()}
 
           <div className="mt-4">
             <div className="flex justify-between items-center mb-2">
@@ -450,11 +475,9 @@ const CommitteeForm = ({
                     </button>
                   </div>
                 ))}
-                {formData.countries.filter(c => c.trim()).length > Number(formData.total_spots) && (
-                  <p className="text-xs text-amber-600">
-                    You have more countries than total spots — total spots will be raised to match.
-                  </p>
-                )}
+                <p className="text-xs text-gray-400 mt-1">
+                  Total spots will match the number of countries in this roster.
+                </p>
               </div>
             )}
           </div>

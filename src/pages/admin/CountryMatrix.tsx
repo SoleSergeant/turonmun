@@ -162,6 +162,14 @@ const CountryMatrix = () => {
       const countryCommittees: CountryAvailability['committees'] = {};
 
       committeesData.forEach(committee => {
+        const roster: string[] = ((committee as any).countries) || [];
+        const rosterMode = roster.length > 0;
+        // When a roster is configured, only surface a cell when this country
+        // is on the roster. When no roster, the committee is "unrestricted"
+        // and every country gets a cell (legacy behaviour).
+        const inRoster = roster.some(c => c.toLowerCase() === country.toLowerCase());
+        if (rosterMode && !inRoster) return;
+
         const assignment = assignmentsData.find(
           a => (a.country === country || a.country_name === country) && a.committee_id === committee.id
         );
@@ -171,7 +179,7 @@ const CountryMatrix = () => {
           : undefined;
 
         countryCommittees[committee.id] = {
-          available: true, // All countries available by default
+          available: true,
           assigned: !!assignment,
           assignedTo: assignment ? assignment.application_id : undefined,
           assignmentId: assignment?.id,
@@ -228,27 +236,18 @@ const CountryMatrix = () => {
         return;
       }
 
-      // ── Roster check — warn + auto-add if country not in the committee's list ──
+      // ── Roster check — strict mode: when a committee has a configured
+      // roster, only roster countries can be assigned. Admins must edit the
+      // committee to extend its roster before assigning off-roster countries.
       const roster: string[] = ((committee as any)?.countries) || [];
       const inRoster = roster.some(c => c.toLowerCase() === country.toLowerCase());
       if (committee && roster.length > 0 && !inRoster) {
-        const ok = window.confirm(
-          `${country} is not in ${committee.name}'s country list.\n\n` +
-          `There are still open seats. Add ${country} to this committee and assign anyway?`
-        );
-        if (!ok) return;
-
-        const newCountries = [...roster, country];
-        const { error: rosterErr } = await (supabase.from('committees') as any)
-          .update({ countries: newCountries })
-          .eq('id', committeeId);
-        if (rosterErr) {
-          toast({ title: 'Error', description: `Could not add country to committee: ${rosterErr.message}`, variant: 'destructive' });
-          return;
-        }
-        // reflect locally
-        setCommittees(prev => prev.map(c => c.id === committeeId ? { ...c, countries: newCountries } : c));
-        toast({ title: 'Country added', description: `${country} added to ${committee.name}.` });
+        toast({
+          title: 'Not in roster',
+          description: `${country} is not in ${committee.name}'s country roster. Add it from the Committees page first.`,
+          variant: 'destructive',
+        });
+        return;
       }
 
       // Check if this delegate already has an assignment for this committee
@@ -784,10 +783,20 @@ const CountryMatrix = () => {
                       </td>
                       {committees.map(committee => {
                         const slot = country.committees[committee.id];
+                        // No cell ⇒ this committee has a roster and this
+                        // country isn't on it. Render a quiet "—" so the
+                        // grid stays readable without showing a control.
+                        if (!slot) {
+                          return (
+                            <td key={committee.id} className="px-4 py-4 text-center">
+                              <span className="text-gray-200 select-none" title="Not on this committee's roster">—</span>
+                            </td>
+                          );
+                        }
                         return (
                           <td key={committee.id} className="px-4 py-4 text-center">
                             <div className="flex flex-col items-center gap-2">
-                              {slot?.assigned ? (
+                              {slot.assigned ? (
                                 <div className="w-full">
                                   <div className="flex items-center justify-center gap-2 px-3 py-2 bg-purple-50 border border-purple-200 rounded-lg">
                                     <Lock className="h-4 w-4 text-purple-600" />

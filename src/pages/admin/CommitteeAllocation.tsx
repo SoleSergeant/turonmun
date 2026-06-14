@@ -167,7 +167,10 @@ const CommitteeAllocation = () => {
     (c.abbreviation || '').toLowerCase().includes(search.toLowerCase())
   );
 
-  const totalSeats = committees.reduce((acc, c) => acc + Math.max(c.total_spots ?? 20, (c.countries || []).length), 0);
+  const totalSeats = committees.reduce((acc, c) => {
+    const rosterCount = (c.countries || []).filter(Boolean).length;
+    return acc + (rosterCount > 0 ? rosterCount : (c.total_spots ?? 20));
+  }, 0);
   const totalFilled = assignments.length;
 
   return (
@@ -229,15 +232,30 @@ const CommitteeAllocation = () => {
           <div className="space-y-6">
             {filteredCommittees.map((committee) => {
               const committeeAssignments = assignments.filter(a => a.committee_id === committee.id);
-              const configuredCountries = committee.countries || [];
-              const totalSpots = Math.max(committee.total_spots ?? 20, configuredCountries.length, committeeAssignments.length);
-              const filled = committeeAssignments.length;
-              const openCount = Math.max(0, totalSpots - filled);
+              // Dedupe roster case-insensitively, preserving order.
+              const seen = new Set<string>();
+              const roster: string[] = (committee.countries || []).filter(c => {
+                const k = (c || '').trim().toLowerCase();
+                if (!k || seen.has(k)) return false;
+                seen.add(k);
+                return true;
+              });
+              const rosterMode = roster.length > 0;
 
-              // Country options: the committee's configured roster first (prioritised),
-              // then the full global list — so every country is still pickable.
-              const roster = Array.from(new Set([...configuredCountries, ...countryOptions]));
-              const usedCountries = new Set(committeeAssignments.map(a => (a.country || '').toLowerCase()));
+              // Assignments that match a roster country (used in roster mode).
+              const rosterKey = (s: string) => s.trim().toLowerCase();
+              const rosterKeys = new Set(roster.map(rosterKey));
+              const offRosterAssignments = rosterMode
+                ? committeeAssignments.filter(a => !rosterKeys.has(rosterKey(a.country || '')))
+                : [];
+
+              const filled = committeeAssignments.length;
+              const totalSpots = rosterMode
+                ? roster.length
+                : Math.max(committee.total_spots ?? 20, committeeAssignments.length);
+              const openCount = rosterMode
+                ? 0  // open seats are derived per-roster-country below
+                : Math.max(0, totalSpots - filled);
 
               return (
                 <div key={committee.id} className="bg-white rounded-lg shadow-sm border overflow-hidden">
@@ -246,6 +264,11 @@ const CommitteeAllocation = () => {
                     <div className="flex items-center gap-2">
                       <Users className="h-4 w-4 text-diplomatic-600" />
                       <span className="font-semibold text-gray-900">{committee.name}</span>
+                      {!rosterMode && (
+                        <span className="text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded-full px-2 py-0.5">
+                          No roster configured
+                        </span>
+                      )}
                     </div>
                     <span className={`text-xs font-bold px-3 py-1 rounded-full ${
                       filled >= totalSpots ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'
@@ -256,14 +279,56 @@ const CommitteeAllocation = () => {
 
                   {/* Slots */}
                   <div className="p-5 grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {/* Filled slots */}
-                    {committeeAssignments.map((a) => {
-                      // options = this assignment's own country + countries not used by others
-                      const editOptions = roster.filter(
+                    {/* ─── Roster mode: one fixed seat per roster country ─── */}
+                    {rosterMode && roster.map((country) => {
+                      const assignment = committeeAssignments.find(
+                        a => rosterKey(a.country || '') === rosterKey(country)
+                      );
+                      const code = getCountryCode(country);
+                      if (assignment) {
+                        return (
+                          <div key={country} className="flex items-center gap-2 px-3 py-2 bg-purple-50 border border-purple-200 rounded-lg">
+                            {code
+                              ? <img src={`https://flagcdn.com/24x18/${code.toLowerCase()}.png`} alt="" className="h-4 w-auto shrink-0 rounded-sm" />
+                              : <Flag className="h-4 w-4 text-purple-500 shrink-0" />}
+                            <span className="w-32 text-sm font-semibold text-purple-900 truncate" title={country}>{country}</span>
+                            <span className="text-sm text-gray-700 truncate flex-1">{delegateName(assignment.application_id)}</span>
+                            <button onClick={() => unassign(assignment)} className="text-red-500 hover:text-red-700 shrink-0" title="Unassign">
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </div>
+                        );
+                      }
+                      return (
+                        <div key={country} className="flex items-center gap-2 px-3 py-2 bg-gray-50 border border-dashed border-gray-300 rounded-lg">
+                          {code
+                            ? <img src={`https://flagcdn.com/24x18/${code.toLowerCase()}.png`} alt="" className="h-4 w-auto shrink-0 rounded-sm opacity-60" />
+                            : <MapPin className="h-4 w-4 text-gray-400 shrink-0" />}
+                          <span className="w-32 text-sm font-medium text-gray-700 truncate" title={country}>{country}</span>
+                          <select
+                            value=""
+                            onChange={(e) => {
+                              if (e.target.value) assignDelegate(committee.id, country, e.target.value);
+                            }}
+                            className="flex-1 text-sm border border-gray-300 rounded px-2 py-1 bg-white"
+                          >
+                            <option value="">Assign delegate…</option>
+                            {availableDelegates.map(d => (
+                              <option key={d.id} value={d.id}>{d.full_name}</option>
+                            ))}
+                          </select>
+                        </div>
+                      );
+                    })}
+
+                    {/* ─── Unrestricted mode: keep the original pick-country UX ─── */}
+                    {!rosterMode && committeeAssignments.map((a) => {
+                      const usedCountries = new Set(committeeAssignments.map(x => (x.country || '').toLowerCase()));
+                      const editOptions = countryOptions.filter(
                         c => c.toLowerCase() === (a.country || '').toLowerCase() ||
                              !usedCountries.has(c.toLowerCase())
                       );
-                      const known = roster.some(c => c.toLowerCase() === (a.country || '').toLowerCase());
+                      const known = countryOptions.some(c => c.toLowerCase() === (a.country || '').toLowerCase());
                       return (
                         <div key={a.id} className="flex items-center gap-2 px-3 py-2 bg-purple-50 border border-purple-200 rounded-lg">
                           <Flag className="h-4 w-4 text-purple-500 shrink-0" />
@@ -284,15 +349,14 @@ const CommitteeAllocation = () => {
                       );
                     })}
 
-                    {/* Open slots */}
-                    {Array.from({ length: openCount }).map((_, i) => {
+                    {!rosterMode && Array.from({ length: openCount }).map((_, i) => {
                       const key = `${committee.id}:${i}`;
-                      // countries chosen in other open-slot drafts for this committee
+                      const usedCountries = new Set(committeeAssignments.map(a => (a.country || '').toLowerCase()));
                       const otherDrafts = Object.entries(drafts)
                         .filter(([k, v]) => k.startsWith(`${committee.id}:`) && k !== key && v)
                         .map(([, v]) => v.toLowerCase());
                       const taken = new Set([...usedCountries, ...otherDrafts]);
-                      const options = roster.filter(c => !taken.has(c.toLowerCase()));
+                      const options = countryOptions.filter(c => !taken.has(c.toLowerCase()));
                       const draftVal = drafts[key] ?? '';
                       return (
                         <div key={key} className="flex items-center gap-2 px-3 py-2 bg-gray-50 border border-dashed border-gray-300 rounded-lg">
@@ -328,12 +392,36 @@ const CommitteeAllocation = () => {
                       );
                     })}
 
-                    {openCount === 0 && (
+                    {!rosterMode && openCount === 0 && committeeAssignments.length > 0 && (
                       <div className="md:col-span-2 flex items-center justify-center gap-2 py-2 text-sm text-green-600">
                         <Check className="h-4 w-4" /> All seats filled
                       </div>
                     )}
                   </div>
+
+                  {/* Off-roster assignments (legacy / pre-roster data). Surfaced so admins can clean them up. */}
+                  {rosterMode && offRosterAssignments.length > 0 && (
+                    <div className="px-5 py-3 border-t bg-amber-50/40">
+                      <p className="text-[11px] font-bold text-amber-800 uppercase tracking-wide mb-2">
+                        Off-roster ({offRosterAssignments.length})
+                      </p>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                        {offRosterAssignments.map(a => (
+                          <div key={a.id} className="flex items-center gap-2 px-3 py-2 bg-white border border-amber-200 rounded-lg">
+                            <Flag className="h-4 w-4 text-amber-500 shrink-0" />
+                            <span className="w-32 text-sm font-medium text-amber-900 truncate" title={a.country || ''}>{a.country || '(no country)'}</span>
+                            <span className="text-sm text-gray-700 truncate flex-1">{delegateName(a.application_id)}</span>
+                            <button onClick={() => unassign(a)} className="text-red-500 hover:text-red-700 shrink-0" title="Unassign">
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                      <p className="text-[11px] text-amber-700 mt-2">
+                        These delegates were assigned to countries not in this committee's roster. Unassign and re-allocate to a roster seat, or add the country to the committee's roster in Committees.
+                      </p>
+                    </div>
+                  )}
                 </div>
               );
             })}
