@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Users, Shield, Heart, Bell, Calendar, ArrowRight, Send, Clock } from 'lucide-react';
+import { Users, Shield, Heart, Eye, Bell, Calendar, ArrowRight, Send, Clock, ExternalLink } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import CountdownMini from '../components/CountdownMini';
@@ -71,7 +71,7 @@ const RegistrationSelection = () => {
               )}
 
               {/* Role cards */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-10">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-5xl mx-auto mb-10">
                 {/* Delegate */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
@@ -199,6 +199,30 @@ const RegistrationSelection = () => {
                       </Link>
                     </div>
                   )}
+                </motion.div>
+
+                {/* Observer — external Google Form */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.4 }}
+                  className="relative backdrop-blur-lg bg-white/5 border border-white/30 hover:bg-white/10 hover:border-white/40 rounded-3xl p-8 transition-all"
+                >
+                  <div className="w-14 h-14 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center mb-6">
+                    <Eye className="w-7 h-7 text-white" />
+                  </div>
+                  <h2 className="text-2xl font-bold text-white mb-2">Observer</h2>
+                  <p className="text-white/50 text-sm mb-5">
+                    Attend the conference as an observer. Watch debates, take notes, and learn from the floor.
+                  </p>
+                  <a
+                    href="https://forms.gle/95J7rWqQoTEvo2Rr7"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-diplomatic-900 text-sm font-bold hover:bg-white/90 transition-colors"
+                  >
+                    Apply Now <ExternalLink className="w-4 h-4" />
+                  </a>
                 </motion.div>
               </div>
 
