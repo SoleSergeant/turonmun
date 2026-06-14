@@ -213,6 +213,66 @@ export type Database = {
           }
         ]
       }
+      volunteer_applications: {
+        Row: {
+          id: string
+          user_id: string | null
+          email: string
+          full_name: string
+          date_of_birth: string
+          location: string
+          telegram_or_phone: string
+          school_name: string | null
+          what_you_bring: string
+          anything_else: string | null
+          commit_to_deposit: boolean
+          notes: string | null
+          status: string
+          payment_status: string
+          admin_notes: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id?: string | null
+          email: string
+          full_name: string
+          date_of_birth: string
+          location: string
+          telegram_or_phone: string
+          school_name?: string | null
+          what_you_bring: string
+          anything_else?: string | null
+          commit_to_deposit: boolean
+          notes?: string | null
+          status?: string
+          payment_status?: string
+          admin_notes?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string | null
+          email?: string
+          full_name?: string
+          date_of_birth?: string
+          location?: string
+          telegram_or_phone?: string
+          school_name?: string | null
+          what_you_bring?: string
+          anything_else?: string | null
+          commit_to_deposit?: boolean
+          notes?: string | null
+          status?: string
+          payment_status?: string
+          admin_notes?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       users: {
         Row: {
           id: string

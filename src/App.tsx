@@ -37,6 +37,7 @@ import ResetPasswordChange from "./pages/ResetPasswordChange";
 import AuthCallback from "./pages/AuthCallback";
 import RegistrationSelection from "./pages/RegistrationSelection";
 import ChairApplication from "./pages/ChairApplication";
+import VolunteerApplication from "./pages/VolunteerApplication";
 import NotFound from "./pages/NotFound";
 import MunCommand from "./pages/MunCommand";
 import AdminLogin from "./pages/admin/AdminLogin";
@@ -53,6 +54,7 @@ import CountryMatrix from "./pages/admin/CountryMatrix";
 import CommitteeAllocation from "./pages/admin/CommitteeAllocation";
 
 import ChairManagement from "./pages/admin/ChairManagement";
+import AdminVolunteers from "./pages/admin/AdminVolunteers";
 import AdminAnalytics from "./pages/admin/Analytics";
 import AdminAwards from "./pages/admin/AdminAwards";
 import AdminHomepage from "./pages/admin/Homepage";
@@ -144,6 +146,7 @@ const App = () => {
           <Route path="/allocation" element={<AdminRoute><CommitteeAllocation /></AdminRoute>} />
           <Route path="/country-matrix" element={<AdminRoute><CountryMatrix /></AdminRoute>} />
           <Route path="/chairs" element={<AdminRoute><ChairManagement /></AdminRoute>} />
+          <Route path="/volunteers" element={<AdminRoute><AdminVolunteers /></AdminRoute>} />
           <Route path="/analytics" element={<AdminRoute><AdminAnalytics /></AdminRoute>} />
           <Route path="/awards" element={<AdminRoute><AdminAwards /></AdminRoute>} />
           <Route path="/homepage" element={<AdminRoute><SGRoute><AdminHomepage /></SGRoute></AdminRoute>} />
@@ -181,6 +184,7 @@ const App = () => {
         <Route path="/register" element={<RegistrationSelection />} />
         <Route path="/register/delegate" element={<ProtectedRoute><Registration /></ProtectedRoute>} />
         <Route path="/register/chair" element={<ProtectedRoute><ChairApplication /></ProtectedRoute>} />
+        <Route path="/register/volunteer" element={<ProtectedRoute><VolunteerApplication /></ProtectedRoute>} />
         <Route path="/registration" element={<Navigate to="/register" replace />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />

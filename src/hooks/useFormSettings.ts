@@ -32,7 +32,7 @@ export const DEFAULT_STEP_LABELS = ['Personal Info', 'Experience', 'Committees',
 
 export interface FormSettings {
   id: string;
-  form_type: 'delegate' | 'chair';
+  form_type: 'delegate' | 'chair' | 'volunteer';
   is_open: boolean;
   closed_message: string;
   opens_at: string | null;         // ISO string or null — when applications open
@@ -64,7 +64,7 @@ const DEFAULTS: Omit<FormSettings, 'id' | 'updated_at' | 'updated_by'> = {
 };
 
 // ── Hook ───────────────────────────────────────────────────────────────────────
-export const useFormSettings = (formType: 'delegate' | 'chair') => {
+export const useFormSettings = (formType: 'delegate' | 'chair' | 'volunteer') => {
   const [settings, setSettings] = useState<FormSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const [approvedCount, setApprovedCount] = useState(0);
@@ -72,16 +72,30 @@ export const useFormSettings = (formType: 'delegate' | 'chair') => {
   const fetch = useCallback(async () => {
     setLoading(true);
     try {
+      // Approved-count query is per-form-type. Volunteers live in their
+      // own table; chairs/delegates share `applications` and are split by
+      // the legacy notes prefix.
+      const approvedCountQuery =
+        formType === 'volunteer'
+          ? (supabase.from('volunteer_applications') as any)
+              .select('id', { count: 'exact', head: true })
+              .eq('status', 'approved')
+          : formType === 'chair'
+          ? (supabase.from('applications') as any)
+              .select('id', { count: 'exact', head: true })
+              .eq('status', 'approved')
+              .ilike('notes', '%APPLICATION TYPE: chair%')
+          : (supabase.from('applications') as any)
+              .select('id', { count: 'exact', head: true })
+              .eq('status', 'approved')
+              .not('notes', 'ilike', '%APPLICATION TYPE: chair%');
+
       const [{ data: settingsData }, { count }] = await Promise.all([
         (supabase.from('form_settings') as any)
           .select('*')
           .eq('form_type', formType)
           .single(),
-        // Count approved applications for capacity check
-        (supabase.from('applications') as any)
-          .select('id', { count: 'exact', head: true })
-          .eq('status', 'approved')
-          .not('notes', 'ilike', '%APPLICATION TYPE: chair%'),
+        approvedCountQuery,
       ]);
 
       if (settingsData) setSettings(settingsData as FormSettings);

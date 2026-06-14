@@ -21,6 +21,7 @@ import {
   Award,
   Home,
   QrCode,
+  Heart,
 } from 'lucide-react';
 
 interface AdminLayoutProps {
@@ -46,6 +47,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
     { path: isRealAdminSubdomain ? '/applications' : `/applications${suffix}`, label: 'Applications', icon: FileText },
     { path: isRealAdminSubdomain ? '/delegates' : `/delegates${suffix}`, label: 'Delegates', icon: Users },
     { path: isRealAdminSubdomain ? '/chairs' : `/chairs${suffix}`, label: 'Chairs', icon: Shield },
+    { path: isRealAdminSubdomain ? '/volunteers' : `/volunteers${suffix}`, label: 'Volunteers', icon: Heart },
     { path: isRealAdminSubdomain ? '/committees' : `/committees${suffix}`, label: 'Committees', icon: Globe },
     { path: isRealAdminSubdomain ? '/allocation' : `/allocation${suffix}`, label: 'Allocation', icon: Map },
     { path: isRealAdminSubdomain ? '/check-in' : `/check-in${suffix}`, label: 'Check-in', icon: QrCode },

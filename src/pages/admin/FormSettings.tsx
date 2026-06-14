@@ -560,7 +560,7 @@ const FormBuilderSection: React.FC<{
 
 // ── Form Preview Modal ──────────────────────────────────────────────────────────
 const FormPreviewModal: React.FC<{
-  formType: 'delegate' | 'chair';
+  formType: 'delegate' | 'chair' | 'volunteer';
   customQuestions: CustomQuestion[];
   formQuestions: FormQuestion[];
   stepLabels?: string[];
@@ -620,7 +620,7 @@ const FormPreviewModal: React.FC<{
         <div className="flex items-center gap-2 text-amber-800 text-sm font-semibold">
           <Eye size={16} />
           <span>
-            Preview — {formType === 'delegate' ? 'Delegate Registration' : 'Chair Application'}
+            Preview — {formType === 'delegate' ? 'Delegate Registration' : formType === 'chair' ? 'Chair Application' : 'Volunteer Application'}
             <span className="ml-2 text-xs font-normal bg-amber-200 text-amber-900 px-2 py-0.5 rounded-full">{localQuestions.length} custom question{localQuestions.length !== 1 ? 's' : ''}</span>
           </span>
         </div>
@@ -735,7 +735,7 @@ const sectionCls = 'bg-white rounded-xl border border-gray-200 shadow-sm p-5';
 // ── Component ──────────────────────────────────────────────────────────────────
 const FormSettingsPage = () => {
   const { toast } = useToast();
-  const [tab, setTab] = useState<'delegate' | 'chair'>('delegate');
+  const [tab, setTab] = useState<'delegate' | 'chair' | 'volunteer'>('delegate');
   const [settings, setSettings] = useState<Record<string, FormSettings>>({});
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -752,7 +752,7 @@ const FormSettingsPage = () => {
   const loadAll = useCallback(async () => {
     setLoading(true);
     try {
-      const [{ data: rows }, { count: delegateCount }, { count: chairCount }] = await Promise.all([
+      const [{ data: rows }, { count: delegateCount }, { count: chairCount }, { count: volunteerCount }] = await Promise.all([
         (supabase.from('form_settings') as any).select('*'),
         (supabase.from('applications') as any)
           .select('id', { count: 'exact', head: true })
@@ -762,12 +762,19 @@ const FormSettingsPage = () => {
           .select('id', { count: 'exact', head: true })
           .eq('status', 'approved')
           .ilike('notes', '%APPLICATION TYPE: chair%'),
+        (supabase.from('volunteer_applications') as any)
+          .select('id', { count: 'exact', head: true })
+          .eq('status', 'approved'),
       ]);
 
       const map: Record<string, FormSettings> = {};
       (rows || []).forEach((r: FormSettings) => { map[r.form_type] = r; });
       setSettings(map);
-      setApprovedCounts({ delegate: delegateCount ?? 0, chair: chairCount ?? 0 });
+      setApprovedCounts({
+        delegate: delegateCount ?? 0,
+        chair: chairCount ?? 0,
+        volunteer: volunteerCount ?? 0,
+      });
     } catch (e: any) {
       toast({ title: 'Error loading settings', description: e.message, variant: 'destructive' });
     } finally {
@@ -893,10 +900,10 @@ const FormSettingsPage = () => {
 
         {/* Tabs */}
         <div className="flex gap-2">
-          {(['delegate', 'chair'] as const).map(t => (
+          {(['delegate', 'chair', 'volunteer'] as const).map(t => (
             <button key={t} onClick={() => setTab(t)}
               className={`px-5 py-2 rounded-lg text-sm font-semibold transition-colors ${tab === t ? 'bg-blue-600 text-white shadow' : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'}`}>
-              {t === 'delegate' ? 'Delegate Registration' : 'Chair Application'}
+              {t === 'delegate' ? 'Delegate Registration' : t === 'chair' ? 'Chair Application' : 'Volunteer Application'}
             </button>
           ))}
           <div className="ml-auto flex items-center gap-2">
@@ -1032,6 +1039,26 @@ const FormSettingsPage = () => {
                       </div>
                     ))}
                   </div>
+                </div>
+              </div>
+            )}
+
+            {/* ── Volunteer deposit (volunteer only) ── */}
+            {tab === 'volunteer' && (
+              <div className={sectionCls}>
+                <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                  <DollarSign size={16} className="text-emerald-600" /> Refundable Deposit
+                </h3>
+                <p className="text-xs text-gray-500 mb-3">
+                  Shown on the volunteer form intro and on the commitment question. Refunded to volunteers after participation.
+                </p>
+                <div className="max-w-xs">
+                  <label className={labelCls}>Deposit Amount (UZS)</label>
+                  <input
+                    type="number" min="0" className={inputCls}
+                    value={draft.fee_amount}
+                    onChange={e => set('fee_amount', Number(e.target.value))}
+                  />
                 </div>
               </div>
             )}

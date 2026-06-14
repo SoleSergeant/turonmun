@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
-import { Users, Shield, Bell, Calendar, ArrowRight, Send, Clock } from 'lucide-react';
+import { Users, Shield, Heart, Bell, Calendar, ArrowRight, Send, Clock } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import CountdownMini from '../components/CountdownMini';
@@ -10,9 +10,10 @@ import { useFormSettings } from '@/hooks/useFormSettings';
 const RegistrationSelection = () => {
   const { settings: delegateSettings, isEffectivelyClosed: delegateClosed, loading: delegateLoading, notOpenYet: delegateNotOpenYet } = useFormSettings('delegate');
   const { settings: chairSettings, isEffectivelyClosed: chairClosed, loading: chairLoading } = useFormSettings('chair');
+  const { settings: volunteerSettings, isEffectivelyClosed: volunteerClosed, loading: volunteerLoading } = useFormSettings('volunteer');
 
-  const loading = delegateLoading || chairLoading;
-  const bothClosed = delegateClosed && chairClosed;
+  const loading = delegateLoading || chairLoading || volunteerLoading;
+  const allClosed = delegateClosed && chairClosed && volunteerClosed;
 
   // Countdown: prefer the "opens in" countdown when a future opens_at is set,
   // otherwise show "closes in" while the form is open and a deadline is set.
@@ -43,7 +44,7 @@ const RegistrationSelection = () => {
                 <span className="inline-block mb-5 px-4 py-1.5 rounded-full bg-gold-500/20 border border-gold-400/30 text-gold-300 text-sm font-semibold tracking-wide uppercase">
                   {loading
                     ? 'Loading…'
-                    : bothClosed
+                    : allClosed
                       ? 'Season 7 — Applications Opening Soon'
                       : 'Season 7 — Applications Open'}
                 </span>
@@ -51,8 +52,8 @@ const RegistrationSelection = () => {
                   Apply for Season 7
                 </h1>
                 <p className="text-white/60 text-lg max-w-xl mx-auto">
-                  {bothClosed
-                    ? "We're preparing the next chapter of TuronMUN. Applications for delegates and chairs will open shortly — follow us to be the first to know."
+                  {allClosed
+                    ? "We're preparing the next chapter of TuronMUN. Applications for delegates, chairs, and volunteers will open shortly — follow us to be the first to know."
                     : 'Choose your role below and begin your TuronMUN journey.'}
                 </p>
               </motion.div>
@@ -70,7 +71,7 @@ const RegistrationSelection = () => {
               )}
 
               {/* Role cards */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-2xl mx-auto mb-10">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-10">
                 {/* Delegate */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
@@ -149,6 +150,49 @@ const RegistrationSelection = () => {
                       )}
                       <Link
                         to="/register/chair"
+                        className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-diplomatic-900 text-sm font-bold hover:bg-white/90 transition-colors"
+                      >
+                        Apply Now <ArrowRight className="w-4 h-4" />
+                      </Link>
+                    </div>
+                  )}
+                </motion.div>
+
+                {/* Volunteer */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.6, delay: 0.3 }}
+                  className={`relative backdrop-blur-lg bg-white/5 border rounded-3xl p-8 transition-all ${
+                    !volunteerClosed
+                      ? 'border-white/30 hover:bg-white/10 hover:border-white/40'
+                      : 'border-white/10 select-none'
+                  }`}
+                >
+                  <div className="w-14 h-14 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center mb-6">
+                    <Heart className={`w-7 h-7 ${!volunteerClosed ? 'text-white' : 'text-white/60'}`} />
+                  </div>
+                  <h2 className="text-2xl font-bold text-white mb-2">Volunteer</h2>
+                  <p className="text-white/50 text-sm mb-5">
+                    Help run the conference behind the scenes. Logistics, hospitality, press, and more.
+                  </p>
+
+                  {loading ? (
+                    <div className="h-7 w-24 rounded-full bg-white/10 animate-pulse" />
+                  ) : volunteerClosed ? (
+                    <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/10 text-white/50 text-xs font-semibold">
+                      <Bell className="w-3 h-3" /> Coming Soon
+                    </span>
+                  ) : (
+                    <div className="space-y-2">
+                      {volunteerSettings?.deadline && (
+                        <p className="text-white/40 text-xs flex items-center gap-1">
+                          <Clock className="w-3 h-3" />
+                          Deadline: {new Date(volunteerSettings.deadline).toLocaleDateString()}
+                        </p>
+                      )}
+                      <Link
+                        to="/register/volunteer"
                         className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-diplomatic-900 text-sm font-bold hover:bg-white/90 transition-colors"
                       >
                         Apply Now <ArrowRight className="w-4 h-4" />
