@@ -8,7 +8,6 @@ import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import { useEffect, useState } from 'react';
 import { SecretMessage, useSecretMessage } from "@/components/easter-egg/SecretMessage";
-import AIAssistant from "@/components/ai/AIAssistant";
 import { useSubdomain } from "./hooks/use-subdomain";
 
 // Import animations
@@ -247,8 +246,7 @@ const App = () => {
             <SecretMessage isOpen={isOpen} onClose={closeMessage} />
 
             {renderRoutes()}
-            
-            <AIAssistant />
+
             <Analytics />
             <SpeedInsights />
           </BrowserRouter>
