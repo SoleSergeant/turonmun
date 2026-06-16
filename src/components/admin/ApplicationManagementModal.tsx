@@ -70,7 +70,8 @@ interface ApplicationManagementModalProps {
   application: Application;
   onClose: () => void;
   onUpdateStatus: (id: string, status: 'approved' | 'rejected' | 'waitlisted') => void;
-  onDelete: (id: string) => void;
+  // Omit to hide the Delete control (e.g. for Academics Manager).
+  onDelete?: (id: string) => void;
 }
 
 const ApplicationManagementModal: React.FC<ApplicationManagementModalProps> = ({
@@ -737,12 +738,14 @@ const ApplicationManagementModal: React.FC<ApplicationManagementModalProps> = ({
               <XCircle size={15} /> Reject
             </button>
 
-            <button
-              onClick={() => onDelete(application.id)}
-              className="px-4 py-2 bg-gray-700 text-white rounded-lg text-sm font-semibold flex items-center gap-2 hover:bg-gray-800 shadow-sm hover:shadow-md transition-all"
-            >
-              <Trash2 size={15} /> Delete
-            </button>
+            {onDelete && (
+              <button
+                onClick={() => onDelete(application.id)}
+                className="px-4 py-2 bg-gray-700 text-white rounded-lg text-sm font-semibold flex items-center gap-2 hover:bg-gray-800 shadow-sm hover:shadow-md transition-all"
+              >
+                <Trash2 size={15} /> Delete
+              </button>
+            )}
           </div>
         </div>
       </div>

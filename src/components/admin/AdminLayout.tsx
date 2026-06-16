@@ -61,15 +61,19 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
   ];
   // Per-role sidebar:
   //   registration → only Check-in
-  //   academics    → everything except Forms, Homepage, Messages, Check-in
+  //   academics    → everything except Forms, Homepage, Messages, Check-in, Volunteers
+  //   logistics    → only Dashboard + Volunteers
   //   sg (and legacy admin/superadmin) → everything
   const SG_ONLY = new Set(['Forms', 'Homepage', 'Messages']);
-  const ACADEMICS_HIDDEN = new Set([...SG_ONLY, 'Check-in']);
+  const ACADEMICS_HIDDEN = new Set([...SG_ONLY, 'Check-in', 'Volunteers']);
+  const LOGISTICS_VISIBLE = new Set(['Dashboard', 'Volunteers']);
   const navItems = role === 'registration'
     ? fullNavItems.filter(i => i.label === 'Check-in')
-    : role === 'academics'
-      ? fullNavItems.filter(i => !ACADEMICS_HIDDEN.has(i.label))
-      : fullNavItems;
+    : role === 'logistics'
+      ? fullNavItems.filter(i => LOGISTICS_VISIBLE.has(i.label))
+      : role === 'academics'
+        ? fullNavItems.filter(i => !ACADEMICS_HIDDEN.has(i.label))
+        : fullNavItems;
 
   const handleLogout = async () => {
     try {

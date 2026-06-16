@@ -32,6 +32,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { exportApplicationsToExcel } from '@/utils/excelExport';
+import { useAdminRole } from '@/hooks/useAdminRole';
 
 interface Application {
   id: string;
@@ -71,6 +72,11 @@ interface Application {
 }
 
 const AdminApplications = () => {
+  const { role } = useAdminRole();
+  // Academics Manager has read/update access to applications but cannot
+  // delete (single or bulk). SG is the only role allowed to remove rows;
+  // the database RLS in migration 031 enforces this server-side too.
+  const canDelete = role === 'sg';
   const [applications, setApplications] = useState<Application[]>([]);
   const [filteredApplications, setFilteredApplications] = useState<Application[]>([]);
   const [loading, setLoading] = useState(true);
@@ -523,14 +529,16 @@ const AdminApplications = () => {
                         Export Excel
                       </button>
 
-                      <button
-                        onClick={() => setIsDeleteAllModalOpen(true)}
-                        disabled={applications.length === 0}
-                        className="bg-red-600 text-white py-2 px-3 rounded-md text-sm flex items-center hover:bg-red-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
-                      >
-                        <Trash2 size={14} className="mr-1" />
-                        Delete All
-                      </button>
+                      {canDelete && (
+                        <button
+                          onClick={() => setIsDeleteAllModalOpen(true)}
+                          disabled={applications.length === 0}
+                          className="bg-red-600 text-white py-2 px-3 rounded-md text-sm flex items-center hover:bg-red-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
+                        >
+                          <Trash2 size={14} className="mr-1" />
+                          Delete All
+                        </button>
+                      )}
                     </div>
                   </div>
 
@@ -695,7 +703,7 @@ const AdminApplications = () => {
               application={modalApplication}
               onClose={() => setModalApplication(null)}
               onUpdateStatus={updateApplicationStatus}
-              onDelete={(id) => setDeleteConfirmId(id)}
+              onDelete={canDelete ? (id) => setDeleteConfirmId(id) : undefined}
             />
               )}
 

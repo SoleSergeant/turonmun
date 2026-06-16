@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
-export type AdminRole = 'sg' | 'academics' | 'registration' | null;
+export type AdminRole = 'sg' | 'academics' | 'logistics' | 'registration' | null;
 
 // Legacy roles that should be treated as SG (full access)
 const LEGACY_SG = new Set(['admin', 'superadmin']);
@@ -37,7 +37,7 @@ export function useAdminRole() {
         setFullName((data as any)?.full_name ?? null);
         if (!raw) setRole(null);
         else if (LEGACY_SG.has(raw)) setRole('sg');
-        else if (raw === 'sg' || raw === 'academics' || raw === 'registration') setRole(raw);
+        else if (raw === 'sg' || raw === 'academics' || raw === 'logistics' || raw === 'registration') setRole(raw);
         else setRole(null);
       } finally {
         if (!cancelled) setLoading(false);
@@ -51,6 +51,7 @@ export function useAdminRole() {
 
 export const ROLE_LABELS: Record<NonNullable<AdminRole>, string> = {
   sg: 'Secretary-General',
-  academics: 'Academics Team',
+  academics: 'Academics Manager',
+  logistics: 'Logistics Manager',
   registration: 'Registration Desk',
 };

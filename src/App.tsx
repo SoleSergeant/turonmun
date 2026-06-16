@@ -136,21 +136,21 @@ const App = () => {
         <Routes>
           <Route path="/" element={<AdminLogin />} />
           <Route path="/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
-          <Route path="/committees" element={<AdminRoute><AdminCommittees /></AdminRoute>} />
-          <Route path="/schedule" element={<AdminRoute><AdminSchedule /></AdminRoute>} />
-          <Route path="/resources" element={<AdminRoute><AdminResources /></AdminRoute>} />
-          <Route path="/applications" element={<AdminRoute><AdminApplications /></AdminRoute>} />
-          <Route path="/messages" element={<AdminRoute><SGRoute><AdminMessages /></SGRoute></AdminRoute>} />
-          <Route path="/delegates" element={<AdminRoute><DelegateManagement /></AdminRoute>} />
-          <Route path="/allocation" element={<AdminRoute><CommitteeAllocation /></AdminRoute>} />
-          <Route path="/country-matrix" element={<AdminRoute><CountryMatrix /></AdminRoute>} />
-          <Route path="/chairs" element={<AdminRoute><ChairManagement /></AdminRoute>} />
-          <Route path="/volunteers" element={<AdminRoute><AdminVolunteers /></AdminRoute>} />
-          <Route path="/analytics" element={<AdminRoute><AdminAnalytics /></AdminRoute>} />
-          <Route path="/awards" element={<AdminRoute><AdminAwards /></AdminRoute>} />
-          <Route path="/homepage" element={<AdminRoute><SGRoute><AdminHomepage /></SGRoute></AdminRoute>} />
+          <Route path="/committees" element={<AdminRoute allow={['sg','academics']}><AdminCommittees /></AdminRoute>} />
+          <Route path="/schedule" element={<AdminRoute allow={['sg','academics']}><AdminSchedule /></AdminRoute>} />
+          <Route path="/resources" element={<AdminRoute allow={['sg','academics']}><AdminResources /></AdminRoute>} />
+          <Route path="/applications" element={<AdminRoute allow={['sg','academics']}><AdminApplications /></AdminRoute>} />
+          <Route path="/messages" element={<AdminRoute allow={['sg']}><AdminMessages /></AdminRoute>} />
+          <Route path="/delegates" element={<AdminRoute allow={['sg','academics']}><DelegateManagement /></AdminRoute>} />
+          <Route path="/allocation" element={<AdminRoute allow={['sg','academics']}><CommitteeAllocation /></AdminRoute>} />
+          <Route path="/country-matrix" element={<AdminRoute allow={['sg','academics']}><CountryMatrix /></AdminRoute>} />
+          <Route path="/chairs" element={<AdminRoute allow={['sg','academics']}><ChairManagement /></AdminRoute>} />
+          <Route path="/volunteers" element={<AdminRoute allow={['sg','logistics']}><AdminVolunteers /></AdminRoute>} />
+          <Route path="/analytics" element={<AdminRoute allow={['sg','academics']}><AdminAnalytics /></AdminRoute>} />
+          <Route path="/awards" element={<AdminRoute allow={['sg','academics']}><AdminAwards /></AdminRoute>} />
+          <Route path="/homepage" element={<AdminRoute allow={['sg']}><AdminHomepage /></AdminRoute>} />
           <Route path="/check-in" element={<CheckInRoute><CheckIn /></CheckInRoute>} />
-          <Route path="/forms" element={<AdminRoute><SGRoute><FormSettings /></SGRoute></AdminRoute>} />
+          <Route path="/forms" element={<AdminRoute allow={['sg']}><FormSettings /></AdminRoute>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       );

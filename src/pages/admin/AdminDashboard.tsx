@@ -13,6 +13,7 @@ import {
   BarChart3,
   MapPin,
   Shield,
+  Heart,
   Loader2,
   TrendingUp,
   CheckCircle2,
@@ -22,6 +23,7 @@ import {
 import { Link } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { useCommittees } from '@/hooks/useCommittees';
+import { useAdminRole, AdminRole } from '@/hooks/useAdminRole';
 
 interface DashboardCounts {
   schedule_days: number;
@@ -31,6 +33,7 @@ interface DashboardCounts {
 }
 
 const AdminDashboard = () => {
+  const { role } = useAdminRole();
   const [loading, setLoading] = useState(true);
   const [connectionStatus, setConnectionStatus] = useState<{ success: boolean, message: string } | null>(null);
   const { toast } = useToast();
@@ -131,7 +134,10 @@ const AdminDashboard = () => {
   const isAdminSubdomain = window.location.hostname.startsWith('admin.');
   const s = isAdminSubdomain ? '' : '?subdomain=admin';
 
-  const navCards = [
+  // Each nav card declares which roles may see it. Cards without an
+  // `allow` list default to sg + academics. The dashboard hides cards
+  // the current role can't access — and routes are gated independently.
+  const allCards: Array<{ title: string; description: string; icon: any; path: string; gradient: string; badge: string | null; allow?: AdminRole[] }> = [
     {
       title: 'Delegate Management',
       description: 'View, filter, and manage all delegate applications and assignments',
@@ -187,6 +193,7 @@ const AdminDashboard = () => {
       path: `/messages${s}`,
       gradient: 'from-red-500 to-red-600',
       badge: counts.unread_messages > 0 ? `${counts.unread_messages} unread` : null,
+      allow: ['sg'],
     },
     {
       title: 'Schedule',
@@ -196,7 +203,18 @@ const AdminDashboard = () => {
       gradient: 'from-green-500 to-emerald-600',
       badge: null,
     },
+    {
+      title: 'Volunteer Applications',
+      description: 'Review, approve, and manage volunteer applications',
+      icon: Heart,
+      path: `/volunteers${s}`,
+      gradient: 'from-rose-500 to-rose-600',
+      badge: null,
+      allow: ['sg', 'logistics'],
+    },
   ];
+
+  const navCards = allCards.filter(c => (c.allow ?? ['sg', 'academics']).includes(role as AdminRole));
 
   return (
     <AdminLayout title="Admin Dashboard">

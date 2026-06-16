@@ -1,18 +1,27 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { useAdminRole } from '@/hooks/useAdminRole';
+import { useAdminRole, AdminRole } from '@/hooks/useAdminRole';
 
 interface AdminRouteProps {
   children: React.ReactNode;
+  /**
+   * Roles allowed to access the wrapped page. If omitted, defaults to
+   * sg + academics + logistics (the union of all admin-panel roles
+   * besides the registration desk). Per-page restrictions should pass
+   * an explicit list, e.g. allow={['sg','academics']} for academics-
+   * scoped pages or allow={['sg','logistics']} for /volunteers.
+   */
+  allow?: AdminRole[];
 }
 
 /**
  * Gate for admin-panel pages.
- *   sg, academics → allowed (per-page SG-only further restricted by SGRoute)
- *   registration  → redirected to /check-in
- *   anything else → kicked to admin login
+ *   - role in `allow`        → children render
+ *   - role is an admin not in `allow` → redirected to their home page
+ *   - registration           → /check-in
+ *   - anything else          → kicked to admin login
  */
-const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
+const AdminRoute: React.FC<AdminRouteProps> = ({ children, allow }) => {
   const { role, loading } = useAdminRole();
 
   if (loading) {
@@ -23,16 +32,32 @@ const AdminRoute: React.FC<AdminRouteProps> = ({ children }) => {
     );
   }
 
-  if (role === 'sg' || role === 'academics') return <>{children}</>;
-
   const isAdminSub = window.location.hostname.startsWith('admin.');
   const hasSubdomainParam = new URLSearchParams(window.location.search).get('subdomain') === 'admin';
+  const suffix = isAdminSub ? '' : '?subdomain=admin';
 
+  const defaultAllow: AdminRole[] = ['sg', 'academics', 'logistics'];
+  const allowed = allow ?? defaultAllow;
+
+  // Allowed → render
+  if (role && allowed.includes(role)) return <>{children}</>;
+
+  // Registration desk has its own home
   if (role === 'registration') {
-    return <Navigate to={isAdminSub ? '/check-in' : '/check-in?subdomain=admin'} replace />;
+    return <Navigate to={`/check-in${suffix}`} replace />;
   }
 
-  // No matching role → admin login
+  // Logistics tried to enter a non-logistics page → send them to volunteers
+  if (role === 'logistics') {
+    return <Navigate to={`/volunteers${suffix}`} replace />;
+  }
+
+  // Academics tried to enter a non-academics page (e.g. /volunteers) → dashboard
+  if (role === 'academics') {
+    return <Navigate to={`/dashboard${suffix}`} replace />;
+  }
+
+  // No matching admin role → admin login
   return <Navigate to={isAdminSub ? '/' : hasSubdomainParam ? '/?subdomain=admin' : '/admin'} replace />;
 };
 
