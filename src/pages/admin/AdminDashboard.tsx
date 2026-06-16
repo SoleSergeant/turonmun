@@ -33,7 +33,7 @@ interface DashboardCounts {
 }
 
 const AdminDashboard = () => {
-  const { role } = useAdminRole();
+  const { role, loading: roleLoading } = useAdminRole();
   const [loading, setLoading] = useState(true);
   const [connectionStatus, setConnectionStatus] = useState<{ success: boolean, message: string } | null>(null);
   const { toast } = useToast();
@@ -214,7 +214,11 @@ const AdminDashboard = () => {
     },
   ];
 
-  const navCards = allCards.filter(c => (c.allow ?? ['sg', 'academics']).includes(role as AdminRole));
+  // Hide all cards while the role is loading so we don't briefly reveal
+  // sections a restricted role isn't supposed to see.
+  const navCards = roleLoading
+    ? []
+    : allCards.filter(c => (c.allow ?? ['sg', 'academics']).includes(role as AdminRole));
 
   return (
     <AdminLayout title="Admin Dashboard">

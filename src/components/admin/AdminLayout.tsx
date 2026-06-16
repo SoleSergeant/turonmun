@@ -34,7 +34,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { role, fullName } = useAdminRole();
+  const { role, fullName, loading: roleLoading } = useAdminRole();
   const displayName = fullName || 'Admin';
 
   const isRealAdminSubdomain = window.location.hostname.startsWith('admin.');
@@ -67,13 +67,20 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
   const SG_ONLY = new Set(['Forms', 'Homepage', 'Messages']);
   const ACADEMICS_HIDDEN = new Set([...SG_ONLY, 'Check-in', 'Volunteers']);
   const LOGISTICS_VISIBLE = new Set(['Dashboard', 'Volunteers']);
-  const navItems = role === 'registration'
-    ? fullNavItems.filter(i => i.label === 'Check-in')
-    : role === 'logistics'
-      ? fullNavItems.filter(i => LOGISTICS_VISIBLE.has(i.label))
-      : role === 'academics'
-        ? fullNavItems.filter(i => !ACADEMICS_HIDDEN.has(i.label))
-        : fullNavItems;
+  // Fail-safe: while the role is still loading (first call this session
+  // before the cache is warm) render an empty nav so we never flash items
+  // a restricted role isn't allowed to see.
+  const navItems = roleLoading
+    ? []
+    : role === 'registration'
+      ? fullNavItems.filter(i => i.label === 'Check-in')
+      : role === 'logistics'
+        ? fullNavItems.filter(i => LOGISTICS_VISIBLE.has(i.label))
+        : role === 'academics'
+          ? fullNavItems.filter(i => !ACADEMICS_HIDDEN.has(i.label))
+          : role
+            ? fullNavItems
+            : [];
 
   const handleLogout = async () => {
     try {
