@@ -3,8 +3,9 @@ import { Navigate } from 'react-router-dom';
 import { useAdminRole } from '@/hooks/useAdminRole';
 
 /**
- * Gate for /check-in. SG and registration desk can use it.
- * Academics cannot (per access matrix). Legacy admin/superadmin map to SG.
+ * Gate for /check-in. SG, registration desk, academics, and logistics
+ * can all use it (anyone at the door needs to be able to scan badges).
+ * Legacy admin/superadmin map to SG.
  */
 const CheckInRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { role, loading } = useAdminRole();
@@ -17,12 +18,13 @@ const CheckInRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => 
     );
   }
 
-  if (role === 'sg' || role === 'registration') return <>{children}</>;
-
-  // Academics — send to dashboard (no check-in access)
-  if (role === 'academics') {
-    const isAdminSub = window.location.hostname.startsWith('admin.');
-    return <Navigate to={isAdminSub ? '/dashboard' : '/dashboard?subdomain=admin'} replace />;
+  if (
+    role === 'sg' ||
+    role === 'registration' ||
+    role === 'academics' ||
+    role === 'logistics'
+  ) {
+    return <>{children}</>;
   }
 
   // No admin role at all → admin login
