@@ -6,82 +6,92 @@ import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-route
 import { HelmetProvider } from "react-helmet-async";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
-import { useEffect, useState } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 import { SecretMessage, useSecretMessage } from "@/components/easter-egg/SecretMessage";
 import { useSubdomain } from "./hooks/use-subdomain";
 
 // Import animations
 import '@/styles/animations.css';
 import '@/styles/mobile.css';
-import Index from "./pages/Index";
-import About from "./pages/About";
-import Committees from "./pages/Committees";
-import Registration from "./pages/Registration";
-import Schedule from "./pages/Schedule";
-import ResourcesPage from "./pages/Resources";
-import Contact from "./pages/Contact";
-import PastConferences from "./pages/PastConferences";
-import EventUpdates from "./pages/EventUpdates";
-import Season1 from "./pages/seasons/Season1";
-import Season2 from "./pages/seasons/Season2";
-import Season3 from "./pages/seasons/Season3";
-import Season4 from "./pages/seasons/Season4";
-import Season5 from "./pages/seasons/Season5";
-import Season6 from "./pages/seasons/Season6";
-import SeasonCAMU from "./pages/seasons/SeasonCAMU";
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
-import ResetPassword from "./pages/ResetPassword";
-import ResetPasswordChange from "./pages/ResetPasswordChange";
-import AuthCallback from "./pages/AuthCallback";
-import RegistrationSelection from "./pages/RegistrationSelection";
-import ChairApplication from "./pages/ChairApplication";
-import VolunteerApplication from "./pages/VolunteerApplication";
-import NotFound from "./pages/NotFound";
-import MunCommand from "./pages/MunCommand";
-import AdminLogin from "./pages/admin/AdminLogin";
-import AdminDashboard from "./pages/admin/AdminDashboard";
-import AdminCommittees from "./pages/admin/AdminCommittees";
-import AdminSchedule from "./pages/admin/AdminSchedule";
-import AdminResources from "./pages/admin/AdminResources";
-import AdminApplications from "./pages/admin/AdminApplications";
-import AdminMessages from "./pages/admin/AdminMessages";
+
+// Route guards stay eager — they're tiny and run before any page renders.
 import AdminRoute from "./components/admin/AdminRoute";
 import ProtectedRoute from "./components/auth/ProtectedRoute";
-import DelegateManagement from "./pages/admin/DelegateManagement";
-import CountryMatrix from "./pages/admin/CountryMatrix";
-import CommitteeAllocation from "./pages/admin/CommitteeAllocation";
-
-import ChairManagement from "./pages/admin/ChairManagement";
-import AdminVolunteers from "./pages/admin/AdminVolunteers";
-import AdminAnalytics from "./pages/admin/Analytics";
-import AdminAwards from "./pages/admin/AdminAwards";
-import AdminHomepage from "./pages/admin/Homepage";
-import CheckIn from "./pages/admin/CheckIn";
 import CheckInRoute from "./components/admin/CheckInRoute";
-import SGRoute from "./components/admin/SGRoute";
-import FormSettings from "./pages/admin/FormSettings";
-import Awards from "./pages/Awards";
+import ChairRoute from "./components/chair/ChairRoute";
 
 import ImagePreloader from "./components/ImagePreloader";
-import Dashboard from "./pages/Dashboard";
-import Overview from "./pages/dashboard/Overview";
-import MyApplication from "./pages/dashboard/MyApplication";
-import MyCommittee from "./pages/dashboard/MyCommittee";
-import DashboardMessages from "./pages/dashboard/Messages";
-import DashboardSettings from "./pages/dashboard/Settings";
-import ChairLogin from "./pages/chair/ChairLogin";
-import ChairDashboardLayout from "./pages/dashboard/ChairDashboard";
-import ChairOverview from "./pages/dashboard/chair/Overview";
-import ChairAnnouncements from "./pages/dashboard/chair/Announcements";
-import ChairPositionPapers from "./pages/dashboard/chair/PositionPapers";
-import ChairAwards from "./pages/dashboard/chair/Awards";
-import ChairSchedule from "./pages/dashboard/chair/Schedule";
-import ChairDelegates from "./pages/dashboard/chair/Delegates";
-import CommandCenter from "./pages/dashboard/chair/CommandCenter";
-import ChairRoute from "./components/chair/ChairRoute";
-import LiveSession from "./pages/dashboard/LiveSession";
 import SplashScreen from "./components/ui/SplashScreen";
+
+// ── Lazy-loaded pages ────────────────────────────────────────────────
+// Splits each page into its own chunk so the marketing-site visitor
+// doesn't download admin or dashboard code, and vice versa.
+const Index = lazy(() => import("./pages/Index"));
+const About = lazy(() => import("./pages/About"));
+const Committees = lazy(() => import("./pages/Committees"));
+const Registration = lazy(() => import("./pages/Registration"));
+const Schedule = lazy(() => import("./pages/Schedule"));
+const ResourcesPage = lazy(() => import("./pages/Resources"));
+const Contact = lazy(() => import("./pages/Contact"));
+const PastConferences = lazy(() => import("./pages/PastConferences"));
+const EventUpdates = lazy(() => import("./pages/EventUpdates"));
+const Season1 = lazy(() => import("./pages/seasons/Season1"));
+const Season2 = lazy(() => import("./pages/seasons/Season2"));
+const Season3 = lazy(() => import("./pages/seasons/Season3"));
+const Season4 = lazy(() => import("./pages/seasons/Season4"));
+const Season5 = lazy(() => import("./pages/seasons/Season5"));
+const Season6 = lazy(() => import("./pages/seasons/Season6"));
+const SeasonCAMU = lazy(() => import("./pages/seasons/SeasonCAMU"));
+const Login = lazy(() => import("./pages/Login"));
+const Signup = lazy(() => import("./pages/Signup"));
+const ResetPassword = lazy(() => import("./pages/ResetPassword"));
+const ResetPasswordChange = lazy(() => import("./pages/ResetPasswordChange"));
+const AuthCallback = lazy(() => import("./pages/AuthCallback"));
+const RegistrationSelection = lazy(() => import("./pages/RegistrationSelection"));
+const ChairApplication = lazy(() => import("./pages/ChairApplication"));
+const VolunteerApplication = lazy(() => import("./pages/VolunteerApplication"));
+const NotFound = lazy(() => import("./pages/NotFound"));
+const MunCommand = lazy(() => import("./pages/MunCommand"));
+const Awards = lazy(() => import("./pages/Awards"));
+
+// Admin pages — only ever loaded for the admin subdomain
+const AdminLogin = lazy(() => import("./pages/admin/AdminLogin"));
+const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
+const AdminCommittees = lazy(() => import("./pages/admin/AdminCommittees"));
+const AdminSchedule = lazy(() => import("./pages/admin/AdminSchedule"));
+const AdminResources = lazy(() => import("./pages/admin/AdminResources"));
+const AdminApplications = lazy(() => import("./pages/admin/AdminApplications"));
+const AdminMessages = lazy(() => import("./pages/admin/AdminMessages"));
+const DelegateManagement = lazy(() => import("./pages/admin/DelegateManagement"));
+const CountryMatrix = lazy(() => import("./pages/admin/CountryMatrix"));
+const CommitteeAllocation = lazy(() => import("./pages/admin/CommitteeAllocation"));
+const ChairManagement = lazy(() => import("./pages/admin/ChairManagement"));
+const AdminVolunteers = lazy(() => import("./pages/admin/AdminVolunteers"));
+const AdminAnalytics = lazy(() => import("./pages/admin/Analytics"));
+const AdminAwards = lazy(() => import("./pages/admin/AdminAwards"));
+const AdminHomepage = lazy(() => import("./pages/admin/Homepage"));
+const CheckIn = lazy(() => import("./pages/admin/CheckIn"));
+const FormSettings = lazy(() => import("./pages/admin/FormSettings"));
+
+// Delegate dashboard
+const Dashboard = lazy(() => import("./pages/Dashboard"));
+const Overview = lazy(() => import("./pages/dashboard/Overview"));
+const MyApplication = lazy(() => import("./pages/dashboard/MyApplication"));
+const MyCommittee = lazy(() => import("./pages/dashboard/MyCommittee"));
+const DashboardMessages = lazy(() => import("./pages/dashboard/Messages"));
+const DashboardSettings = lazy(() => import("./pages/dashboard/Settings"));
+const LiveSession = lazy(() => import("./pages/dashboard/LiveSession"));
+
+// Chair dashboard
+const ChairLogin = lazy(() => import("./pages/chair/ChairLogin"));
+const ChairDashboardLayout = lazy(() => import("./pages/dashboard/ChairDashboard"));
+const ChairOverview = lazy(() => import("./pages/dashboard/chair/Overview"));
+const ChairAnnouncements = lazy(() => import("./pages/dashboard/chair/Announcements"));
+const ChairPositionPapers = lazy(() => import("./pages/dashboard/chair/PositionPapers"));
+const ChairAwards = lazy(() => import("./pages/dashboard/chair/Awards"));
+const ChairSchedule = lazy(() => import("./pages/dashboard/chair/Schedule"));
+const ChairDelegates = lazy(() => import("./pages/dashboard/chair/Delegates"));
+const CommandCenter = lazy(() => import("./pages/dashboard/chair/CommandCenter"));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -94,6 +104,13 @@ const queryClient = new QueryClient({
     },
   },
 });
+
+// Lightweight fallback while a route chunk is being fetched.
+const RouteFallback = () => (
+  <div className="min-h-screen flex items-center justify-center bg-white">
+    <div className="w-8 h-8 border-4 border-diplomatic-500 border-t-transparent rounded-full animate-spin" />
+  </div>
+);
 
 // Scroll to top on route change
 const ScrollToTop = () => {
@@ -245,7 +262,9 @@ const App = () => {
             {/* Secret Message Easter Egg */}
             <SecretMessage isOpen={isOpen} onClose={closeMessage} />
 
-            {renderRoutes()}
+            <Suspense fallback={<RouteFallback />}>
+              {renderRoutes()}
+            </Suspense>
 
             <Analytics />
             <SpeedInsights />
