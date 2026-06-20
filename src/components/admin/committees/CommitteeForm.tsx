@@ -1,10 +1,87 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { PlusCircle, X, Trash2, ChevronDown } from 'lucide-react';
+import { PlusCircle, X, Trash2, ChevronDown, Upload, RotateCcw, Flag as FlagIcon } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { COMMON_COUNTRIES } from '@/data/countries';
 import type { CommitteeFormData } from './types';
 import ImageUpload from './ImageUpload';
+import { useFlagOverrides } from '@/hooks/useFlagOverrides';
+import { getCountryCode } from '@/utils/countryCodes';
+
+// ── Inline flag override control ──────────────────────────────────────
+// Renders the current best-available flag (override → flagcdn → icon)
+// for a single country, with an Upload button (replaces it) and Reset
+// button (deletes the override row) when the user is allowed to edit.
+const FlagOverrideButton: React.FC<{ country: string }> = ({ country }) => {
+  const { flagFor, overrides, upload, reset, busy } = useFlagOverrides();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
+
+  const trimmed = country.trim();
+  if (!trimmed) return null;
+
+  const url = flagFor(trimmed);
+  const hasOverride = !!overrides[trimmed.toLowerCase()];
+  const knowsAuto = !!getCountryCode(trimmed);
+
+  const onPick = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    if (file.size > 1.5 * 1024 * 1024) {
+      toast({ title: 'File too large', description: 'Flag images must be under 1.5 MB.', variant: 'destructive' });
+      return;
+    }
+    try {
+      await upload(trimmed, file);
+      toast({ title: 'Flag updated', description: `Custom flag set for ${trimmed}.` });
+    } catch (err: any) {
+      toast({ title: 'Upload failed', description: err.message || 'Could not upload flag.', variant: 'destructive' });
+    }
+  };
+
+  const onReset = async () => {
+    if (!hasOverride) return;
+    if (!confirm(`Remove the custom flag for ${trimmed}? It will fall back to the automatic flag.`)) return;
+    try {
+      await reset(trimmed);
+      toast({ title: 'Flag reset', description: `${trimmed} is back to the automatic flag.` });
+    } catch (err: any) {
+      toast({ title: 'Reset failed', description: err.message, variant: 'destructive' });
+    }
+  };
+
+  return (
+    <div className="flex items-center gap-1.5 ml-2 shrink-0">
+      <div className="w-7 h-5 flex items-center justify-center rounded border border-gray-200 bg-gray-50 overflow-hidden" title={hasOverride ? 'Custom flag' : knowsAuto ? 'Automatic flag' : 'No flag — upload one'}>
+        {url
+          ? <img src={url} alt="" className="w-full h-full object-cover" />
+          : <FlagIcon size={11} className="text-gray-300" />}
+      </div>
+      <input ref={fileInputRef} type="file" accept="image/*" className="hidden" onChange={onPick} />
+      <button
+        type="button"
+        onClick={() => fileInputRef.current?.click()}
+        disabled={busy}
+        title={hasOverride ? 'Replace custom flag' : 'Upload custom flag'}
+        className="p-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded disabled:opacity-50"
+      >
+        <Upload size={14} />
+      </button>
+      {hasOverride && (
+        <button
+          type="button"
+          onClick={onReset}
+          disabled={busy}
+          title="Remove custom flag (use automatic)"
+          className="p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded disabled:opacity-50"
+        >
+          <RotateCcw size={14} />
+        </button>
+      )}
+    </div>
+  );
+};
 
 // ── Compact searchable country picker ─────────────────────────────────────
 // Replaces the native <datalist> which Chrome positions over the sidebar
@@ -466,6 +543,7 @@ const CommitteeForm = ({
                       options={countryOptions}
                       placeholder={`Country ${index + 1} (e.g. France)`}
                     />
+                    <FlagOverrideButton country={country} />
                     <button
                       type="button"
                       onClick={() => removeCountry(index)}
@@ -477,6 +555,8 @@ const CommitteeForm = ({
                 ))}
                 <p className="text-xs text-gray-400 mt-1">
                   Total spots will match the number of countries in this roster.
+                  Click <Upload size={11} className="inline -mt-0.5" /> next to any country to upload a custom flag —
+                  useful for historical names like "Nazi Germany" or "Soviet Union" that don't have an auto flag.
                 </p>
               </div>
             )}

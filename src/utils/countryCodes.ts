@@ -1,3 +1,8 @@
+// ISO 3166-1 alpha-2 codes for real countries. Used to build flagcdn URLs.
+// Historical / fictional names (Nazi Germany, Soviet Union, Yugoslavia,
+// Fascist Italy, etc.) intentionally have no entry here — admins upload
+// custom flag images via the country_flag_overrides table and
+// getFlagUrl() resolves those first.
 export const countryToCode: { [key: string]: string } = {
   'Afghanistan': 'af',
   'Albania': 'al',
@@ -6,21 +11,31 @@ export const countryToCode: { [key: string]: string } = {
   'Australia': 'au',
   'Austria': 'at',
   'Bangladesh': 'bd',
+  'Belarus': 'by',
   'Belgium': 'be',
   'Brazil': 'br',
+  'Bulgaria': 'bg',
   'Canada': 'ca',
   'Chile': 'cl',
   'China': 'cn',
   'Colombia': 'co',
+  'Croatia': 'hr',
   'Cuba': 'cu',
+  'Cyprus': 'cy',
+  'Czech Republic': 'cz',
+  'Czechia': 'cz',
   'Denmark': 'dk',
   'Egypt': 'eg',
+  'Estonia': 'ee',
   'Ethiopia': 'et',
   'Finland': 'fi',
   'France': 'fr',
+  'Georgia': 'ge',
   'Germany': 'de',
   'Ghana': 'gh',
   'Greece': 'gr',
+  'Hungary': 'hu',
+  'Iceland': 'is',
   'India': 'in',
   'Indonesia': 'id',
   'Iran': 'ir',
@@ -32,38 +47,64 @@ export const countryToCode: { [key: string]: string } = {
   'Jordan': 'jo',
   'Kazakhstan': 'kz',
   'Kenya': 'ke',
+  'Kyrgyzstan': 'kg',
+  'Latvia': 'lv',
+  'Lithuania': 'lt',
+  'Luxembourg': 'lu',
+  'Malaysia': 'my',
+  'Malta': 'mt',
   'Mexico': 'mx',
+  'Moldova': 'md',
+  'Mongolia': 'mn',
   'Morocco': 'ma',
   'Netherlands': 'nl',
   'New Zealand': 'nz',
   'Nigeria': 'ng',
+  'North Korea': 'kp',
   'Norway': 'no',
   'Pakistan': 'pk',
   'Palestine': 'ps',
+  'Peru': 'pe',
   'Philippines': 'ph',
   'Poland': 'pl',
   'Portugal': 'pt',
   'Qatar': 'qa',
+  'Romania': 'ro',
   'Russia': 'ru',
+  'Russian Federation': 'ru',
   'Saudi Arabia': 'sa',
+  'Serbia': 'rs',
   'Singapore': 'sg',
+  'Slovakia': 'sk',
+  'Slovenia': 'si',
   'South Africa': 'za',
   'South Korea': 'kr',
   'Spain': 'es',
   'Sweden': 'se',
   'Switzerland': 'ch',
   'Syria': 'sy',
+  'Tajikistan': 'tj',
   'Thailand': 'th',
   'Turkey': 'tr',
+  'Turkmenistan': 'tm',
   'Ukraine': 'ua',
   'United Arab Emirates': 'ae',
   'United Kingdom': 'gb',
   'United States': 'us',
+  'Uzbekistan': 'uz',
   'Venezuela': 've',
   'Vietnam': 'vn',
-  'Uzbekistan': 'uz'
 };
 
-export const getCountryCode = (countryName: string): string => {
-  return countryToCode[countryName] || countryName.substring(0, 2).toLowerCase();
+/**
+ * Returns the ISO 3166-1 alpha-2 code for a country name, or null if
+ * unknown. Unlike the previous implementation, this does NOT fall back
+ * to the first two letters — that mis-mapped "Estonia" to Spain's "es"
+ * and "Nazi Germany" to Namibia's "na". Callers should treat null as
+ * "no auto flag available" and fall back to either an override or a
+ * generic icon.
+ */
+export const getCountryCode = (countryName: string): string | null => {
+  if (!countryName) return null;
+  return countryToCode[countryName.trim()] ?? null;
 };

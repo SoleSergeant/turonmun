@@ -289,7 +289,7 @@ const CountryMatrix = () => {
         committee_id: committeeId,
         country: country,
         country_name: country,
-        country_code: getCountryCode(country).toUpperCase()
+        country_code: (getCountryCode(country) ?? '').toUpperCase() || null
       };
 
       const { data, error } = await (supabase

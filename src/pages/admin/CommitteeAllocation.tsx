@@ -3,6 +3,7 @@ import AdminLayout from '@/components/admin/AdminLayout';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { getCountryCode } from '@/utils/countryCodes';
+import { useFlagOverrides } from '@/hooks/useFlagOverrides';
 import { COMMON_COUNTRIES } from '@/data/countries';
 import {
   Users, MapPin, Search, Lock, Trash2, UserPlus, RefreshCw, Check, Flag,
@@ -41,6 +42,7 @@ const CommitteeAllocation = () => {
   // editable draft country label for open numbered slots, keyed `${committeeId}:${index}`
   const [drafts, setDrafts] = useState<Record<string, string>>({});
   const [countryOptions, setCountryOptions] = useState<string[]>(COMMON_COUNTRIES);
+  const { flagFor } = useFlagOverrides();
 
   useEffect(() => { fetchAll(); }, []);
 
@@ -284,12 +286,12 @@ const CommitteeAllocation = () => {
                       const assignment = committeeAssignments.find(
                         a => rosterKey(a.country || '') === rosterKey(country)
                       );
-                      const code = getCountryCode(country);
+                      const flagUrl = flagFor(country);
                       if (assignment) {
                         return (
                           <div key={country} className="flex items-center gap-2 px-3 py-2 bg-purple-50 border border-purple-200 rounded-lg">
-                            {code
-                              ? <img src={`https://flagcdn.com/24x18/${code.toLowerCase()}.png`} alt="" className="h-4 w-auto shrink-0 rounded-sm" />
+                            {flagUrl
+                              ? <img src={flagUrl} alt="" className="h-4 w-auto shrink-0 rounded-sm" />
                               : <Flag className="h-4 w-4 text-purple-500 shrink-0" />}
                             <span className="w-32 text-sm font-semibold text-purple-900 truncate" title={country}>{country}</span>
                             <span className="text-sm text-gray-700 truncate flex-1">{delegateName(assignment.application_id)}</span>
@@ -301,8 +303,8 @@ const CommitteeAllocation = () => {
                       }
                       return (
                         <div key={country} className="flex items-center gap-2 px-3 py-2 bg-gray-50 border border-dashed border-gray-300 rounded-lg">
-                          {code
-                            ? <img src={`https://flagcdn.com/24x18/${code.toLowerCase()}.png`} alt="" className="h-4 w-auto shrink-0 rounded-sm opacity-60" />
+                          {flagUrl
+                            ? <img src={flagUrl} alt="" className="h-4 w-auto shrink-0 rounded-sm opacity-60" />
                             : <MapPin className="h-4 w-4 text-gray-400 shrink-0" />}
                           <span className="w-32 text-sm font-medium text-gray-700 truncate" title={country}>{country}</span>
                           <select
