@@ -277,9 +277,8 @@ export default function VolunteerApplication() {
           <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 mb-6 flex items-start gap-3">
             <Wallet className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
             <div className="text-sm text-amber-900">
-              <strong>Refundable deposit:</strong> To ensure commitment and avoid
-              last-minute absences, selected volunteers pay a <strong>{depositAmount.toLocaleString()} UZS</strong> deposit
-              that is refunded after the conference.
+              <strong>Participation fee:</strong> Selected volunteers pay a <strong>{depositAmount.toLocaleString()} UZS</strong> participation
+              fee, which covers food, certificates and other event materials.
             </div>
           </div>
 
@@ -407,8 +406,8 @@ export default function VolunteerApplication() {
                   <div>
                     <p className="text-sm font-medium text-diplomatic-800 mb-3">
                       Are you ready to commit to all requirements, including paying
-                      the <strong>{depositAmount.toLocaleString()} UZS</strong> attendance fee
-                      which will be refunded after participation, if selected? *
+                      the <strong>{depositAmount.toLocaleString()} UZS</strong> participation fee
+                      which covers food, certificates and other event materials, if selected? *
                     </p>
                     <div className="grid grid-cols-2 gap-3">
                       {(['yes', 'no'] as const).map(opt => {

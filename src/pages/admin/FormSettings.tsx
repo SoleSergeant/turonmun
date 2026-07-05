@@ -1047,13 +1047,13 @@ const FormSettingsPage = () => {
             {tab === 'volunteer' && (
               <div className={sectionCls}>
                 <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                  <DollarSign size={16} className="text-emerald-600" /> Refundable Deposit
+                  <DollarSign size={16} className="text-emerald-600" /> Participation Fee
                 </h3>
                 <p className="text-xs text-gray-500 mb-3">
-                  Shown on the volunteer form intro and on the commitment question. Refunded to volunteers after participation.
+                  Shown on the volunteer form intro and on the commitment question. Covers food, certificates and other event materials.
                 </p>
                 <div className="max-w-xs">
-                  <label className={labelCls}>Deposit Amount (UZS)</label>
+                  <label className={labelCls}>Participation Fee Amount (UZS)</label>
                   <input
                     type="number" min="0" className={inputCls}
                     value={draft.fee_amount}
