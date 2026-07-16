@@ -152,6 +152,7 @@ const App = () => {
       return (
         <Routes>
           <Route path="/" element={<AdminLogin />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
           <Route path="/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
           <Route path="/committees" element={<AdminRoute allow={['sg','academics']}><AdminCommittees /></AdminRoute>} />
           <Route path="/schedule" element={<AdminRoute allow={['sg','academics']}><AdminSchedule /></AdminRoute>} />
@@ -177,6 +178,10 @@ const App = () => {
       return (
         <Routes>
           <Route path="/" element={<ChairLogin />} />
+          {/* OAuth return lands here; AuthCallback honours ?next=/dashboard.
+              Without this route the chair subdomain's catch-all bounced the
+              Google sign-in back to the login page. */}
+          <Route path="/auth/callback" element={<AuthCallback />} />
           <Route element={<ChairRoute><ChairDashboardLayout /></ChairRoute>}>
             <Route path="/dashboard" element={<ChairOverview />} />
             <Route path="/announcements" element={<ChairAnnouncements />} />
