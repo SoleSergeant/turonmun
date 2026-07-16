@@ -18,10 +18,12 @@ import {
   School,
   MapPin,
   Users,
-  Send
+  Send,
+  Loader2
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 import type { Tables } from '@/integrations/supabase/types';
 
 const containerVariants = {
@@ -41,9 +43,45 @@ const itemVariants = {
 
 export default function MyApplication() {
   const { user, loading: authLoading } = useAuth();
+  const { toast } = useToast();
   const [application, setApplication] = useState<Tables<'applications'> | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [editingName, setEditingName] = useState(false);
+  const [nameDraft, setNameDraft] = useState('');
+  const [savingName, setSavingName] = useState(false);
+
+  // The name on the application row is what the admin exports and prints on
+  // certificates. Google sign-in pre-fills it from the account's display name,
+  // which isn't always the delegate's real/official name — so let them correct
+  // it here. Updates the applications row (source of truth) and mirrors it to
+  // the auth profile so greetings/avatars stay in sync.
+  const handleSaveName = async () => {
+    const trimmed = nameDraft.trim();
+    if (!trimmed) {
+      toast({ title: 'Name required', description: 'Please enter your full name.', variant: 'destructive' });
+      return;
+    }
+    if (!application) return;
+    setSavingName(true);
+    try {
+      // Owners have no direct UPDATE on applications (RLS); this SECURITY DEFINER
+      // RPC updates only full_name on the caller's own row (migration 034).
+      const { error } = await (supabase as any).rpc('update_own_application_name', {
+        p_full_name: trimmed,
+      });
+      if (error) throw error;
+      await supabase.auth.updateUser({ data: { full_name: trimmed } });
+      setApplication(prev => (prev ? ({ ...prev, full_name: trimmed } as any) : prev));
+      setEditingName(false);
+      toast({ title: 'Name updated', description: 'Your name for certificates has been saved.' });
+    } catch (err: any) {
+      console.error('Error updating name:', err);
+      toast({ title: 'Update failed', description: err.message || 'Could not update your name.', variant: 'destructive' });
+    } finally {
+      setSavingName(false);
+    }
+  };
 
   const documents = [
     { name: 'Application Form', status: 'uploaded', uploadDate: application?.created_at || 'N/A', size: '—', type: 'Record' },
@@ -316,22 +354,65 @@ export default function MyApplication() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-8">
               {[
-                { label: 'Full Name', value: application?.full_name, icon: User },
+                { label: 'Full Name', value: application?.full_name, icon: User, editable: true },
                 { label: 'Email Address', value: application?.email, icon: Mail },
                 { label: 'Mobile Number', value: application?.phone, icon: Clock },
                 { label: 'Institution', value: application?.institution, icon: School },
                 { label: 'Experience Level', value: application?.experience, icon: FileText, capitalize: true },
                 { label: 'Country & City', value: application?.country, icon: MapPin },
-              ].map((field, idx) => (
+              ].map((field, idx) => {
+                const f = field as any;
+                return (
                 <div key={idx} className="flex flex-col border-b border-white/5 pb-4 last:border-0 md:last:border-b">
                   <span className="text-white/30 text-[9px] font-bold uppercase tracking-[0.2em] mb-2">{field.label}</span>
-                  <div className="flex items-center space-x-2">
-                    <span className={`text-sm font-semibold text-white/90 ${field.capitalize ? 'capitalize' : ''}`}>
-                      {field.value || 'Not provided'}
-                    </span>
-                  </div>
+                  {f.editable && editingName ? (
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="text"
+                        value={nameDraft}
+                        onChange={(e) => setNameDraft(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === 'Enter') handleSaveName(); if (e.key === 'Escape') setEditingName(false); }}
+                        autoFocus
+                        maxLength={100}
+                        className="flex-1 min-w-0 bg-white/10 border border-white/20 focus:border-gold-400/50 rounded-md px-2 py-1 text-sm text-white outline-none"
+                        placeholder="Your official full name"
+                      />
+                      <button
+                        onClick={handleSaveName}
+                        disabled={savingName}
+                        title="Save"
+                        className="p-1.5 rounded-md bg-gold-500 hover:bg-gold-600 text-white disabled:opacity-50"
+                      >
+                        {savingName ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                      </button>
+                      <button
+                        onClick={() => setEditingName(false)}
+                        disabled={savingName}
+                        title="Cancel"
+                        className="p-1.5 rounded-md bg-white/10 hover:bg-white/20 text-white/70"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center space-x-2">
+                      <span className={`text-sm font-semibold text-white/90 ${f.capitalize ? 'capitalize' : ''}`}>
+                        {field.value || 'Not provided'}
+                      </span>
+                      {f.editable && (
+                        <button
+                          onClick={() => { setNameDraft(application?.full_name || ''); setEditingName(true); }}
+                          title="Edit your name (used for certificates)"
+                          className="text-white/40 hover:text-gold-400 transition-colors"
+                        >
+                          <Edit3 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </div>
-              ))}
+                );
+              })}
             </div>
           </motion.div>
 
