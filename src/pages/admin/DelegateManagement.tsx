@@ -106,8 +106,16 @@ const DelegateManagement = () => {
 
       setManagedCountries(managedData?.map((m: any) => m.country_name) || []);
 
+      // Chairs and delegates share the applications table; this section is for
+      // delegates only. Exclude chairs the same way the rest of the app detects
+      // them: the notes marker written at submit time is ground truth, the
+      // application_type column is a secondary signal.
+      const delegatesOnly = (data || []).filter((app: any) =>
+        !(app.application_type === 'chair' || app.notes?.includes('APPLICATION TYPE: chair'))
+      );
+
       // Map database records to Delegate interface
-      const mappedDelegates: Delegate[] = (data || []).map(app => {
+      const mappedDelegates: Delegate[] = delegatesOnly.map(app => {
         // Parse notes to extract grade, emergency contact, etc.
         const notes = app.notes || '';
         const gradeMatch = notes.match(/Grade:\s*([^\n]+)/);
