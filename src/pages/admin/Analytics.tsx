@@ -11,8 +11,41 @@ import {
   Award,
   Loader2,
   DollarSign,
-  Calendar
+  Calendar,
+  Merge
 } from 'lucide-react';
+import MergeDemographicsModal, { Bucket, Alias } from '@/components/admin/MergeDemographicsModal';
+
+// Existing region normalization, extracted verbatim so it can run before the
+// admin alias map is applied. Turns "Fergana, Uzbekistan" → "Fergana", etc.
+const normalizeRegion = (rawCountry: string): string => {
+  let country = (rawCountry || 'Unknown').trim();
+  const lowerCountry = country.toLowerCase();
+  const cities = ['fergana', 'andijan', 'namangan', 'kokand', 'tashkent', 'samarkand', 'bukhara', 'khiva', 'nukus', 'navoi', 'jizzakh', 'gulistan', 'termez'];
+  if (lowerCountry.includes('uzbekistan') || cities.some(city => lowerCountry.includes(city))) {
+    if (lowerCountry.includes('uzbekistan')) {
+      const parts = country.split(/[,\s]+/).filter(p => p.toLowerCase() !== 'uzbekistan' && p.length > 0);
+      country = parts.length > 0 ? parts[0] : 'Uzbekistan';
+    }
+  }
+  return country.charAt(0).toUpperCase() + country.slice(1).toLowerCase();
+};
+
+// Follows the admin alias map to a final canonical label, guarding against
+// cycles, so chained merges (A→B, B→C) resolve A all the way to C.
+const resolveAlias = (map: Map<string, string>, value: string): string => {
+  let cur = value.trim();
+  const seen = new Set<string>();
+  while (true) {
+    const key = cur.toLowerCase();
+    if (seen.has(key)) break;
+    seen.add(key);
+    const next = map.get(key);
+    if (!next || next.trim().toLowerCase() === key) break;
+    cur = next.trim();
+  }
+  return cur;
+};
 
 interface AnalyticsData {
   totalRegistrations: number;
@@ -24,6 +57,8 @@ interface AnalyticsData {
   paymentDistribution: { status: string; count: number; color: string }[];
   topSchools: { name: string; count: number }[];
   topCountries: { name: string; count: number }[];
+  allRegionBuckets: Bucket[];
+  allSchoolBuckets: Bucket[];
   registrationsByDay: { date: string; count: number }[];
   totalRevenue: number;
   avgPayment: number;
@@ -41,10 +76,14 @@ const Analytics = () => {
     paymentDistribution: [],
     topSchools: [],
     topCountries: [],
+    allRegionBuckets: [],
+    allSchoolBuckets: [],
     registrationsByDay: [],
     totalRevenue: 0,
     avgPayment: 0
   });
+  const [aliases, setAliases] = useState<Alias[]>([]);
+  const [mergeField, setMergeField] = useState<'region' | 'school' | null>(null);
 
   useEffect(() => {
     fetchAnalytics();
@@ -69,6 +108,21 @@ const Analytics = () => {
         .from('country_assignments')
         .select('application_id, committee_id');
 
+      // Fetch admin-defined merge aliases (collapse "Fergana"/"Farg'ona"/…)
+      const { data: aliasRows } = await supabase
+        .from('demographic_aliases' as any)
+        .select('id, field, raw_value, canonical_value');
+      const aliasList = (aliasRows as any as Alias[]) || [];
+      setAliases(aliasList);
+
+      // Build case-insensitive lookup maps per field.
+      const regionAliasMap = new Map<string, string>();
+      const schoolAliasMap = new Map<string, string>();
+      aliasList.forEach(a => {
+        (a.field === 'region' ? regionAliasMap : schoolAliasMap)
+          .set(a.raw_value.trim().toLowerCase(), a.canonical_value);
+      });
+
       if (!applications || applications.length === 0) {
         setLoading(false);
         return;
@@ -77,33 +131,16 @@ const Analytics = () => {
       const apps = applications as any[];
       const total = apps.length;
 
-      // ── Unique schools & countries ──
+      // ── Unique schools & regions (normalize → then apply admin aliases) ──
       const schoolMap: Record<string, number> = {};
       const countryMap: Record<string, number> = {};
       apps.forEach(a => {
-        const school = (a.institution || 'Unknown').trim();
-        const rawCountry = (a.country || 'Unknown').trim();
-        let country = rawCountry;
-        
-        // Simple normalization for common variants
-        const lowerCountry = country.toLowerCase();
-        const cities = ['fergana', 'andijan', 'namangan', 'kokand', 'tashkent', 'samarkand', 'bukhara', 'khiva', 'nukus', 'navoi', 'jizzakh', 'gulistan', 'termez'];
-        
-        if (lowerCountry.includes('uzbekistan') || cities.some(city => lowerCountry.includes(city))) {
-          // Extract city/region if Uzbekistan is mentioned
-          if (lowerCountry.includes('uzbekistan')) {
-            const parts = country.split(/[,\s]+/).filter(p => p.toLowerCase() !== 'uzbekistan' && p.length > 0);
-            if (parts.length > 0) {
-              country = parts[0]; 
-            } else {
-              country = 'Uzbekistan';
-            }
-          }
-        }
-        
-        // Capitalize first letter of fixed country
-        country = country.charAt(0).toUpperCase() + country.slice(1).toLowerCase();
-        
+        const schoolBucket = ((a.institution || 'Unknown').trim()) || 'Unknown';
+        const school = resolveAlias(schoolAliasMap, schoolBucket);
+
+        const regionBucket = normalizeRegion(a.country || 'Unknown');
+        const country = resolveAlias(regionAliasMap, regionBucket);
+
         schoolMap[school] = (schoolMap[school] || 0) + 1;
         countryMap[country] = (countryMap[country] || 0) + 1;
       });
@@ -111,15 +148,15 @@ const Analytics = () => {
       const schoolsCount = Object.keys(schoolMap).length;
       const countriesCount = Object.keys(countryMap).length;
 
-      const topSchools = Object.entries(schoolMap)
+      const allRegionBuckets = Object.entries(countryMap)
         .map(([name, count]) => ({ name, count }))
-        .sort((a, b) => b.count - a.count)
-        .slice(0, 8);
+        .sort((a, b) => b.count - a.count);
+      const allSchoolBuckets = Object.entries(schoolMap)
+        .map(([name, count]) => ({ name, count }))
+        .sort((a, b) => b.count - a.count);
 
-      const topCountries = Object.entries(countryMap)
-        .map(([name, count]) => ({ name, count }))
-        .sort((a, b) => b.count - a.count)
-        .slice(0, 8);
+      const topSchools = allSchoolBuckets.slice(0, 8);
+      const topCountries = allRegionBuckets.slice(0, 8);
 
       // ── Acceptance rate ──
       const approved = apps.filter(a => a.status === 'approved').length;
@@ -212,6 +249,8 @@ const Analytics = () => {
         paymentDistribution,
         topSchools,
         topCountries,
+        allRegionBuckets,
+        allSchoolBuckets,
         registrationsByDay,
         totalRevenue,
         avgPayment
@@ -437,7 +476,16 @@ const Analytics = () => {
           <div className="bg-white rounded-lg shadow-sm border p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900">Top Locations</h3>
-              <MapPin className="h-5 w-5 text-purple-500" />
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setMergeField('region')}
+                  className="flex items-center gap-1 text-xs font-medium text-purple-600 hover:text-purple-800 border border-purple-200 hover:border-purple-300 rounded-md px-2 py-1 transition-colors"
+                  title="Merge duplicate region names"
+                >
+                  <Merge size={13} /> Merge
+                </button>
+                <MapPin className="h-5 w-5 text-purple-500" />
+              </div>
             </div>
             {data.topCountries.length === 0 ? (
               <p className="text-gray-500 text-center py-8">No data yet</p>
@@ -466,7 +514,16 @@ const Analytics = () => {
         <div className="bg-white rounded-lg shadow-sm border p-6">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-semibold text-gray-900">Top Schools</h3>
-            <School className="h-5 w-5 text-green-500" />
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setMergeField('school')}
+                className="flex items-center gap-1 text-xs font-medium text-green-600 hover:text-green-800 border border-green-200 hover:border-green-300 rounded-md px-2 py-1 transition-colors"
+                title="Merge duplicate school names"
+              >
+                <Merge size={13} /> Merge
+              </button>
+              <School className="h-5 w-5 text-green-500" />
+            </div>
           </div>
           {data.topSchools.length === 0 ? (
             <p className="text-gray-500 text-center py-8">No data yet</p>
@@ -487,6 +544,16 @@ const Analytics = () => {
           )}
         </div>
       </div>
+
+      {mergeField && (
+        <MergeDemographicsModal
+          field={mergeField}
+          buckets={mergeField === 'region' ? data.allRegionBuckets : data.allSchoolBuckets}
+          aliases={aliases.filter(a => a.field === mergeField)}
+          onClose={() => setMergeField(null)}
+          onChanged={fetchAnalytics}
+        />
+      )}
     </AdminLayout>
   );
 };
