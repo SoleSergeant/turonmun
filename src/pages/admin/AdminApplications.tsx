@@ -29,6 +29,7 @@ import {
   FileText,
   AlertCircle,
   MessageSquare,
+  UserPlus,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { exportApplicationsToExcel } from '@/utils/excelExport';
@@ -71,6 +72,11 @@ interface Application {
   notes?: string;
 }
 
+// Chair detection mirrors filterApplications(): the notes marker written at
+// submit time is ground truth, the application_type column is a secondary signal.
+const isChairApplication = (app: any) =>
+  app?.application_type === 'chair' || !!app?.notes?.includes('APPLICATION TYPE: chair');
+
 const AdminApplications = () => {
   const { role } = useAdminRole();
   // Academics Manager has read/update access to applications but cannot
@@ -82,6 +88,7 @@ const AdminApplications = () => {
   const [loading, setLoading] = useState(true);
   const [modalApplication, setModalApplication] = useState<Application | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [convertConfirm, setConvertConfirm] = useState<Application | null>(null);
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -255,6 +262,61 @@ const AdminApplications = () => {
         title: "Error",
         description: "Failed to update application status",
         variant: "destructive",
+      });
+    }
+  };
+
+  // Convert a rejected chair application into a delegate so it re-enters the
+  // delegate pipeline. Rejected chairs are often still strong delegates, so
+  // this lets admins reuse them instead of asking them to re-apply.
+  //   - application_type   → 'delegate'
+  //   - notes marker       → strip the 'APPLICATION TYPE: chair' line (ground
+  //                          truth for detection) and record the conversion
+  //   - status             → 'pending' so they show up as a fresh delegate to
+  //                          approve; once approved they can be assigned a
+  //                          country & committee in Delegate Management.
+  const convertChairToDelegate = async (app: Application) => {
+    try {
+      const strippedNotes = (app.notes || '')
+        .split('\n')
+        .filter(line => !line.includes('APPLICATION TYPE: chair'))
+        .join('\n')
+        .trim();
+      const conversionNote = `Converted from a rejected chair application on ${new Date().toLocaleDateString()}.`;
+      const newNotes = strippedNotes ? `${conversionNote}\n${strippedNotes}` : conversionNote;
+
+      const { error } = await supabase
+        .from('applications' as any)
+        .update({
+          application_type: 'delegate',
+          notes: newNotes,
+          status: 'pending',
+          reviewed_at: new Date().toISOString(),
+        } as any)
+        .eq('id', app.id);
+
+      if (error) throw error;
+
+      setApplications(prev =>
+        prev.map(a =>
+          a.id === app.id
+            ? ({ ...a, application_type: 'delegate', notes: newNotes, status: 'pending' } as any)
+            : a
+        )
+      );
+
+      await loadEmailCollections();
+
+      toast({
+        title: 'Converted to Delegate',
+        description: `${app.full_name} is now a pending delegate. Approve them to assign a country & committee.`,
+      });
+    } catch (error: any) {
+      console.error('Error converting chair to delegate:', error);
+      toast({
+        title: 'Conversion Failed',
+        description: error.message || 'Could not convert this application.',
+        variant: 'destructive',
       });
     }
   };
@@ -674,6 +736,16 @@ const AdminApplications = () => {
                                   <Check size={13} /> Accept Now
                                 </button>
                               )}
+                              {/* Convert to delegate — only for rejected chairs */}
+                              {app.status === 'rejected' && isChairApplication(app) && (
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); setConvertConfirm(app); }}
+                                  className="flex items-center gap-1.5 px-3 py-1.5 bg-sky-600 hover:bg-sky-700 text-white rounded-lg text-xs font-semibold transition-colors"
+                                  title="Convert this rejected chair into a delegate"
+                                >
+                                  <UserPlus size={13} /> Make Delegate
+                                </button>
+                              )}
                             </div>
 
                             <div className="text-xs text-gray-400">
@@ -734,6 +806,42 @@ const AdminApplications = () => {
                           className="flex-1 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium transition-colors shadow-sm"
                         >
                           Permanently Delete
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+              {/* Convert Chair → Delegate Confirmation Modal */}
+              {convertConfirm && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+                  <div className="bg-white rounded-xl shadow-2xl max-w-md w-full p-6 animate-in fade-in zoom-in duration-200">
+                    <div className="flex flex-col items-center text-center space-y-4">
+                      <div className="w-16 h-16 bg-sky-100 rounded-full flex items-center justify-center">
+                        <UserPlus className="text-sky-600" size={32} />
+                      </div>
+                      <h3 className="text-xl font-bold text-gray-900">Convert to Delegate</h3>
+                      <p className="text-gray-600">
+                        Convert <span className="font-semibold">{convertConfirm.full_name}</span> from a
+                        rejected chair into a delegate? Their status will reset to{' '}
+                        <span className="font-semibold">pending</span> so you can approve them and assign
+                        a country &amp; committee.
+                      </p>
+                      <div className="flex w-full space-x-3 pt-4">
+                        <button
+                          onClick={() => setConvertConfirm(null)}
+                          className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 font-medium transition-colors"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={() => {
+                            convertChairToDelegate(convertConfirm);
+                            setConvertConfirm(null);
+                          }}
+                          className="flex-1 px-4 py-2 bg-sky-600 text-white rounded-lg hover:bg-sky-700 font-medium transition-colors shadow-sm"
+                        >
+                          Make Delegate
                         </button>
                       </div>
                     </div>
