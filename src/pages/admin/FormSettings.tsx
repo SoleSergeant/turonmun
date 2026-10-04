@@ -395,7 +395,7 @@ const FormBuilderSection: React.FC<{
                       {/* Info */}
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-1.5">
-                          {q.system && <Lock size={11} className="text-gray-300 flex-shrink-0" title="Built-in field" />}
+                          {q.system && <span title="Built-in field" className="flex-shrink-0"><Lock size={11} className="text-gray-300" /></span>}
                           <p className="text-sm font-medium text-gray-800 truncate">{q.label || <em className="text-gray-400">Untitled</em>}</p>
                         </div>
                         <p className="text-xs text-gray-400">

@@ -4,38 +4,15 @@ import { Users, Award, Globe, PenTool } from 'lucide-react';
 import { Badge } from './ui/badge';
 import { Card, CardContent } from './ui/card';
 import { motion, useInView } from 'framer-motion';
+import { useContent, rich } from '@/content/store';
 
-const features = [
-  {
-    icon: Globe,
-    title: 'Why TuronMUN?',
-    description: 'Experience authentic international diplomacy through immersive crisis scenarios that place real global challenges in your hands.'
-  },
-  {
-    icon: Users,
-    title: 'Why TuronMUN?',
-    description: 'Transform into a master negotiator through thrilling consensus-building exercises that mirror high-stakes international diplomacy perfectly.'
-  },
-  {
-    icon: Award,
-    title: 'Why TuronMUN?',
-    description: 'Forge powerful connections with exceptional delegates who share your passion for justice and bring diverse cultural perspectives.'
-  },
-  {
-    icon: PenTool,
-    title: 'Why TuronMUN?',
-    description: 'Unleash your intellectual potential through masterfully designed challenges that sharpen analytical prowess and eloquent speaking abilities.'
-  }
-];
-
-const stats = [
-  { label: 'Delegates Empowered', value: 500, suffix: '+' },
-  { label: 'Countries Represented', value: 3, suffix: '' },
-  { label: 'Committees', value: 15, suffix: '+' },
-  { label: 'Seasons of Excellence', value: 7, suffix: '' },
-];
+// Card icons cycle in this order; the text comes from Site content → Homepage → About block.
+const FEATURE_ICONS = [Globe, Users, Award, PenTool];
 
 export default function AboutSection() {
+  const content = useContent('home_about');
+  const stats = content.stats.map(s => ({ ...s, value: Number(s.value) || 0 }));
+  const features = content.features.map((f, i) => ({ ...f, icon: FEATURE_ICONS[i % FEATURE_ICONS.length] }));
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -48,7 +25,7 @@ export default function AboutSection() {
 
   
 
-  const [counts, setCounts] = useState(stats.map(() => 0));
+  const [counts, setCounts] = useState<number[]>([]);
   const statsRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(statsRef, { once: true, margin: '-80px' });
 
@@ -72,7 +49,7 @@ export default function AboutSection() {
     animationFrame = requestAnimationFrame(tick);
 
     return () => cancelAnimationFrame(animationFrame);
-  }, [isInView]);
+  }, [isInView, content.stats]);
 
   return (
     <section className="relative py-24 md:py-32 overflow-hidden bg-gradient-to-b from-neutral-50 via-white to-neutral-100 border-y border-neutral-200">
@@ -95,24 +72,21 @@ export default function AboutSection() {
               transition={{ type: "spring", stiffness: 400, damping: 10 }}
             >
               <Badge variant="outline" className="mb-4 glass-panel text-diplomatic-700 border-diplomatic-300/50 px-4 py-2 text-sm font-medium shadow-subtle">
-                About Our Conference
+                {content.badge}
               </Badge>
             </motion.div>
             
             <div className="space-y-4">
               <h2 className="text-3xl md:text-4xl font-display font-bold text-diplomatic-900 leading-tight">
-                We are the only MUN from <span className="text-gold-500">Central Asia</span> that topped the <span className="text-gold-500">mymun charts</span> <span className="text-gold-500">back-to-back</span>
+                {rich(content.headline, 'text-gold-500')}
               </h2>
               <div className="w-20 h-1 bg-gold-400 rounded-full" />
             </div>
 
             <div className="space-y-6 pt-6">
-              <p className="text-neutral-700 leading-relaxed">
-                Our Model United Nations conference provides a unique platform for students to simulate international diplomacy and develop a deep understanding of global issues. Through carefully designed committee sessions, workshops, and social events, participants gain valuable skills while building lifelong connections.
-              </p>
-              <p className="text-neutral-700 leading-relaxed">
-                Whether you're a seasoned delegate or new to MUN, our conference offers opportunities for growth, learning, and meaningful engagement with international affairs.
-              </p>
+              {content.paragraphs.map((text, i) => (
+                <p key={i} className="text-neutral-700 leading-relaxed">{text}</p>
+              ))}
             </div>
 
             <motion.div
@@ -140,7 +114,7 @@ export default function AboutSection() {
                   <div className="absolute inset-0 bg-gradient-to-br from-gold-400/5 to-diplomatic-400/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                   <div className="relative z-10">
                     <div className="text-2xl sm:text-3xl font-display font-bold text-diplomatic-900 mb-1">
-                      {counts[index]}
+                      {counts[index] ?? 0}
                       <span className="text-gold-500 ml-0.5">{stat.suffix}</span>
                     </div>
                     <div className="text-xs sm:text-sm text-neutral-600 group-hover:text-neutral-700 transition-colors">

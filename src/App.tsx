@@ -34,13 +34,7 @@ const ResourcesPage = lazy(() => import("./pages/Resources"));
 const Contact = lazy(() => import("./pages/Contact"));
 const PastConferences = lazy(() => import("./pages/PastConferences"));
 const EventUpdates = lazy(() => import("./pages/EventUpdates"));
-const Season1 = lazy(() => import("./pages/seasons/Season1"));
-const Season2 = lazy(() => import("./pages/seasons/Season2"));
-const Season3 = lazy(() => import("./pages/seasons/Season3"));
-const Season4 = lazy(() => import("./pages/seasons/Season4"));
-const Season5 = lazy(() => import("./pages/seasons/Season5"));
-const Season6 = lazy(() => import("./pages/seasons/Season6"));
-const SeasonCAMU = lazy(() => import("./pages/seasons/SeasonCAMU"));
+const SeasonRoute = lazy(() => import("./pages/seasons/SeasonRoute"));
 const Login = lazy(() => import("./pages/Login"));
 const Signup = lazy(() => import("./pages/Signup"));
 const ResetPassword = lazy(() => import("./pages/ResetPassword"));
@@ -67,7 +61,7 @@ const ChairManagement = lazy(() => import("./pages/admin/ChairManagement"));
 const AdminVolunteers = lazy(() => import("./pages/admin/AdminVolunteers"));
 const AdminAnalytics = lazy(() => import("./pages/admin/Analytics"));
 const AdminAwards = lazy(() => import("./pages/admin/AdminAwards"));
-const AdminHomepage = lazy(() => import("./pages/admin/Homepage"));
+const SiteContent = lazy(() => import("./pages/admin/SiteContent"));
 const CheckIn = lazy(() => import("./pages/admin/CheckIn"));
 const FormSettings = lazy(() => import("./pages/admin/FormSettings"));
 const AdminAccounts = lazy(() => import("./pages/admin/AdminAccounts"));
@@ -167,7 +161,8 @@ const App = () => {
           <Route path="/volunteers" element={<AdminRoute allow={['sg','logistics']}><AdminVolunteers /></AdminRoute>} />
           <Route path="/analytics" element={<AdminRoute allow={['sg','academics']}><AdminAnalytics /></AdminRoute>} />
           <Route path="/awards" element={<AdminRoute allow={['sg','academics']}><AdminAwards /></AdminRoute>} />
-          <Route path="/homepage" element={<AdminRoute allow={['sg']}><AdminHomepage /></AdminRoute>} />
+          <Route path="/content" element={<AdminRoute allow={['sg']}><SiteContent /></AdminRoute>} />
+          <Route path="/homepage" element={<Navigate to="/content" replace />} />
           <Route path="/check-in" element={<CheckInRoute><CheckIn /></CheckInRoute>} />
           <Route path="/forms" element={<AdminRoute allow={['sg']}><FormSettings /></AdminRoute>} />
           <Route path="/accounts" element={<AdminRoute allow={['sg']}><AdminAccounts /></AdminRoute>} />
@@ -221,14 +216,9 @@ const App = () => {
         <Route path="/contact" element={<Contact />} />
         <Route path="/past-conferences" element={<PastConferences />} />
         <Route path="/awards" element={<Awards />} />
-        <Route path="/seasons/1" element={<Season1 />} />
-        <Route path="/seasons/2" element={<Season2 />} />
-        <Route path="/seasons/3" element={<Season3 />} />
-        <Route path="/seasons/4" element={<Season4 />} />
-        <Route path="/seasons/5" element={<Season5 />} />
         <Route path="/seasons/Season5" element={<Navigate to="/seasons/5" replace />} />
-        <Route path="/seasons/6" element={<Season6 />} />
-        <Route path="/seasons/camu" element={<SeasonCAMU />} />
+        {/* Every past season (built-in and admin-added) — see Site content → Seasons */}
+        <Route path="/seasons/:slug" element={<SeasonRoute />} />
         <Route path="/mun-command" element={<MunCommand />} />
 
         {/* Chair login & dashboard (non-subdomain access) */}

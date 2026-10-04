@@ -1,19 +1,23 @@
 import React, { useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { seasonsData } from '@/data/seasonsData';
+import { motion, type Variants } from 'framer-motion';
+import { photoSrc } from '@/content/seasons';
+import type { PastSeason } from '@/content/sections';
 import PageLayout from '@/components/layout/PageLayout';
 import CallToAction from '@/components/past-conferences/CallToAction';
 import { ArrowLeft, Users, Calendar, MapPin, Award } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-export default function Season6() {
-  const seasonData = seasonsData.find(season => season.id === "season6") || seasonsData[0];
+/**
+ * Page layout for a past season. Season 6 uses it directly, and every season
+ * added later in Admin → Site content → Seasons is rendered with it.
+ */
+export default function SeasonTemplate({ seasonData }: { seasonData: PastSeason }) {
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
-  const pageVariants = {
+  const pageVariants: Variants = {
     initial: { opacity: 0, y: 20 },
     animate: {
       opacity: 1,
@@ -23,7 +27,7 @@ export default function Season6() {
     exit: { opacity: 0, y: -20, transition: { duration: 0.3, ease: "easeIn" } }
   };
 
-  const itemVariants = {
+  const itemVariants: Variants = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
   };
@@ -31,7 +35,7 @@ export default function Season6() {
   return (
     <PageLayout>
       <motion.div
-        key="season-6"
+        key={`season-${seasonData.id}`}
         initial="initial"
         animate="animate"
         exit="exit"
@@ -214,7 +218,7 @@ export default function Season6() {
             </motion.div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {[1, 2, 3, 4].map((num) => (
+              {seasonData.photos.map((_, i) => i + 1).map((num) => (
                 <motion.div
                   key={num}
                   initial={{ opacity: 0, y: 20 }}
@@ -224,14 +228,14 @@ export default function Season6() {
                   className="group relative overflow-hidden rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1"
                 >
                   <img
-                    src={`/seasons/season 6/${num}.JPG`}
+                    src={photoSrc(seasonData.photos[num - 1]?.url)}
                     alt={`${seasonData.title} highlight ${num}`}
                     className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-105"
                     loading="lazy"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
                     <div>
-                      <h3 className="text-white text-lg font-semibold mb-1">{seasonData.title} - Highlight #{num}</h3>
+                      <h3 className="text-white text-lg font-semibold mb-1">{seasonData.photos[num - 1]?.caption || `${seasonData.title} - Highlight #${num}`}</h3>
                       <p className="text-diplomatic-200 text-sm">{seasonData.date}</p>
                     </div>
                   </div>

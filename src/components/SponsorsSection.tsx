@@ -1,7 +1,8 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Sparkles, ArrowRight, Handshake } from 'lucide-react';
 import { CustomButton } from './ui/custom-button';
+import { useContent, useFill, rich } from '@/content/store';
 
 type Sponsor = { name: string; src: string; url?: string };
 
@@ -9,21 +10,13 @@ const MARQUEE_DURATION_S = 40;
 const SLIDE_GAP_PX = 20;
 
 const SponsorsSection = () => {
-  const [sponsorLogos, setSponsorLogos] = useState<Sponsor[]>([]);
+  const text = useContent('sponsors');
+  const fill = useFill();
   const [paused, setPaused] = useState(false);
-  const [loaded, setLoaded] = useState(false);
-
-  useEffect(() => {
-    fetch('/sponsors.json', { cache: 'no-store' })
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data: Sponsor[] | null) => {
-        if (Array.isArray(data) && data.length > 0) {
-          setSponsorLogos(data);
-        }
-      })
-      .catch(() => {})
-      .finally(() => setLoaded(true));
-  }, []);
+  const sponsorLogos: Sponsor[] = text.logos
+    .filter(l => l.image)
+    .map(l => ({ name: l.name, src: l.image, url: l.url || undefined }));
+  const loaded = true;
 
   const hasSponsors = sponsorLogos.length > 0;
   const marqueeItems = [...sponsorLogos, ...sponsorLogos];
@@ -41,7 +34,7 @@ const SponsorsSection = () => {
             transition={{ duration: 0.4 }}
           >
             <Sparkles size={16} />
-            Proud Partners
+            {text.badge}
           </motion.div>
 
           <motion.h2 
@@ -51,7 +44,7 @@ const SponsorsSection = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.4, delay: 0.1 }}
           >
-            Sponsors Powering <span className="text-gradient-gold">TuronMUN</span>
+            {rich(fill(text.heading), 'text-gradient-gold')}
           </motion.h2>
 
           <motion.p 
@@ -61,7 +54,7 @@ const SponsorsSection = () => {
             viewport={{ once: true }}
             transition={{ duration: 0.4, delay: 0.15 }}
           >
-            Our Season 6 partners help us deliver immersive diplomatic simulations, scholarships, and a world-class experience for every delegate. Explore the brands shaping the future with us.
+            {fill(text.intro)}
           </motion.p>
         </div>
 
@@ -121,7 +114,7 @@ const SponsorsSection = () => {
               <Handshake className="w-7 h-7 text-gold-300/60" />
             </div>
             <p className="text-white/40 text-sm">
-              Season 7 sponsors will be announced here. Reach out if you'd like to partner with us.
+              {fill(text.empty_text)}
             </p>
           </motion.div>
         ) : null}
@@ -134,19 +127,19 @@ const SponsorsSection = () => {
           transition={{ duration: 0.4, delay: 0.2 }}
         >
           <div className="text-center sm:text-left max-w-xl">
-            <p className="text-sm uppercase tracking-[0.2em] text-gold-300 mb-1">Become A Sponsor</p>
+            <p className="text-sm uppercase tracking-[0.2em] text-gold-300 mb-1">{text.cta_eyebrow}</p>
             <p className="text-base sm:text-lg text-white/80">
-              Partner with TuronMUN Season 6 to inspire the next generation of diplomats through workshops, scholarships, and immersive experiences.
+              {fill(text.cta_text)}
             </p>
           </div>
 
           <CustomButton 
-            to="/contact"
+            to={text.cta_url || '/contact'}
             variant="accent"
             size="lg"
             className="group shadow-lg shadow-gold-400/30"
           >
-            Sponsor With Us
+            {text.cta_button}
             <ArrowRight className="ml-2 transition-transform group-hover:translate-x-1" size={18} />
           </CustomButton>
         </motion.div>

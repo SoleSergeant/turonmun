@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useContent, useFill, rich } from '@/content/store';
 
 interface SplashScreenProps {
     onComplete?: () => void;
 }
 
 export default function SplashScreen({ onComplete }: SplashScreenProps) {
+    const general = useContent('general');
     const [isVisible, setIsVisible] = useState(true);
 
     useEffect(() => {
@@ -43,7 +45,7 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
                         >
                             <div className="absolute inset-0 bg-gold-400/20 blur-xl rounded-full animate-pulse" />
                             <img
-                                src="/lovable-uploads/58911c41-3ed8-4807-8789-5df7d2fff02c.png"
+                                src={general.logo_url}
                                 alt="TuronMUN Logo"
                                 className="w-32 h-32 md:w-40 md:h-40 object-contain relative z-10 drop-shadow-2xl"
                             />
@@ -57,10 +59,10 @@ export default function SplashScreen({ onComplete }: SplashScreenProps) {
                             className="text-center"
                         >
                             <h1 className="text-3xl md:text-4xl font-display font-bold text-white mb-2 tracking-tight">
-                                TuronMUN
+                                {general.site_name}
                             </h1>
                             <p className="text-gold-400 text-sm md:text-base font-medium tracking-widest uppercase opacity-90">
-                                Season 7
+                                {general.season_label}
                             </p>
                         </motion.div>
 

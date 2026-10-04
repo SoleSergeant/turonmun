@@ -1,11 +1,14 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { seasonsData } from '@/data/seasonsData';
+import { usePastSeasons } from '@/content/seasons';
 import { ArrowRight } from 'lucide-react';
 import PageLayout from '@/components/layout/PageLayout';
+import { useContent, useFill, rich } from '@/content/store';
 
 export default function PastConferences() {
+  const text = useContent('past_conferences');
+  const seasonsData = usePastSeasons();
   // Animation variants
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -47,7 +50,7 @@ export default function PastConferences() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
             >
-              Past Conferences
+              {text.title}
             </motion.h1>
             
             <motion.div 
@@ -63,7 +66,7 @@ export default function PastConferences() {
               animate={{ opacity: 1 }}
               transition={{ duration: 0.6, delay: 0.3 }}
             >
-              Explore our previous conference seasons, each focused on critical global issues and featuring distinguished delegates from around the world.
+              {text.intro}
             </motion.p>
           </div>
         </div>

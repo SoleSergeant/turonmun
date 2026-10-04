@@ -1,40 +1,16 @@
 
 import React, { useState } from 'react';
 import { ChevronDown, ChevronUp } from 'lucide-react';
+import { useContent, useFill, rich } from '@/content/store';
 
 interface FAQItem {
   question: string;
   answer: string;
 }
 
-const faqItems: FAQItem[] = [
-  {
-    question: 'What is Model United Nations?',
-    answer: 'Model United Nations (MUN) is an educational simulation where students role-play as delegates representing different countries in UN committees. Participants research global issues, represent their assigned country\'s positions, debate, and draft resolutions to address international challenges.'
-  },
-  {
-    question: 'Who can participate in the conference?',
-    answer: 'Our conference welcomes university and high school students from all around the world. We accept both individual applications and delegations from academic institutions.'
-  },
-  {
-    question: 'How much does participation cost?',
-    answer: 'Participation fees vary depending on whether you are applying as an individual delegate or as part of a delegation. Early bird rates and discounts for returning delegates are available. Please check the Application page for current pricing details.'
-  },
-  {
-    question: 'What is the conference language?',
-    answer: 'The conference is conducted primarily in English. Most committee sessions, documentation, and communication are in English. Each season also features one Russian-language committee for participants more comfortable in Russian.'
-  },
-  {
-    question: 'Do I need previous MUN experience to participate?',
-    answer: 'No, prior experience is not required. We welcome delegates of all experience levels. We provide training sessions and resources for first-time participants to ensure everyone can engage meaningfully in the conference.'
-  },
-  {
-    question: 'What should I do to prepare for the conference?',
-    answer: 'Preparation includes researching your assigned country and committee topics, drafting position papers, and reviewing parliamentary procedure. We provide a delegate handbook and research guides to assist you in your preparation.'
-  }
-];
-
 export default function FAQSection() {
+  const text = useContent('home_sections');
+  const faqItems: FAQItem[] = useContent('faq').items;
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   
   const toggleFAQ = (index: number) => {
@@ -45,10 +21,10 @@ export default function FAQSection() {
     <section className="section bg-white">
       <div className="container max-w-4xl">
         <div className="text-center mb-12">
-          <span className="chip mb-2">Questions?</span>
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Frequently Asked Questions</h2>
+          <span className="chip mb-2">{text.faq_eyebrow}</span>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">{text.faq_title}</h2>
           <p className="text-neutral-600">
-            Find answers to common questions about our MUN conference, application process, and more.
+            {text.faq_intro}
           </p>
         </div>
         

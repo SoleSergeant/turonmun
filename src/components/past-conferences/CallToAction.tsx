@@ -4,12 +4,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Sparkles } from 'lucide-react';
 import { CustomButton } from '@/components/ui/custom-button';
 import { SeasonData } from '@/data/seasonsData';
+import { useContent, useFill, rich } from '@/content/store';
 
 interface CallToActionProps {
   selectedSeason: SeasonData;
 }
 
 const CallToAction: React.FC<CallToActionProps> = ({ selectedSeason }) => {
+  const text = useContent('past_conferences');
   return (
     <AnimatePresence mode="wait">
       <motion.section 
@@ -27,9 +29,9 @@ const CallToAction: React.FC<CallToActionProps> = ({ selectedSeason }) => {
           transition={{ duration: 0.6 }}
           className="container mx-auto px-4 text-center"
         >
-          <h2 className="text-3xl font-bold mb-6">Join Our Next Conference</h2>
+          <h2 className="text-3xl font-bold mb-6">{text.cta_title}</h2>
           <p className="text-lg mb-8 max-w-2xl mx-auto">
-            Be part of our upcoming season and contribute to meaningful discussions on pressing global issues.
+            {text.cta_text}
           </p>
           <motion.div 
             whileHover={{ scale: 1.05 }} 
@@ -40,7 +42,7 @@ const CallToAction: React.FC<CallToActionProps> = ({ selectedSeason }) => {
           >
             <CustomButton variant="accent" size="lg" to="/register">
               <Sparkles className="mr-2 h-5 w-5" />
-              Apply Now
+              {text.cta_button}
             </CustomButton>
           </motion.div>
         </motion.div>

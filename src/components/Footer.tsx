@@ -1,8 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Mail, Phone, MapPin, Instagram, Send, ArrowRight } from 'lucide-react';
+import { useContent, useFill, rich } from '@/content/store';
 
 export default function Footer() {
+  const general = useContent('general');
   const currentYear = new Date().getFullYear();
   return <footer className="bg-[#00235c] text-white pt-16 pb-8">
     <div className="container mx-auto px-4">
@@ -11,7 +13,7 @@ export default function Footer() {
         <div>
           <div className="flex items-center gap-2 mb-6">
             <div className="w-10 h-10 rounded-full bg-diplomatic-800 flex items-center justify-center overflow-hidden">
-              <img src="/lovable-uploads/58911c41-3ed8-4807-8789-5df7d2fff02c.png" alt="TuronMUN Logo" className="w-8 h-8 object-contain" />
+              <img src={general.logo_url} alt="TuronMUN Logo" className="w-8 h-8 object-contain" />
             </div>
             <div className="font-display">
               <span className="font-bold text-white">TURON</span>
@@ -19,13 +21,13 @@ export default function Footer() {
             </div>
           </div>
           <p className="text-neutral-300 mb-6 text-sm sm:text-base">
-            Join us for an enriching diplomatic simulation that brings together students from around the world to discuss pressing global issues.
+            {general.footer_about}
           </p>
           <div className="flex space-x-4">
-            <a href="https://www.instagram.com/turon.mun/" className="text-blue-300 hover:text-white transition-colors" aria-label="Instagram">
+            <a href={general.instagram_url} className="text-blue-300 hover:text-white transition-colors" aria-label="Instagram">
               <Instagram size={20} />
             </a>
-            <a href="https://t.me/TuronMUN" className="text-blue-300 hover:text-white transition-colors" aria-label="Telegram">
+            <a href={general.telegram_url} className="text-blue-300 hover:text-white transition-colors" aria-label="Telegram">
               <Send size={20} />
             </a>
           </div>
@@ -69,11 +71,11 @@ export default function Footer() {
           <ul className="space-y-4">
             <li className="flex items-start">
               <Mail className="mr-3 shrink-0 mt-1 text-blue-300" size={18} />
-              <span className="text-blue-200 text-sm sm:text-base">admin@turonmun.com</span>
+              <span className="text-blue-200 text-sm sm:text-base">{general.contact_email}</span>
             </li>
             <li className="flex items-start">
               <Phone className="mr-3 shrink-0 mt-1 text-blue-300" size={18} />
-              <span className="text-blue-200 text-sm sm:text-base">+998903672103</span>
+              <span className="text-blue-200 text-sm sm:text-base">{general.contact_phone}</span>
             </li>
             <li className="flex items-start">
               <MapPin className="mr-3 shrink-0 mt-1 text-blue-300" size={18} />
@@ -99,7 +101,7 @@ export default function Footer() {
               </Link>
             </li>
             <li>
-              <a href="http://t.me/ozodjonov_mh" target="_blank" rel="noopener noreferrer" className="text-blue-200 hover:text-white transition-colors inline-flex items-center">
+              <a href={general.sponsorship_url} target="_blank" rel="noopener noreferrer" className="text-blue-200 hover:text-white transition-colors inline-flex items-center">
                 <ArrowRight size={14} className="mr-2 opacity-70" /> Sponsorship
               </a>
             </li>
@@ -114,8 +116,8 @@ export default function Footer() {
 
       <div className="mt-12 pt-8 border-t border-blue-800/50 text-center text-blue-400 text-sm">
         <div className="flex flex-col md:flex-row justify-between items-center">
-          <p> {currentYear} TuronMUN. All rights reserved.</p>
-          <p className="mt-2 md:mt-0">Coded & created by <a href="https://t.me/samandar_vibe" target="_blank" rel="noopener" className="underline hover:text-white">Numonov Samandar</a> & Asadbek Abdukhalilov • {currentYear}.</p>
+          <p>© {currentYear} {general.site_name}. All rights reserved.</p>
+          <p className="mt-2 md:mt-0">{general.footer_credits_url ? <a href={general.footer_credits_url} target="_blank" rel="noopener" className="underline hover:text-white">{general.footer_credits}</a> : general.footer_credits}</p>
         </div>
       </div>
     </div>

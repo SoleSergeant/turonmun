@@ -5,9 +5,10 @@ import NavbarDesktop from './navbar/NavbarDesktop';
 import NavbarMobile from './navbar/NavbarMobile';
 import { cn } from '@/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
-import navLinks from './navbar/NavLinks';  // Import default export
+import { useNavLinks } from './navbar/NavLinks';
 
 export default function Navbar() {
+  const navLinks = useNavLinks();
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();

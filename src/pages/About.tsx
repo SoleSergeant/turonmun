@@ -11,8 +11,10 @@ import AboutTestimonials from '@/components/about/AboutTestimonials';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import { motion } from 'framer-motion';
+import { useContent, useFill, rich } from '@/content/store';
 
 export default function About() {
+  const text = useContent('about_page');
   return (
     <div className="min-h-screen">
       <Navbar />
@@ -32,12 +34,12 @@ export default function About() {
             transition={{ duration: 0.6, delay: 0.2 }}
             className="max-w-4xl mx-auto text-center"
           >
-            <Badge variant="outline" className="mb-4">About TuronMUN</Badge>
+            <Badge variant="outline" className="mb-4">{text.badge}</Badge>
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-diplomatic-600 to-diplomatic-900">
-              Shaping Tomorrow's Global Leaders
+              {text.title}
             </h1>
             <p className="text-lg md:text-xl text-neutral-600 mb-8">
-              Join us in fostering international cooperation, developing leadership skills, and creating lasting connections in the world of Model United Nations.
+              {text.intro}
             </p>
             <motion.div
               className="flex flex-col sm:flex-row gap-4 justify-center items-center"
@@ -50,7 +52,7 @@ export default function About() {
                 whileTap={{ scale: 0.95 }}
               >
                 <CustomButton variant="primary" size="lg" to="/register">
-                  Join Our Community
+                  {text.primary_button}
                 </CustomButton>
               </motion.div>
               <motion.div
@@ -58,7 +60,7 @@ export default function About() {
                 whileTap={{ scale: 0.95 }}
               >
                 <CustomButton variant="outline" size="lg" to="/past-conferences">
-                  <span>Past Conferences</span>
+                  <span>{text.secondary_button}</span>
                   <ChevronRight size={18} className="ml-1" />
                 </CustomButton>
               </motion.div>

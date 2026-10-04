@@ -5,8 +5,10 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { CustomButton } from './ui/custom-button';
 import { useCommittees } from '../hooks/useCommittees';
+import { useContent, useFill, rich } from '@/content/store';
 
 export default function CommitteesSection() {
+  const text = useContent('home_sections');
   const { committees } = useCommittees();
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -88,7 +90,7 @@ export default function CommitteesSection() {
               viewport={{ once: true }}
               transition={{ duration: 0.3 }}
             >
-              For Delegates
+              {text.committees_eyebrow}
             </motion.span>
           </motion.div>
           
@@ -100,7 +102,7 @@ export default function CommitteesSection() {
             transition={{ duration: 0.4 }}
           >
             <span className="text-diplomatic-800">
-              Our Committees
+              {text.committees_title}
             </span>
           </motion.h2>
           
@@ -111,7 +113,7 @@ export default function CommitteesSection() {
             viewport={{ once: true }}
             transition={{ duration: 0.4 }}
           >
-            Explore our diverse committees where you can debate critical global issues, forge diplomatic relationships, and develop leadership skills.
+            {text.committees_intro}
           </motion.p>
         </motion.div>
         
@@ -154,7 +156,7 @@ export default function CommitteesSection() {
               variant="ghost"
               className="group"
             >
-              <span>View All Committees</span>
+              <span>{text.committees_button}</span>
               <ChevronRight className="ml-1 w-4 h-4 group-hover:translate-x-1 transition-transform" />
             </CustomButton>
           </div>

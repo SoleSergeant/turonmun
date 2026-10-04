@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { seasonsData } from '@/data/seasonsData';
+import { usePastSeason, photoSrc } from '@/content/seasons';
 import PageLayout from '@/components/layout/PageLayout';
 import SeasonOverview from '@/components/past-conferences/SeasonOverview';
 import CallToAction from '@/components/past-conferences/CallToAction';
@@ -10,7 +10,7 @@ import { Link } from 'react-router-dom';
 
 export default function Season1() {
   // Get the season data for Season 1
-  const seasonData = seasonsData.find(season => season.id === "season1") || seasonsData[0];
+  const seasonData = usePastSeason("season1");
   
   // Scroll to top when component mounts
   useEffect(() => {
@@ -316,7 +316,7 @@ export default function Season1() {
             </motion.div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-              {[1, 2, 3, 4].map((num) => (
+              {seasonData.photos.map((_, i) => i + 1).map((num) => (
                 <motion.div
                   key={num}
                   initial={{ opacity: 0, y: 20 }}
@@ -329,7 +329,7 @@ export default function Season1() {
                   className="group relative overflow-hidden rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-1"
                 >
                   <img
-                    src={`/seasons/season 1/${num}.jpg`}
+                    src={photoSrc(seasonData.photos[num - 1]?.url)}
                     alt={`${seasonData.title} highlight ${num}`}
                     className="w-full h-64 object-cover transition-transform duration-500 group-hover:scale-105"
                     loading="lazy"
@@ -337,7 +337,7 @@ export default function Season1() {
                   <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-6">
                     <div>
                       <h3 className="text-white text-lg font-semibold mb-1">
-                        {seasonData.title} - Highlight #{num}
+                        {seasonData.photos[num - 1]?.caption || `${seasonData.title} - Highlight #${num}`}
                       </h3>
                       <p className="text-diplomatic-200 text-sm">
                         {seasonData.date}

@@ -1,3 +1,5 @@
+import { usePastSeasons } from '@/content/seasons';
+
 export const navLinks = [
   { name: 'Home', path: '/' },
   { name: 'About', path: '/about' },
@@ -12,21 +14,24 @@ export const navLinks = [
       { name: 'Awards', path: '/awards' },
     ]
   },
-  { 
-    name: 'Past Conferences', 
-    path: '/past-conferences',
-    hasDropdown: true,
-    dropdownItems: [
-      { name: 'Season 1', path: '/seasons/1' },
-      { name: 'Season 2', path: '/seasons/2' },
-      { name: 'Season 3', path: '/seasons/3' },
-      { name: 'Season 4', path: '/seasons/4' },
-      { name: 'TuronMUN x CAMU', path: '/seasons/camu' },
-      { name: 'Season 5', path: '/seasons/5' },
-      { name: 'Season 6', path: '/seasons/6' }
-    ]
-  },
+  // Season entries are filled in by useNavLinks() from Site content → Seasons.
+  { name: 'Past Conferences', path: '/past-conferences', hasDropdown: true, dropdownItems: [] as { name: string; path: string }[] },
   { name: 'Contact', path: '/contact' },
 ];
+
+/** Menu links, with the Past Conferences dropdown built from the season list. */
+export function useNavLinks() {
+  const seasons = usePastSeasons();
+  return navLinks.map(link =>
+    link.name === 'Past Conferences'
+      ? {
+          ...link,
+          dropdownItems: seasons
+            .filter(s => s.show_in_menu !== false && s.route)
+            .map(s => ({ name: s.menu_label || s.title, path: s.route })),
+        }
+      : link,
+  );
+}
 
 export default navLinks;

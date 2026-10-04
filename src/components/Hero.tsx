@@ -5,40 +5,19 @@ import { ChevronRight, Calendar, Clock, MapPin, Users, Sparkles } from 'lucide-r
 import { Link } from 'react-router-dom';
 import { CustomButton } from './ui/custom-button';
 import { transitionVariants } from '@/lib/transition-utils';
-import { supabase } from '@/integrations/supabase/client';
+import { useContent } from '@/content/store';
 import { useFormSettings } from '@/hooks/useFormSettings';
 import CountdownMini from './CountdownMini';
-
-const SEASON_DEFAULTS = {
-  badge_label: 'Next Season',
-  heading: 'Coming Soon',
-  subtitle: 'Season 7 details will be announced shortly.',
-  date_text: 'To be announced',
-  duration_text: 'To be announced',
-  location_text: 'Fergana, Uzbekistan',
-  delegates_text: 'To be announced',
-  apply_label: 'Apply for Season 7',
-};
-
-const phrases = [
-  "Shaping Tomorrow's Leaders",
-  "Build Lasting Connections",
-  "Shape the Future of Diplomacy",
-  "Empowering Youth Diplomacy"
-];
 
 const Hero = () => {
   const [currentPhrase, setCurrentPhrase] = useState('');
   const [phraseIndex, setPhraseIndex] = useState(0);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
-  const [season, setSeason] = useState(SEASON_DEFAULTS);
+  const season = useContent('next_season');
+  const hero = useContent('hero');
+  const phrases = hero.phrases.length > 0 ? hero.phrases : [''];
   const { settings: delegateSettings, isEffectivelyClosed: delegateClosed, notOpenYet } = useFormSettings('delegate');
-
-  useEffect(() => {
-    (supabase.from('season_info' as any) as any).select('*').eq('id', 1).single()
-      .then(({ data }: any) => { if (data) setSeason({ ...SEASON_DEFAULTS, ...data }); });
-  }, []);
 
   // Countdown logic:
   //  - "Applications open in" → opens_at in the future (form not open yet)
@@ -61,7 +40,7 @@ const Hero = () => {
     setIsVisible(true);
 
     const handleTyping = () => {
-      const currentFullPhrase = phrases[phraseIndex];
+      const currentFullPhrase = phrases[phraseIndex % phrases.length];
 
       if (!isDeleting && currentPhrase !== currentFullPhrase) {
         setCurrentPhrase(currentFullPhrase.substring(0, currentPhrase.length + 1));
@@ -91,7 +70,7 @@ const Hero = () => {
     }, typingSpeed);
 
     return () => clearTimeout(timeout);
-  }, [currentPhrase, isDeleting, phraseIndex]);
+  }, [currentPhrase, isDeleting, phraseIndex, phrases]);
 
   // Background animation variants
   const backgroundVariants = {
@@ -100,7 +79,7 @@ const Hero = () => {
       opacity: 0.05,
       transition: {
         duration: 2,
-        ease: [0.25, 0.1, 0.25, 1]
+        ease: [0.25, 0.1, 0.25, 1] as const
       }
     }
   };
@@ -206,7 +185,7 @@ const Hero = () => {
               whileHover={{ scale: 1.05, y: -2 }}
               transition={{ type: "spring", stiffness: 400, damping: 10 }}
             >
-              <span className="text-gradient-gold">Model United Nations</span>
+              <span className="text-gradient-gold">{hero.eyebrow}</span>
             </motion.span>
 
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-display font-bold mb-4 md:mb-6">
@@ -229,8 +208,7 @@ const Hero = () => {
               variants={transitionVariants.slideInLeft}
               className="text-sm sm:text-base md:text-lg text-white/80 mb-6 md:mb-8 max-w-xl"
             >
-              Join delegates from across Uzbekistan to debate pressing global issues, develop
-              leadership skills, and forge valuable connections at our prestigious Model UN conference.
+              {hero.intro}
             </motion.p>
 
             <motion.div
@@ -252,7 +230,7 @@ const Hero = () => {
                 className="w-full sm:w-auto"
               >
                 <CustomButton to="/register" variant="accent" size="lg" className="group w-full sm:w-auto">
-                  Apply Now
+                  {hero.apply_button}
                   <ChevronRight className="transition-transform group-hover:translate-x-1" size={16} />
                 </CustomButton>
               </motion.div>
@@ -277,7 +255,7 @@ const Hero = () => {
                   size="lg"
                   className="bg-white/10 backdrop-blur-sm border-white/30 text-white hover:bg-white/20 hover:border-white/50 w-full sm:w-auto"
                 >
-                  Explore Committees
+                  {hero.committees_button}
                 </CustomButton>
               </motion.div>
             </motion.div>
@@ -300,13 +278,9 @@ const Hero = () => {
                   {/* Two identical sets — second set makes it loop seamlessly */}
                   {[0, 1].map(set => (
                     <React.Fragment key={set}>
-                      <span className="inline-flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-gold-400" />Ranked top on MyMUN charts</span>
-                      <span className="inline-flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-gold-400" />Best social conference</span>
-                      <span className="inline-flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-gold-400" />Best small conference</span>
-                      <span className="inline-flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-gold-400" />Best logistics conference</span>
-                      <span className="inline-flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-gold-400" />Central Asia's leading MUN</span>
-                      <span className="inline-flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-gold-400" />Expert academic &amp; chairing team</span>
-                      <span className="inline-flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-gold-400" />6 successful seasons</span>
+                      {hero.accolades.map(text => (
+                        <span key={text} className="inline-flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-gold-400" />{text}</span>
+                      ))}
                     </React.Fragment>
                   ))}
                 </div>

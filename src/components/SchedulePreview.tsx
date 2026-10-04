@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Calendar, Clock } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useSchedule } from '@/hooks/useSchedule';
+import { useContent, useFill, rich } from '@/content/store';
 
 interface ScheduleItem {
   day: string;
@@ -15,6 +16,7 @@ interface ScheduleItem {
 }
 
 export default function SchedulePreview() {
+  const text = useContent('home_sections');
   const { scheduleData, loading, error } = useSchedule();
 
   // One-day conference: show the single day's first 5 events as a preview
@@ -60,10 +62,10 @@ export default function SchedulePreview() {
       <section className="section bg-white">
         <div className="container">
           <div className="text-center mb-12">
-            <span className="chip mb-2">Event Schedule</span>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">Conference Agenda</h2>
+            <span className="chip mb-2">{text.schedule_eyebrow}</span>
+            <h2 className="text-3xl md:text-4xl font-bold mb-4">{text.schedule_title}</h2>
             <p className="text-neutral-600 max-w-2xl mx-auto">
-              The conference schedule will be available soon. Check back later for updates!
+              {text.schedule_empty}
             </p>
           </div>
           
@@ -83,10 +85,10 @@ export default function SchedulePreview() {
     <section className="section bg-white">
       <div className="container">
         <div className="text-center mb-12">
-          <span className="chip mb-2">Event Schedule</span>
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Conference Agenda</h2>
+          <span className="chip mb-2">{text.schedule_eyebrow}</span>
+          <h2 className="text-3xl md:text-4xl font-bold mb-4">{text.schedule_title}</h2>
           <p className="text-neutral-600 max-w-2xl mx-auto">
-            Here's a preview of our event schedule. For the complete agenda and details, please visit the Schedule page.
+            {text.schedule_intro}
           </p>
           {error && (
             <div className="mt-4 p-3 bg-yellow-100 border border-yellow-300 rounded-md">

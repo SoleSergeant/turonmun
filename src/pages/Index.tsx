@@ -11,12 +11,12 @@ import FAQSection from '../components/FAQSection';
 import SponsorsSection from '../components/SponsorsSection';
 import Footer from '../components/Footer';
 import ErrorBoundary from '../components/ErrorBoundary';
-import { seasonsData } from '../data/seasonsData';
+import { usePastSeasons } from '@/content/seasons';
 
-// Get the latest season data
-const latestSeason = seasonsData[seasonsData.length - 1];
 
 const Index = () => {
+  const seasons = usePastSeasons();
+  const latestSeason = seasons[seasons.length - 1];
   // Scroll to top on page load
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -81,9 +81,7 @@ const Index = () => {
       transition={{ duration: 0.6, ease: 'easeOut' }}
     >
       <Seo 
-        title="TuronMUN - Model United Nations Conference"
-        description="Join TuronMUN for an enriching Model United Nations experience. Develop diplomacy, debate, and leadership skills with students from around the world."
-        event={{
+        event={latestSeason && {
           name: `TuronMUN ${latestSeason.title}`,
           startDate: latestSeason.date,
           endDate: latestSeason.endDate || latestSeason.date,

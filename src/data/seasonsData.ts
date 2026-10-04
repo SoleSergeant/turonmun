@@ -37,9 +37,9 @@ export const seasonsData = [
     ],
     photos: [
       { url: "seasons/season 1/1.jpg", caption: "Inaugural Ceremony" },
-      { url: "seasons/season1/2.jpg", caption: "Committee Session" },
-      { url: "seasons/season1/3.jpg", caption: "Keynote Address" },
-      { url: "seasons/season1/4.jpg", caption: "Award Ceremony" }
+      { url: "seasons/season 1/2.jpg", caption: "Committee Session" },
+      { url: "seasons/season 1/3.jpg", caption: "Keynote Address" },
+      { url: "seasons/season 1/4.jpg", caption: "Award Ceremony" }
     ]
   },
   {
@@ -84,9 +84,9 @@ export const seasonsData = [
     ],
     photos: [
       { url: "seasons/season 2/3.jpg", caption: "Cover" },
-      { url: "seasons/season2/1.jpg", caption: "Opening Plenary" },
-      { url: "seasons/season2/2.jpg", caption: "Committee Work" },
-      { url: "seasons/season2/4.jpg", caption: "Award Ceremony" }
+      { url: "seasons/season 2/1.jpg", caption: "Opening Plenary" },
+      { url: "seasons/season 2/2.jpg", caption: "Committee Work" },
+      { url: "seasons/season 2/4.jpg", caption: "Award Ceremony" }
     ]
   },
   {
@@ -132,9 +132,9 @@ export const seasonsData = [
     ],
     photos: [
       { url: "seasons/season 3/2.jpg", caption: "Cover" },
-      { url: "seasons/season3/1.jpg", caption: "Opening Ceremony" },
-      { url: "seasons/season3/3.jpg", caption: "Guest Speaker" },
-      { url: "seasons/season3/4.jpg", caption: "Group Photo" }
+      { url: "seasons/season 3/1.jpg", caption: "Opening Ceremony" },
+      { url: "seasons/season 3/3.jpg", caption: "Guest Speaker" },
+      { url: "seasons/season 3/4.jpg", caption: "Group Photo" }
     ]
   },
   {
@@ -174,9 +174,9 @@ export const seasonsData = [
     ],
     photos: [
       { url: "seasons/Season 4/1.jpg", caption: "Opening Ceremony" },
-      { url: "seasons/season4/2.jpg", caption: "Committee Work" },
-      { url: "seasons/season4/3.jpg", caption: "Guest Speaker" },
-      { url: "seasons/season4/4.jpg", caption: "Award Ceremony" }
+      { url: "seasons/Season 4/2.jpg", caption: "Committee Work" },
+      { url: "seasons/Season 4/3.jpg", caption: "Guest Speaker" },
+      { url: "seasons/Season 4/4.jpg", caption: "Award Ceremony" }
     ]
   },
   {

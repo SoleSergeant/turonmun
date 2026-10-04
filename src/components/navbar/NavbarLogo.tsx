@@ -1,12 +1,14 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
+import { useContent, useFill, rich } from '@/content/store';
 
 interface NavbarLogoProps {
   scrolled: boolean;
 }
 
 const NavbarLogo: React.FC<NavbarLogoProps> = ({ scrolled }) => {
+  const general = useContent('general');
   return (
     <Link 
       to="/" 
@@ -18,7 +20,7 @@ const NavbarLogo: React.FC<NavbarLogoProps> = ({ scrolled }) => {
         className="w-10 h-10 rounded-full bg-diplomatic-800 flex items-center justify-center overflow-hidden shadow-glow relative"
       >
         <img
-          src="/lovable-uploads/58911c41-3ed8-4807-8789-5df7d2fff02c.png"
+          src={general.logo_url}
           alt="TuronMUN Logo"
           className="w-8 h-8 object-contain"
         />

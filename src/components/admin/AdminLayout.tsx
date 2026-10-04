@@ -65,7 +65,7 @@ const NAV: { group: string; items: NavItem[] }[] = [
   {
     group: 'Site',
     items: [
-      { path: '/homepage', label: 'Homepage', icon: Home, roles: SG },
+      { path: '/content', label: 'Site content', icon: Home, roles: SG },
       { path: '/forms', label: 'Forms', icon: ClipboardList, roles: SG },
       { path: '/messages', label: 'Messages', icon: Mail, roles: SG },
     ],
