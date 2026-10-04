@@ -142,8 +142,8 @@ const CheckIn = () => {
     const { error } = await (supabase.rpc as any)('set_check_in', { p_kind: p.kind === 'delegate' ? 'delegate' : 'chair', p_id: p.id, p_checked: checked });
     if (!error) return;
     if (error.code !== 'PGRST202') throw error;
-    const { error: updErr } = await supabase.from(p.kind === 'delegate' ? 'applications' : 'admin_users')
-      .update({ checked_in_at: checked ? new Date().toISOString() : null, checked_in_by: checked ? adminId : null } as any)
+    const { error: updErr } = await (supabase.from(p.kind === 'delegate' ? 'applications' : 'admin_users') as any)
+      .update({ checked_in_at: checked ? new Date().toISOString() : null, checked_in_by: checked ? adminId : null })
       .eq('id', p.id);
     if (updErr) throw updErr;
   };
