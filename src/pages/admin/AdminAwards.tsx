@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import { supabase } from '@/integrations/supabase/client';
+import { downloadCsv, datedFilename } from '@/lib/csv';
 import { useToast } from '@/hooks/use-toast';
 import { Trophy, Lock, Unlock, Globe, EyeOff, Upload, Download, RefreshCw } from 'lucide-react';
 
@@ -78,11 +79,7 @@ const AdminAwards = () => {
       const a = awardFor(c.id, d.key);
       if (a) rows.push([c.name, d.label, a.winner_name || '', a.winner_country || '']);
     }));
-    const csv = rows.map(r => r.map(x => `"${x}"`).join(',')).join('\n');
-    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
-    const link = document.createElement('a');
-    link.href = url; link.download = `turonmun_awards.csv`; link.click();
-    URL.revokeObjectURL(url);
+    downloadCsv('turonmun_awards.csv', rows);
   };
 
   return (

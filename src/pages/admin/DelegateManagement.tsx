@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import { supabase } from '@/integrations/supabase/client';
+import { downloadCsv, datedFilename } from '@/lib/csv';
 import { getCurrentSeason, inSeason } from '@/lib/season';
 import { adminPath } from '@/lib/adminPath';
 import { sendEmails, templates } from '@/lib/email';
@@ -335,22 +336,7 @@ const DelegateManagement = () => {
       delegate.emergency_contact
     ]);
 
-    // Create CSV content
-    const csvContent = [
-      headers.join(','),
-      ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
-    ].join('\n');
-
-    // Create and download file
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    link.setAttribute('href', url);
-    link.setAttribute('download', `delegates_${new Date().toISOString().split('T')[0]}.csv`);
-    link.style.visibility = 'hidden';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    downloadCsv(datedFilename('delegates'), [headers, ...rows]);
 
     toast({
       title: 'Success',

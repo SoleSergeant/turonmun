@@ -33,18 +33,6 @@ export const supabase = createClient<Database>(
 // Helper function to sign in as admin (simplified for demo)
 // Removed due to security risk. Admins should use standard login flows.
 
-// Helper function to check if Supabase connection is working
-export const checkSupabaseConnection = async () => {
-  try {
-    const { data, error } = await supabase.from('committees').select('id').limit(1);
-    if (error) throw error;
-    return { success: true, message: 'Connected to Supabase' };
-  } catch (error: any) {
-    console.error('Supabase connection error:', error.message);
-    return { success: false, message: error.message };
-  }
-};
-
 // Helper function to check current auth state
 export const checkAuthState = async () => {
   try {

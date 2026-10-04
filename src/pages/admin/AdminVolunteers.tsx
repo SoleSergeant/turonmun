@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import VolunteerApplicationModal, { VolunteerApplication } from '@/components/admin/VolunteerApplicationModal';
 import { supabase } from '@/integrations/supabase/client';
+import { downloadCsv, datedFilename } from '@/lib/csv';
 import { getCurrentSeason, inSeason } from '@/lib/season';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -27,27 +28,19 @@ const formatDate = (d: string) => {
   catch { return d; }
 };
 
-const toCsv = (rows: VolunteerApplication[]) => {
-  const headers = [
+const csvRows = (rows: VolunteerApplication[]) => [
+  [
     'Full Name', 'Email', 'Telegram/Phone', 'Birthday', 'Location', 'School',
     'What They Bring', 'Anything Else', 'Committed to Deposit', 'Status',
     'Payment Status', 'Submitted',
-  ];
-  const escape = (v: any) => {
-    const s = v == null ? '' : String(v);
-    return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
-  };
-  const lines = [headers.join(',')];
-  rows.forEach(r => {
-    lines.push([
-      r.full_name, r.email, r.telegram_or_phone, r.date_of_birth, r.location,
-      r.school_name ?? '', r.what_you_bring, r.anything_else ?? '',
-      r.commit_to_deposit ? 'Yes' : 'No', r.status, r.payment_status,
-      r.created_at,
-    ].map(escape).join(','));
-  });
-  return lines.join('\n');
-};
+  ],
+  ...rows.map(r => [
+    r.full_name, r.email, r.telegram_or_phone, r.date_of_birth, r.location,
+    r.school_name ?? '', r.what_you_bring, r.anything_else ?? '',
+    r.commit_to_deposit ? 'Yes' : 'No', r.status, r.payment_status,
+    r.created_at,
+  ]),
+];
 
 const AdminVolunteers: React.FC = () => {
   const { toast } = useToast();
@@ -128,16 +121,7 @@ const AdminVolunteers: React.FC = () => {
   };
 
   const handleExport = () => {
-    const csv = toCsv(filtered);
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `volunteer-applications-${new Date().toISOString().slice(0, 10)}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    downloadCsv(datedFilename('volunteer-applications'), csvRows(filtered));
   };
 
   return (

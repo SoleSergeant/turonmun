@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Users, Mail, Phone, Globe, Flag, Search, Download, FileText, X } from 'lucide-react';
 import { useOutletContext } from 'react-router-dom';
+import { downloadCsv, datedFilename } from '@/lib/csv';
 
 interface DelegatesProps {
   committees: any[];
@@ -56,24 +57,7 @@ export default function ChairDelegates() {
       ];
     });
 
-    // Combine headers and rows
-    const csvContent = [
-      headers.join(','),
-      ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
-    ].join('\n');
-
-    // Create blob and download
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-
-    link.setAttribute('href', url);
-    link.setAttribute('download', `delegates_${new Date().toISOString().split('T')[0]}.csv`);
-    link.style.visibility = 'hidden';
-
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    downloadCsv(datedFilename('delegates'), [headers, ...rows]);
   };
 
   if (loading) {

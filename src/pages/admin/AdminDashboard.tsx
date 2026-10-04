@@ -1,424 +1,234 @@
-
 import React, { useEffect, useState } from 'react';
-import AdminLayout from '@/components/admin/AdminLayout';
-import { supabase, checkSupabaseConnection } from '@/integrations/supabase/client';
+import { Link } from 'react-router-dom';
 import {
-  Users,
-  Calendar,
-  Mail,
   AlertCircle,
   ChevronRight,
-  UserCheck,
-  Globe,
-  BarChart3,
-  MapPin,
-  Shield,
-  Heart,
-  Loader2,
-  TrendingUp,
   CheckCircle2,
   Clock,
-  XCircle
+  CreditCard,
+  Heart,
+  Loader2,
+  Mail,
+  MapPin,
+  MessageSquare,
+  Send,
+  Shield,
+  UserCheck,
+  LucideIcon,
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
-import { useToast } from '@/hooks/use-toast';
-import { useCommittees } from '@/hooks/useCommittees';
+import AdminLayout from '@/components/admin/AdminLayout';
+import { supabase } from '@/integrations/supabase/client';
 import { useAdminRole, AdminRole } from '@/hooks/useAdminRole';
+import { adminPath } from '@/lib/adminPath';
+import { isChairApplication } from '@/lib/applications';
+import { getCurrentSeason, inSeason } from '@/lib/season';
 
-interface DashboardCounts {
-  schedule_days: number;
-  applications: number;
-  unread_messages: number;
-  resources: number;
+type Role = NonNullable<AdminRole>;
+
+interface Todo {
+  key: string;
+  count: number | null;       // null = not available (e.g. migration not applied)
+  title: string;
+  hint: string;
+  path: string;
+  icon: LucideIcon;
+  roles: Role[];
+  tone: string;
+}
+
+interface Snapshot {
+  pendingReview: number;
+  decisionsUnsent: number | null;
+  unpaid: number;
+  paidNoSeat: number;
+  seatsUnannounced: number | null;
+  pendingChairs: number;
+  pendingVolunteers: number;
+  unansweredMessages: number;
+  seated: number;
+  arrived: number;
+  approvedDelegates: number;
+  paidDelegates: number;
+}
+
+const ACADEMIC: Role[] = ['sg', 'academics'];
+
+const APP_COLUMNS = 'id, status, payment_status, assigned_committee_id, notes, application_type, checked_in_at';
+
+/** Runs a select; when an optional column is missing (migration not applied) retries without it. */
+async function selectWithOptional(table: string, base: string, optional: string, season: Awaited<ReturnType<typeof getCurrentSeason>>) {
+  const run = (cols: string) => inSeason((supabase.from(table as any) as any).select(cols), season);
+  const first = await run(`${base}, ${optional}`);
+  if (!first.error) return { rows: (first.data || []) as any[], hasOptional: true };
+  const second = await run(base);
+  return { rows: (second.data || []) as any[], hasOptional: false };
 }
 
 const AdminDashboard = () => {
-  const { role, loading: roleLoading } = useAdminRole();
-  const [loading, setLoading] = useState(true);
-  const [connectionStatus, setConnectionStatus] = useState<{ success: boolean, message: string } | null>(null);
-  const { toast } = useToast();
-  const { committees } = useCommittees();
-  const [counts, setCounts] = useState<DashboardCounts>({
-    schedule_days: 0,
-    applications: 0,
-    unread_messages: 0,
-    resources: 0,
-  });
-  const [applicationsByStatus, setApplicationsByStatus] = useState<Record<string, number>>({});
-  const [delegateStats, setDelegateStats] = useState({ total: 0, approved: 0, pending: 0, rejected: 0 });
-  const [chairStats, setChairStats] = useState({ total: 0, approved: 0, pending: 0, rejected: 0 });
-  const [recentApplications, setRecentApplications] = useState<any[]>([]);
-  const [recentMessages, setRecentMessages] = useState<any[]>([]);
+  const { role, fullName, loading: roleLoading } = useAdminRole();
+  const [snap, setSnap] = useState<Snapshot | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [recent, setRecent] = useState<any[]>([]);
 
   useEffect(() => {
-    const checkConnection = async () => {
-      const status = await checkSupabaseConnection();
-      setConnectionStatus(status);
-      if (!status.success) {
-        toast({ title: "Database Connection Error", description: status.message, variant: "destructive" });
-        setLoading(false);
-        return;
-      }
-      fetchDashboardData();
-    };
-    checkConnection();
-  }, [toast]);
+    (async () => {
+      try {
+        const season = await getCurrentSeason();
+        const [apps, seats, messages, volunteers, recentApps] = await Promise.all([
+          selectWithOptional('applications', APP_COLUMNS, 'decision_emailed_at', season),
+          (async () => {
+            const r = await (supabase.from('country_assignments') as any).select('application_id, notified_at');
+            if (!r.error) return { rows: (r.data || []) as any[], hasOptional: true };
+            const r2 = await (supabase.from('country_assignments') as any).select('application_id');
+            return { rows: (r2.data || []) as any[], hasOptional: false };
+          })(),
+          (supabase.from('contact_messages') as any).select('id, responded_at'),
+          inSeason((supabase.from('volunteer_applications') as any).select('id, status'), season),
+          inSeason(supabase.from('applications').select('id, full_name, institution, status, created_at, notes, application_type'), season)
+            .order('created_at', { ascending: false })
+            .limit(6),
+        ]);
 
-  const fetchDashboardData = async () => {
-    try {
-      const [
-        scheduleRes, applicationsRes, unreadRes, resourcesRes,
-        recentAppsRes, recentMsgsRes, statusStatsRes
-      ] = await Promise.all([
-        supabase.from('schedule_events').select('id', { count: 'exact', head: true }),
-        supabase.from('applications').select('id', { count: 'exact', head: true }),
-        supabase.from('contact_messages').select('id', { count: 'exact', head: true }).eq('is_read', false),
-        supabase.from('resources').select('id', { count: 'exact', head: true }),
-        supabase.from('applications').select('*').order('created_at', { ascending: false }).limit(5),
-        supabase.from('contact_messages').select('*').order('created_at', { ascending: false }).limit(5),
-        supabase.from('applications').select('status, notes, application_type').not('status', 'is', null),
-      ]);
+        const delegates = apps.rows.filter(a => !isChairApplication(a));
+        const chairs = apps.rows.filter(a => isChairApplication(a));
+        const approved = delegates.filter(a => a.status === 'approved');
+        const seatedIds = new Set(seats.rows.map(s => s.application_id));
 
-      setCounts({
-        schedule_days: scheduleRes.count || 0,
-        applications: applicationsRes.count || 0,
-        unread_messages: unreadRes.count || 0,
-        resources: resourcesRes.count || 0,
-      });
-
-      setRecentApplications(recentAppsRes.data || []);
-      setRecentMessages(recentMsgsRes.data || []);
-
-      if (statusStatsRes.data) {
-        const allApps = statusStatsRes.data as any[];
-
-        // Split by type: notes marker is ground truth, application_type column is secondary
-        const isChairApp = (a: any) =>
-          a.notes?.includes('APPLICATION TYPE: chair') || a.application_type === 'chair';
-
-        const getTypeCounts = (apps: any[]) => {
-          const c = { total: 0, approved: 0, pending: 0, rejected: 0 };
-          apps.forEach(a => {
-            c.total += 1;
-            const s = a.status || 'pending';
-            if (s === 'approved') c.approved += 1;
-            else if (s === 'rejected') c.rejected += 1;
-            else c.pending += 1;
-          });
-          return c;
-        };
-
-        setDelegateStats(getTypeCounts(allApps.filter(a => !isChairApp(a))));
-        setChairStats(getTypeCounts(allApps.filter(isChairApp)));
-
-        const statusCounts: Record<string, number> = {};
-        allApps.forEach(app => {
-          const status = app.status || 'unknown';
-          statusCounts[status] = (statusCounts[status] || 0) + 1;
+        setSnap({
+          pendingReview: delegates.filter(a => !a.status || a.status === 'pending').length,
+          decisionsUnsent: apps.hasOptional
+            ? delegates.filter(a => (a.status === 'approved' || a.status === 'rejected') && !a.decision_emailed_at).length
+            : null,
+          unpaid: approved.filter(a => a.payment_status !== 'paid').length,
+          paidNoSeat: approved.filter(a => a.payment_status === 'paid' && !seatedIds.has(a.id)).length,
+          seatsUnannounced: seats.hasOptional ? seats.rows.filter(s => !s.notified_at).length : null,
+          pendingChairs: chairs.filter(a => !a.status || a.status === 'pending').length,
+          pendingVolunteers: ((volunteers.data || []) as any[]).filter(v => v.status === 'pending').length,
+          unansweredMessages: ((messages.data || []) as any[]).filter(m => !m.responded_at).length,
+          seated: approved.filter(a => seatedIds.has(a.id)).length,
+          arrived: approved.filter(a => seatedIds.has(a.id) && a.checked_in_at).length,
+          approvedDelegates: approved.length,
+          paidDelegates: approved.filter(a => a.payment_status === 'paid').length,
         });
-        setApplicationsByStatus(statusCounts);
+        setRecent((recentApps.data || []) as any[]);
+      } catch (err: any) {
+        setError(err.message || 'Could not load the dashboard');
       }
-    } catch (error) {
-      console.error('Error fetching dashboard data:', error);
-      toast({ title: "Error Loading Dashboard", description: "Please try again.", variant: "destructive" });
-    } finally {
-      setLoading(false);
-    }
-  };
+    })();
+  }, []);
 
-  const totalApps = Object.values(applicationsByStatus).reduce((a, b) => a + b, 0);
-  const approved = applicationsByStatus['approved'] || 0;
-  const pending = applicationsByStatus['pending'] || 0;
-  const rejected = applicationsByStatus['rejected'] || 0;
+  const todos: Todo[] = snap ? [
+    { key: 'review', count: snap.pendingReview, title: 'Applications to review', hint: 'Delegate applications waiting for a decision', path: '/applications', icon: UserCheck, roles: ACADEMIC, tone: 'text-purple-600 bg-purple-50' },
+    { key: 'decisions', count: snap.decisionsUnsent, title: 'Decision emails not sent', hint: 'Accepted or rejected, but not told yet', path: '/applications', icon: Send, roles: ACADEMIC, tone: 'text-blue-600 bg-blue-50' },
+    { key: 'unpaid', count: snap.unpaid, title: 'Accepted but unpaid', hint: 'Send a payment reminder from Delegates', path: '/delegates', icon: CreditCard, roles: ACADEMIC, tone: 'text-amber-600 bg-amber-50' },
+    { key: 'seat', count: snap.paidNoSeat, title: 'Paid, no seat yet', hint: 'Ready to allocate', path: '/allocation', icon: MapPin, roles: ACADEMIC, tone: 'text-teal-600 bg-teal-50' },
+    { key: 'announce', count: snap.seatsUnannounced, title: 'Seats not announced', hint: 'Seated delegates who haven’t been emailed', path: '/allocation', icon: Mail, roles: ACADEMIC, tone: 'text-indigo-600 bg-indigo-50' },
+    { key: 'chairs', count: snap.pendingChairs, title: 'Chair applications', hint: 'Waiting for a decision', path: '/chairs', icon: Shield, roles: ACADEMIC, tone: 'text-orange-600 bg-orange-50' },
+    { key: 'volunteers', count: snap.pendingVolunteers, title: 'Volunteer applications', hint: 'Waiting for a decision', path: '/volunteers', icon: Heart, roles: ['sg', 'logistics'], tone: 'text-rose-600 bg-rose-50' },
+    { key: 'messages', count: snap.unansweredMessages, title: 'Unanswered messages', hint: 'Contact form messages without a reply', path: '/messages', icon: MessageSquare, roles: ['sg'], tone: 'text-red-600 bg-red-50' },
+  ] : [];
 
-  const isAdminSubdomain = window.location.hostname.startsWith('admin.');
-  const s = isAdminSubdomain ? '' : '?subdomain=admin';
-
-  // Each nav card declares which roles may see it. Cards without an
-  // `allow` list default to sg + academics. The dashboard hides cards
-  // the current role can't access — and routes are gated independently.
-  const allCards: Array<{ title: string; description: string; icon: any; path: string; gradient: string; badge: string | null; allow?: AdminRole[] }> = [
-    {
-      title: 'Delegate Management',
-      description: 'View, filter, and manage all delegate applications and assignments',
-      icon: Users,
-      path: `/delegates${s}`,
-      gradient: 'from-blue-500 to-blue-600',
-      badge: counts.applications > 0 ? `${counts.applications} total` : null,
-    },
-    {
-      title: 'Committee Management',
-      description: 'Create committees, assign chairs, upload background guides',
-      icon: Globe,
-      path: `/committees${s}`,
-      gradient: 'from-indigo-500 to-indigo-600',
-      badge: committees.length > 0 ? `${committees.length} active` : null,
-    },
-    {
-      title: 'Country Matrix',
-      description: 'Manage country-committee assignments and availability',
-      icon: MapPin,
-      path: `/country-matrix${s}`,
-      gradient: 'from-teal-500 to-teal-600',
-      badge: null,
-    },
-    {
-      title: 'Applications',
-      description: 'Review, approve, reject and manage incoming applications',
-      icon: UserCheck,
-      path: `/applications${s}`,
-      gradient: 'from-purple-500 to-purple-600',
-      badge: pending > 0 ? `${pending} pending` : null,
-    },
-    {
-      title: 'Chairperson Panel',
-      description: 'Manage chair accounts, roles and permissions',
-      icon: Shield,
-      path: `/chairs${s}`,
-      gradient: 'from-orange-500 to-orange-600',
-      badge: null,
-    },
-    {
-      title: 'Analytics Dashboard',
-      description: 'Registration trends, committee balance and demographics',
-      icon: BarChart3,
-      path: `/analytics${s}`,
-      gradient: 'from-pink-500 to-rose-500',
-      badge: null,
-    },
-    {
-      title: 'Messages',
-      description: 'Read and respond to contact form submissions',
-      icon: Mail,
-      path: `/messages${s}`,
-      gradient: 'from-red-500 to-red-600',
-      badge: counts.unread_messages > 0 ? `${counts.unread_messages} unread` : null,
-      allow: ['sg'],
-    },
-    {
-      title: 'Schedule',
-      description: 'Manage conference schedule and events',
-      icon: Calendar,
-      path: `/schedule${s}`,
-      gradient: 'from-green-500 to-emerald-600',
-      badge: null,
-    },
-    {
-      title: 'Volunteer Applications',
-      description: 'Review, approve, and manage volunteer applications',
-      icon: Heart,
-      path: `/volunteers${s}`,
-      gradient: 'from-rose-500 to-rose-600',
-      badge: null,
-      allow: ['sg', 'logistics'],
-    },
-  ];
-
-  // Hide all cards while the role is loading so we don't briefly reveal
-  // sections a restricted role isn't supposed to see.
-  const navCards = roleLoading
-    ? []
-    : allCards.filter(c => (c.allow ?? ['sg', 'academics']).includes(role as AdminRole));
+  const visible = role ? todos.filter(t => t.roles.includes(role) && t.count !== null) : [];
+  const open = visible.filter(t => (t.count ?? 0) > 0);
+  const done = visible.filter(t => t.count === 0);
+  const canSeeDelegates = !!role && ACADEMIC.includes(role);
 
   return (
-    <AdminLayout title="Admin Dashboard">
-      {loading ? (
-        <div className="flex items-center justify-center h-64">
-          <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+    <AdminLayout title="Dashboard">
+      {error ? (
+        <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-red-800">
+          <h3 className="mb-1 flex items-center gap-2 font-semibold"><AlertCircle className="h-5 w-5" /> Couldn't load the dashboard</h3>
+          <p className="text-sm">{error}</p>
         </div>
-      ) : !connectionStatus?.success ? (
-        <div className="bg-red-50 border border-red-200 rounded-xl p-8 text-center">
-          <AlertCircle className="mx-auto mb-4 text-red-500" size={48} />
-          <h3 className="text-xl font-semibold text-red-800 mb-2">Database Connection Error</h3>
-          <p className="mb-4 text-red-700">{connectionStatus?.message || "Could not connect to database."}</p>
-          <button onClick={() => window.location.reload()} className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">
-            Retry Connection
-          </button>
-        </div>
+      ) : !snap || roleLoading ? (
+        <div className="flex h-64 items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-diplomatic-600" /></div>
       ) : (
         <div className="space-y-8">
-
-          {/* Stats Row */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-
-            {/* Delegate Stats */}
-            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <div className="p-2 bg-sky-50 rounded-lg">
-                    <Users className="h-4 w-4 text-sky-600" />
-                  </div>
-                  <span className="text-sm font-semibold text-gray-700">Delegates</span>
-                </div>
-                <span className="text-2xl font-bold text-gray-900">{delegateStats.total}</span>
-              </div>
-              <div className="grid grid-cols-3 gap-2 text-center">
-                <div className="bg-green-50 rounded-lg py-2">
-                  <p className="text-xl font-bold text-green-600">{delegateStats.approved}</p>
-                  <p className="text-[11px] text-gray-400 mt-0.5">Approved</p>
-                </div>
-                <div className="bg-yellow-50 rounded-lg py-2">
-                  <p className="text-xl font-bold text-yellow-600">{delegateStats.pending}</p>
-                  <p className="text-[11px] text-gray-400 mt-0.5">Pending</p>
-                </div>
-                <div className="bg-red-50 rounded-lg py-2">
-                  <p className="text-xl font-bold text-red-500">{delegateStats.rejected}</p>
-                  <p className="text-[11px] text-gray-400 mt-0.5">Rejected</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Chair Stats */}
-            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <div className="p-2 bg-purple-50 rounded-lg">
-                    <Shield className="h-4 w-4 text-purple-600" />
-                  </div>
-                  <span className="text-sm font-semibold text-gray-700">Chairs / Co-Chairs</span>
-                </div>
-                <span className="text-2xl font-bold text-gray-900">{chairStats.total}</span>
-              </div>
-              <div className="grid grid-cols-3 gap-2 text-center">
-                <div className="bg-green-50 rounded-lg py-2">
-                  <p className="text-xl font-bold text-green-600">{chairStats.approved}</p>
-                  <p className="text-[11px] text-gray-400 mt-0.5">Approved</p>
-                </div>
-                <div className="bg-yellow-50 rounded-lg py-2">
-                  <p className="text-xl font-bold text-yellow-600">{chairStats.pending}</p>
-                  <p className="text-[11px] text-gray-400 mt-0.5">Pending</p>
-                </div>
-                <div className="bg-red-50 rounded-lg py-2">
-                  <p className="text-xl font-bold text-red-500">{chairStats.rejected}</p>
-                  <p className="text-[11px] text-gray-400 mt-0.5">Rejected</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Committees */}
-            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 flex flex-col justify-between">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-sm font-medium text-gray-500">Committees</span>
-                <div className="p-2 bg-blue-50 rounded-lg">
-                  <Globe className="h-4 w-4 text-blue-600" />
-                </div>
-              </div>
-              <p className="text-3xl font-bold text-blue-600">{committees.length}</p>
-              <p className="text-xs text-gray-400 mt-1">Active this year</p>
-            </div>
+          <div>
+            <h2 className="text-2xl font-semibold text-gray-900">Welcome{fullName ? `, ${fullName.split(' ')[0]}` : ''}</h2>
+            <p className="text-gray-600">
+              {open.length === 0 ? 'Nothing needs your attention right now.' : `${open.length} thing${open.length === 1 ? '' : 's'} need${open.length === 1 ? 's' : ''} attention.`}
+            </p>
           </div>
 
-          {/* Application Status Bar */}
-          {totalApps > 0 && (
-            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-semibold text-gray-700">Application Status Overview</h3>
-                <Link to={isAdminSubdomain ? "/applications" : "/admin/applications"} className="text-xs text-blue-600 hover:underline">View all →</Link>
-              </div>
-              <div className="flex h-3 w-full rounded-full overflow-hidden gap-0.5">
-                {approved > 0 && <div className="bg-green-500 rounded-l-full" style={{ width: `${(approved / totalApps) * 100}%` }} title={`Approved: ${approved}`} />}
-                {pending > 0 && <div className="bg-yellow-400" style={{ width: `${(pending / totalApps) * 100}%` }} title={`Pending: ${pending}`} />}
-                {rejected > 0 && <div className="bg-red-400 rounded-r-full" style={{ width: `${(rejected / totalApps) * 100}%` }} title={`Rejected: ${rejected}`} />}
-              </div>
-              <div className="flex gap-4 mt-3">
-                <div className="flex items-center gap-1.5 text-xs text-gray-600"><div className="w-2.5 h-2.5 rounded-full bg-green-500" /> Approved ({approved})</div>
-                <div className="flex items-center gap-1.5 text-xs text-gray-600"><div className="w-2.5 h-2.5 rounded-full bg-yellow-400" /> Pending ({pending})</div>
-                <div className="flex items-center gap-1.5 text-xs text-gray-600"><div className="w-2.5 h-2.5 rounded-full bg-red-400" /> Rejected ({rejected})</div>
-              </div>
-            </div>
-          )}
-
-          {/* Navigation Cards Grid */}
-          <div>
-            <h2 className="text-lg font-semibold text-gray-800 mb-4">Management</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              {navCards.map((card) => (
-                <Link key={card.path} to={card.path} className="group block">
-                  <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5 hover:shadow-md hover:border-gray-200 transition-all duration-200 h-full">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className={`p-2.5 rounded-xl bg-gradient-to-br ${card.gradient} shadow-sm`}>
-                        <card.icon className="h-5 w-5 text-white" />
-                      </div>
-                      {card.badge && (
-                        <span className="text-[10px] font-semibold px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full whitespace-nowrap">
-                          {card.badge}
-                        </span>
-                      )}
-                    </div>
-                    <h3 className="font-semibold text-gray-900 text-sm mb-1 group-hover:text-blue-600 transition-colors">{card.title}</h3>
-                    <p className="text-xs text-gray-500 leading-relaxed">{card.description}</p>
-                    <div className="mt-3 flex items-center text-xs font-medium text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity">
-                      Open <ChevronRight className="h-3 w-3 ml-0.5" />
-                    </div>
+          {open.length > 0 && (
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {open.map(t => (
+                <Link
+                  key={t.key}
+                  to={adminPath(t.path)}
+                  className="group flex items-center gap-4 rounded-xl border bg-white p-5 shadow-sm transition hover:border-diplomatic-200 hover:shadow-md"
+                >
+                  <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${t.tone}`}>
+                    <t.icon className="h-6 w-6" />
                   </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-2xl font-bold text-gray-900">{t.count}</p>
+                    <p className="font-medium text-gray-900">{t.title}</p>
+                    <p className="truncate text-xs text-gray-500">{t.hint}</p>
+                  </div>
+                  <ChevronRight className="h-5 w-5 text-gray-300 transition group-hover:translate-x-1 group-hover:text-diplomatic-500" />
                 </Link>
               ))}
             </div>
-          </div>
+          )}
 
-          {/* Recent Activity Row */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Recent Applications */}
-            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold text-gray-800">Recent Applications</h3>
-                <Link to={isAdminSubdomain ? "/applications" : "/admin/applications"} className="text-xs text-blue-600 hover:underline font-medium">View all →</Link>
-              </div>
-              {recentApplications.length > 0 ? (
-                <div className="space-y-3">
-                  {recentApplications.map((app) => (
-                    <div key={app.id} className="flex items-center justify-between py-2 border-b border-gray-50 last:border-0">
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900 truncate">{app.full_name}</p>
-                        <p className="text-xs text-gray-400 truncate">{app.institution}</p>
-                      </div>
-                      <div className="ml-3 flex items-center gap-2 shrink-0">
-                        <span className={`inline-block px-2 py-0.5 text-[10px] font-semibold rounded-full ${
-                          app.status === 'approved' ? 'bg-green-100 text-green-700'
-                          : app.status === 'rejected' ? 'bg-red-100 text-red-700'
-                          : 'bg-yellow-100 text-yellow-700'
-                        }`}>
-                          {app.status?.charAt(0).toUpperCase() + app.status?.slice(1)}
-                        </span>
-                        <span className="text-[10px] text-gray-400">{new Date(app.created_at).toLocaleDateString('en', { month: 'short', day: 'numeric' })}</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-8 text-gray-400 text-sm">No applications yet</div>
-              )}
+          {done.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {done.map(t => (
+                <span key={t.key} className="inline-flex items-center gap-1 rounded-full bg-green-50 px-3 py-1 text-xs text-green-700">
+                  <CheckCircle2 className="h-3.5 w-3.5" /> {t.title}: all clear
+                </span>
+              ))}
             </div>
+          )}
 
-            {/* Recent Messages */}
-            <div className="bg-white rounded-xl border border-gray-100 shadow-sm p-5">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold text-gray-800">Recent Messages</h3>
-                <Link to={isAdminSubdomain ? "/messages" : "/admin/messages"} className="text-xs text-blue-600 hover:underline font-medium">View all →</Link>
-              </div>
-              {recentMessages.length > 0 ? (
-                <div className="space-y-3">
-                  {recentMessages.map((msg) => (
-                    <div key={msg.id} className="flex items-start justify-between py-2 border-b border-gray-50 last:border-0">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-0.5">
-                          <p className="text-sm font-medium text-gray-900 truncate">{msg.full_name}</p>
-                          {!msg.is_read && (
-                            <span className="inline-block px-1.5 py-0.5 text-[9px] font-bold bg-red-100 text-red-700 rounded-full">NEW</span>
-                          )}
-                        </div>
-                        <p className="text-xs text-gray-500 truncate">{msg.subject}</p>
-                      </div>
-                      <span className="ml-3 text-[10px] text-gray-400 shrink-0">{new Date(msg.created_at).toLocaleDateString('en', { month: 'short', day: 'numeric' })}</span>
-                    </div>
-                  ))}
+          {canSeeDelegates && (
+            <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+              {[
+                { label: 'Approved delegates', value: snap.approvedDelegates },
+                { label: 'Paid', value: snap.paidDelegates },
+                { label: 'Seated', value: snap.seated },
+                { label: 'Checked in', value: snap.seated > 0 ? `${snap.arrived} / ${snap.seated}` : '—' },
+              ].map(k => (
+                <div key={k.label} className="rounded-lg border bg-white p-4 shadow-sm">
+                  <p className="text-sm text-gray-500">{k.label}</p>
+                  <p className="text-2xl font-semibold text-gray-900">{k.value}</p>
                 </div>
-              ) : (
-                <div className="text-center py-8 text-gray-400 text-sm">No messages yet</div>
-              )}
+              ))}
             </div>
-          </div>
+          )}
 
+          {canSeeDelegates && recent.length > 0 && (
+            <div className="rounded-xl border bg-white shadow-sm">
+              <div className="flex items-center justify-between border-b px-5 py-3">
+                <h3 className="font-semibold text-gray-800">Latest applications</h3>
+                <Link to={adminPath('/applications')} className="text-sm text-diplomatic-600 hover:underline">All applications</Link>
+              </div>
+              <ul className="divide-y divide-gray-100">
+                {recent.map(a => (
+                  <li key={a.id} className="flex items-center justify-between gap-4 px-5 py-3 text-sm">
+                    <div className="min-w-0">
+                      <p className="truncate font-medium text-gray-900">
+                        {a.full_name}
+                        {isChairApplication(a) && <span className="ml-2 rounded-full bg-purple-100 px-2 py-0.5 text-[10px] font-semibold text-purple-700">Chair</span>}
+                      </p>
+                      <p className="truncate text-xs text-gray-500">{a.institution}</p>
+                    </div>
+                    <div className="flex shrink-0 items-center gap-3 text-xs text-gray-500">
+                      <span className="inline-flex items-center gap-1"><Clock className="h-3 w-3" />{new Date(a.created_at).toLocaleDateString()}</span>
+                      <span className={`rounded-full px-2 py-0.5 font-semibold ${
+                        a.status === 'approved' ? 'bg-green-100 text-green-700'
+                        : a.status === 'rejected' ? 'bg-red-100 text-red-700'
+                        : a.status === 'waitlisted' ? 'bg-orange-100 text-orange-700'
+                        : 'bg-yellow-100 text-yellow-700'
+                      }`}>{a.status || 'pending'}</span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </div>
       )}
     </AdminLayout>

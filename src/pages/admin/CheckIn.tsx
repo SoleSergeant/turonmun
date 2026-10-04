@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import { supabase } from '@/integrations/supabase/client';
+import { downloadCsv, datedFilename } from '@/lib/csv';
 import { getCurrentSeason, inSeason } from '@/lib/season';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -191,13 +192,7 @@ const CheckIn = () => {
         p.checked_in_at ? new Date(p.checked_in_at).toLocaleString() : '',
       ]);
     });
-    const csv = rows.map(r => r.map(x => `"${(x || '').toString().replace(/"/g, '""')}"`).join(',')).join('\n');
-    const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv' }));
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `turonmun_checkin_${new Date().toISOString().split('T')[0]}.csv`;
-    link.click();
-    URL.revokeObjectURL(url);
+    downloadCsv(datedFilename('turonmun_checkin'), rows);
   };
 
   // Per-committee breakdown (everyone — delegates + chairs)

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { downloadCsv, datedFilename } from '@/lib/csv';
 import { getCurrentSeason, inSeason } from '@/lib/season';
 import {
   Download,
@@ -407,27 +408,16 @@ const MatrixView = () => {
   };
 
   const exportToCSV = () => {
-    let csv = 'Country,' + committees.map(c => c.abbreviation).join(',') + '\n';
-
-    matrix.forEach(country => {
-      csv += country.country;
-      committees.forEach(committee => {
-        const assignment = country.committees[committee.id];
-        if (assignment?.assigned && assignment.delegateName) {
-          csv += ',' + assignment.delegateName;
-        } else {
-          csv += ',';
-        }
-      });
-      csv += '\n';
-    });
-
-    const blob = new Blob([csv], { type: 'text/csv' });
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `country-matrix-${new Date().toISOString().split('T')[0]}.csv`;
-    a.click();
+    downloadCsv(datedFilename('country-matrix'), [
+      ['Country', ...committees.map(c => c.abbreviation)],
+      ...matrix.map(country => [
+        country.country,
+        ...committees.map(committee => {
+          const cell = country.committees[committee.id];
+          return cell?.assigned ? cell.delegateName ?? '' : '';
+        }),
+      ]),
+    ]);
 
     toast({
       title: "Success",
