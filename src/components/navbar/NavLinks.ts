@@ -29,9 +29,4 @@ export const navLinks = [
   { name: 'Contact', path: '/contact' },
 ];
 
-export const authLinks = [
-  { name: 'Login', path: '/login' },
-  { name: 'Sign Up', path: '/signup' },
-];
-
 export default navLinks;
