@@ -52,4 +52,36 @@ export const transitionVariants = {
     animate: { opacity: 1, y: 0, transition: spring },
     exit: { opacity: 0, y: -20, transition: { duration: 0.3 } }
   },
+
+  slideInUp: {
+    initial: { opacity: 0, y: 30 },
+    animate: { opacity: 1, y: 0, transition: spring },
+    exit: { opacity: 0, y: 20, transition: { duration: 0.3 } }
+  },
+
+  scaleVariants: {
+    initial: { opacity: 0, scale: 0.9 },
+    animate: { opacity: 1, scale: 1, transition: spring },
+    exit: { opacity: 0, scale: 0.95, transition: { duration: 0.3 } }
+  },
+
+  staggerContainerVariants: {
+    initial: { opacity: 0 },
+    animate: {
+      opacity: 1,
+      transition: {
+        duration: 0.5,
+        ease: easeOut,
+        when: 'beforeChildren',
+        staggerChildren: 0.15
+      }
+    },
+    exit: { opacity: 0, transition: { duration: 0.3 } }
+  },
+
+  staggerItemVariants: {
+    initial: { opacity: 0, y: 10 },
+    animate: { opacity: 1, y: 0, transition: { duration: 0.5, ease: easeOut } },
+    exit: { opacity: 0, y: 5, transition: { duration: 0.2 } }
+  },
 } satisfies Record<string, Variants>;
