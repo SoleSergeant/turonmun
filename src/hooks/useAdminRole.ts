@@ -3,7 +3,9 @@ import { supabase } from '@/integrations/supabase/client';
 
 export type AdminRole = 'sg' | 'academics' | 'logistics' | 'registration' | null;
 
-// Legacy roles that should be treated as SG (full access)
+// Legacy roles treated as SG. Migration 036 rewrites these rows to 'sg';
+// this only keeps such accounts working until that migration has run.
+// Safe to delete once 036 is applied everywhere.
 const LEGACY_SG = new Set(['admin', 'superadmin']);
 
 interface RoleSnapshot {

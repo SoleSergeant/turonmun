@@ -872,7 +872,6 @@ const DelegateManagement = () => {
                   const formData = new FormData(e.currentTarget);
 
                   try {
-                    console.log('[DelegateManagement] Saving via RPC update_delegate_info');
                     const { data: rpcData, error } = await (supabase as any).rpc('update_delegate_info', {
                       p_id: selectedDelegate.id,
                       p_full_name: formData.get('full_name') as string,
@@ -882,7 +881,6 @@ const DelegateManagement = () => {
                       p_country: formData.get('country') as string,
                       p_payment_status: formData.get('payment_status') as string,
                     });
-                    console.log('[DelegateManagement] RPC result:', { rpcData, error });
 
                     if (error) {
                       console.error('Supabase full error object:', JSON.stringify(error, null, 2));

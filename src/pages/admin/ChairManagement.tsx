@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import { supabase } from '@/integrations/supabase/client';
+import { isChairApplication } from '@/lib/applications';
 import { getCurrentSeason, inSeason } from '@/lib/season';
 import { createClient } from '@supabase/supabase-js';
 import {
@@ -8,7 +9,6 @@ import {
   Plus,
   Edit,
   Trash2,
-  Shield,
   Mail,
   Globe,
   Key,
@@ -106,8 +106,7 @@ const ChairManagement = () => {
 
       const apps: ChairApp[] = (data || [])
         .filter((a: any) =>
-          a.notes?.includes('APPLICATION TYPE: chair') ||
-          (a as any).application_type === 'chair'
+          isChairApplication(a)
         )
         .map((a: any) => ({
           id: a.id,
@@ -210,17 +209,10 @@ const ChairManagement = () => {
   const [userSearchResults, setUserSearchResults] = useState<{ id: string; full_name: string; email: string }[]>([]);
   const [selectedExistingUser, setSelectedExistingUser] = useState<{ id: string; full_name: string; email: string } | null>(null);
   const [userSearchLoading, setUserSearchLoading] = useState(false);
-  const [isRealAdmin, setIsRealAdmin] = useState(false);
 
   useEffect(() => {
-    checkRealAdmin();
     fetchData();
   }, []);
-
-  const checkRealAdmin = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    setIsRealAdmin(!!session);
-  };
 
   const fetchData = async () => {
     setLoading(true);
@@ -294,15 +286,6 @@ const ChairManagement = () => {
 
   const handleAddChair = async (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!isRealAdmin) {
-      toast({
-        title: "Access Denied",
-        description: "You are using demo admin access. Please log out and sign in with a real admin account to manage chairs.",
-        variant: "destructive",
-      });
-      return;
-    }
 
     setActionLoading(true);
 
@@ -384,15 +367,6 @@ const ChairManagement = () => {
     e.preventDefault();
     if (!selectedChair) return;
 
-    if (!isRealAdmin) {
-      toast({
-        title: "Access Denied",
-        description: "You are using demo admin access. Please log out and sign in with a real admin account to manage chairs.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     setActionLoading(true);
 
     try {
@@ -458,15 +432,6 @@ const ChairManagement = () => {
   };
 
   const handleDeleteChair = async (id: string, fullName: string) => {
-    if (!isRealAdmin) {
-      toast({
-        title: "Access Denied",
-        description: "You are using demo admin access. Please log out and sign in with a real admin account to manage chairs.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     if (!confirm('Are you sure you want to delete this chair? This action cannot be undone.')) return;
 
     try {
@@ -530,20 +495,6 @@ const ChairManagement = () => {
   return (
     <AdminLayout title="Chair Management">
       <div className="space-y-6">
-        {!isRealAdmin && (
-          <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4">
-            <div className="flex">
-              <div className="flex-shrink-0">
-                <Shield className="h-5 w-5 text-yellow-400" />
-              </div>
-              <div className="ml-3">
-                <p className="text-sm text-yellow-700">
-                  You are viewing this page in <strong>Demo Mode</strong>. To add, edit, or delete chairs, you must <a href="/admin" className="font-medium underline hover:text-yellow-600">log in</a> with a real admin account.
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">

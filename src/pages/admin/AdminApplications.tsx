@@ -159,7 +159,6 @@ const AdminApplications = () => {
       }
 
       if (!data) {
-        console.warn('No data returned from applications table');
         setApplications([]);
         return;
       }

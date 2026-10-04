@@ -18,12 +18,12 @@ const FIELDS: { key: string; label: string; hint?: string }[] = [
 const DEFAULTS: Record<string, string> = {
   badge_label: 'Next Season',
   heading: 'Coming Soon',
-  subtitle: 'Season 7 details will be announced shortly.',
+  subtitle: 'Details will be announced shortly.',
   date_text: 'To be announced',
   duration_text: 'To be announced',
   location_text: 'Fergana, Uzbekistan',
   delegates_text: 'To be announced',
-  apply_label: 'Apply for Season 7',
+  apply_label: 'Apply now',
 };
 
 const Homepage = () => {

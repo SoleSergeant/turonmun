@@ -1,4 +1,5 @@
 import React from 'react';
+import { isChairApplication } from '@/lib/applications';
 import {
   X,
   Mail,
@@ -149,8 +150,7 @@ const ApplicationManagementModal: React.FC<ApplicationManagementModalProps> = ({
   const satScore        = application.sat_score ?? getFromNotes('SAT Score');
 
   // Chair-specific notes fields (only relevant on chair applications)
-  const isChair                 = (application as any).application_type === 'chair'
-                                || (application.notes || '').includes('APPLICATION TYPE: chair');
+  const isChair                 = isChairApplication(application as any);
   const rolePreference          = getFromNotes('Role Preference');
   const previousChairExperience = getFromNotes('Previous Chair Experience');
   const leadershipExample       = getFromNotes('Leadership Example');
@@ -251,7 +251,7 @@ const ApplicationManagementModal: React.FC<ApplicationManagementModalProps> = ({
           
           <div className="flex items-center space-x-3">
             {/* Application type badge — uses column when available, notes as fallback */}
-            {((application as any).application_type === 'chair' || (application as any).notes?.includes('APPLICATION TYPE: chair')) ? (
+            {isChair ? (
               <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/20 text-purple-200 text-xs font-bold border border-purple-400/30">
                 <Users size={12} /> Chair / Co-Chair
               </span>
