@@ -155,6 +155,7 @@ $$;
 
 -- ── applications ───────────────────────────────────────────────────────
 DROP POLICY IF EXISTS "Admins can update applications" ON public.applications;
+DROP POLICY IF EXISTS "SG or Academics can update applications" ON public.applications;
 CREATE POLICY "SG or Academics can update applications"
   ON public.applications FOR UPDATE
   USING (public.is_academic_staff()) WITH CHECK (public.is_academic_staff());
