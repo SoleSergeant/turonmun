@@ -20,7 +20,6 @@ import ProtectedRoute from "./components/auth/ProtectedRoute";
 import CheckInRoute from "./components/admin/CheckInRoute";
 import ChairRoute from "./components/chair/ChairRoute";
 
-import ImagePreloader from "./components/ImagePreloader";
 import SplashScreen from "./components/ui/SplashScreen";
 
 // ── Lazy-loaded pages ────────────────────────────────────────────────
@@ -262,7 +261,6 @@ const App = () => {
           {showSplash && <SplashScreen onComplete={() => setShowSplash(false)} />}
           <BrowserRouter>
             <ScrollToTop />
-            <ImagePreloader />
 
             {/* Secret Message Easter Egg */}
             <SecretMessage isOpen={isOpen} onClose={closeMessage} />

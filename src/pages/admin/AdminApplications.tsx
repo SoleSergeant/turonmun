@@ -32,7 +32,6 @@ import {
   UserPlus,
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { exportApplicationsToExcel } from '@/utils/excelExport';
 import { useAdminRole } from '@/hooks/useAdminRole';
 
 interface Application {
@@ -386,8 +385,10 @@ const AdminApplications = () => {
     }
   };
 
-  const handleExportExcel = () => {
+  const handleExportExcel = async () => {
     try {
+      // xlsx is ~200 KB; load it only when someone actually exports.
+      const { exportApplicationsToExcel } = await import('@/utils/excelExport');
       const fileName = exportApplicationsToExcel(filteredApplications, 'TuronMUN_Applications');
       toast({
         title: "Export Successful",
