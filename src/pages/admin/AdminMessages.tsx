@@ -65,7 +65,7 @@ const AdminMessages = () => {
     setMessages(prev => prev.map(m => (m.id === id ? { ...m, ...fields } : m)));
 
   const markAsRead = async (id: string) => {
-    const { error } = await supabase.from('contact_messages').update({ is_read: true }).eq('id', id);
+    const { error } = await (supabase.from('contact_messages') as any).update({ is_read: true }).eq('id', id);
     if (error) {
       toast({ title: 'Error', description: 'Failed to mark message as read', variant: 'destructive' });
       return;
@@ -97,14 +97,13 @@ const AdminMessages = () => {
       const { data: { user } } = await supabase.auth.getUser();
       const { data: admin } = await supabase.from('admin_users').select('id').eq('email', user?.email ?? '').maybeSingle();
       const respondedAt = new Date().toISOString();
-      await supabase
-        .from('contact_messages')
+      await (supabase.from('contact_messages') as any)
         .update({
           is_read: true,
           responded_at: respondedAt,
           responded_by: (admin as any)?.id ?? null,
           response_message: reply,
-        } as any)
+        })
         .eq('id', message.id);
 
       patch(message.id, { is_read: true, responded_at: respondedAt, response_message: reply });
