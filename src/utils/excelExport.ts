@@ -27,7 +27,7 @@ interface Application {
   final_confirmation?: boolean;
   has_ielts: boolean;
   has_sat: boolean;
-  status: 'pending' | 'approved' | 'rejected';
+  status: 'pending' | 'approved' | 'rejected' | 'waitlisted';
   created_at: string;
   application_id?: string;
   photo_url?: string;

@@ -55,7 +55,7 @@ interface Application {
   sat_score?: number;
   payment_amount?: number;
   dietary_restrictions?: string;
-  status: 'pending' | 'approved' | 'rejected';
+  status: 'pending' | 'approved' | 'rejected' | 'waitlisted';
   created_at: string;
   application_id?: string;
   photo_url?: string;

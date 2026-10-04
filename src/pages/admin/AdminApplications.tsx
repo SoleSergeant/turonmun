@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import ApplicationManagementModal from '@/components/admin/ApplicationManagementModal';
-import DeleteAllApplicationsModal from '@/components/admin/DeleteAllApplicationsModal';
+import DecisionEmailPanel from '@/components/admin/DecisionEmailPanel';
+import { isChairApplication } from '@/lib/applications';
 import { supabase, checkAuthState } from '@/integrations/supabase/client';
 import {
   Check,
@@ -61,7 +62,7 @@ interface Application {
   final_confirmation?: boolean;
   has_ielts: boolean;
   has_sat: boolean;
-  status: 'pending' | 'approved' | 'rejected';
+  status: 'pending' | 'approved' | 'rejected' | 'waitlisted';
   created_at: string;
   application_id?: string;
   photo_url?: string;
@@ -69,12 +70,9 @@ interface Application {
   ielts_certificate_url?: string;
   sat_certificate_url?: string;
   notes?: string;
+  payment_status?: string | null;
+  decision_emailed_at?: string | null;
 }
-
-// Chair detection mirrors filterApplications(): the notes marker written at
-// submit time is ground truth, the application_type column is a secondary signal.
-const isChairApplication = (app: any) =>
-  app?.application_type === 'chair' || !!app?.notes?.includes('APPLICATION TYPE: chair');
 
 const AdminApplications = () => {
   const { role } = useAdminRole();
@@ -92,9 +90,8 @@ const AdminApplications = () => {
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [searchQuery, setSearchQuery] = useState('');
   const [authChecked, setAuthChecked] = useState(false);
-  const [acceptedEmails, setAcceptedEmails] = useState<string>('');
-  const [rejectedEmails, setRejectedEmails] = useState<string>('');
-  const [isDeleteAllModalOpen, setIsDeleteAllModalOpen] = useState(false);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [bulkBusy, setBulkBusy] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -103,11 +100,9 @@ const AdminApplications = () => {
         setLoading(true);
 
         const { isAuthenticated, user } = await checkAuthState();
-        console.log('Auth state:', { isAuthenticated, user });
 
         if (isAuthenticated) {
           await fetchApplications();
-          await loadEmailCollections(); // Load persisted emails
         }
       } catch (error) {
         console.error('Auth check failed:', error);
@@ -130,7 +125,6 @@ const AdminApplications = () => {
       .on('postgres_changes',
         { event: '*', schema: 'public', table: 'applications' },
         () => {
-          console.log('Applications changed, refreshing...');
           fetchApplications();
         }
       )
@@ -147,7 +141,6 @@ const AdminApplications = () => {
 
   const fetchApplications = async () => {
     try {
-      console.log('Fetching applications...');
       if (applications.length === 0) {
         setLoading(true);
       }
@@ -157,7 +150,6 @@ const AdminApplications = () => {
         .select('*')
         .order('created_at', { ascending: false });
 
-      console.log('Supabase response:', { status, error, count: data?.length });
 
       if (error) {
         console.error('Supabase error:', error);
@@ -170,7 +162,6 @@ const AdminApplications = () => {
         return;
       }
 
-      console.log(`Successfully fetched ${data.length} applications`);
 
       // Convert the string status to the defined type
       const typedData = (data as any[]).map(app => ({
@@ -197,12 +188,7 @@ const AdminApplications = () => {
     // Notes marker is the ground truth (always written at submit time).
     // application_type column is used as a secondary signal when notes is absent.
     if (typeFilter !== 'all') {
-      filtered = filtered.filter(app => {
-        const notesIsChair = !!(app as any).notes?.includes('APPLICATION TYPE: chair');
-        const colIsChair = (app as any).application_type === 'chair';
-        const isChair = notesIsChair || colIsChair;
-        return typeFilter === 'chair' ? isChair : !isChair;
-      });
+      filtered = filtered.filter(app => (typeFilter === 'chair') === isChairApplication(app));
     }
 
     // Apply status filter
@@ -227,8 +213,8 @@ const AdminApplications = () => {
 
   const updateApplicationStatus = async (id: string, status: 'approved' | 'rejected' | 'waitlisted') => {
     try {
-      const { error } = await supabase
-        .from('applications' as any)
+      const { error } = await (supabase
+        .from('applications') as any)
         .update({ 
           status,
           reviewed_at: new Date().toISOString()
@@ -249,7 +235,6 @@ const AdminApplications = () => {
       }
 
       // Refresh email collections from database
-      await loadEmailCollections();
 
       toast({
         title: "Status Updated",
@@ -284,8 +269,8 @@ const AdminApplications = () => {
       const conversionNote = `Converted from a rejected chair application on ${new Date().toLocaleDateString()}.`;
       const newNotes = strippedNotes ? `${conversionNote}\n${strippedNotes}` : conversionNote;
 
-      const { error } = await supabase
-        .from('applications' as any)
+      const { error } = await (supabase
+        .from('applications') as any)
         .update({
           application_type: 'delegate',
           notes: newNotes,
@@ -304,7 +289,6 @@ const AdminApplications = () => {
         )
       );
 
-      await loadEmailCollections();
 
       toast({
         title: 'Converted to Delegate',
@@ -318,33 +302,6 @@ const AdminApplications = () => {
         variant: 'destructive',
       });
     }
-  };
-
-  const copyToClipboard = (text: string, type: string) => {
-    navigator.clipboard.writeText(text).then(() => {
-      toast({
-        title: "Copied!",
-        description: `${type} emails copied to clipboard`,
-      });
-    }).catch(() => {
-      toast({
-        title: "Copy Failed",
-        description: "Could not copy to clipboard",
-        variant: "destructive",
-      });
-    });
-  };
-
-  const clearEmails = (type: 'accepted' | 'rejected') => {
-    if (type === 'accepted') {
-      setAcceptedEmails('');
-    } else {
-      setRejectedEmails('');
-    }
-    toast({
-      title: "Cleared",
-      description: `${type} emails list cleared`,
-    });
   };
 
   const deleteApplication = async (id: string | null) => {
@@ -368,7 +325,6 @@ const AdminApplications = () => {
       }
 
       // Refresh email collections from database
-      await loadEmailCollections();
 
       toast({
         title: "Application Deleted",
@@ -382,6 +338,38 @@ const AdminApplications = () => {
         description: `Error: ${errorMessage}. This might happen if the application has related data in other tables like feedback.`,
         variant: "destructive",
       });
+    }
+  };
+
+  const toggleSelected = (id: string) => {
+    setSelected(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
+
+  const allShownSelected = filteredApplications.length > 0 && filteredApplications.every(a => selected.has(a.id));
+  const toggleSelectAllShown = () => {
+    setSelected(allShownSelected ? new Set() : new Set(filteredApplications.map(a => a.id)));
+  };
+
+  const bulkUpdate = async (fields: Record<string, string>, label: string) => {
+    const ids = Array.from(selected);
+    if (!confirm(`${label}: apply to ${ids.length} application${ids.length === 1 ? '' : 's'}?`)) return;
+    setBulkBusy(true);
+    try {
+      const { error } = await (supabase.from('applications') as any)
+        .update({ ...fields, ...(fields.status ? { reviewed_at: new Date().toISOString() } : {}) })
+        .in('id', ids);
+      if (error) throw error;
+      toast({ title: `${label}: ${ids.length}` });
+      setSelected(new Set());
+      await fetchApplications();
+    } catch (err: any) {
+      toast({ title: 'Bulk update failed', description: err.message, variant: 'destructive' });
+    } finally {
+      setBulkBusy(false);
     }
   };
 
@@ -404,73 +392,6 @@ const AdminApplications = () => {
     }
   };
 
-  // Load email collections from Supabase
-  const loadEmailCollections = async () => {
-    try {
-      // Get all approved applications
-      const { data: approved, error: approvedError } = await supabase
-        .from('applications')
-        .select('email')
-        .eq('status', 'approved');
-
-      if (approvedError) throw approvedError;
-
-      // Get all rejected applications  
-      const { data: rejected, error: rejectedError } = await supabase
-        .from('applications')
-        .select('email')
-        .eq('status', 'rejected');
-
-      if (rejectedError) throw rejectedError;
-
-      // Set email collections
-      setAcceptedEmails(approved ? (approved as any[]).map(app => app.email).join(', ') : '');
-      setRejectedEmails(rejected ? (rejected as any[]).map(app => app.email).join(', ') : '');
-
-    } catch (error) {
-      console.error('Error loading email collections:', error);
-      toast({
-        title: "Error",
-        description: "Failed to load email collections",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const deleteAllApplications = async () => {
-    try {
-      const { error } = await supabase
-        .from('applications')
-        .delete()
-        .neq('id', '00000000-0000-0000-0000-000000000000'); // Delete all records
-
-      if (error) throw error;
-
-      // Clear local state
-      setApplications([]);
-      setFilteredApplications([]);
-      setAcceptedEmails('');
-      setRejectedEmails('');
-
-      // Close modal if open
-      if (modalApplication) {
-        setModalApplication(null);
-      }
-
-      toast({
-        title: "All Applications Deleted",
-        description: "All applications have been permanently deleted from the database",
-      });
-    } catch (error) {
-      console.error('Error deleting all applications:', error);
-      toast({
-        title: "Error",
-        description: "Failed to delete all applications",
-        variant: "destructive",
-      });
-    }
-  };
-
   return (
     <AdminLayout title="Applications Management">
       {!authChecked || loading ? (
@@ -480,66 +401,7 @@ const AdminApplications = () => {
         </div>
       ) : (
         <>
-          {/* Email Collection Section */}
-          <div className="mb-6 grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {/* Accepted Emails */}
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-              <div className="flex justify-between items-center mb-3">
-                <h3 className="text-sm font-semibold text-green-800">Accepted Emails</h3>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => copyToClipboard(acceptedEmails, 'Accepted')}
-                    disabled={!acceptedEmails}
-                    className="px-3 py-1 text-xs bg-green-600 text-white rounded disabled:bg-gray-300 hover:bg-green-700"
-                  >
-                    Copy
-                  </button>
-                  <button
-                    onClick={() => clearEmails('accepted')}
-                    disabled={!acceptedEmails}
-                    className="px-3 py-1 text-xs bg-red-600 text-white rounded disabled:bg-gray-300 hover:bg-red-700"
-                  >
-                    Clear
-                  </button>
-                </div>
-              </div>
-              <textarea
-                value={acceptedEmails}
-                readOnly
-                className="w-full h-20 p-2 text-xs border border-green-300 rounded bg-white resize-none"
-                placeholder="Accepted applicant emails will appear here (comma-separated)"
-              />
-            </div>
-
-            {/* Rejected Emails */}
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-              <div className="flex justify-between items-center mb-3">
-                <h3 className="text-sm font-semibold text-red-800">Rejected Emails</h3>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => copyToClipboard(rejectedEmails, 'Rejected')}
-                    disabled={!rejectedEmails}
-                    className="px-3 py-1 text-xs bg-red-600 text-white rounded disabled:bg-gray-300 hover:bg-red-700"
-                  >
-                    Copy
-                  </button>
-                  <button
-                    onClick={() => clearEmails('rejected')}
-                    disabled={!rejectedEmails}
-                    className="px-3 py-1 text-xs bg-red-600 text-white rounded disabled:bg-gray-300 hover:bg-red-700"
-                  >
-                    Clear
-                  </button>
-                </div>
-              </div>
-              <textarea
-                value={rejectedEmails}
-                readOnly
-                className="w-full h-20 p-2 text-xs border border-red-300 rounded bg-white resize-none"
-                placeholder="Rejected applicant emails will appear here (comma-separated)"
-              />
-            </div>
-          </div>
+          <DecisionEmailPanel applications={applications} onSent={fetchApplications} />
 
           <div className="flex flex-col h-full">
             {/* Applications Grid */}
@@ -592,16 +454,13 @@ const AdminApplications = () => {
                         Export Excel
                       </button>
 
-                      {canDelete && (
-                        <button
-                          onClick={() => setIsDeleteAllModalOpen(true)}
-                          disabled={applications.length === 0}
-                          className="bg-red-600 text-white py-2 px-3 rounded-md text-sm flex items-center hover:bg-red-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
-                        >
-                          <Trash2 size={14} className="mr-1" />
-                          Delete All
-                        </button>
-                      )}
+                      <button
+                        onClick={toggleSelectAllShown}
+                        disabled={filteredApplications.length === 0}
+                        className="border border-gray-300 bg-white text-gray-700 py-2 px-3 rounded-md text-sm hover:bg-gray-50 disabled:opacity-40"
+                      >
+                        {allShownSelected ? 'Clear selection' : `Select all ${filteredApplications.length}`}
+                      </button>
                     </div>
                   </div>
 
@@ -619,6 +478,17 @@ const AdminApplications = () => {
                   </div>
                 </div>
 
+                {selected.size > 0 && (
+                  <div className="sticky top-0 z-10 flex flex-wrap items-center gap-2 border-b bg-diplomatic-50 px-4 py-3">
+                    <span className="mr-2 text-sm font-semibold text-diplomatic-900">{selected.size} selected</span>
+                    <button disabled={bulkBusy} onClick={() => bulkUpdate({ status: 'approved' }, 'Approved')} className="rounded-md bg-green-600 px-3 py-1.5 text-sm text-white hover:bg-green-700 disabled:opacity-50">Approve</button>
+                    <button disabled={bulkBusy} onClick={() => bulkUpdate({ status: 'waitlisted' }, 'Waitlisted')} className="rounded-md bg-orange-500 px-3 py-1.5 text-sm text-white hover:bg-orange-600 disabled:opacity-50">Waitlist</button>
+                    <button disabled={bulkBusy} onClick={() => bulkUpdate({ status: 'rejected' }, 'Rejected')} className="rounded-md bg-red-600 px-3 py-1.5 text-sm text-white hover:bg-red-700 disabled:opacity-50">Reject</button>
+                    <button disabled={bulkBusy} onClick={() => bulkUpdate({ payment_status: 'paid' }, 'Marked paid')} className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-50 disabled:opacity-50">Mark paid</button>
+                    <button onClick={() => setSelected(new Set())} className="ml-auto text-sm text-gray-500 hover:text-gray-800">Clear</button>
+                  </div>
+                )}
+
                 <div className="p-6">
                   {filteredApplications.length === 0 ? (
                     <div className="text-center py-12 text-gray-500">
@@ -635,6 +505,13 @@ const AdminApplications = () => {
                         >
                           <div className="flex items-start justify-between mb-4">
                             <div className="flex items-center">
+                              <input
+                                type="checkbox"
+                                checked={selected.has(app.id)}
+                                onChange={() => toggleSelected(app.id)}
+                                aria-label={`Select ${app.full_name}`}
+                                className="mr-3 h-4 w-4 rounded border-gray-300 text-diplomatic-600 focus:ring-diplomatic-500"
+                              />
                               <div className="mr-3">
                                 {app.status === 'approved' ? (
                                   <Check size={16} className="text-green-500" strokeWidth={2} />
@@ -663,7 +540,7 @@ const AdminApplications = () => {
                           <div className="mb-4">
                             <div className="flex items-center gap-2 mb-1.5">
                               <h4 className="font-semibold text-gray-900 text-lg">{app.full_name}</h4>
-                              {((app as any).application_type === 'chair' || (app as any).notes?.includes('APPLICATION TYPE: chair')) ? (
+                              {isChairApplication(app) ? (
                                 <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-100 text-purple-700 border border-purple-200 font-bold">Chair/Co-Chair</span>
                               ) : (
                                 <span className="text-[10px] px-2 py-0.5 rounded-full bg-sky-100 text-sky-700 border border-sky-200 font-bold">Delegate</span>
@@ -849,13 +726,6 @@ const AdminApplications = () => {
                   </div>
                 </div>
               )}
-          {/* Delete All Applications Modal */}
-          <DeleteAllApplicationsModal
-            isOpen={isDeleteAllModalOpen}
-            onClose={() => setIsDeleteAllModalOpen(false)}
-            onConfirm={deleteAllApplications}
-            applicationCount={applications.length}
-          />
         </>
       )}
     </AdminLayout>

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import { supabase } from '@/integrations/supabase/client';
 import { adminPath } from '@/lib/adminPath';
+import { sendEmails, templates } from '@/lib/email';
+import { isChairApplication } from '@/lib/applications';
 import { COMMON_COUNTRIES } from '@/data/countries';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -46,6 +48,7 @@ interface Delegate {
   payment_status: 'pending' | 'paid' | 'overdue';
   payment_amount: number | null;
   contacted: boolean;
+  payment_reminded_at?: string | null;
   telegram_username?: string;
   documents_submitted: boolean;
   registration_date: string;
@@ -92,9 +95,7 @@ const DelegateManagement = () => {
       // delegates only. Exclude chairs the same way the rest of the app detects
       // them: the notes marker written at submit time is ground truth, the
       // application_type column is a secondary signal.
-      const delegatesOnly = (data || []).filter((app: any) =>
-        !(app.application_type === 'chair' || app.notes?.includes('APPLICATION TYPE: chair'))
-      );
+      const delegatesOnly = (data || []).filter((app: any) => !isChairApplication(app));
 
       // Map database records to Delegate interface
       const mappedDelegates: Delegate[] = delegatesOnly.map(app => {
@@ -122,6 +123,7 @@ const DelegateManagement = () => {
           payment_status: (app.payment_status || 'pending') as any,
           payment_amount: app.payment_amount ?? null,
           contacted: !!app.contacted,
+          payment_reminded_at: (app as any).payment_reminded_at ?? null,
           telegram_username: app.telegram_username || undefined,
           documents_submitted: !!(app.has_ielts || app.has_sat),
           registration_date: new Date(app.created_at || '').toLocaleDateString(),
@@ -172,6 +174,8 @@ const DelegateManagement = () => {
   const [showViewModal, setShowViewModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showEmailModal, setShowEmailModal] = useState(false);
+  const [emailRecipients, setEmailRecipients] = useState<Delegate[]>([]);
+  const [emailBusy, setEmailBusy] = useState(false);
 
   const handleViewDelegate = (delegate: Delegate) => {
     setSelectedDelegate(delegate);
@@ -184,17 +188,81 @@ const DelegateManagement = () => {
   };
 
   const handleEmailDelegate = (delegate: Delegate) => {
-    setSelectedDelegate(delegate);
+    setEmailRecipients([delegate]);
     setShowEmailModal(true);
   };
 
-  const sendEmail = async (to: string, subject: string, body: string) => {
-    // TODO: Implement email sending via your backend/API
-    toast({
-      title: 'Email Sent',
-      description: `Email sent to ${to}`,
-    });
-    setShowEmailModal(false);
+  const emailSelected = () => {
+    setEmailRecipients(delegates.filter(d => selectedDelegates.includes(d.id)));
+    setShowEmailModal(true);
+  };
+
+  const sendEmail = async (subject: string, body: string) => {
+    setEmailBusy(true);
+    try {
+      const sent = await sendEmails(
+        emailRecipients.map(d => templates.custom({ to: d.email, subject, body })),
+        'custom',
+      );
+      toast({ title: `Email sent to ${sent} delegate${sent === 1 ? '' : 's'}` });
+      setShowEmailModal(false);
+    } catch (err: any) {
+      toast({ title: 'Email failed', description: err.message, variant: 'destructive' });
+    } finally {
+      setEmailBusy(false);
+    }
+  };
+
+  // Payment reminders go to approved delegates who haven't paid. Without an
+  // explicit selection, people reminded in the last 3 days are skipped.
+  const REMIND_GAP_MS = 3 * 24 * 60 * 60 * 1000;
+  const unpaidToRemind = (onlySelected: boolean) =>
+    delegates.filter(d =>
+      d.payment_status !== 'paid' &&
+      (onlySelected
+        ? selectedDelegates.includes(d.id)
+        : !d.payment_reminded_at || Date.now() - new Date(d.payment_reminded_at).getTime() > REMIND_GAP_MS),
+    );
+
+  const sendPaymentReminders = async (onlySelected: boolean) => {
+    const list = unpaidToRemind(onlySelected);
+    if (list.length === 0) {
+      toast({
+        title: 'Nobody to remind',
+        description: onlySelected ? 'The selected delegates have all paid.' : 'Every unpaid delegate was reminded in the last 3 days.',
+      });
+      return;
+    }
+    if (!confirm(`Send a payment reminder to ${list.length} unpaid delegate${list.length === 1 ? '' : 's'}?`)) return;
+    setEmailBusy(true);
+    try {
+      const sent = await sendEmails(
+        list.map(d => templates.paymentReminder({ to: d.email, name: d.full_name, amount: d.payment_amount })),
+        'payment_reminder',
+      );
+      const now = new Date().toISOString();
+      const ids = list.slice(0, sent).map(d => d.id);
+      await (supabase.from('applications') as any).update({ payment_reminded_at: now }).in('id', ids);
+      setDelegates(prev => prev.map(d => ids.includes(d.id) ? { ...d, payment_reminded_at: now } : d));
+      toast({ title: `Sent ${sent} payment reminder${sent === 1 ? '' : 's'}` });
+    } catch (err: any) {
+      toast({ title: 'Reminders failed', description: err.message, variant: 'destructive' });
+    } finally {
+      setEmailBusy(false);
+    }
+  };
+
+  const markSelectedPaid = async () => {
+    const ids = [...selectedDelegates];
+    if (!confirm(`Mark ${ids.length} delegate${ids.length === 1 ? '' : 's'} as paid?`)) return;
+    const { error } = await (supabase.from('applications') as any).update({ payment_status: 'paid' }).in('id', ids);
+    if (error) {
+      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+      return;
+    }
+    setDelegates(prev => prev.map(d => ids.includes(d.id) ? { ...d, payment_status: 'paid' } : d));
+    setSelectedDelegates([]);
+    toast({ title: `Marked ${ids.length} as paid` });
   };
 
   const handleDeleteDelegate = async (delegateId: string) => {
@@ -329,8 +397,8 @@ const DelegateManagement = () => {
 
   const updatePaymentStatus = async (id: string, newStatus: string) => {
     try {
-      const { error } = await supabase
-        .from('applications')
+      const { error } = await (supabase
+        .from('applications') as any)
         .update({ payment_status: newStatus } as any)
         .eq('id', id);
       if (error) throw error;
@@ -345,8 +413,8 @@ const DelegateManagement = () => {
   const toggleContacted = async (id: string, current: boolean) => {
     const next = !current;
     try {
-      const { error } = await supabase
-        .from('applications')
+      const { error } = await (supabase
+        .from('applications') as any)
         .update({ contacted: next, contacted_at: next ? new Date().toISOString() : null } as any)
         .eq('id', id);
       if (error) throw error;
@@ -370,6 +438,14 @@ const DelegateManagement = () => {
             <p className="text-gray-600">Manage applications, assignments, and delegate status</p>
           </div>
           <div className="flex items-center gap-3">
+            <button
+              onClick={() => sendPaymentReminders(false)}
+              disabled={emailBusy}
+              className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50"
+            >
+              <Mail className="h-4 w-4" />
+              Remind unpaid
+            </button>
             <button
               onClick={exportToCSV}
               className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
@@ -698,14 +774,14 @@ const DelegateManagement = () => {
                 {selectedDelegates.length} delegate(s) selected
               </span>
               <div className="flex items-center gap-2">
-                <button className="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700">
-                  Accept All
+                <button onClick={emailSelected} className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700">
+                  Email
                 </button>
-                <button className="px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700">
-                  Reject All
+                <button onClick={() => sendPaymentReminders(true)} disabled={emailBusy} className="px-3 py-1 bg-amber-500 text-white text-sm rounded hover:bg-amber-600 disabled:opacity-50">
+                  Payment reminder
                 </button>
-                <button className="px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700">
-                  Send Email
+                <button onClick={markSelectedPaid} className="px-3 py-1 bg-green-600 text-white text-sm rounded hover:bg-green-700">
+                  Mark paid
                 </button>
                 <button
                   onClick={() => setSelectedDelegates([])}
@@ -929,12 +1005,14 @@ const DelegateManagement = () => {
         )}
 
         {/* Email Modal */}
-        {showEmailModal && selectedDelegate && (
+        {showEmailModal && emailRecipients.length > 0 && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-lg max-w-2xl w-full">
               <div className="p-6">
                 <div className="flex justify-between items-start mb-4">
-                  <h3 className="text-xl font-semibold">Send Email to {selectedDelegate.full_name}</h3>
+                  <h3 className="text-xl font-semibold">
+                    Email {emailRecipients.length === 1 ? emailRecipients[0].full_name : `${emailRecipients.length} delegates`}
+                  </h3>
                   <button onClick={() => setShowEmailModal(false)} className="text-gray-400 hover:text-gray-600">
                     <X className="h-5 w-5" />
                   </button>
@@ -942,21 +1020,17 @@ const DelegateManagement = () => {
                 <form onSubmit={(e) => {
                   e.preventDefault();
                   const formData = new FormData(e.currentTarget);
-                  sendEmail(
-                    selectedDelegate.email,
-                    formData.get('subject') as string,
-                    formData.get('body') as string
-                  );
+                  sendEmail(formData.get('subject') as string, formData.get('body') as string);
                 }}>
                   <div className="space-y-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">To</label>
-                      <input
-                        type="email"
-                        value={selectedDelegate.email}
-                        disabled
-                        className="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-50"
-                      />
+                      <div className="w-full max-h-24 overflow-y-auto px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-sm text-gray-700">
+                        {emailRecipients.map(d => d.email).join(', ')}
+                      </div>
+                      {emailRecipients.length > 1 && (
+                        <p className="mt-1 text-xs text-gray-500">Each delegate gets their own copy; nobody sees the other addresses.</p>
+                      )}
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Subject</label>
@@ -988,9 +1062,10 @@ const DelegateManagement = () => {
                       </button>
                       <button
                         type="submit"
-                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                        disabled={emailBusy}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
                       >
-                        Send Email
+                        {emailBusy ? 'Sending…' : 'Send Email'}
                       </button>
                     </div>
                   </div>
