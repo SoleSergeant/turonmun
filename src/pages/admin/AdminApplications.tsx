@@ -4,6 +4,7 @@ import ApplicationManagementModal from '@/components/admin/ApplicationManagement
 import DecisionEmailPanel from '@/components/admin/DecisionEmailPanel';
 import { isChairApplication } from '@/lib/applications';
 import { supabase, checkAuthState } from '@/integrations/supabase/client';
+import { getCurrentSeason, inSeason } from '@/lib/season';
 import {
   Check,
   XCircle,
@@ -145,9 +146,10 @@ const AdminApplications = () => {
         setLoading(true);
       }
 
-      const { data, error, status } = await supabase
+      const season = await getCurrentSeason();
+      const { data, error } = await inSeason(supabase
         .from('applications')
-        .select('*')
+        .select('*'), season)
         .order('created_at', { ascending: false });
 
 

@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import { supabase } from '@/integrations/supabase/client';
+import { getCurrentSeason, inSeason } from '@/lib/season';
 import { useToast } from '@/hooks/use-toast';
 import {
   Search, CheckCircle2, AlertTriangle, Undo2,
@@ -48,10 +49,11 @@ const CheckIn = () => {
       const { data: admin } = await supabase.from('admin_users').select('id').eq('email', user?.email).single();
       setAdminId((admin as any)?.id ?? null);
 
+      const season = await getCurrentSeason();
       const [{ data: dels }, { data: chairs }, { data: comms }, { data: asgs }] = await Promise.all([
         // Delegates: accepted AND allocated to a committee.
-        supabase.from('applications')
-          .select('id, full_name, email, country, photo_url, payment_status, assigned_committee_id, checked_in_at, checked_in_by')
+        inSeason(supabase.from('applications')
+          .select('id, full_name, email, country, photo_url, payment_status, assigned_committee_id, checked_in_at, checked_in_by'), season)
           .eq('status', 'approved')
           .not('assigned_committee_id', 'is', null)
           .order('full_name'),

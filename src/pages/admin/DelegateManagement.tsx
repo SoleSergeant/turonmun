@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import { supabase } from '@/integrations/supabase/client';
+import { getCurrentSeason, inSeason } from '@/lib/season';
 import { adminPath } from '@/lib/adminPath';
 import { sendEmails, templates } from '@/lib/email';
 import { isChairApplication } from '@/lib/applications';
@@ -78,9 +79,10 @@ const DelegateManagement = () => {
     try {
       setLoading(true);
       // Only fetch approved applications
-      const { data, error } = await supabase
+      const season = await getCurrentSeason();
+      const { data, error } = await inSeason(supabase
         .from('applications')
-        .select('*')
+        .select('*'), season)
         .eq('status', 'approved')
         .order('created_at', { ascending: false });
 

@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import VolunteerApplicationModal, { VolunteerApplication } from '@/components/admin/VolunteerApplicationModal';
 import { supabase } from '@/integrations/supabase/client';
+import { getCurrentSeason, inSeason } from '@/lib/season';
 import { useToast } from '@/hooks/use-toast';
 import {
   Search, Filter, Download, RefreshCw, Heart, CheckCircle, XCircle, Clock,
@@ -61,8 +62,9 @@ const AdminVolunteers: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      const { data, error } = await (supabase.from('volunteer_applications') as any)
-        .select('*')
+      const season = await getCurrentSeason();
+      const { data, error } = await inSeason((supabase.from('volunteer_applications') as any)
+        .select('*'), season)
         .order('created_at', { ascending: false });
       if (error) throw error;
       setApps((data ?? []) as VolunteerApplication[]);

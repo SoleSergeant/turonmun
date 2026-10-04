@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import { supabase } from '@/integrations/supabase/client';
+import { getCurrentSeason, inSeason } from '@/lib/season';
 import type { FormSettings, CustomQuestion, FormQuestion } from '@/hooks/useFormSettings';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -752,18 +753,19 @@ const FormSettingsPage = () => {
   const loadAll = useCallback(async () => {
     setLoading(true);
     try {
+      const season = await getCurrentSeason();
       const [{ data: rows }, { count: delegateCount }, { count: chairCount }, { count: volunteerCount }] = await Promise.all([
         (supabase.from('form_settings') as any).select('*'),
-        (supabase.from('applications') as any)
-          .select('id', { count: 'exact', head: true })
+        inSeason((supabase.from('applications') as any)
+          .select('id', { count: 'exact', head: true }), season)
           .eq('status', 'approved')
           .not('notes', 'ilike', '%APPLICATION TYPE: chair%'),
-        (supabase.from('applications') as any)
-          .select('id', { count: 'exact', head: true })
+        inSeason((supabase.from('applications') as any)
+          .select('id', { count: 'exact', head: true }), season)
           .eq('status', 'approved')
           .ilike('notes', '%APPLICATION TYPE: chair%'),
-        (supabase.from('volunteer_applications') as any)
-          .select('id', { count: 'exact', head: true })
+        inSeason((supabase.from('volunteer_applications') as any)
+          .select('id', { count: 'exact', head: true }), season)
           .eq('status', 'approved'),
       ]);
 

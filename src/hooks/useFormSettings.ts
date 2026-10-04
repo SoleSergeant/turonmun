@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { getCurrentSeason, inSeason } from '@/lib/season';
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 export interface CustomQuestion {
@@ -75,7 +76,9 @@ export const useFormSettings = (formType: 'delegate' | 'chair' | 'volunteer') =>
       // Approved-count query is per-form-type. Volunteers live in their
       // own table; chairs/delegates share `applications` and are split by
       // the legacy notes prefix.
-      const approvedCountQuery =
+      // Capacity counts only this season's approvals.
+      const season = await getCurrentSeason();
+      const approvedCountQuery = inSeason(
         formType === 'volunteer'
           ? (supabase.from('volunteer_applications') as any)
               .select('id', { count: 'exact', head: true })
@@ -88,7 +91,9 @@ export const useFormSettings = (formType: 'delegate' | 'chair' | 'volunteer') =>
           : (supabase.from('applications') as any)
               .select('id', { count: 'exact', head: true })
               .eq('status', 'approved')
-              .not('notes', 'ilike', '%APPLICATION TYPE: chair%');
+              .not('notes', 'ilike', '%APPLICATION TYPE: chair%'),
+        season,
+      );
 
       const [{ data: settingsData }, { count }] = await Promise.all([
         (supabase.from('form_settings') as any)

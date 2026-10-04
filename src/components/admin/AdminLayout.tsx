@@ -1,9 +1,11 @@
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { useAdminRole, ROLE_LABELS } from '@/hooks/useAdminRole';
+import { useAdminRole, ROLE_LABELS, AdminRole } from '@/hooks/useAdminRole';
+import { adminPath } from '@/lib/adminPath';
+import { getCurrentSeason } from '@/lib/season';
 import {
   LayoutDashboard,
   Users,
@@ -22,7 +24,65 @@ import {
   Home,
   QrCode,
   Heart,
+  UserCog,
+  History,
+  CalendarRange,
+  LucideIcon,
 } from 'lucide-react';
+
+type NavItem = { path: string; label: string; icon: LucideIcon; roles: NonNullable<AdminRole>[] };
+
+const SG: NonNullable<AdminRole>[] = ['sg'];
+const ACADEMIC: NonNullable<AdminRole>[] = ['sg', 'academics'];
+
+// One place that decides who sees what. Keep in sync with the allow lists
+// on the routes in App.tsx (and the database policies in migration 036).
+const NAV: { group: string; items: NavItem[] }[] = [
+  {
+    group: 'Overview',
+    items: [{ path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['sg', 'academics', 'logistics'] }],
+  },
+  {
+    group: 'People',
+    items: [
+      { path: '/applications', label: 'Applications', icon: FileText, roles: ACADEMIC },
+      { path: '/delegates', label: 'Delegates', icon: Users, roles: ACADEMIC },
+      { path: '/chairs', label: 'Chairs', icon: Shield, roles: ACADEMIC },
+      { path: '/volunteers', label: 'Volunteers', icon: Heart, roles: ['sg', 'logistics'] },
+    ],
+  },
+  {
+    group: 'Conference',
+    items: [
+      { path: '/committees', label: 'Committees', icon: Globe, roles: ACADEMIC },
+      { path: '/allocation', label: 'Allocation', icon: Map, roles: ACADEMIC },
+      { path: '/schedule', label: 'Schedule', icon: Calendar, roles: ACADEMIC },
+      { path: '/resources', label: 'Resources', icon: FileText, roles: ACADEMIC },
+      { path: '/awards', label: 'Awards', icon: Award, roles: ACADEMIC },
+      { path: '/check-in', label: 'Check-in', icon: QrCode, roles: ['sg', 'academics', 'logistics', 'registration'] },
+    ],
+  },
+  {
+    group: 'Site',
+    items: [
+      { path: '/homepage', label: 'Homepage', icon: Home, roles: SG },
+      { path: '/forms', label: 'Forms', icon: ClipboardList, roles: SG },
+      { path: '/messages', label: 'Messages', icon: Mail, roles: SG },
+    ],
+  },
+  {
+    group: 'Insights',
+    items: [{ path: '/analytics', label: 'Analytics', icon: BarChart3, roles: ACADEMIC }],
+  },
+  {
+    group: 'Administration',
+    items: [
+      { path: '/accounts', label: 'Admin accounts', icon: UserCog, roles: SG },
+      { path: '/seasons', label: 'Seasons', icon: CalendarRange, roles: SG },
+      { path: '/activity', label: 'Activity log', icon: History, roles: SG },
+    ],
+  },
+];
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -38,49 +98,19 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
   const displayName = fullName || 'Admin';
 
   const isRealAdminSubdomain = window.location.hostname.startsWith('admin.');
-  // If not on a real admin subdomain, always append ?subdomain=admin so
-  // navigation stays within the admin route tree.
-  const suffix = isRealAdminSubdomain ? '' : '?subdomain=admin';
+  const [seasonName, setSeasonName] = useState<string | null>(null);
 
-  const fullNavItems = [
-    { path: isRealAdminSubdomain ? '/dashboard' : `/dashboard${suffix}`, label: 'Dashboard', icon: LayoutDashboard },
-    { path: isRealAdminSubdomain ? '/applications' : `/applications${suffix}`, label: 'Applications', icon: FileText },
-    { path: isRealAdminSubdomain ? '/delegates' : `/delegates${suffix}`, label: 'Delegates', icon: Users },
-    { path: isRealAdminSubdomain ? '/chairs' : `/chairs${suffix}`, label: 'Chairs', icon: Shield },
-    { path: isRealAdminSubdomain ? '/volunteers' : `/volunteers${suffix}`, label: 'Volunteers', icon: Heart },
-    { path: isRealAdminSubdomain ? '/committees' : `/committees${suffix}`, label: 'Committees', icon: Globe },
-    { path: isRealAdminSubdomain ? '/allocation' : `/allocation${suffix}`, label: 'Allocation', icon: Map },
-    { path: isRealAdminSubdomain ? '/check-in' : `/check-in${suffix}`, label: 'Check-in', icon: QrCode },
-    { path: isRealAdminSubdomain ? '/schedule' : `/schedule${suffix}`, label: 'Schedule', icon: Calendar },
-    { path: isRealAdminSubdomain ? '/resources' : `/resources${suffix}`, label: 'Resources', icon: FileText },
-    { path: isRealAdminSubdomain ? '/messages' : `/messages${suffix}`, label: 'Messages', icon: Mail },
-    { path: isRealAdminSubdomain ? '/analytics' : `/analytics${suffix}`, label: 'Analytics', icon: BarChart3 },
-    { path: isRealAdminSubdomain ? '/awards' : `/awards${suffix}`, label: 'Awards', icon: Award },
-    { path: isRealAdminSubdomain ? '/homepage' : `/homepage${suffix}`, label: 'Homepage', icon: Home },
-    { path: isRealAdminSubdomain ? '/forms' : `/forms${suffix}`, label: 'Forms', icon: ClipboardList },
-  ];
-  // Per-role sidebar:
-  //   registration → only Check-in
-  //   academics    → everything except Forms, Homepage, Messages, Volunteers
-  //   logistics    → Dashboard + Volunteers + Check-in
-  //   sg (and legacy admin/superadmin) → everything
-  const SG_ONLY = new Set(['Forms', 'Homepage', 'Messages']);
-  const ACADEMICS_HIDDEN = new Set([...SG_ONLY, 'Volunteers']);
-  const LOGISTICS_VISIBLE = new Set(['Dashboard', 'Volunteers', 'Check-in']);
-  // Fail-safe: while the role is still loading (first call this session
-  // before the cache is warm) render an empty nav so we never flash items
-  // a restricted role isn't allowed to see.
-  const navItems = roleLoading
+  useEffect(() => {
+    getCurrentSeason().then(season => setSeasonName(season?.name ?? null));
+  }, []);
+
+  // While the role is still loading, render no nav items so a restricted
+  // role never sees a flash of pages it can't open.
+  const navGroups = roleLoading || !role
     ? []
-    : role === 'registration'
-      ? fullNavItems.filter(i => i.label === 'Check-in')
-      : role === 'logistics'
-        ? fullNavItems.filter(i => LOGISTICS_VISIBLE.has(i.label))
-        : role === 'academics'
-          ? fullNavItems.filter(i => !ACADEMICS_HIDDEN.has(i.label))
-          : role
-            ? fullNavItems
-            : [];
+    : NAV
+        .map(g => ({ ...g, items: g.items.filter(i => i.roles.includes(role)) }))
+        .filter(g => g.items.length > 0);
 
   const handleLogout = async () => {
     try {
@@ -126,7 +156,9 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
             </div>
             <div>
               <span className="block text-lg font-bold tracking-tight text-white">TuronMUN</span>
-              <span className="block text-xs text-diplomatic-200 font-medium tracking-wider uppercase">Admin Panel</span>
+              <span className="block text-xs text-diplomatic-200 font-medium tracking-wider uppercase">
+                Admin Panel{seasonName ? ` · ${seasonName}` : ''}
+              </span>
             </div>
           </div>
           <button
@@ -138,30 +170,38 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
         </div>
 
         <nav className="mt-6 px-3 flex-1 overflow-y-auto pb-4">
-          <div className="px-3 py-2 text-[10px] font-bold text-diplomatic-200 uppercase tracking-widest opacity-80">
-            Management
-          </div>
-          <ul className="mt-1 space-y-1">
-            {navItems.map((item) => (
-              <li key={item.path}>
-                <Link
-                  to={item.path}
-                  className={`flex items-center px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 group ${location.pathname === item.path.split('?')[0]
-                      ? 'bg-white/10 text-white shadow-sm border border-white/5'
-                      : 'text-diplomatic-100 hover:bg-white/5 hover:text-white hover:translate-x-1'
-                    }`}
-                >
-                  <item.icon size={18} className={`mr-3 transition-colors ${location.pathname === item.path.split('?')[0] ? 'text-diplomatic-200' : 'text-diplomatic-400 group-hover:text-diplomatic-200'}`} />
-                  <span>{item.label}</span>
-                  {location.pathname === item.path.split('?')[0] && (
-                    <div className="ml-auto w-1.5 h-1.5 rounded-full bg-diplomatic-200 shadow-[0_0_8px_rgba(255,255,255,0.5)]" />
-                  )}
-                </Link>
-              </li>
-            ))}
-          </ul>
+          {navGroups.map(({ group, items }) => (
+            <div key={group} className="mb-4">
+              <div className="px-3 py-1.5 text-[10px] font-bold text-diplomatic-200 uppercase tracking-widest opacity-80">
+                {group}
+              </div>
+              <ul className="space-y-0.5">
+                {items.map((item) => {
+                  const active = location.pathname === item.path;
+                  return (
+                    <li key={item.path}>
+                      <Link
+                        to={adminPath(item.path)}
+                        onClick={() => setSidebarOpen(false)}
+                        className={`flex items-center px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group ${active
+                            ? 'bg-white/10 text-white shadow-sm border border-white/5'
+                            : 'text-diplomatic-100 hover:bg-white/5 hover:text-white hover:translate-x-1'
+                          }`}
+                      >
+                        <item.icon size={18} className={`mr-3 transition-colors ${active ? 'text-diplomatic-200' : 'text-diplomatic-400 group-hover:text-diplomatic-200'}`} />
+                        <span>{item.label}</span>
+                        {active && (
+                          <div className="ml-auto w-1.5 h-1.5 rounded-full bg-diplomatic-200 shadow-[0_0_8px_rgba(255,255,255,0.5)]" />
+                        )}
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          ))}
 
-          <div className="px-3 py-2 mt-8 text-[10px] font-bold text-diplomatic-200 uppercase tracking-widest opacity-80">
+          <div className="px-3 py-1.5 mt-4 text-[10px] font-bold text-diplomatic-200 uppercase tracking-widest opacity-80">
             Account
           </div>
           <ul className="mt-1 space-y-1">

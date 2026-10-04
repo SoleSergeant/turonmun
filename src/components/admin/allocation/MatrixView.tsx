@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { getCurrentSeason, inSeason } from '@/lib/season';
 import {
   Download,
   RefreshCw,
@@ -89,11 +90,11 @@ const MatrixView = () => {
       if (committeesError) throw committeesError;
       setCommittees(committeesData || []);
 
-      // Fetch approved delegates — payment_status is informational only,
-      // country assignment does NOT require payment to be completed.
-      const { data: delegatesData, error: delegatesError } = await supabase
+      // Approved delegates of the current season (only paid ones can be seated).
+      const season = await getCurrentSeason();
+      const { data: delegatesData, error: delegatesError } = await inSeason(supabase
         .from('applications')
-        .select('id, full_name, email, institution, payment_status')
+        .select('id, full_name, email, institution, status, payment_status'), season)
         .eq('status', 'approved');
 
       if (delegatesError) throw delegatesError;

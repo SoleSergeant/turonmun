@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import { supabase } from '@/integrations/supabase/client';
+import { getCurrentSeason, inSeason } from '@/lib/season';
 import {
   BarChart3,
   TrendingUp,
@@ -92,9 +93,10 @@ const Analytics = () => {
   const fetchAnalytics = async () => {
     try {
       // Fetch all applications
-      const { data: applications, error } = await supabase
+      const season = await getCurrentSeason();
+      const { data: applications, error } = await inSeason(supabase
         .from('applications')
-        .select('id, institution, country, status, payment_status, payment_amount, assigned_committee_id, created_at');
+        .select('id, institution, country, status, payment_status, payment_amount, assigned_committee_id, created_at'), season);
 
       if (error) throw error;
 

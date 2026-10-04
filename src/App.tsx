@@ -70,6 +70,9 @@ const AdminAwards = lazy(() => import("./pages/admin/AdminAwards"));
 const AdminHomepage = lazy(() => import("./pages/admin/Homepage"));
 const CheckIn = lazy(() => import("./pages/admin/CheckIn"));
 const FormSettings = lazy(() => import("./pages/admin/FormSettings"));
+const AdminAccounts = lazy(() => import("./pages/admin/AdminAccounts"));
+const Seasons = lazy(() => import("./pages/admin/Seasons"));
+const ActivityLog = lazy(() => import("./pages/admin/ActivityLog"));
 
 // Delegate dashboard
 const Dashboard = lazy(() => import("./pages/Dashboard"));
@@ -167,6 +170,9 @@ const App = () => {
           <Route path="/homepage" element={<AdminRoute allow={['sg']}><AdminHomepage /></AdminRoute>} />
           <Route path="/check-in" element={<CheckInRoute><CheckIn /></CheckInRoute>} />
           <Route path="/forms" element={<AdminRoute allow={['sg']}><FormSettings /></AdminRoute>} />
+          <Route path="/accounts" element={<AdminRoute allow={['sg']}><AdminAccounts /></AdminRoute>} />
+          <Route path="/seasons" element={<AdminRoute allow={['sg']}><Seasons /></AdminRoute>} />
+          <Route path="/activity" element={<AdminRoute allow={['sg']}><ActivityLog /></AdminRoute>} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       );

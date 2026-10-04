@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef } from 'react';
 import { PlusCircle, X, Trash2, ChevronDown, Upload, RotateCcw, Flag as FlagIcon } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { isChairApplication } from '@/lib/applications';
+import { getCurrentSeason, inSeason } from '@/lib/season';
 import { COMMON_COUNTRIES } from '@/data/countries';
 import type { CommitteeFormData } from './types';
 import ImageUpload from './ImageUpload';
@@ -175,20 +177,18 @@ const CommitteeForm = ({
       const custom = (data || []).map((m: any) => m.country_name).filter(Boolean);
       setCountryOptions(Array.from(new Set([...COMMON_COUNTRIES, ...custom])).sort());
     });
-    // Pull names of approved chair applicants (delegate-only apps are filtered out)
-    (supabase
+    // Pull names of this season's approved chair applicants
+    getCurrentSeason().then(season => inSeason((supabase
       .from('applications') as any)
-      .select('full_name, application_type, notes')
+      .select('full_name, application_type, notes'), season)
       .eq('status', 'approved')
       .then(({ data }: any) => {
         const names = (data || [])
-          .filter((a: any) =>
-            a.application_type === 'chair' ||
-            (a.notes || '').includes('APPLICATION TYPE: chair'))
+          .filter((a: any) => isChairApplication(a))
           .map((a: any) => a.full_name)
           .filter(Boolean);
         setChairCandidates(Array.from(new Set(names)).sort());
-      });
+      }));
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {

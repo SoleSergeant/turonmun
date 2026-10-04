@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { getCurrentSeason, inSeason } from '@/lib/season';
 import { useToast } from '@/hooks/use-toast';
 import { assignSeat, unassignSeat, changeSeatCountry, checkSeat } from '@/lib/allocation';
 import { useFlagOverrides } from '@/hooks/useFlagOverrides';
@@ -49,9 +50,10 @@ const ByCommitteeView = () => {
   const fetchAll = async () => {
     setLoading(true);
     try {
+      const season = await getCurrentSeason();
       const [{ data: comms, error: commErr }, { data: dels }, { data: asgs }] = await Promise.all([
         supabase.from('committees').select('*').order('name'),
-        supabase.from('applications').select('id, full_name, email, institution, status, payment_status').eq('status', 'approved'),
+        inSeason(supabase.from('applications').select('id, full_name, email, institution, status, payment_status'), season).eq('status', 'approved'),
         supabase.from('country_assignments').select('id, application_id, committee_id, country'),
       ]);
       if (commErr) {

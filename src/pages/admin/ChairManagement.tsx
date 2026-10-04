@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import { supabase } from '@/integrations/supabase/client';
+import { getCurrentSeason, inSeason } from '@/lib/season';
 import { createClient } from '@supabase/supabase-js';
 import {
   Users,
@@ -97,8 +98,9 @@ const ChairManagement = () => {
   const fetchChairApps = useCallback(async () => {
     setChairAppsLoading(true);
     try {
-      const { data, error } = await (supabase.from('applications') as any)
-        .select('*')
+      const season = await getCurrentSeason();
+      const { data, error } = await inSeason((supabase.from('applications') as any)
+        .select('*'), season)
         .order('created_at', { ascending: false });
       if (error) throw error;
 
