@@ -62,8 +62,7 @@ const AdminResources = lazy(() => import("./pages/admin/AdminResources"));
 const AdminApplications = lazy(() => import("./pages/admin/AdminApplications"));
 const AdminMessages = lazy(() => import("./pages/admin/AdminMessages"));
 const DelegateManagement = lazy(() => import("./pages/admin/DelegateManagement"));
-const CountryMatrix = lazy(() => import("./pages/admin/CountryMatrix"));
-const CommitteeAllocation = lazy(() => import("./pages/admin/CommitteeAllocation"));
+const Allocation = lazy(() => import("./pages/admin/Allocation"));
 const ChairManagement = lazy(() => import("./pages/admin/ChairManagement"));
 const AdminVolunteers = lazy(() => import("./pages/admin/AdminVolunteers"));
 const AdminAnalytics = lazy(() => import("./pages/admin/Analytics"));
@@ -159,8 +158,8 @@ const App = () => {
           <Route path="/applications" element={<AdminRoute allow={['sg','academics']}><AdminApplications /></AdminRoute>} />
           <Route path="/messages" element={<AdminRoute allow={['sg']}><AdminMessages /></AdminRoute>} />
           <Route path="/delegates" element={<AdminRoute allow={['sg','academics']}><DelegateManagement /></AdminRoute>} />
-          <Route path="/allocation" element={<AdminRoute allow={['sg','academics']}><CommitteeAllocation /></AdminRoute>} />
-          <Route path="/country-matrix" element={<AdminRoute allow={['sg','academics']}><CountryMatrix /></AdminRoute>} />
+          <Route path="/allocation" element={<AdminRoute allow={['sg','academics']}><Allocation /></AdminRoute>} />
+          <Route path="/country-matrix" element={<Navigate to="/allocation?view=matrix" replace />} />
           <Route path="/chairs" element={<AdminRoute allow={['sg','academics']}><ChairManagement /></AdminRoute>} />
           <Route path="/volunteers" element={<AdminRoute allow={['sg','logistics']}><AdminVolunteers /></AdminRoute>} />
           <Route path="/analytics" element={<AdminRoute allow={['sg','academics']}><AdminAnalytics /></AdminRoute>} />

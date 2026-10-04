@@ -1,17 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import AdminLayout from '@/components/admin/AdminLayout';
 import { supabase } from '@/integrations/supabase/client';
 import {
-  Upload,
   Download,
-  Save,
   RefreshCw,
   MapPin,
   Globe,
   Check,
-  X,
   Lock,
-  Unlock,
   AlertTriangle,
   Filter,
   Search,
@@ -19,7 +14,7 @@ import {
   Trash2
 } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
-import { getCountryCode } from '@/utils/countryCodes';
+import { assignSeat, unassignSeat, checkSeat, type SeatAssignment } from '@/lib/allocation';
 import { COMMON_COUNTRIES } from '@/data/countries';
 
 interface Committee {
@@ -63,15 +58,15 @@ interface CountryAvailability {
 
 // Shared country list moved to @/data/countries.ts
 
-const CountryMatrix = () => {
+const MatrixView = () => {
   const { toast } = useToast();
   const [matrix, setMatrix] = useState<CountryAvailability[]>([]);
   const [committees, setCommittees] = useState<Committee[]>([]);
   const [delegates, setDelegates] = useState<Delegate[]>([]);
+  const [assignments, setAssignments] = useState<SeatAssignment[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterAssigned, setFilterAssigned] = useState('all');
   const [loading, setLoading] = useState(false);
-  const [saving, setSaving] = useState(false);
   const [selectedCountries, setSelectedCountries] = useState<string[]>(COMMON_COUNTRIES);
   const [showAddCountryDialog, setShowAddCountryDialog] = useState(false);
   const [newCountry, setNewCountry] = useState('');
@@ -124,6 +119,7 @@ const CountryMatrix = () => {
       if (committeesError) throw committeesError;
       if (delegatesError) throw delegatesError;
       if (assignmentsError) throw assignmentsError;
+      setAssignments((assignmentsData as any) || []);
 
       // Combine all sources: COMMON_COUNTRIES + managed + assigned + committee rosters
       const assignedCountriesList = assignmentsData?.map((a: any) => a.country || a.country_name).filter(Boolean) || [];
@@ -197,219 +193,61 @@ const CountryMatrix = () => {
     setMatrix(matrixData);
   };
 
+  const setCell = (country: string, committeeId: string, cell: Partial<CountryAvailability['committees'][string]>) => {
+    setMatrix(prev => prev.map(item => item.country !== country ? item : {
+      ...item,
+      committees: { ...item.committees, [committeeId]: { ...item.committees[committeeId], ...cell } },
+    }));
+  };
+
   const assignCountry = async (country: string, committeeId: string, delegateId: string) => {
+    const delegate = delegates.find(d => d.id === delegateId);
+    const problem = checkSeat({
+      delegate,
+      committee: committees.find(c => c.id === committeeId),
+      country,
+      assignments,
+      committeeNames: Object.fromEntries(committees.map(c => [c.id, c.name])),
+    });
+    if (problem) {
+      toast({ title: 'Cannot assign', description: problem, variant: 'destructive' });
+      return;
+    }
     try {
-      const delegate = delegates.find(d => d.id === delegateId);
-      if (!delegate) {
-        toast({
-          title: "Error",
-          description: "Delegate not found",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // ── Payment gate — only paid delegates can be allocated ──
-      if (delegate.payment_status !== 'paid') {
-        toast({
-          title: 'Payment required',
-          description: `${delegate.full_name} has not paid yet. Mark payment as "paid" before assigning.`,
-          variant: 'destructive',
-        });
-        return;
-      }
-
-      const committee = committees.find(c => c.id === committeeId);
-
-      // ── Capacity check — committee must have an open seat ──
-      const filledSeats = matrix.reduce(
-        (acc, m) => acc + (m.committees[committeeId]?.assigned ? 1 : 0),
-        0
-      );
-      const totalSpots = (committee as any)?.total_spots ?? 20;
-      if (filledSeats >= totalSpots) {
-        toast({
-          title: 'Committee full',
-          description: `${committee?.name ?? 'This committee'} already has all ${totalSpots} seats filled.`,
-          variant: 'destructive',
-        });
-        return;
-      }
-
-      // ── Roster check — strict mode: when a committee has a configured
-      // roster, only roster countries can be assigned. Admins must edit the
-      // committee to extend its roster before assigning off-roster countries.
-      const roster: string[] = ((committee as any)?.countries) || [];
-      const inRoster = roster.some(c => c.toLowerCase() === country.toLowerCase());
-      if (committee && roster.length > 0 && !inRoster) {
-        toast({
-          title: 'Not in roster',
-          description: `${country} is not in ${committee.name}'s country roster. Add it from the Committees page first.`,
-          variant: 'destructive',
-        });
-        return;
-      }
-
-      // Check if this delegate already has an assignment for this committee
-      const existingAssignment = matrix.find(m =>
-        Object.entries(m.committees).some(([cId, c]) =>
-          cId === committeeId && c.delegateId === delegateId
-        )
-      );
-
-      if (existingAssignment) {
-        toast({
-          title: "Warning",
-          description: `${delegate.full_name} is already assigned to ${existingAssignment.country} in this committee. Please remove that assignment first.`,
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Delete any existing assignment for this country+committee slot first (fail-safe)
-      // We do separate calls to avoid failing if one column is missing
-      try {
-        await (supabase.from('country_assignments') as any)
-          .delete()
-          .eq('country', country)
-          .eq('committee_id', committeeId);
-      } catch (e) {}
-
-      try {
-        await (supabase.from('country_assignments') as any)
-          .delete()
-          .eq('country_name', country)
-          .eq('committee_id', committeeId);
-      } catch (e) {}
-
-      // Now insert the new assignment and get the data back
-      // Providing all potential column names to ensure compatibility with different schema versions
-      const insertData: any = {
-        application_id: delegateId,
-        committee_id: committeeId,
-        country: country,
-        country_name: country,
-        country_code: (getCountryCode(country) ?? '').toUpperCase() || null
-      };
-
-      const { data, error } = await (supabase
-        .from('country_assignments') as any)
-        .insert(insertData)
-        .select()
-        .single();
-
-      if (error) throw error;
-
-      // IMPORTANT: Also update the application's assigned_committee_id
-      const { error: updateError } = await (supabase.from('applications') as any)
-        .update({ assigned_committee_id: committeeId })
-        .eq('id', delegateId);
-
-      if (updateError) {
-        console.error('Error updating application committee:', updateError);
-        // Don't throw - assignment was created, just log the error
-      }
-
-      // Update local state with the actual data from the database
-      setMatrix(prev => prev.map(item => {
-        if (item.country === country) {
-          return {
-            ...item,
-            committees: {
-              ...item.committees,
-              [committeeId]: {
-                ...item.committees[committeeId],
-                assigned: true,
-                assignedTo: delegateId,
-                assignmentId: data.id, // Use real ID from DB
-                delegateId: delegateId,
-                delegateName: delegate.full_name,
-              }
-            }
-          };
-        }
-        return item;
-      }));
-
+      const row = await assignSeat(delegateId, committeeId, country);
+      setAssignments(prev => [...prev, row]);
+      setCell(country, committeeId, {
+        assigned: true,
+        assignedTo: delegateId,
+        assignmentId: row.id,
+        delegateId,
+        delegateName: delegate?.full_name,
+      });
       toast({
-        title: "Success",
-        description: `Assigned ${country} to ${delegate.full_name} in ${committees.find(c => c.id === committeeId)?.abbreviation}`,
+        title: 'Assigned',
+        description: `${country} → ${delegate?.full_name} in ${committees.find(c => c.id === committeeId)?.abbreviation}`,
       });
     } catch (error: any) {
-      console.error('Error assigning country:', error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to assign country",
-        variant: "destructive",
-      });
+      toast({ title: 'Error', description: error.message || 'Failed to assign country', variant: 'destructive' });
     }
   };
 
   const unassignCountry = async (country: string, committeeId: string) => {
+    const cell = matrix.find(m => m.country === country)?.committees[committeeId];
+    if (!cell?.assignmentId || !cell.delegateId) return;
     try {
-      const assignment = matrix.find(m => m.country === country)?.committees[committeeId];
-      if (!assignment?.assignmentId) return;
-
-      // Since assignmentId might be a temporary mock ID from assignCountry(),
-      // we must delete by country and committee_id instead of just id.
-      // Use separate calls for fail-safety if columns are missing.
-      try {
-        await supabase
-          .from('country_assignments')
-          .delete()
-          .eq('committee_id', committeeId)
-          .eq('country', country);
-      } catch (e) {}
-
-      try {
-        await supabase
-          .from('country_assignments')
-          .delete()
-          .eq('committee_id', committeeId)
-          .eq('country_name', country);
-      } catch (e) {}
-
-      // Also remove assigned_committee_id from the application
-      // We don't throw on error because RLS might block this specific update
-      // but the country_assignment deletion was successful
-      if (assignment.delegateId) {
-        await (supabase.from('applications') as any)
-          .update({ assigned_committee_id: null })
-          .eq('id', assignment.delegateId);
-      }
-
-      // Update local state
-      setMatrix(prev => prev.map(item => {
-        if (item.country === country) {
-          return {
-            ...item,
-            committees: {
-              ...item.committees,
-              [committeeId]: {
-                ...item.committees[committeeId],
-                assigned: false,
-                assignedTo: undefined,
-                assignmentId: undefined,
-                delegateId: undefined,
-                delegateName: undefined,
-              }
-            }
-          };
-        }
-        return item;
-      }));
-
-      toast({
-        title: "Success",
-        description: `Unassigned ${country}`,
+      await unassignSeat({ id: cell.assignmentId, application_id: cell.delegateId });
+      setAssignments(prev => prev.filter(a => a.id !== cell.assignmentId));
+      setCell(country, committeeId, {
+        assigned: false,
+        assignedTo: undefined,
+        assignmentId: undefined,
+        delegateId: undefined,
+        delegateName: undefined,
       });
+      toast({ title: 'Unassigned', description: country });
     } catch (error: any) {
-      console.error('Error unassigning country:', error);
-      toast({
-        title: "Error",
-        description: error.message || "Failed to unassign country",
-        variant: "destructive",
-      });
+      toast({ title: 'Error', description: error.message || 'Failed to unassign country', variant: 'destructive' });
     }
   };
 
@@ -597,14 +435,11 @@ const CountryMatrix = () => {
   };
 
   return (
-    <AdminLayout title="Country Matrix Management">
+    <>
       <div className="space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div>
-            <h2 className="text-2xl font-semibold text-gray-900">Country Matrix</h2>
-            <p className="text-gray-600">Assign countries to delegates across committees</p>
-          </div>
+          <p className="text-gray-600 text-sm">Every country across every committee. Click a cell to seat a delegate.</p>
           <div className="flex items-center gap-3">
             <button
               onClick={() => setShowAddCountryDialog(true)}
@@ -886,7 +721,7 @@ const CountryMatrix = () => {
               <p className="font-medium mb-1">Important Notes:</p>
               <ul className="list-disc list-inside space-y-1">
                 <li>Only approved delegates appear in the assignment dropdowns</li>
-                <li>Each delegate can only be assigned to one country per committee</li>
+                <li>Only paid delegates can be seated, and each delegate gets one seat in total</li>
                 <li>All changes are saved immediately to the database</li>
                 <li>Use "Export CSV" to download the current matrix for records</li>
               </ul>
@@ -894,9 +729,9 @@ const CountryMatrix = () => {
           </div>
         </div>
       </div>
-    </AdminLayout>
+    </>
   );
 };
 
-export default CountryMatrix;
+export default MatrixView;
 

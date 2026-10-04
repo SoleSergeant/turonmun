@@ -1,12 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import AdminLayout from '@/components/admin/AdminLayout';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { getCountryCode } from '@/utils/countryCodes';
+import { assignSeat, unassignSeat, changeSeatCountry, checkSeat } from '@/lib/allocation';
 import { useFlagOverrides } from '@/hooks/useFlagOverrides';
 import { COMMON_COUNTRIES } from '@/data/countries';
 import {
-  Users, MapPin, Search, Lock, Trash2, UserPlus, RefreshCw, Check, Flag,
+  Users, MapPin, Search, Trash2, RefreshCw, Check, Flag,
 } from 'lucide-react';
 
 interface Committee {
@@ -22,6 +21,7 @@ interface Delegate {
   full_name: string;
   email: string;
   institution?: string;
+  status?: string;
   payment_status?: string;
 }
 
@@ -32,7 +32,7 @@ interface Assignment {
   country: string | null;
 }
 
-const CommitteeAllocation = () => {
+const ByCommitteeView = () => {
   const { toast } = useToast();
   const [committees, setCommittees] = useState<Committee[]>([]);
   const [delegates, setDelegates] = useState<Delegate[]>([]);
@@ -51,7 +51,7 @@ const CommitteeAllocation = () => {
     try {
       const [{ data: comms, error: commErr }, { data: dels }, { data: asgs }] = await Promise.all([
         supabase.from('committees').select('*').order('name'),
-        supabase.from('applications').select('id, full_name, email, institution, payment_status').eq('status', 'approved'),
+        supabase.from('applications').select('id, full_name, email, institution, status, payment_status').eq('status', 'approved'),
         supabase.from('country_assignments').select('id, application_id, committee_id, country'),
       ]);
       if (commErr) {
@@ -82,41 +82,20 @@ const CommitteeAllocation = () => {
 
   const assignDelegate = async (committeeId: string, country: string, delegateId: string) => {
     const label = (country || '').trim();
-    if (!label) {
-      toast({ title: 'Pick a country first', variant: 'destructive' });
-      return;
-    }
-    // Hard payment gate — only paid delegates can be allocated
-    const delegate = delegates.find(d => d.id === delegateId);
-    if (!delegate || delegate.payment_status !== 'paid') {
-      toast({ title: 'Payment required', description: 'This delegate has not paid yet — only paid delegates can be allocated.', variant: 'destructive' });
-      return;
-    }
-    // No duplicate country within the same committee
-    const dup = assignments.some(a => a.committee_id === committeeId && (a.country || '').toLowerCase() === label.toLowerCase());
-    if (dup) {
-      toast({ title: 'Country already used', description: `${label} is already assigned in this committee.`, variant: 'destructive' });
+    const problem = checkSeat({
+      delegate: delegates.find(d => d.id === delegateId),
+      committee: committees.find(c => c.id === committeeId),
+      country: label,
+      assignments,
+      committeeNames: Object.fromEntries(committees.map(c => [c.id, c.name])),
+    });
+    if (problem) {
+      toast({ title: 'Cannot assign', description: problem, variant: 'destructive' });
       return;
     }
     try {
-      const code = getCountryCode(label);
-      const { data, error } = await (supabase.from('country_assignments') as any)
-        .insert({
-          application_id: delegateId,
-          committee_id: committeeId,
-          country: label,
-          country_name: label,
-          country_code: code ? code.toUpperCase() : null,
-        })
-        .select()
-        .single();
-      if (error) throw error;
-
-      await (supabase.from('applications') as any)
-        .update({ assigned_committee_id: committeeId })
-        .eq('id', delegateId);
-
-      setAssignments(prev => [...prev, data as Assignment]);
+      const row = await assignSeat(delegateId, committeeId, label);
+      setAssignments(prev => [...prev, row as Assignment]);
       toast({ title: 'Assigned', description: `${delegateName(delegateId)} → ${label}` });
     } catch (err: any) {
       toast({ title: 'Error', description: err.message || 'Failed to assign', variant: 'destructive' });
@@ -125,12 +104,7 @@ const CommitteeAllocation = () => {
 
   const unassign = async (assignment: Assignment) => {
     try {
-      const { error } = await supabase.from('country_assignments').delete().eq('id', assignment.id);
-      if (error) throw error;
-      // Clear the delegate's committee link
-      await (supabase.from('applications') as any)
-        .update({ assigned_committee_id: null })
-        .eq('id', assignment.application_id);
+      await unassignSeat(assignment);
       setAssignments(prev => prev.filter(a => a.id !== assignment.id));
       toast({ title: 'Unassigned' });
     } catch (err: any) {
@@ -152,11 +126,7 @@ const CommitteeAllocation = () => {
       return;
     }
     try {
-      const code = getCountryCode(label);
-      const { error } = await (supabase.from('country_assignments') as any)
-        .update({ country: label, country_name: label, country_code: code ? code.toUpperCase() : null })
-        .eq('id', assignment.id);
-      if (error) throw error;
+      await changeSeatCountry(assignment.id, label);
       setAssignments(prev => prev.map(a => a.id === assignment.id ? { ...a, country: label } : a));
       toast({ title: 'Country updated', description: label });
     } catch (err: any) {
@@ -176,7 +146,7 @@ const CommitteeAllocation = () => {
   const totalFilled = assignments.length;
 
   return (
-    <AdminLayout title="Committee Allocation">
+    <>
       {/* Shared country suggestions for all slot inputs */}
       <datalist id="country-options">
         {countryOptions.map((c) => <option key={c} value={c} />)}
@@ -184,10 +154,7 @@ const CommitteeAllocation = () => {
       <div className="space-y-6">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div>
-            <h2 className="text-2xl font-semibold text-gray-900">Committee Allocation</h2>
-            <p className="text-gray-600">Assign delegates to each committee's seats. Set spots & countries in Committees.</p>
-          </div>
+          <p className="text-gray-600 text-sm">Assign delegates to each committee's seats. Set spots &amp; countries in Committees.</p>
           <button
             onClick={fetchAll}
             className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm hover:bg-gray-50"
@@ -430,8 +397,8 @@ const CommitteeAllocation = () => {
           </div>
         )}
       </div>
-    </AdminLayout>
+    </>
   );
 };
 
-export default CommitteeAllocation;
+export default ByCommitteeView;
