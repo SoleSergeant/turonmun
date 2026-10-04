@@ -4,6 +4,7 @@ import { Trophy } from 'lucide-react';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { supabase } from '@/integrations/supabase/client';
+import { useContent, useFill, rich } from '@/content/store';
 
 const AWARD_DEFS = [
   { key: 'best_delegate', label: 'Best Delegate' },
@@ -12,6 +13,7 @@ const AWARD_DEFS = [
 ];
 
 const Awards = () => {
+  const text = useContent('pages');
   const [published, setPublished] = useState(false);
   const [committees, setCommittees] = useState<any[]>([]);
   const [awards, setAwards] = useState<any[]>([]);
@@ -57,8 +59,8 @@ const Awards = () => {
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gold-100 text-gold-600 mb-4">
               <Trophy className="h-8 w-8" />
             </div>
-            <h1 className="text-4xl md:text-5xl font-display font-bold text-diplomatic-900 mb-3">Award Winners</h1>
-            <p className="text-neutral-600 max-w-xl mx-auto">Celebrating the outstanding delegates of TuronMUN.</p>
+            <h1 className="text-4xl md:text-5xl font-display font-bold text-diplomatic-900 mb-3">{text.awards_title}</h1>
+            <p className="text-neutral-600 max-w-xl mx-auto">{text.awards_intro}</p>
           </motion.div>
 
           {loading ? (
@@ -66,8 +68,8 @@ const Awards = () => {
           ) : !published ? (
             <div className="max-w-lg mx-auto text-center bg-white rounded-2xl border border-neutral-200 p-12 shadow-sm">
               <Trophy className="h-10 w-10 text-neutral-300 mx-auto mb-4" />
-              <h2 className="text-xl font-bold text-diplomatic-900 mb-2">Winners announced after the conference</h2>
-              <p className="text-neutral-500">Award winners will be published here once the conference concludes. Stay tuned!</p>
+              <h2 className="text-xl font-bold text-diplomatic-900 mb-2">{text.awards_pending_title}</h2>
+              <p className="text-neutral-500">{text.awards_pending_text}</p>
             </div>
           ) : committeesWithAwards.length === 0 ? (
             <div className="text-center py-16 text-neutral-400">Winners will appear here shortly.</div>

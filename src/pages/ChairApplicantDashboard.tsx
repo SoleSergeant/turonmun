@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Shield, Clock, CheckCircle2, XCircle, ArrowRight, LogOut, Send, ExternalLink } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { useContent } from '@/content/store';
 
 interface Props { userEmail: string }
 
@@ -33,6 +34,7 @@ interface AdminRow {
  *   4. rejected — gentle thank-you message
  */
 const ChairApplicantDashboard: React.FC<Props> = ({ userEmail }) => {
+  const general = useContent('general');
   const [application, setApplication] = useState<AppRow | null>(null);
   const [admin, setAdmin] = useState<AdminRow | null>(null);
   const [loading, setLoading] = useState(true);
@@ -208,7 +210,7 @@ const ChairApplicantDashboard: React.FC<Props> = ({ userEmail }) => {
           <Send className="h-4 w-4 text-gold-400 shrink-0" />
           <p className="text-white/60 text-sm flex-1">
             Questions? Reach our team on{' '}
-            <a href="https://t.me/TuronMUN" target="_blank" rel="noreferrer" className="text-gold-400 hover:underline inline-flex items-center gap-0.5">
+            <a href={general.telegram_url} target="_blank" rel="noreferrer" className="text-gold-400 hover:underline inline-flex items-center gap-0.5">
               Telegram <ExternalLink className="h-3 w-3" />
             </a>.
           </p>

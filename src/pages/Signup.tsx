@@ -8,8 +8,11 @@ import { CustomButton } from '../components/ui/custom-button';
 import { Checkbox } from '../components/ui/checkbox';
 import { useAuth } from '../hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { useContent, useFill, rich } from '@/content/store';
 
 const Signup = () => {
+  const regText = useContent('registration');
+  const fill = useFill();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const redirectTo = searchParams.get('redirect') || '/dashboard';
@@ -128,7 +131,7 @@ const Signup = () => {
                 className="mt-8 p-6 bg-diplomatic-50 rounded-xl border border-diplomatic-200"
               >
                 <p className="text-sm text-diplomatic-700">
-                  <span className="font-semibold">🎓 Tip:</span> Create an account to get early access to Season 7 application when it opens!
+                  <span className="font-semibold">🎓 Tip:</span> {fill(regText.signup_tip)}
                 </p>
               </motion.div>
             </motion.div>

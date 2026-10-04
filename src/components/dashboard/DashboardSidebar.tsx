@@ -12,6 +12,7 @@ import {
   MessageSquare
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { useContent, useFill, rich } from '@/content/store';
 interface DashboardSidebarProps {
   isOpen: boolean;
   onClose: () => void;
@@ -27,6 +28,7 @@ const navigationItems = [
 ];
 
 export default function DashboardSidebar({ isOpen, onClose }: DashboardSidebarProps) {
+  const general = useContent('general');
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -50,15 +52,15 @@ export default function DashboardSidebar({ isOpen, onClose }: DashboardSidebarPr
                 <div className="absolute -inset-1 bg-gradient-to-r from-gold-400 to-diplomatic-400 rounded-xl blur opacity-25 group-hover:opacity-40 transition duration-200"></div>
                 <div className="relative w-10 h-10 bg-gradient-to-br from-white/20 to-white/5 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/10 shadow-inner">
                   <img
-                    src="/lovable-uploads/58911c41-3ed8-4807-8789-5df7d2fff02c.png"
+                    src={general.logo_url}
                     alt="TuronMUN Logo"
                     className="w-7 h-7 object-contain drop-shadow-md"
                   />
                 </div>
               </div>
               <div className="flex flex-col">
-                <span className="text-white font-display font-bold text-base tracking-tight">TuronMUN</span>
-                <span className="text-[10px] text-diplomatic-200 font-medium tracking-wider uppercase">Season 7</span>
+                <span className="text-white font-display font-bold text-base tracking-tight">{general.site_name}</span>
+                <span className="text-[10px] text-diplomatic-200 font-medium tracking-wider uppercase">{general.season_label}</span>
               </div>
             </Link>
           </div>
@@ -120,15 +122,15 @@ export default function DashboardSidebar({ isOpen, onClose }: DashboardSidebarPr
                 <div className="absolute -inset-1 bg-gradient-to-r from-gold-400 to-diplomatic-400 rounded-xl blur opacity-25"></div>
                 <div className="relative w-10 h-10 bg-gradient-to-br from-white/20 to-white/5 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/10 shadow-inner">
                   <img
-                    src="/lovable-uploads/58911c41-3ed8-4807-8789-5df7d2fff02c.png"
+                    src={general.logo_url}
                     alt="TuronMUN Logo"
                     className="w-7 h-7 object-contain drop-shadow-md"
                   />
                 </div>
               </div>
               <div className="flex flex-col">
-                <span className="text-white font-display font-bold text-base tracking-tight">TuronMUN</span>
-                <span className="text-[10px] text-diplomatic-200 font-medium tracking-wider uppercase">Season 7</span>
+                <span className="text-white font-display font-bold text-base tracking-tight">{general.site_name}</span>
+                <span className="text-[10px] text-diplomatic-200 font-medium tracking-wider uppercase">{general.season_label}</span>
               </div>
             </Link>
             <button

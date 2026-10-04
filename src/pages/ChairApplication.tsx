@@ -12,6 +12,7 @@ import { useFormAutosave } from '@/hooks/useFormAutosave';
 import { useCommittees } from '@/hooks/useCommittees';
 import DynamicFormStep from '@/components/registration/DynamicFormStep';
 import type { FormQuestion } from '@/hooks/useFormSettings';
+import { useContent, useFill, rich } from '@/content/store';
 
 // ── Fallback constants (used when DB form_questions are empty) ──────────────
 const ROLES = ['Chair', 'Co-Chair'];
@@ -41,6 +42,8 @@ const EMPTY_FORM: Record<string, any> = {
 };
 
 export default function ChairApplication() {
+  const regText = useContent('registration');
+  const fill = useFill();
   const { toast } = useToast();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -312,7 +315,7 @@ export default function ChairApplication() {
             <h1 className="text-3xl md:text-4xl font-display font-bold text-diplomatic-900 mb-2">
               Apply as Chair or Co-Chair
             </h1>
-            <p className="text-neutral-500 text-sm">Season 7 — Lead a committee and shape the TuronMUN experience</p>
+            <p className="text-neutral-500 text-sm">{fill(regText.chair_form_subtitle)}</p>
           </div>
 
           {/* Progress bar */}

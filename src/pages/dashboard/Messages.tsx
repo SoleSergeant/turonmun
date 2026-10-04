@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { MessageSquare, Bell, Clock, Send } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
+import { useContent } from '@/content/store';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -15,6 +16,7 @@ const itemVariants = {
 };
 
 export default function Messages() {
+  const general = useContent('general');
   const { user } = useAuth();
   const [announcements, setAnnouncements] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -119,7 +121,7 @@ export default function Messages() {
             <p className="text-white/50 text-xs leading-relaxed">
               After your application is accepted, our team will contact you via Telegram to arrange payment.
               You can also reach us directly at{' '}
-              <a href="https://t.me/TuronMUN" target="_blank" rel="noreferrer" className="text-gold-400 hover:underline">
+              <a href={general.telegram_url} target="_blank" rel="noreferrer" className="text-gold-400 hover:underline">
                 @TuronMUN
               </a>.
             </p>

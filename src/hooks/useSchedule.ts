@@ -52,29 +52,6 @@ const formatDate = (dateString: string): string => {
   });
 };
 
-const FALLBACK_SCHEDULE: ScheduleDay[] = [
-  {
-    day: 'Day 1',
-    date: 'To Be Announced',
-    events: [
-      {
-        time: '08:00 - 09:30',
-        title: 'Registration & Welcome Coffee',
-        location: 'Tashkent, Uzbekistan',
-        category: 'general',
-        description: 'Check in, receive your conference materials, and enjoy refreshments while networking with other delegates.',
-      },
-      {
-        time: '10:00 - 11:30',
-        title: 'Opening Ceremony',
-        location: 'Tashkent, Uzbekistan',
-        category: 'general',
-        description: 'Official opening of TuronMUN Season 7 with keynote speeches from distinguished guests and the organising committee.',
-      },
-    ],
-  },
-];
-
 async function fetchSchedule(): Promise<ScheduleDay[]> {
   const { data: events, error } = await supabase
     .from('schedule_events')
@@ -83,7 +60,7 @@ async function fetchSchedule(): Promise<ScheduleDay[]> {
     .order('start_time', { ascending: true });
 
   if (error) throw error;
-  if (!events || events.length === 0) return FALLBACK_SCHEDULE;
+  if (!events || events.length === 0) return [];
 
   // Group events by date
   const grouped: Record<string, ScheduleEvent[]> = {};
@@ -115,12 +92,11 @@ export const useSchedule = () => {
     queryFn: fetchSchedule,
     staleTime: 5 * 60 * 1000,   // treat data as fresh for 5 minutes
     gcTime: 10 * 60 * 1000,     // keep in cache for 10 minutes
-    placeholderData: FALLBACK_SCHEDULE,
     retry: 2,
   });
 
   return {
-    scheduleData: data ?? FALLBACK_SCHEDULE,
+    scheduleData: data ?? [],
     loading: isLoading,
     error: error ? 'Failed to load schedule' : null,
   };

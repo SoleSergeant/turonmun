@@ -1,4 +1,4 @@
-# Admin panel setup (migrations 036–039 and email)
+# Admin panel setup (migrations 036–040 and email)
 
 The admin panel overhaul needs four database migrations and one Edge Function.
 The code works before these are applied (it falls back to the old behaviour),
@@ -15,8 +15,9 @@ Supabase Dashboard → SQL Editor → paste and run each file:
 | `supabase/migrations/037_seat_allocation.sql` | `assign_seat` / `unassign_seat` / `change_seat_country` with all allocation rules; unique indexes |
 | `supabase/migrations/038_activity_log_and_email.sql` | Activity log (written by triggers) and "already emailed" timestamps |
 | `supabase/migrations/039_seasons.sql` | Seasons. **Check `EXISTING_SEASON` (set to 7) before running.** |
+| `supabase/migrations/040_site_content.sql` | Admin-editable website content (Admin → Site content) |
 
-All four are safe to re-run.
+All are safe to re-run.
 
 If 037 prints a warning about duplicates, some delegate holds two seats or a
 country is assigned twice in one committee. Fix those in **Allocation**, then
@@ -61,3 +62,21 @@ Admin panel → **Seasons** (SG only). Starting a season:
 - unlocks awards.
 
 Committees, schedule, resources and form settings carry over; review them.
+
+## 4. Editing the website
+
+Admin → **Site content** (SG only) holds every text, link, image and list on
+the public site: season label, contact details, homepage, About page, FAQ,
+sponsors, past seasons (which also build the Past Conferences menu),
+registration page, contact page, SEO tags.
+
+- Until a section is saved it shows the original built-in text.
+- Write `{season}` in any text to insert the Season label from General —
+  change that one field when the next season is announced.
+- In headlines, wrap words in `*stars*` to highlight them in gold.
+- **Reset** on a section returns it to the original text.
+- To add a past season: Site content → Seasons → Add season, set its page
+  address (e.g. `/seasons/7`), fill it in and upload photos. It gets a page
+  and a menu entry automatically.
+
+Whether applications are open, deadlines and fees stay in Admin → Forms.

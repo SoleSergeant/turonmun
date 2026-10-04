@@ -11,6 +11,7 @@ import { useFormSettings } from '@/hooks/useFormSettings';
 import { useFormAutosave } from '@/hooks/useFormAutosave';
 import DynamicFormStep from '@/components/registration/DynamicFormStep';
 import type { FormQuestion } from '@/hooks/useFormSettings';
+import { useContent, useFill, rich } from '@/content/store';
 
 const TOTAL_STEPS = 3;
 const STEP_SUBTITLES: Record<number, string> = {
@@ -30,6 +31,8 @@ const EMPTY_FORM: Record<string, any> = {
 };
 
 export default function VolunteerApplication() {
+  const regText = useContent('registration');
+  const fill = useFill();
   const { toast } = useToast();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -270,7 +273,7 @@ export default function VolunteerApplication() {
             <h1 className="text-3xl md:text-4xl font-display font-bold text-diplomatic-900 mb-2">
               Volunteer at TuronMUN
             </h1>
-            <p className="text-neutral-500 text-sm">Season 7 — Help make the conference unforgettable</p>
+            <p className="text-neutral-500 text-sm">{fill(regText.volunteer_form_subtitle)}</p>
           </div>
 
           {/* Deposit notice — surfaced up-front, like the S6 Google Form intro */}

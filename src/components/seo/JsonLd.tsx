@@ -66,9 +66,9 @@ type EventJsonLdProps = {
   location: {
     name: string;
     address: {
-      streetAddress: string;
-      addressLocality: string;
-      postalCode: string;
+      streetAddress?: string;
+      addressLocality?: string;
+      postalCode?: string;
       addressRegion?: string;
       addressCountry: string;
     };

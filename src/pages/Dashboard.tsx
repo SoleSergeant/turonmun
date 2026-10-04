@@ -6,8 +6,10 @@ import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import ChairApplicantDashboard from './ChairApplicantDashboard';
+import { useContent, useFill, rich } from '@/content/store';
 
 export default function Dashboard() {
+  const general = useContent('general');
   const location = useLocation();
   const navigate = useNavigate();
   const { user, loading } = useAuth();
@@ -77,14 +79,14 @@ export default function Dashboard() {
               <div className="absolute -inset-1 bg-gradient-to-r from-gold-400 to-diplomatic-400 rounded-xl blur opacity-25 group-hover:opacity-40 transition duration-200"></div>
               <div className="relative w-9 h-9 bg-gradient-to-br from-white/20 to-white/5 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/10 shadow-inner">
                 <img
-                  src="/lovable-uploads/58911c41-3ed8-4807-8789-5df7d2fff02c.png"
+                  src={general.logo_url}
                   alt="TuronMUN Logo"
                   className="w-6 h-6 object-contain drop-shadow-md"
                 />
               </div>
             </div>
             <div className="flex flex-col justify-center">
-              <span className="text-sm font-bold text-white tracking-tight leading-none mb-1">TuronMUN Season 7</span>
+              <span className="text-sm font-bold text-white tracking-tight leading-none mb-1">{general.site_name} {general.season_label}</span>
               <span className="text-[10px] text-white/60 font-medium tracking-wider uppercase leading-none">Delegate Dashboard</span>
             </div>
           </div>

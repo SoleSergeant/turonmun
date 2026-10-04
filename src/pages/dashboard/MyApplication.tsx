@@ -25,6 +25,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import type { Tables } from '@/integrations/supabase/types';
+import { useContent } from '@/content/store';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -42,6 +43,7 @@ const itemVariants = {
 };
 
 export default function MyApplication() {
+  const general = useContent('general');
   const { user, loading: authLoading } = useAuth();
   const { toast } = useToast();
   const [application, setApplication] = useState<Tables<'applications'> | null>(null);
@@ -255,11 +257,11 @@ export default function MyApplication() {
               Your application has been accepted. Our team will contact you via Telegram to arrange payment of{' '}
               <span className="text-gold-400 font-bold">{(application?.payment_amount || 0).toLocaleString()} UZS</span>.
               Please ensure your Telegram is reachable. Questions? Message us at{' '}
-              <a href="https://t.me/TuronMUN" target="_blank" rel="noreferrer" className="text-gold-400 hover:underline">@TuronMUN</a>.
+              <a href={general.telegram_url} target="_blank" rel="noreferrer" className="text-gold-400 hover:underline">@TuronMUN</a>.
             </p>
           </div>
           <a
-            href="https://t.me/TuronMUN"
+            href={general.telegram_url}
             target="_blank"
             rel="noreferrer"
             className="shrink-0 flex items-center gap-2 px-4 py-2 bg-gold-400 text-diplomatic-900 rounded-lg text-xs font-bold hover:bg-gold-300 transition-colors"

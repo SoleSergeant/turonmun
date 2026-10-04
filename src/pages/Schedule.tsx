@@ -5,6 +5,7 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { cn } from '@/lib/utils';
 import { useSchedule } from '@/hooks/useSchedule';
+import { useContent, useFill, rich } from '@/content/store';
 
 const categoryConfig: Record<string, { dot: string; badge: string; badgeText: string }> = {
   general:   { dot: 'bg-blue-500',        badge: 'bg-blue-100 text-blue-800',         badgeText: 'General' },
@@ -13,6 +14,7 @@ const categoryConfig: Record<string, { dot: string; badge: string; badgeText: st
 };
 
 const Schedule = () => {
+  const text = useContent('pages');
   const { scheduleData, loading, error } = useSchedule();
   const [filter, setFilter] = useState<string | null>(null);
   const [expandedEvent, setExpandedEvent] = useState<string | null>(null);
@@ -38,7 +40,7 @@ const Schedule = () => {
           <div className="absolute inset-0 bg-hero-pattern opacity-10" />
           <div className="container relative z-10">
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-              <h1 className="text-4xl md:text-5xl font-bold mb-4">Conference Schedule</h1>
+              <h1 className="text-4xl md:text-5xl font-bold mb-4">{text.schedule_title}</h1>
               {day && (
                 <div className="flex items-center gap-2 text-diplomatic-200 text-lg mb-4">
                   <Calendar size={18} />
@@ -46,7 +48,7 @@ const Schedule = () => {
                 </div>
               )}
               <p className="text-diplomatic-100 max-w-2xl">
-                Plan your TuronMUN experience with our full day programme.
+                {text.schedule_intro}
               </p>
               {error && (
                 <div className="mt-4 p-3 bg-yellow-500/20 border border-yellow-500 rounded-md">
@@ -106,8 +108,8 @@ const Schedule = () => {
             ) : !day ? (
               <div className="text-center py-16">
                 <Calendar size={48} className="mx-auto text-diplomatic-300 mb-4" />
-                <h3 className="text-xl font-semibold text-diplomatic-900 mb-2">No Schedule Available</h3>
-                <p className="text-neutral-500">Check back soon — the schedule will be published before the conference.</p>
+                <h3 className="text-xl font-semibold text-diplomatic-900 mb-2">{text.schedule_empty_title}</h3>
+                <p className="text-neutral-500">{text.schedule_empty_text}</p>
               </div>
             ) : (
               <motion.div

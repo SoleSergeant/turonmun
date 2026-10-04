@@ -2,6 +2,7 @@ import React from 'react';
 import { Helmet } from 'react-helmet-async';
 import { useLocation } from 'react-router-dom';
 import { OrganizationJsonLd, EventJsonLd, BreadcrumbJsonLd } from './JsonLd';
+import { useContent } from '@/content/store';
 
 type SeoProps = {
   title?: string;
@@ -23,25 +24,26 @@ type SeoProps = {
   children?: React.ReactNode;
 };
 
-const SITE_URL = 'https://turonmun.uz';
-const DEFAULT_IMAGE = 'https://turonmun.uz/images/og-image.jpg';
-const DEFAULT_TITLE = 'TuronMUN - Model United Nations Conference';
-const DEFAULT_DESCRIPTION = 'Join TuronMUN for an enriching Model United Nations experience. Develop diplomacy, debate, and leadership skills with students from around the world.';
-const DEFAULT_KEYWORDS = 'MUN, Model United Nations, TuronMUN, Uzbekistan, Tashkent, debate, diplomacy, UN, conference';
-
 export const Seo: React.FC<SeoProps> = ({
   title = '',
-  description = DEFAULT_DESCRIPTION,
-  keywords = DEFAULT_KEYWORDS,
-  image = DEFAULT_IMAGE,
+  description: descriptionProp,
+  keywords: keywordsProp,
+  image: imageProp,
   article = false,
   event,
   breadcrumbs = [],
   children,
 }) => {
+  // Defaults are edited in Admin → Site content → Search & sharing.
+  const seo = useContent('seo');
+  const general = useContent('general');
+  const SITE_URL = seo.site_url.replace(/\/$/, '');
+  const description = descriptionProp || seo.default_description;
+  const keywords = keywordsProp || seo.keywords;
+  const image = imageProp || seo.share_image;
   const { pathname } = useLocation();
   const url = `${SITE_URL}${pathname}`;
-  const pageTitle = title ? `${title} | TuronMUN` : DEFAULT_TITLE;
+  const pageTitle = title ? `${title} | ${general.site_name}` : seo.default_title;
 
   // Default breadcrumb includes home
   const allBreadcrumbs = [
@@ -68,7 +70,7 @@ export const Seo: React.FC<SeoProps> = ({
           { property: 'og:title', content: pageTitle },
           { property: 'og:description', content: description },
           { property: 'og:image', content: image },
-          { property: 'og:site_name', content: 'TuronMUN' },
+          { property: 'og:site_name', content: general.site_name },
           
           // Twitter
           { name: 'twitter:card', content: 'summary_large_image' },
@@ -79,11 +81,11 @@ export const Seo: React.FC<SeoProps> = ({
           // Mobile
           { name: 'theme-color', content: '#00235c' },
           { name: 'mobile-web-app-capable', content: 'yes' },
-          { name: 'apple-mobile-web-app-title', content: 'TuronMUN' },
+          { name: 'apple-mobile-web-app-title', content: general.site_name },
           { name: 'apple-mobile-web-app-status-bar-style', content: 'default' },
           
           // PWA
-          { name: 'application-name', content: 'TuronMUN' },
+          { name: 'application-name', content: general.site_name },
           { name: 'msapplication-TileColor', content: '#00235c' },
           { name: 'msapplication-config', content: '/browserconfig.xml' },
         ]}
@@ -99,18 +101,14 @@ export const Seo: React.FC<SeoProps> = ({
 
       {/* Organization Schema */}
       <OrganizationJsonLd
-        name="TuronMUN"
+        name={general.site_name}
         url={SITE_URL}
         logo={`${SITE_URL}/icons/icon-512x512.png`}
-        sameAs={[
-          'https://www.instagram.com/turonmun',
-          'https://www.facebook.com/turonmun',
-          'https://twitter.com/turonmun',
-        ]}
+        sameAs={[general.instagram_url, general.telegram_url].filter(Boolean)}
         contactPoint={{
-          telephone: '+998-XX-XXX-XXXX', // Replace with actual phone
+          telephone: general.contact_phone,
           contactType: 'customer service',
-          email: 'admin@turonmun.com',
+          email: general.contact_email,
           areaServed: 'UZ',
           availableLanguage: ['en', 'uz', 'ru'],
         }}
@@ -124,18 +122,13 @@ export const Seo: React.FC<SeoProps> = ({
           endDate={event.endDate}
           location={{
             name: event.location,
-            address: {
-              streetAddress: '123 Main St', // Update with actual address
-              addressLocality: 'Tashkent',
-              addressCountry: 'UZ',
-              postalCode: '100000',
-            },
+            address: { addressCountry: 'UZ' },
           }}
           url={url}
           description={event.description}
           image={image}
           organizer={{
-            name: 'TuronMUN',
+            name: general.site_name,
             url: SITE_URL,
           }}
           offers={{

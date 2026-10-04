@@ -3,6 +3,7 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import { Book, FileText, Video, Download, BookOpen, ArrowRight, BookMarked, Scale, PenLine, LayoutTemplate, FlaskConical, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { useContent, useFill, rich } from '@/content/store';
 
 interface Resource {
   id: string;
@@ -29,6 +30,7 @@ const CATEGORY_CONFIG: Record<string, { label: string; icon: React.ElementType; 
 const CATEGORY_ORDER = ['handbook', 'rop', 'position_paper', 'Delegate Guides', 'Committee Materials', 'templates', 'samples', 'Video Tutorials'];
 
 const Resources = () => {
+  const text = useContent('pages');
   const [resources, setResources] = useState<Resource[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState<string | null>(null);
@@ -105,12 +107,12 @@ const Resources = () => {
         <section className="bg-gradient-to-b from-diplomatic-50 to-white py-16 md:py-24">
           <div className="container">
             <div className="max-w-3xl mx-auto text-center">
-              <span className="chip-gold mb-4">Delegate Preparation</span>
+              <span className="chip-gold mb-4">{text.resources_eyebrow}</span>
               <h1 className="text-4xl md:text-5xl font-display font-bold mb-6 text-diplomatic-800">
-                Resources & Materials
+                {text.resources_title}
               </h1>
               <p className="text-lg text-neutral-600 mb-8">
-                Access comprehensive guides, background materials, and tools to help you prepare for a successful Model UN experience.
+                {text.resources_intro}
               </p>
 
               {/* Category jump buttons */}
@@ -213,15 +215,11 @@ const Resources = () => {
         <section className="py-12 bg-diplomatic-50/50">
           <div className="container">
             <div className="max-w-3xl mx-auto text-center mb-10">
-              <h2 className="text-2xl font-display font-semibold mb-3">Additional Resources</h2>
-              <p className="text-neutral-600 text-sm">External links to help you prepare further.</p>
+              <h2 className="text-2xl font-display font-semibold mb-3">{text.resources_links_title}</h2>
+              <p className="text-neutral-600 text-sm">{text.resources_links_intro}</p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-              {[
-                { title: 'Country Research Database', desc: 'Detailed information on all UN member states.', label: 'Explore', href: 'https://www.un.org/en/about-us/member-states' },
-                { title: 'Resolution Templates', desc: 'Download templates for drafting effective resolutions.', label: 'Download', href: 'https://www.wisemee.com/model-un-resolution-template/' },
-                { title: 'Diplomatic Glossary', desc: 'Essential terms and phrases used in diplomatic contexts.', label: 'View Glossary', href: 'https://www.wisemee.com/mun-glossary/' },
-              ].map(link => (
+              {text.resources_links.map(l => ({ title: l.title, desc: l.description, label: l.label, href: l.url })).map(link => (
                 <a key={link.href} href={link.href} target="_blank" rel="noopener noreferrer"
                   className="bg-white p-6 rounded-xl border border-neutral-100 shadow-subtle hover:shadow-elegant transition-all group">
                   <h3 className="font-display font-semibold text-lg mb-2 group-hover:text-diplomatic-600 transition-colors">{link.title}</h3>

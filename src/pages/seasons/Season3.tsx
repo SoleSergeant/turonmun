@@ -8,8 +8,10 @@ import { ArrowLeft, Cpu, Globe as GlobeIcon, Lightbulb } from 'lucide-react';
 import ExperienceSection from '@/components/seasons/ExperienceSection';
 import { Link } from 'react-router-dom';
 import { Seo } from '@/components/seo';
+import { useContent } from '@/content/store';
 
 export default function Season3() {
+  const siteUrl = useContent('seo').site_url.replace(/\/$/, '');
   // Get the season data for Season 3
   const seasonData = usePastSeason("season3");
   
@@ -59,15 +61,15 @@ export default function Season3() {
       <Seo
         title={`TuronMUN ${seasonData.year} | ${seasonData.theme}`}
         description={seasonData.description}
-        canonical={`https://turonmun.uz${seasonData.route}`}
+        canonical={`${siteUrl}${seasonData.route}`}
         openGraph={{
           type: 'website',
-          url: `https://turonmun.uz${seasonData.route}`,
+          url: `${siteUrl}${seasonData.route}`,
           title: `TuronMUN ${seasonData.year} | ${seasonData.theme}`,
           description: seasonData.description,
           images: [
             {
-              url: `https://turonmun.uz/${seasonData.photos[0]?.url || 'images/og-image.jpg'}`,
+              url: `${siteUrl}/${(seasonData.photos[0]?.url || 'images/og-image.jpg').replace(/^\//, '')}`,
               width: 1200,
               height: 630,
               alt: `TuronMUN ${seasonData.year} - ${seasonData.theme}`,
@@ -98,15 +100,15 @@ export default function Season3() {
             name: seasonData.location,
             address: seasonData.location,
           },
-          image: `https://turonmun.uz/${seasonData.photos[0]?.url || 'images/og-image.jpg'}`,
+          image: `${siteUrl}/${(seasonData.photos[0]?.url || 'images/og-image.jpg').replace(/^\//, '')}`,
           organizer: {
             '@type': 'Organization',
             name: 'TuronMUN',
-            url: 'https://turonmun.uz',
+            url: siteUrl,
           },
           offers: {
             '@type': 'Offer',
-            url: `https://turonmun.uz${seasonData.route}`,
+            url: `${siteUrl}${seasonData.route}`,
             price: '0',
             priceCurrency: 'UZS',
             availability: 'https://schema.org/SoldOut',

@@ -4,8 +4,11 @@ import { Link } from 'react-router-dom';
 import PageLayout from '@/components/layout/PageLayout';
 import { Helmet } from 'react-helmet-async';
 import { ArrowRight } from 'lucide-react';
+import { useContent, useFill, rich } from '@/content/store';
 
 const EventUpdates = () => {
+  const text = useContent('pages');
+  const fill = useFill();
   // Animation variants
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -43,10 +46,10 @@ const EventUpdates = () => {
           className="text-center mb-16"
         >
           <h1 className="text-4xl md:text-5xl font-display font-bold text-diplomatic-800 mb-4">
-            Event Updates
+            {text.updates_title}
           </h1>
           <p className="text-lg text-diplomatic-600 max-w-2xl mx-auto">
-            Stay informed about the latest developments for TuronMUN Season 1, including committee information and event schedules.
+            {fill(text.updates_intro)}
           </p>
         </motion.div>
 
@@ -74,7 +77,7 @@ const EventUpdates = () => {
             <div className="p-6">
               <h2 className="text-2xl font-display font-bold text-diplomatic-800 mb-3">Committees</h2>
               <p className="text-diplomatic-600 mb-6">
-                Explore the various committees that will be part of TuronMUN Season 1, including topics, background guides, and committee structures.
+                {fill(text.updates_committees_text)}
               </p>
               <Link 
                 to="/committees" 
@@ -101,7 +104,7 @@ const EventUpdates = () => {
             <div className="p-6">
               <h2 className="text-2xl font-display font-bold text-diplomatic-800 mb-3">Schedule</h2>
               <p className="text-diplomatic-600 mb-6">
-                View the complete schedule for TuronMUN Season 1, including opening and closing ceremonies, committee sessions, and social events.
+                {fill(text.updates_schedule_text)}
               </p>
               <Link 
                 to="/schedule" 

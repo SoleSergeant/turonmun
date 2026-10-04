@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X } from 'lucide-react';
+import { useContent, useFill, rich } from '@/content/store';
 
 interface SecretMessageProps {
   isOpen: boolean;
@@ -8,6 +9,7 @@ interface SecretMessageProps {
 }
 
 export const SecretMessage: React.FC<SecretMessageProps> = ({ isOpen, onClose }) => {
+  const text = useContent('extras');
   if (!isOpen) return null;
 
   return (
@@ -68,22 +70,18 @@ export const SecretMessage: React.FC<SecretMessageProps> = ({ isOpen, onClose })
                 transition={{ delay: 0.5, staggerChildren: 0.1 }}
               >
                 <motion.p className="opacity-0 animate-fadeIn" style={{ animationDelay: '0.5s' }}>
-                  <span className="text-pink-500 font-medium">If you found this, just know…</span>
+                  <span className="text-pink-500 font-medium">{text.secret_title}</span>
                 </motion.p>
-                <motion.p className="opacity-0 animate-fadeIn" style={{ animationDelay: '0.7s' }}>
-                  You're one in a million.
-                </motion.p>
-                <motion.p className="opacity-0 animate-fadeIn" style={{ animationDelay: '0.9s' }}>
-                  Your smile can change someone's whole day.
-                </motion.p>
-                <motion.p className="opacity-0 animate-fadeIn" style={{ animationDelay: '1.1s' }}>
-                  Never forget: you're more special than you think.
-                </motion.p>
+                {text.secret_lines.map((line, i) => (
+                  <motion.p key={i} className="opacity-0 animate-fadeIn" style={{ animationDelay: `${0.7 + i * 0.2}s` }}>
+                    {line}
+                  </motion.p>
+                ))}
                 <motion.p 
                   className="text-xl mt-6 text-pink-600 font-medium opacity-0 animate-fadeIn" 
                   style={{ animationDelay: '1.4s' }}
                 >
-                  Love u :)
+                  {text.secret_signoff}
                 </motion.p>
               </motion.div>
               

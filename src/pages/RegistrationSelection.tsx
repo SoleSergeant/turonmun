@@ -6,8 +6,12 @@ import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 import CountdownMini from '../components/CountdownMini';
 import { useFormSettings } from '@/hooks/useFormSettings';
+import { useContent, useFill, rich } from '@/content/store';
 
 const RegistrationSelection = () => {
+  const general = useContent('general');
+  const text = useContent('registration');
+  const fill = useFill();
   const { settings: delegateSettings, isEffectivelyClosed: delegateClosed, loading: delegateLoading, notOpenYet: delegateNotOpenYet } = useFormSettings('delegate');
   const { settings: chairSettings, isEffectivelyClosed: chairClosed, loading: chairLoading } = useFormSettings('chair');
 
@@ -44,16 +48,14 @@ const RegistrationSelection = () => {
                   {loading
                     ? 'Loading…'
                     : allClosed
-                      ? 'Season 7 — Applications Opening Soon'
-                      : 'Season 7 — Applications Open'}
+                      ? fill(text.badge_closed)
+                      : fill(text.badge_open)}
                 </span>
                 <h1 className="text-4xl md:text-6xl font-display font-bold text-white mb-4">
-                  Apply for Season 7
+                  {fill(text.title)}
                 </h1>
                 <p className="text-white/60 text-lg max-w-xl mx-auto">
-                  {allClosed
-                    ? "We're preparing the next chapter of TuronMUN. Applications for delegates and chairs will open shortly — follow us to be the first to know."
-                    : 'Choose your role below and begin your TuronMUN journey.'}
+                  {fill(allClosed ? text.intro_closed : text.intro_open)}
                 </p>
               </motion.div>
 
@@ -70,7 +72,7 @@ const RegistrationSelection = () => {
               )}
 
               {/* Role cards */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-10">
+              <div className={`grid grid-cols-1 ${text.observer_enabled ? 'md:grid-cols-3' : 'md:grid-cols-2'} gap-6 max-w-4xl mx-auto mb-10`}>
                 {/* Delegate */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
@@ -87,7 +89,7 @@ const RegistrationSelection = () => {
                   </div>
                   <h2 className="text-2xl font-bold text-white mb-2">Delegate</h2>
                   <p className="text-white/50 text-sm mb-5">
-                    Represent a country in one of our committees. Debate, draft resolutions, and practise diplomacy.
+                    {fill(text.delegate_description)}
                   </p>
 
                   {loading ? (
@@ -130,7 +132,7 @@ const RegistrationSelection = () => {
                   </div>
                   <h2 className="text-2xl font-bold text-white mb-2">Chair</h2>
                   <p className="text-white/50 text-sm mb-5">
-                    Lead a committee as a chair. Shape the debate and guide delegates through the session.
+                    {fill(text.chair_description)}
                   </p>
 
                   {loading ? (
@@ -157,7 +159,8 @@ const RegistrationSelection = () => {
                   )}
                 </motion.div>
 
-                {/* Observer — external Google Form */}
+                {/* Observer — external form, set in Site content → Registration */}
+                {text.observer_enabled && (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -167,12 +170,12 @@ const RegistrationSelection = () => {
                   <div className="w-14 h-14 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center mb-6">
                     <Eye className="w-7 h-7 text-white" />
                   </div>
-                  <h2 className="text-2xl font-bold text-white mb-2">Observer</h2>
+                  <h2 className="text-2xl font-bold text-white mb-2">{text.observer_title}</h2>
                   <p className="text-white/50 text-sm mb-5">
-                    Attend the conference as an observer. Watch debates, take notes, and learn from the floor.
+                    {fill(text.observer_description)}
                   </p>
                   <a
-                    href="https://forms.gle/95J7rWqQoTEvo2Rr7"
+                    href={text.observer_url}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-white text-diplomatic-900 text-sm font-bold hover:bg-white/90 transition-colors"
@@ -180,6 +183,7 @@ const RegistrationSelection = () => {
                     Apply Now <ExternalLink className="w-4 h-4" />
                   </a>
                 </motion.div>
+                )}
               </div>
 
               {/* Action row */}
@@ -190,7 +194,7 @@ const RegistrationSelection = () => {
                 className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8"
               >
                 <a
-                  href="https://t.me/TuronMUN"
+                  href={general.telegram_url}
                   target="_blank"
                   rel="noreferrer"
                   className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#0088cc] hover:bg-[#0077b5] text-white font-semibold transition-colors"

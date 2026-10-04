@@ -6,8 +6,11 @@ import NewsletterForm from '../components/NewsletterForm';
 import { motion } from 'framer-motion';
 import { Globe, FileBarChart, Landmark, Shield } from 'lucide-react';
 import { useCommittees } from '../hooks/useCommittees';
+import { useContent, useFill, rich } from '@/content/store';
 
 const Committees = () => {
+  const text = useContent('pages');
+  const fill = useFill();
   const { committees } = useCommittees();
   
   useEffect(() => {
@@ -29,12 +32,12 @@ const Committees = () => {
               transition={{ duration: 0.3 }}
               className="mb-12 text-center"
             >
-              <span className="inline-block px-3 py-1 bg-gold-100 text-gold-600 rounded-full text-sm font-medium mb-3">Season 7</span>
+              <span className="inline-block px-3 py-1 bg-gold-100 text-gold-600 rounded-full text-sm font-medium mb-3">{fill(text.committees_badge)}</span>
               <h1 className="text-4xl md:text-5xl font-display font-bold text-diplomatic-900 mb-6">
-                Our Committees
+                {text.committees_title}
               </h1>
               <p className="text-lg text-neutral-600 max-w-2xl mx-auto">
-                Join one of our carefully designed committees to debate pressing international issues, develop diplomatic skills, and forge connections with fellow delegates.
+                {fill(text.committees_intro)}
               </p>
             </motion.div>
             
@@ -82,15 +85,15 @@ const Committees = () => {
               transition={{ duration: 0.3, delay: 0.2 }}
               className="glass-panel p-8 text-center max-w-3xl mx-auto"
             >
-              <h3 className="text-2xl font-display font-semibold mb-4">Ready to Join the Deliberation?</h3>
+              <h3 className="text-2xl font-display font-semibold mb-4">{text.committees_cta_title}</h3>
               <p className="mb-6 text-neutral-600">
-                Apply now to secure your place in one of our prestigious committees. Spaces are limited and allocated on a first-come, first-served basis.
+                {fill(text.committees_cta_text)}
               </p>
               <a 
                 href="/register" 
                 className="btn-primary bg-diplomatic-700 hover:bg-diplomatic-800 transition-colors duration-200"
               >
-                Register as a Delegate
+                {text.committees_cta_button}
               </a>
             </motion.div>
           </div>

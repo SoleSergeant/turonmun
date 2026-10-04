@@ -16,7 +16,7 @@ import CountdownTimer from '@/components/CountdownTimer';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import type { Tables } from '@/integrations/supabase/types';
-import { siteConfig } from '@/config/site';
+import { useContent, useFill, rich } from '@/content/store';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -34,6 +34,7 @@ const itemVariants = {
 };
 
 function Overview() {
+  const general = useContent('general');
   const { user } = useAuth();
   const [application, setApplication] = useState<Tables<'applications'> | null>(null);
   const [committee, setCommittee] = useState<any | null>(null);
@@ -153,7 +154,8 @@ function Overview() {
     },
   ];
 
-  const conferenceDate = siteConfig.conferenceDate ?? new Date('2026-03-21T23:59:00');
+  // Set in Admin → Site content → General → Conference start.
+  const conferenceDate = general.conference_date ? new Date(general.conference_date) : null;
 
   return (
     <motion.div
@@ -311,7 +313,7 @@ function Overview() {
 
           <div className="flex-1 flex items-center justify-center">
             <div className="w-full">
-              <CountdownTimer targetDate={conferenceDate} />
+              {conferenceDate ? <CountdownTimer targetDate={conferenceDate} /> : <p className="text-center text-white/60">Date to be announced</p>}
             </div>
           </div>
         </motion.div>
