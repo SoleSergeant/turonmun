@@ -135,17 +135,25 @@ const CheckIn = () => {
     });
   }, [people, search, hideArrived, assignments, committees]);
 
-  const tableFor = (p: Person) => (p.kind === 'delegate' ? 'applications' : 'admin_users');
+  // Goes through set_check_in() (migration 036) so the registration desk
+  // doesn't need UPDATE rights on whole tables. Falls back to a direct update
+  // until that migration has been applied.
+  const setCheckIn = async (p: Person, checked: boolean) => {
+    const { error } = await (supabase.rpc as any)('set_check_in', { p_kind: p.kind === 'delegate' ? 'delegate' : 'chair', p_id: p.id, p_checked: checked });
+    if (!error) return;
+    if (error.code !== 'PGRST202') throw error;
+    const { error: updErr } = await supabase.from(p.kind === 'delegate' ? 'applications' : 'admin_users')
+      .update({ checked_in_at: checked ? new Date().toISOString() : null, checked_in_by: checked ? adminId : null } as any)
+      .eq('id', p.id);
+    if (updErr) throw updErr;
+  };
 
   const confirmCheckIn = async () => {
     if (!selected) return;
     setConfirming(true);
     try {
       const nowIso = new Date().toISOString();
-      const { error } = await supabase.from(tableFor(selected))
-        .update({ checked_in_at: nowIso, checked_in_by: adminId } as any)
-        .eq('id', selected.id);
-      if (error) throw error;
+      await setCheckIn(selected, true);
       setPeople(prev => prev.map(p => p.id === selected.id ? { ...p, checked_in_at: nowIso, checked_in_by: adminId } : p));
       toast({ title: 'Checked in', description: `${selected.full_name} — hand them their badge.` });
       setSelected(null);
@@ -159,10 +167,7 @@ const CheckIn = () => {
   const undoCheckIn = async (p: Person) => {
     if (!confirm(`Undo check-in for ${p.full_name}?`)) return;
     try {
-      const { error } = await supabase.from(tableFor(p))
-        .update({ checked_in_at: null, checked_in_by: null } as any)
-        .eq('id', p.id);
-      if (error) throw error;
+      await setCheckIn(p, false);
       setPeople(prev => prev.map(x => x.id === p.id ? { ...x, checked_in_at: null, checked_in_by: null } : x));
       toast({ title: 'Check-in reverted', description: p.full_name });
       setSelected(null);
