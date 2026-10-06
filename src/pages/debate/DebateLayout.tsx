@@ -27,7 +27,8 @@ export default function DebateLayout({ title, children }: { title?: string; chil
         <meta name="description" content={d.intro} />
       </Helmet>
 
-      <header className="sticky top-0 z-30 border-b border-white/10 bg-diplomatic-950/80 backdrop-blur">
+      {/* fixed, not sticky: the site-wide overflow-x on <body> breaks sticky */}
+      <header className="fixed inset-x-0 top-0 z-30 border-b border-white/10 bg-diplomatic-950/80 backdrop-blur">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <Link to="/" className="flex items-center gap-3">
             <img src={general.logo_url} alt="" className="h-8 w-8 object-contain" />
@@ -50,7 +51,7 @@ export default function DebateLayout({ title, children }: { title?: string; chil
         </div>
       </header>
 
-      <main className="flex-1">{children}</main>
+      <main className="flex-1 pt-16">{children}</main>
 
       <footer className="border-t border-white/10 py-8 text-sm text-white/50">
         <div className="container mx-auto flex flex-col items-center justify-between gap-4 px-4 sm:flex-row">
