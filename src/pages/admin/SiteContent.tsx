@@ -104,7 +104,9 @@ const SiteContent = () => {
 
   const saved = rows[activeKey];
   // On admin.* the same path would open the admin panel, so link to the public site.
-  const previewPath = (isAdminHost() ? getSection('seo').site_url.replace(/\/$/, '') : '') + (PREVIEW[activeKey] ?? '/');
+  const previewPath = activeKey === 'debate'
+    ? (isAdminHost() ? 'https://debat.turonmun.com' : '/?subdomain=debate')
+    : (isAdminHost() ? getSection('seo').site_url.replace(/\/$/, '') : '') + (PREVIEW[activeKey] ?? '/');
 
   return (
     <AdminLayout title="Site content">

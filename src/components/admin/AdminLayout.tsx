@@ -27,6 +27,7 @@ import {
   UserCog,
   History,
   CalendarRange,
+  Mic,
   LucideIcon,
 } from 'lucide-react';
 
@@ -49,6 +50,7 @@ const NAV: { group: string; items: NavItem[] }[] = [
       { path: '/delegates', label: 'Delegates', icon: Users, roles: ACADEMIC },
       { path: '/chairs', label: 'Chairs', icon: Shield, roles: ACADEMIC },
       { path: '/volunteers', label: 'Volunteers', icon: Heart, roles: ['sg', 'logistics'] },
+      { path: '/debate', label: 'Turon Debate', icon: Mic, roles: ACADEMIC },
     ],
   },
   {

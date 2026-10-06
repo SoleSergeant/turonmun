@@ -22,6 +22,7 @@ const AREAS: { key: string; label: string }[] = [
   { key: 'email', label: 'Emails' },
   { key: 'admin_user', label: 'Accounts' },
   { key: 'volunteer', label: 'Volunteers' },
+  { key: 'debate', label: 'Turon Debate' },
   { key: 'season', label: 'Seasons' },
 ];
 

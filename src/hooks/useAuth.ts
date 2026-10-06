@@ -44,7 +44,9 @@ export const useAuth = () => {
   const signup = useCallback(async (
     email: string,
     password: string,
-    fullName: string
+    fullName: string,
+    /** Where to land after confirming the email, e.g. '/register'. */
+    next?: string
   ): Promise<AuthResponse> => {
     setIsLoading(true);
     setError(null);
@@ -58,7 +60,7 @@ export const useAuth = () => {
           data: {
             full_name: fullName,
           },
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          emailRedirectTo: `${window.location.origin}/auth/callback${next ? `?next=${encodeURIComponent(next)}` : ''}`,
         },
       });
 

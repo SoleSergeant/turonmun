@@ -62,6 +62,7 @@ const AdminVolunteers = lazy(() => import("./pages/admin/AdminVolunteers"));
 const AdminAnalytics = lazy(() => import("./pages/admin/Analytics"));
 const AdminAwards = lazy(() => import("./pages/admin/AdminAwards"));
 const SiteContent = lazy(() => import("./pages/admin/SiteContent"));
+const DebateRegistrations = lazy(() => import("./pages/admin/DebateRegistrations"));
 const CheckIn = lazy(() => import("./pages/admin/CheckIn"));
 const FormSettings = lazy(() => import("./pages/admin/FormSettings"));
 const AdminAccounts = lazy(() => import("./pages/admin/AdminAccounts"));
@@ -78,6 +79,11 @@ const DashboardSettings = lazy(() => import("./pages/dashboard/Settings"));
 const LiveSession = lazy(() => import("./pages/dashboard/LiveSession"));
 
 // Chair dashboard
+// Turon Debate (debat.turonmun.com)
+const DebateLanding = lazy(() => import("./pages/debate/DebateLanding"));
+const DebateLogin = lazy(() => import("./pages/debate/DebateLogin"));
+const DebateRegister = lazy(() => import("./pages/debate/DebateRegister"));
+
 const ChairLogin = lazy(() => import("./pages/chair/ChairLogin"));
 const ChairDashboardLayout = lazy(() => import("./pages/dashboard/ChairDashboard"));
 const ChairOverview = lazy(() => import("./pages/dashboard/chair/Overview"));
@@ -159,6 +165,7 @@ const App = () => {
           <Route path="/country-matrix" element={<Navigate to="/allocation?view=matrix" replace />} />
           <Route path="/chairs" element={<AdminRoute allow={['sg','academics']}><ChairManagement /></AdminRoute>} />
           <Route path="/volunteers" element={<AdminRoute allow={['sg','logistics']}><AdminVolunteers /></AdminRoute>} />
+          <Route path="/debate" element={<AdminRoute allow={['sg','academics']}><DebateRegistrations /></AdminRoute>} />
           <Route path="/analytics" element={<AdminRoute allow={['sg','academics']}><AdminAnalytics /></AdminRoute>} />
           <Route path="/awards" element={<AdminRoute allow={['sg','academics']}><AdminAwards /></AdminRoute>} />
           <Route path="/content" element={<AdminRoute allow={['sg']}><SiteContent /></AdminRoute>} />
@@ -168,6 +175,19 @@ const App = () => {
           <Route path="/accounts" element={<AdminRoute allow={['sg']}><AdminAccounts /></AdminRoute>} />
           <Route path="/seasons" element={<AdminRoute allow={['sg']}><Seasons /></AdminRoute>} />
           <Route path="/activity" element={<AdminRoute allow={['sg']}><ActivityLog /></AdminRoute>} />
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      );
+    }
+
+    if (subdomain === 'debate') {
+      return (
+        <Routes>
+          <Route path="/" element={<DebateLanding />} />
+          <Route path="/login" element={<DebateLogin />} />
+          <Route path="/auth/callback" element={<AuthCallback />} />
+          <Route path="/register" element={<ProtectedRoute><DebateRegister /></ProtectedRoute>} />
+          <Route path="/reset-password-change" element={<ResetPasswordChange />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       );
@@ -253,7 +273,7 @@ const App = () => {
         <TooltipProvider>
           <Toaster />
           <Sonner />
-          {showSplash && <SplashScreen onComplete={() => setShowSplash(false)} />}
+          {showSplash && subdomain !== 'debate' && <SplashScreen onComplete={() => setShowSplash(false)} />}
           <BrowserRouter>
             <ScrollToTop />
 

@@ -356,6 +356,39 @@ const extras = {
   secret_signoff: 'Love u :)',
 };
 
+// ── Turon Debate (debat.turonmun.com) ─────────────────────────────────
+const debate = {
+  name: 'Turon Debate',
+  tagline: 'A new debate initiative by TuronMUN',
+  intro: 'Sharpen your arguments, think on your feet and compete with debaters from across Uzbekistan. Watch the video to see how a round works, then register below.',
+  video_url: '',
+  video_caption: 'How a Turon Debate round works',
+  register_button: 'Register',
+  registration_open: true,
+  registration_deadline: '',
+  closed_message: 'Registration is closed right now. Follow us on Telegram for the next round.',
+  info: [
+    { label: 'Format', value: 'To be announced' },
+    { label: 'Date', value: 'To be announced' },
+    { label: 'Venue', value: 'Fergana, Uzbekistan' },
+    { label: 'Participation', value: 'Free' },
+  ],
+  steps_title: 'How it works',
+  steps: [
+    { title: 'Create an account', description: 'Sign up with your email or Google account.' },
+    { title: 'Register', description: 'Fill in the short registration form. You can edit it until it is reviewed.' },
+    { title: 'Get confirmed', description: 'Our team reviews every registration and lets you know the result.' },
+    { title: 'Debate', description: 'Prepare, show up and make your case.' },
+  ],
+  faq_title: 'Questions',
+  faq: [] as { question: string; answer: string }[],
+  form_title: 'Register for Turon Debate',
+  form_intro: 'Tell us a little about yourself. Fields marked * are required.',
+  rules_label: 'I agree to follow the tournament rules and code of conduct.',
+  success_title: 'Registration received',
+  success_text: "Thank you for registering. We'll review your registration and contact you by email or Telegram.",
+};
+
 // ── Section registry ───────────────────────────────────────────────────
 export const SECTIONS = {
   general: {
@@ -614,6 +647,35 @@ export const SECTIONS = {
       { key: 'secret_title', label: 'Title', type: 'text' },
       { key: 'secret_lines', label: 'Lines', type: 'strings' },
       { key: 'secret_signoff', label: 'Sign-off', type: 'text' },
+    ],
+  },
+  debate: {
+    key: 'debate', group: 'Turon Debate', title: 'Turon Debate',
+    description: 'The debat.turonmun.com site: video, text, and whether registration is open. Registrations are in Admin → Debate.',
+    defaults: debate,
+    fields: [
+      { key: 'name', label: 'Name', type: 'text' },
+      { key: 'tagline', label: 'Tagline', type: 'text' },
+      { key: 'intro', label: 'Intro', type: 'textarea' },
+      { key: 'video_url', label: 'YouTube video link', type: 'url', hint: 'Paste the YouTube link (watch, youtu.be or shorts). Leave empty to show "Video coming soon".' },
+      { key: 'video_caption', label: 'Video caption', type: 'text' },
+      { key: 'register_button', label: 'Register button', type: 'text' },
+      { key: 'registration_open', label: 'Registration open', type: 'boolean' },
+      { key: 'registration_deadline', label: 'Registration deadline (optional)', type: 'date', hint: 'Registration closes automatically after this.' },
+      { key: 'closed_message', label: 'Message when closed', type: 'textarea' },
+      { key: 'info', label: 'Key details', type: 'list', itemLabel: 'Detail', titleKey: 'label', fields: [
+        { key: 'label', label: 'Label', type: 'text' },
+        { key: 'value', label: 'Value', type: 'text' },
+      ] },
+      { key: 'steps_title', label: 'Steps — title', type: 'text' },
+      { key: 'steps', label: 'Steps', type: 'list', itemLabel: 'Step', titleKey: 'title', fields: titleDesc },
+      { key: 'faq_title', label: 'FAQ — title', type: 'text' },
+      { key: 'faq', label: 'FAQ', type: 'list', itemLabel: 'Question', titleKey: 'question', fields: qa, hint: 'Hidden when empty.' },
+      { key: 'form_title', label: 'Form — title', type: 'text' },
+      { key: 'form_intro', label: 'Form — intro', type: 'textarea' },
+      { key: 'rules_label', label: 'Form — rules checkbox', type: 'text' },
+      { key: 'success_title', label: 'After registering — title', type: 'text' },
+      { key: 'success_text', label: 'After registering — text', type: 'textarea' },
     ],
   },
 } satisfies Record<string, Section<any>>;
