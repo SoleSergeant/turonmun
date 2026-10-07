@@ -23,9 +23,14 @@ export const focusRing =
 export const goldButton =
   `inline-flex items-center justify-center gap-2 rounded-xl bg-gold-400 font-semibold text-diplomatic-950 shadow-lg shadow-gold-500/20 transition hover:bg-gold-300 active:scale-[0.98] disabled:opacity-60 ${focusRing}`;
 
-/** Text inputs; color-scheme makes native date pickers and dropdowns dark too. */
+/**
+ * Text inputs and selects. color-scheme darkens native date pickers; the
+ * option colours are set explicitly because Chrome on Windows draws the
+ * dropdown list itself with a white background, which made the (inherited)
+ * white option text invisible.
+ */
 export const inputCls =
-  'w-full rounded-lg border border-white/15 bg-white/[0.06] px-3 py-2.5 text-white [color-scheme:dark] placeholder:text-white/40 transition focus:border-gold-400 focus:outline-none focus:ring-2 focus:ring-gold-400/30';
+  'w-full rounded-lg border border-white/15 bg-white/[0.06] px-3 py-2.5 text-white [color-scheme:dark] placeholder:text-white/40 transition focus:border-gold-400 focus:outline-none focus:ring-2 focus:ring-gold-400/30 [&_option]:bg-diplomatic-900 [&_option]:text-white';
 
 /** Header + footer for the Turon Debate site (turonmun.com/debat). */
 export default function DebateLayout({ title, children, nav }: {
