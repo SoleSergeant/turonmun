@@ -8,7 +8,7 @@ import { useSubdomain } from '@/hooks/use-subdomain';
 export const DEBATE_BASE = '/debat';
 
 /** Public address of the debate site (used by admin links). */
-export const DEBATE_SITE_URL = 'https://turonmun.com/debat';
+export const DEBATE_SITE_URL = 'https://www.turonmun.com/debat';
 
 export function useDebatePath() {
   const base = useSubdomain() === 'debate' ? '' : DEBATE_BASE;

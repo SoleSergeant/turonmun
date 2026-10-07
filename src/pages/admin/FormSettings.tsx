@@ -759,11 +759,11 @@ const FormSettingsPage = () => {
         inSeason((supabase.from('applications') as any)
           .select('id', { count: 'exact', head: true }), season)
           .eq('status', 'approved')
-          .not('notes', 'ilike', '%APPLICATION TYPE: chair%'),
+          .neq('application_type', 'chair'),
         inSeason((supabase.from('applications') as any)
           .select('id', { count: 'exact', head: true }), season)
           .eq('status', 'approved')
-          .ilike('notes', '%APPLICATION TYPE: chair%'),
+          .eq('application_type', 'chair'),
         inSeason((supabase.from('volunteer_applications') as any)
           .select('id', { count: 'exact', head: true }), season)
           .eq('status', 'approved'),

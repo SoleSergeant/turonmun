@@ -70,11 +70,11 @@ export default function ChairApplication() {
       fullName: user.user_metadata?.full_name ?? user.user_metadata?.name ?? '',
     }));
     (supabase.from('applications') as any)
-      .select('id, notes')
+      .select('id, application_type')
       .eq('user_id', user.id)
       .limit(20)
       .then(({ data }: { data: any[] | null }) => {
-        if (data?.some((a: any) => a.notes?.includes('APPLICATION TYPE: chair'))) {
+        if (data?.some((a: any) => a.application_type === 'chair')) {
           setAlreadyApplied(true);
         }
       });
@@ -157,7 +157,6 @@ export default function ChairApplication() {
         payment_status: 'pending',
         notes: (() => {
           const hardcoded: Array<[string, string]> = [
-            ['APPLICATION TYPE', 'chair'],
             ['Role Preference', formData.rolePreference],
             ['Previous Chair Experience', formData.previousChairExperience || 'None'],
           ];
@@ -190,13 +189,8 @@ export default function ChairApplication() {
         })(),
       };
 
-      let { error } = await (supabase.from('applications') as any)
+      const { error } = await (supabase.from('applications') as any)
         .insert({ ...basePayload, application_type: 'chair' });
-
-      if (error?.message?.includes('application_type')) {
-        const { error: retryError } = await (supabase.from('applications') as any).insert(basePayload);
-        error = retryError;
-      }
 
       if (error) throw error;
 

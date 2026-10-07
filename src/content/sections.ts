@@ -339,11 +339,11 @@ const contact = {
 };
 
 const seo = {
-  site_url: 'https://turonmun.uz',
+  site_url: 'https://www.turonmun.com',
   default_title: 'TuronMUN - Model United Nations Conference',
   default_description: 'Join TuronMUN for an enriching Model United Nations experience. Develop diplomacy, debate, and leadership skills with students from around the world.',
   keywords: 'MUN, Model United Nations, TuronMUN, Uzbekistan, Fergana, debate, diplomacy, UN, conference',
-  share_image: 'https://turonmun.uz/images/og-image.jpg',
+  share_image: 'https://www.turonmun.com/og-image.png',
 };
 
 const extras = {

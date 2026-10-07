@@ -29,14 +29,13 @@ export default function Dashboard() {
     (async () => {
       const { data } = await supabase
         .from('applications')
-        .select('application_type, notes')
+        .select('application_type')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(1)
         .single();
       const t = (data as any)?.application_type;
-      const isChairFromNotes = ((data as any)?.notes || '').includes('APPLICATION TYPE: chair');
-      setAppType(t === 'chair' || isChairFromNotes ? 'chair' : 'delegate');
+      setAppType(t === 'chair' ? 'chair' : 'delegate');
       setAppChecking(false);
     })();
   }, [user?.id]);

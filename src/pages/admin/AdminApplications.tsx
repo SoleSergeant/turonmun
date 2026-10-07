@@ -39,6 +39,7 @@ import { useAdminRole } from '@/hooks/useAdminRole';
 interface Application {
   id: string;
   full_name: string;
+  application_type?: string | null;
   email: string;
   telegram_username?: string;
   institution: string;
@@ -186,8 +187,6 @@ const AdminApplications = () => {
     let filtered = [...applications];
 
     // Apply application type filter.
-    // Notes marker is the ground truth (always written at submit time).
-    // application_type column is used as a secondary signal when notes is absent.
     if (typeFilter !== 'all') {
       filtered = filtered.filter(app => (typeFilter === 'chair') === isChairApplication(app));
     }
@@ -255,8 +254,8 @@ const AdminApplications = () => {
   // delegate pipeline. Rejected chairs are often still strong delegates, so
   // this lets admins reuse them instead of asking them to re-apply.
   //   - application_type   → 'delegate'
-  //   - notes marker       → strip the 'APPLICATION TYPE: chair' line (ground
-  //                          truth for detection) and record the conversion
+  //   - notes              → drop the legacy 'APPLICATION TYPE: chair' line
+  //                          and record the conversion
   //   - status             → 'pending' so they show up as a fresh delegate to
   //                          approve; once approved they can be assigned a
   //                          country & committee in Delegate Management.
