@@ -7,6 +7,8 @@ import { downloadCsv, datedFilename } from '@/lib/csv';
 import { sendEmails, templates } from '@/lib/email';
 import { EXPERIENCE, type DebateRegistration } from '@/pages/debate/DebateRegister';
 import { DEBATE_SITE_URL } from '@/pages/debate/paths';
+import { sideShares } from '@/pages/debate/sides';
+import { useContent } from '@/content/store';
 
 type Status = DebateRegistration['status'];
 
@@ -27,6 +29,8 @@ const DebateRegistrations = () => {
   const [missing, setMissing] = useState(false);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<Status | 'all'>('all');
+  const [sideFilter, setSideFilter] = useState<string>('all');
+  const debate = useContent('debate');
   const [openId, setOpenId] = useState<string | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [emailOpen, setEmailOpen] = useState(false);
@@ -50,13 +54,24 @@ const DebateRegistrations = () => {
     return c;
   }, [rows]);
 
+  // Same rule as the public numbers on the form: rejected registrations don't count.
+  const sides = useMemo(() => {
+    const listed = (debate.sides || []).filter(Boolean);
+    const counts: Record<string, number> = {};
+    rows.forEach(r => { if (r.preferred_side && r.status !== 'rejected') counts[r.preferred_side] = (counts[r.preferred_side] || 0) + 1; });
+    // Answers for sides that were renamed or removed still show up here.
+    const all = [...listed, ...Object.keys(counts).filter(k => !listed.includes(k))];
+    return { ...sideShares(all, counts), noSide: rows.filter(r => !r.preferred_side && r.status !== 'rejected').length };
+  }, [rows, debate.sides]);
+
   const shown = useMemo(() => {
     const q = search.trim().toLowerCase();
     return rows.filter(r =>
       (statusFilter === 'all' || r.status === statusFilter) &&
+      (sideFilter === 'all' || (sideFilter === 'none' ? !r.preferred_side : r.preferred_side === sideFilter)) &&
       (!q || [r.full_name, r.email, r.institution, r.city, r.phone, r.telegram].some(v => (v || '').toLowerCase().includes(q))),
     );
-  }, [rows, search, statusFilter]);
+  }, [rows, search, statusFilter, sideFilter]);
 
   const patchLocal = (ids: string[], fields: Partial<DebateRegistration>) =>
     setRows(prev => prev.map(r => (ids.includes(r.id) ? { ...r, ...fields } : r)));
@@ -90,10 +105,10 @@ const DebateRegistrations = () => {
   const exportCsv = () => {
     downloadCsv(datedFilename('turon-debate-registrations'), [
       ['Name', 'Email', 'Phone', 'Telegram', 'Date of birth', 'Gender', 'School / university', 'Grade', 'City',
-        'English level', 'Experience', 'Past tournaments', 'Motivation', 'Heard from', 'Status', 'Notes', 'Registered'],
+        'English level', 'Experience', 'Preferred side', 'Past tournaments', 'Motivation', 'Heard from', 'Status', 'Notes', 'Registered'],
       ...shown.map(r => [
         r.full_name, r.email, r.phone, r.telegram, r.date_of_birth, r.gender, r.institution, r.grade, r.city,
-        r.english_level, experienceLabel(r.experience), r.past_tournaments, r.motivation, r.heard_from,
+        r.english_level, experienceLabel(r.experience), r.preferred_side, r.past_tournaments, r.motivation, r.heard_from,
         r.status, r.admin_notes, new Date(r.created_at).toLocaleString(),
       ]),
     ]);
@@ -158,6 +173,38 @@ const DebateRegistrations = () => {
               ))}
             </div>
 
+            {sides.shares.length > 0 && (
+              <div className="rounded-lg border bg-white p-4 shadow-sm">
+                <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
+                  <h3 className="text-sm font-semibold text-gray-900">Preferred side</h3>
+                  <p className="text-xs text-gray-500">
+                    {sides.total} picked a side{sides.noSide > 0 && ` · ${sides.noSide} didn't answer`} · rejected not counted · click to filter
+                  </p>
+                </div>
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                  {sides.shares.map(({ side, count, percent }) => (
+                    <button
+                      key={side}
+                      onClick={() => setSideFilter(sideFilter === side ? 'all' : side)}
+                      className={`rounded-lg border p-3 text-left transition ${sideFilter === side ? 'border-diplomatic-500 bg-diplomatic-50' : 'border-gray-200 hover:bg-gray-50'}`}
+                    >
+                      <div className="flex items-baseline justify-between gap-2">
+                        <span className="truncate text-sm font-medium text-gray-800">{side}</span>
+                        <span className="text-lg font-semibold text-gray-900">{percent}%</span>
+                      </div>
+                      <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-gray-100">
+                        <div className="h-full rounded-full bg-diplomatic-500" style={{ width: `${percent}%` }} />
+                      </div>
+                      <div className="mt-1 text-xs text-gray-500">{count} registration{count === 1 ? '' : 's'}</div>
+                    </button>
+                  ))}
+                </div>
+                {sideFilter !== 'all' && (
+                  <button onClick={() => setSideFilter('all')} className="mt-3 text-xs text-diplomatic-700 hover:underline">Show all sides</button>
+                )}
+              </div>
+            )}
+
             <div className="relative max-w-md">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
               <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search name, email, school, city…" className="w-full rounded-lg border border-gray-300 py-2 pl-10 pr-4" />
@@ -192,6 +239,7 @@ const DebateRegistrations = () => {
                       </th>
                       <th className="px-4 py-3">Name</th>
                       <th className="hidden px-4 py-3 md:table-cell">School</th>
+                      <th className="hidden px-4 py-3 md:table-cell">Side</th>
                       <th className="hidden px-4 py-3 lg:table-cell">Experience</th>
                       <th className="hidden px-4 py-3 lg:table-cell">Registered</th>
                       <th className="px-4 py-3">Status</th>
@@ -214,6 +262,7 @@ const DebateRegistrations = () => {
                               </button>
                             </td>
                             <td className="hidden px-4 py-3 text-gray-700 md:table-cell">{r.institution}{r.grade ? <span className="text-gray-400"> · {r.grade}</span> : null}</td>
+                            <td className="hidden px-4 py-3 text-gray-700 md:table-cell">{r.preferred_side || '—'}</td>
                             <td className="hidden px-4 py-3 text-gray-700 lg:table-cell">{experienceLabel(r.experience)}</td>
                             <td className="hidden px-4 py-3 text-gray-500 lg:table-cell">{new Date(r.created_at).toLocaleDateString()}</td>
                             <td className="px-4 py-3">
@@ -229,7 +278,7 @@ const DebateRegistrations = () => {
                           {isOpen && (
                             <tr className="bg-gray-50">
                               <td />
-                              <td colSpan={5} className="px-4 pb-5">
+                              <td colSpan={6} className="px-4 pb-5">
                                 <dl className="grid gap-x-6 gap-y-2 text-sm sm:grid-cols-2 lg:grid-cols-3">
                                   {([
                                     ['Phone', r.phone], ['Telegram', r.telegram], ['Date of birth', r.date_of_birth], ['Gender', r.gender],

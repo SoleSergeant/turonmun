@@ -6,6 +6,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useContent } from '@/content/store';
 import DebateLayout, { useDebateRegistrationOpen, inputCls, goldButton, focusRing } from './DebateLayout';
 import { useDebatePath } from './paths';
+import { useSideStats } from './sides';
 
 export interface DebateRegistration {
   id: string;
@@ -24,6 +25,7 @@ export interface DebateRegistration {
   past_tournaments: string | null;
   motivation: string | null;
   heard_from: string | null;
+  preferred_side: string | null;
   agreed_to_rules: boolean;
   status: 'pending' | 'approved' | 'waitlisted' | 'rejected';
   admin_notes: string | null;
@@ -50,7 +52,7 @@ type Form = Omit<DebateRegistration, 'id' | 'user_id' | 'status' | 'admin_notes'
 
 const emptyForm = (name: string, email: string): Form => ({
   full_name: name, email, phone: '', telegram: '', date_of_birth: '', gender: '', institution: '', grade: '',
-  city: '', english_level: '', experience: '', past_tournaments: '', motivation: '', heard_from: '', agreed_to_rules: false,
+  city: '', english_level: '', experience: '', past_tournaments: '', motivation: '', heard_from: '', preferred_side: '', agreed_to_rules: false,
 });
 
 function Field({ label, required, children, hint }: { label: string; required?: boolean; hint?: string; children: React.ReactNode }) {
@@ -76,6 +78,8 @@ export default function DebateRegister() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const errorRef = useRef<HTMLDivElement>(null);
+  const sideStats = useSideStats();
+  const showShares = d.show_side_stats && sideStats.total > 0;
 
   useEffect(() => {
     if (error) errorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -100,6 +104,7 @@ export default function DebateRegister() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user || !form) return;
+    if (sideStats.sides.length > 0 && !form.preferred_side) { setError('Please choose the side you would like to be on.'); return; }
     if (!form.agreed_to_rules) { setError('Please agree to the rules to continue.'); return; }
     setError(null);
     setSaving(true);
@@ -118,6 +123,7 @@ export default function DebateRegister() {
       past_tournaments: form.past_tournaments?.trim() || null,
       motivation: form.motivation?.trim() || null,
       heard_from: form.heard_from || null,
+      preferred_side: form.preferred_side || null,
       agreed_to_rules: true,
     };
     try {
@@ -131,6 +137,7 @@ export default function DebateRegister() {
       }
       setExisting(data as DebateRegistration);
       setEditing(false);
+      sideStats.refetch();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     } catch (err: any) {
       setError(err.message || 'Could not save your registration.');
@@ -166,6 +173,7 @@ export default function DebateRegister() {
       ['Name', existing.full_name], ['Email', existing.email], ['Phone', existing.phone], ['Telegram', existing.telegram],
       ['School / university', existing.institution], ['Grade / year', existing.grade], ['City', existing.city],
       ['English level', existing.english_level],
+      ['Preferred side', existing.preferred_side],
       ['Experience', EXPERIENCE.find(x => x.value === existing.experience)?.label ?? existing.experience],
     ];
     return (
@@ -271,6 +279,49 @@ export default function DebateRegister() {
 
           <fieldset className="space-y-4">
             <legend className="mb-2 text-xs font-semibold uppercase tracking-widest text-gold-300">Debate</legend>
+            {sideStats.sides.length > 0 && (
+              <div role="radiogroup" aria-labelledby="side-label" aria-describedby={d.side_hint ? 'side-hint' : undefined} aria-required="true">
+                <p id="side-label" className="text-sm text-white/80">{d.side_label}<span className="text-gold-300"> *</span></p>
+                {d.side_hint && <p id="side-hint" className="mt-1 text-xs text-white/60">{d.side_hint}</p>}
+                <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                  {sideStats.shares.map(({ side, percent }) => {
+                    const checked = form.preferred_side === side;
+                    return (
+                      <label
+                        key={side}
+                        className={`relative cursor-pointer rounded-xl border p-4 transition has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-gold-300 ${checked ? 'border-gold-400 bg-gold-400/10' : 'border-white/15 bg-white/[0.03] hover:border-white/30'}`}
+                      >
+                        <input
+                          type="radio"
+                          name="preferred_side"
+                          value={side}
+                          checked={checked}
+                          onChange={() => set('preferred_side', side)}
+                          className="sr-only"
+                        />
+                        <span className="flex items-center justify-between gap-3">
+                          <span className="font-semibold">{side}</span>
+                          <span aria-hidden className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 ${checked ? 'border-gold-400' : 'border-white/30'}`}>
+                            {checked && <span className="h-2.5 w-2.5 rounded-full bg-gold-400" />}
+                          </span>
+                        </span>
+                        {showShares && (
+                          <span className="mt-3 block">
+                            <span className="block h-1.5 overflow-hidden rounded-full bg-white/10">
+                              <span className="block h-full rounded-full bg-gold-400/80 transition-all" style={{ width: `${percent}%` }} />
+                            </span>
+                            <span className="mt-1.5 block text-xs text-white/65">{percent}% of registrations</span>
+                          </span>
+                        )}
+                      </label>
+                    );
+                  })}
+                </div>
+                {showShares && (
+                  <p className="mt-2 text-xs text-white/50">Based on {sideStats.total} registration{sideStats.total === 1 ? '' : 's'} so far.</p>
+                )}
+              </div>
+            )}
             <div className="grid gap-4 sm:grid-cols-2">
               <Field label="English level">
                 <select value={form.english_level ?? ''} onChange={e => set('english_level', e.target.value)} className={inputCls}>

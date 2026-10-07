@@ -22,7 +22,9 @@ For `turonmun.com/debat` only step 1 is needed. Steps 2–4 are for the
 `debat.turonmun.com` subdomain later.
 
 1. **Database** — run `supabase/migrations/041_turon_debate.sql` in the
-   Supabase SQL editor (needs 036, 038 and 040 applied first).
+   Supabase SQL editor (needs 036, 038 and 040 applied first), then
+   `042_debate_sides.sql` (the "which side" question and its percentages;
+   the sides themselves are edited in Site content → Turon Debate).
 2. **Vercel** — Project → Settings → Domains → add `debat.turonmun.com`.
 3. **DNS** (where turonmun.com is managed) — add the record Vercel shows,
    normally `CNAME  debat  →  cname.vercel-dns.com`.
