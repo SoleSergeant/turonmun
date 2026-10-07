@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { CheckCircle2, Clock, XCircle, Hourglass, Loader2, Pencil, LogOut } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useContent } from '@/content/store';
-import DebateLayout, { useDebateRegistrationOpen } from './DebateLayout';
+import DebateLayout, { useDebateRegistrationOpen, inputCls, goldButton, focusRing } from './DebateLayout';
 import { useDebatePath } from './paths';
 
 export interface DebateRegistration {
@@ -46,8 +46,6 @@ export const STATUS_INFO: Record<DebateRegistration['status'], { label: string; 
   rejected: { label: 'Not accepted', icon: XCircle, tone: 'border-red-400/30 bg-red-400/10 text-red-200' },
 };
 
-const inputCls = 'w-full rounded-lg border border-white/15 bg-white/5 px-3 py-2.5 text-white placeholder:text-white/30 focus:border-gold-400 focus:outline-none focus:ring-2 focus:ring-gold-400/30';
-
 type Form = Omit<DebateRegistration, 'id' | 'user_id' | 'status' | 'admin_notes' | 'created_at' | 'updated_at'>;
 
 const emptyForm = (name: string, email: string): Form => ({
@@ -60,7 +58,7 @@ function Field({ label, required, children, hint }: { label: string; required?: 
     <label className="block text-sm">
       <span className="mb-1 block text-white/80">{label}{required && <span className="text-gold-300"> *</span>}</span>
       {children}
-      {hint && <span className="mt-1 block text-xs text-white/40">{hint}</span>}
+      {hint && <span className="mt-1 block text-xs text-white/60">{hint}</span>}
     </label>
   );
 }
@@ -77,6 +75,11 @@ export default function DebateRegister() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const errorRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (error) errorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, [error]);
 
   useEffect(() => {
     if (!user) return;
@@ -150,9 +153,9 @@ export default function DebateRegister() {
   }
 
   const signedInAs = (
-    <p className="mt-6 flex items-center justify-center gap-2 text-xs text-white/40">
+    <p className="mt-6 flex flex-wrap items-center justify-center gap-2 text-xs text-white/60">
       Signed in as {user?.email}
-      <button onClick={() => logout()} className="inline-flex items-center gap-1 hover:text-white"><LogOut className="h-3 w-3" /> Sign out</button>
+      <button onClick={() => logout()} className={`inline-flex items-center gap-1 rounded hover:text-white ${focusRing}`}><LogOut className="h-3 w-3" /> Sign out</button>
     </p>
   );
 
@@ -167,7 +170,7 @@ export default function DebateRegister() {
     ];
     return (
       <DebateLayout title="My registration">
-        <div className="container mx-auto max-w-2xl px-4 py-14">
+        <div className="container mx-auto max-w-2xl px-4 py-10 sm:py-16">
           <div className="text-center">
             <CheckCircle2 className="mx-auto h-12 w-12 text-gold-300" />
             <h1 className="mt-4 font-display text-3xl font-bold">{d.success_title}</h1>
@@ -181,7 +184,7 @@ export default function DebateRegister() {
           <dl className="mt-6 divide-y divide-white/10 rounded-2xl border border-white/10 bg-white/[0.04]">
             {rows.filter(([, v]) => v).map(([k, v]) => (
               <div key={k} className="flex justify-between gap-4 px-5 py-3 text-sm">
-                <dt className="text-white/50">{k}</dt>
+                <dt className="text-white/65">{k}</dt>
                 <dd className="text-right">{v}</dd>
               </div>
             ))}
@@ -189,7 +192,7 @@ export default function DebateRegister() {
 
           {existing.status === 'pending' && (
             <div className="mt-6 text-center">
-              <button onClick={() => setEditing(true)} className="inline-flex items-center gap-2 rounded-lg border border-white/15 px-4 py-2 text-sm hover:bg-white/10">
+              <button onClick={() => setEditing(true)} className={`inline-flex items-center gap-2 rounded-lg border border-white/15 px-4 py-2 text-sm hover:bg-white/10 ${focusRing}`}>
                 <Pencil className="h-4 w-4" /> Edit my answers
               </button>
             </div>
@@ -207,7 +210,7 @@ export default function DebateRegister() {
         <div className="container mx-auto max-w-lg px-4 py-24 text-center">
           <h1 className="font-display text-3xl font-bold">{d.form_title}</h1>
           <p className="mt-4 rounded-xl border border-white/10 bg-white/5 px-5 py-4 text-white/70">{d.closed_message}</p>
-          <Link to={path('/')} className="mt-6 inline-block text-sm text-gold-300 hover:underline">← Back</Link>
+          <Link to={path('/')} className={`mt-6 inline-block rounded text-sm text-gold-300 hover:underline ${focusRing}`}>← Back</Link>
           {signedInAs}
         </div>
       </DebateLayout>
@@ -217,28 +220,28 @@ export default function DebateRegister() {
   // ── Form ─────────────────────────────────────────────────────────────
   return (
     <DebateLayout title="Register">
-      <div className="container mx-auto max-w-2xl px-4 py-14">
+      <div className="container mx-auto max-w-2xl px-4 py-10 sm:py-16">
         <h1 className="text-center font-display text-3xl font-bold">{d.form_title}</h1>
-        <p className="mt-2 text-center text-white/60">{d.form_intro}</p>
+        <p className="mt-2 text-center text-white/70">{d.form_intro}</p>
 
-        <form onSubmit={submit} className="mt-8 space-y-8 rounded-2xl border border-white/10 bg-white/[0.04] p-6 sm:p-8">
+        <form onSubmit={submit} className="mt-8 space-y-8 rounded-2xl border border-white/10 bg-white/[0.04] p-5 shadow-2xl shadow-black/30 sm:p-8">
           <fieldset className="space-y-4">
             <legend className="mb-2 text-xs font-semibold uppercase tracking-widest text-gold-300">About you</legend>
             <Field label="Full name" required>
-              <input required value={form.full_name} onChange={e => set('full_name', e.target.value)} className={inputCls} />
+              <input required value={form.full_name} onChange={e => set('full_name', e.target.value)} className={inputCls} autoComplete="name" />
             </Field>
             <div className="grid gap-4 sm:grid-cols-2">
               <Field label="Email" hint="From your account">
                 <input value={user?.email || form.email} disabled className={`${inputCls} opacity-60`} />
               </Field>
               <Field label="Phone" required>
-                <input required type="tel" value={form.phone} onChange={e => set('phone', e.target.value)} placeholder="+998 90 123 45 67" className={inputCls} />
+                <input required type="tel" value={form.phone} onChange={e => set('phone', e.target.value)} autoComplete="tel" inputMode="tel" placeholder="+998 90 123 45 67" className={inputCls} />
               </Field>
               <Field label="Telegram username">
-                <input value={form.telegram ?? ''} onChange={e => set('telegram', e.target.value)} placeholder="@username" className={inputCls} />
+                <input value={form.telegram ?? ''} onChange={e => set('telegram', e.target.value)} autoComplete="off" placeholder="@username" className={inputCls} />
               </Field>
               <Field label="Date of birth">
-                <input type="date" value={form.date_of_birth ?? ''} onChange={e => set('date_of_birth', e.target.value)} className={inputCls} />
+                <input type="date" value={form.date_of_birth ?? ''} onChange={e => set('date_of_birth', e.target.value)} autoComplete="bday" className={inputCls} />
               </Field>
               <Field label="Gender">
                 <select value={form.gender ?? ''} onChange={e => set('gender', e.target.value)} className={inputCls}>
@@ -249,7 +252,7 @@ export default function DebateRegister() {
                 </select>
               </Field>
               <Field label="City / region">
-                <input value={form.city ?? ''} onChange={e => set('city', e.target.value)} className={inputCls} />
+                <input value={form.city ?? ''} onChange={e => set('city', e.target.value)} autoComplete="address-level2" className={inputCls} />
               </Field>
             </div>
           </fieldset>
@@ -258,7 +261,7 @@ export default function DebateRegister() {
             <legend className="mb-2 text-xs font-semibold uppercase tracking-widest text-gold-300">Education</legend>
             <div className="grid gap-4 sm:grid-cols-2">
               <Field label="School / university" required>
-                <input required value={form.institution} onChange={e => set('institution', e.target.value)} className={inputCls} />
+                <input required value={form.institution} onChange={e => set('institution', e.target.value)} autoComplete="organization" className={inputCls} />
               </Field>
               <Field label="Grade / year">
                 <input value={form.grade ?? ''} onChange={e => set('grade', e.target.value)} placeholder="e.g. 10th grade" className={inputCls} />
@@ -301,21 +304,21 @@ export default function DebateRegister() {
               type="checkbox"
               checked={form.agreed_to_rules}
               onChange={e => set('agreed_to_rules', e.target.checked)}
-              className="mt-0.5 h-4 w-4 rounded border-white/30 bg-white/10 text-gold-400"
+              className="mt-0.5 h-5 w-5 shrink-0 rounded border-white/30 bg-white/10 accent-gold-400"
             />
             <span>{d.rules_label} <span className="text-gold-300">*</span></span>
           </label>
 
-          {error && <p className="rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-300">{error}</p>}
+          <div ref={errorRef} aria-live="polite">{error && <p role="alert" className="rounded-lg border border-red-400/30 bg-red-500/10 px-3 py-2 text-sm text-red-200">{error}</p>}</div>
 
           <div className="flex flex-col-reverse items-center justify-end gap-3 sm:flex-row">
             {editing && (
-              <button type="button" onClick={() => setEditing(false)} className="rounded-lg px-4 py-2.5 text-sm text-white/70 hover:bg-white/10">Cancel</button>
+              <button type="button" onClick={() => setEditing(false)} className={`rounded-lg px-4 py-2.5 text-sm text-white/80 hover:bg-white/10 ${focusRing}`}>Cancel</button>
             )}
             <button
               type="submit"
               disabled={saving}
-              className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-gold-400 px-6 py-3 font-semibold text-diplomatic-950 hover:bg-gold-300 disabled:opacity-60 sm:w-auto"
+              className={`${goldButton} w-full px-6 py-3.5 sm:w-auto`}
             >
               {saving && <Loader2 className="h-4 w-4 animate-spin" />}
               {existing ? 'Save changes' : 'Submit registration'}
