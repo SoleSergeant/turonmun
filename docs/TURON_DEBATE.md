@@ -1,18 +1,25 @@
-# Turon Debate — debat.turonmun.com
+# Turon Debate — turonmun.com/debat
 
-Turon Debate runs from the same app and database as TuronMUN. The site is
-picked by the domain: `debat.turonmun.com` (or `debate.turonmun.com`) shows
-the debate site. Locally, add `?subdomain=debate` to the URL.
+Turon Debate runs from the same app and database as TuronMUN.
+
+- **Now:** `https://turonmun.com/debat` — no extra DNS, Vercel or Supabase
+  setup needed.
+- **Later (optional):** `debat.turonmun.com` also works once the domain is
+  set up (steps below); the same pages are then served at the root of that
+  subdomain. Locally, add `?subdomain=debate` to the URL to try it.
 
 ## Pages
 
 | Address | What it is |
 |---|---|
-| `/` | Landing page: YouTube video, intro, key details, how it works, FAQ, Register |
-| `/login` | Sign in / create account (same accounts as the MUN site; email or Google) |
-| `/register` | Registration form → afterwards the person's status (editable while pending) |
+| `/debat` | Landing page: YouTube video, intro, key details, how it works, FAQ, Register |
+| `/debat/login` | Sign in / create account (same accounts as the MUN site; email or Google) |
+| `/debat/register` | Registration form → afterwards the person's status (editable while pending) |
 
 ## One-time setup
+
+For `turonmun.com/debat` only step 1 is needed. Steps 2–4 are for the
+`debat.turonmun.com` subdomain later.
 
 1. **Database** — run `supabase/migrations/041_turon_debate.sql` in the
    Supabase SQL editor (needs 036, 038 and 040 applied first).

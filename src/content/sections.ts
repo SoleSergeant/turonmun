@@ -651,7 +651,7 @@ export const SECTIONS = {
   },
   debate: {
     key: 'debate', group: 'Turon Debate', title: 'Turon Debate',
-    description: 'The debat.turonmun.com site: video, text, and whether registration is open. Registrations are in Admin → Debate.',
+    description: 'The Turon Debate site (turonmun.com/debat): video, text, and whether registration is open. Registrations are in Admin → Turon Debate.',
     defaults: debate,
     fields: [
       { key: 'name', label: 'Name', type: 'text' },

@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { CheckCircle2, Clock, XCircle, Hourglass, Loader2, Pencil, LogOut } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useContent } from '@/content/store';
 import DebateLayout, { useDebateRegistrationOpen } from './DebateLayout';
+import { useDebatePath } from './paths';
 
 export interface DebateRegistration {
   id: string;
@@ -68,7 +69,8 @@ function Field({ label, required, children, hint }: { label: string; required?: 
 export default function DebateRegister() {
   const d = useContent('debate');
   const { open } = useDebateRegistrationOpen();
-  const { user, logout } = useAuth();
+  const { user, logout, loading: authLoading } = useAuth();
+  const path = useDebatePath();
   const [existing, setExisting] = useState<DebateRegistration | null>(null);
   const [form, setForm] = useState<Form | null>(null);
   const [editing, setEditing] = useState(false);
@@ -133,6 +135,11 @@ export default function DebateRegister() {
       setSaving(false);
     }
   };
+
+  // Signed-out visitors go to the debate sign-in page and come back here.
+  if (!authLoading && !user) {
+    return <Navigate to={`${path('/login')}?redirect=${encodeURIComponent(path('/register'))}`} replace />;
+  }
 
   if (loading || !form) {
     return (
@@ -200,7 +207,7 @@ export default function DebateRegister() {
         <div className="container mx-auto max-w-lg px-4 py-24 text-center">
           <h1 className="font-display text-3xl font-bold">{d.form_title}</h1>
           <p className="mt-4 rounded-xl border border-white/10 bg-white/5 px-5 py-4 text-white/70">{d.closed_message}</p>
-          <Link to="/" className="mt-6 inline-block text-sm text-gold-300 hover:underline">← Back</Link>
+          <Link to={path('/')} className="mt-6 inline-block text-sm text-gold-300 hover:underline">← Back</Link>
           {signedInAs}
         </div>
       </DebateLayout>

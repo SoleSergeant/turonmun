@@ -5,12 +5,14 @@ import { ArrowRight, PlayCircle, ChevronDown, CalendarClock } from 'lucide-react
 import { useContent } from '@/content/store';
 import { youtubeId, youtubeEmbedUrl } from '@/lib/youtube';
 import DebateLayout, { useDebateRegistrationOpen } from './DebateLayout';
+import { useDebatePath } from './paths';
 
-/** debat.turonmun.com — everything on it is edited in Site content → Turon Debate. */
+/** Turon Debate landing (turonmun.com/debat) — everything on it is edited in Site content → Turon Debate. */
 export default function DebateLanding() {
   const d = useContent('debate');
   const { open, deadline } = useDebateRegistrationOpen();
   const videoId = youtubeId(d.video_url);
+  const path = useDebatePath();
 
   return (
     <DebateLayout>
@@ -61,7 +63,7 @@ export default function DebateLanding() {
             {open ? (
               <>
                 <Link
-                  to="/register"
+                  to={path('/register')}
                   className="group inline-flex items-center gap-2 rounded-xl bg-gold-400 px-8 py-4 text-lg font-bold text-diplomatic-950 shadow-lg shadow-gold-400/20 transition hover:bg-gold-300"
                 >
                   {d.register_button}

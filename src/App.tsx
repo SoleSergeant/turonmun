@@ -186,7 +186,7 @@ const App = () => {
           <Route path="/" element={<DebateLanding />} />
           <Route path="/login" element={<DebateLogin />} />
           <Route path="/auth/callback" element={<AuthCallback />} />
-          <Route path="/register" element={<ProtectedRoute><DebateRegister /></ProtectedRoute>} />
+          <Route path="/register" element={<DebateRegister />} />
           <Route path="/reset-password-change" element={<ResetPasswordChange />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
@@ -241,6 +241,11 @@ const App = () => {
         <Route path="/seasons/:slug" element={<SeasonRoute />} />
         <Route path="/mun-command" element={<MunCommand />} />
 
+        {/* Turon Debate at turonmun.com/debat (same pages as debat.turonmun.com) */}
+        <Route path="/debat" element={<DebateLanding />} />
+        <Route path="/debat/login" element={<DebateLogin />} />
+        <Route path="/debat/register" element={<DebateRegister />} />
+
         {/* Chair login & dashboard (non-subdomain access) */}
         <Route path="/chair-login" element={<ChairLogin />} />
         <Route path="/chair-dashboard" element={<ChairRoute><ChairDashboardLayout /></ChairRoute>}>
@@ -273,7 +278,7 @@ const App = () => {
         <TooltipProvider>
           <Toaster />
           <Sonner />
-          {showSplash && subdomain !== 'debate' && <SplashScreen onComplete={() => setShowSplash(false)} />}
+          {showSplash && subdomain !== 'debate' && !window.location.pathname.startsWith('/debat') && <SplashScreen onComplete={() => setShowSplash(false)} />}
           <BrowserRouter>
             <ScrollToTop />
 

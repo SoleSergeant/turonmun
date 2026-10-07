@@ -6,6 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 import { downloadCsv, datedFilename } from '@/lib/csv';
 import { sendEmails, templates } from '@/lib/email';
 import { EXPERIENCE, type DebateRegistration } from '@/pages/debate/DebateRegister';
+import { DEBATE_SITE_URL } from '@/pages/debate/paths';
 
 type Status = DebateRegistration['status'];
 
@@ -119,7 +120,7 @@ const DebateRegistrations = () => {
     return next;
   });
 
-  const debateSiteUrl = 'https://debat.turonmun.com';
+  const debateSiteUrl = DEBATE_SITE_URL;
 
   return (
     <AdminLayout title="Turon Debate">

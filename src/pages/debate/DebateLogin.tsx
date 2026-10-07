@@ -4,6 +4,7 @@ import { Loader2, MailCheck } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useContent } from '@/content/store';
 import DebateLayout from './DebateLayout';
+import { useDebatePath } from './paths';
 
 type Mode = 'signin' | 'signup' | 'reset';
 
@@ -14,7 +15,8 @@ export default function DebateLogin() {
   const d = useContent('debate');
   const navigate = useNavigate();
   const [params] = useSearchParams();
-  const redirect = params.get('redirect') || '/register';
+  const path = useDebatePath();
+  const redirect = params.get('redirect') || path('/register');
   const { user, login, signup, signInWithGoogle, resetPassword } = useAuth();
 
   const [mode, setMode] = useState<Mode>(params.get('mode') === 'signup' ? 'signup' : 'signin');

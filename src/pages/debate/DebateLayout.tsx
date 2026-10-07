@@ -4,6 +4,7 @@ import { Send, Instagram, Mail } from 'lucide-react';
 import { Helmet } from 'react-helmet-async';
 import { useContent } from '@/content/store';
 import { useAuth } from '@/hooks/useAuth';
+import { useDebatePath } from './paths';
 
 /** Registration is open when switched on and the deadline (if any) hasn't passed. */
 export function useDebateRegistrationOpen() {
@@ -13,12 +14,13 @@ export function useDebateRegistrationOpen() {
   return { open: !!d.registration_open && beforeDeadline, deadline };
 }
 
-/** Header + footer for debat.turonmun.com. */
+/** Header + footer for the Turon Debate site (turonmun.com/debat). */
 export default function DebateLayout({ title, children }: { title?: string; children: React.ReactNode }) {
   const d = useContent('debate');
   const general = useContent('general');
   const seo = useContent('seo');
   const { user } = useAuth();
+  const path = useDebatePath();
 
   return (
     <div className="flex min-h-screen flex-col bg-diplomatic-950 text-white">
@@ -30,21 +32,21 @@ export default function DebateLayout({ title, children }: { title?: string; chil
       {/* fixed, not sticky: the site-wide overflow-x on <body> breaks sticky */}
       <header className="fixed inset-x-0 top-0 z-30 border-b border-white/10 bg-diplomatic-950/80 backdrop-blur">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
-          <Link to="/" className="flex items-center gap-3">
+          <Link to={path('/')} className="flex items-center gap-3">
             <img src={general.logo_url} alt="" className="h-8 w-8 object-contain" />
             <span className="font-display text-lg font-bold tracking-tight">{d.name}</span>
           </Link>
           <nav className="flex items-center gap-2 text-sm">
             {user ? (
-              <Link to="/register" className="rounded-lg px-3 py-2 font-medium text-white/80 hover:bg-white/10 hover:text-white">
+              <Link to={path('/register')} className="rounded-lg px-3 py-2 font-medium text-white/80 hover:bg-white/10 hover:text-white">
                 My registration
               </Link>
             ) : (
-              <Link to="/login?redirect=%2Fregister" className="rounded-lg px-3 py-2 font-medium text-white/80 hover:bg-white/10 hover:text-white">
+              <Link to={`${path('/login')}?redirect=${encodeURIComponent(path('/register'))}`} className="rounded-lg px-3 py-2 font-medium text-white/80 hover:bg-white/10 hover:text-white">
                 Sign in
               </Link>
             )}
-            <Link to="/register" className="rounded-lg bg-gold-400 px-4 py-2 font-semibold text-diplomatic-950 hover:bg-gold-300">
+            <Link to={path('/register')} className="rounded-lg bg-gold-400 px-4 py-2 font-semibold text-diplomatic-950 hover:bg-gold-300">
               {d.register_button}
             </Link>
           </nav>

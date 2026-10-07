@@ -7,6 +7,7 @@ import { useToast } from '@/hooks/use-toast';
 import { SECTION_LIST } from '@/content/sections';
 import { reloadContent, getSection } from '@/content/store';
 import { isAdminHost } from '@/lib/adminPath';
+import { DEBATE_SITE_URL, DEBATE_BASE } from '@/pages/debate/paths';
 
 interface Row {
   key: string;
@@ -105,7 +106,7 @@ const SiteContent = () => {
   const saved = rows[activeKey];
   // On admin.* the same path would open the admin panel, so link to the public site.
   const previewPath = activeKey === 'debate'
-    ? (isAdminHost() ? 'https://debat.turonmun.com' : '/?subdomain=debate')
+    ? (isAdminHost() ? DEBATE_SITE_URL : DEBATE_BASE)
     : (isAdminHost() ? getSection('seo').site_url.replace(/\/$/, '') : '') + (PREVIEW[activeKey] ?? '/');
 
   return (
