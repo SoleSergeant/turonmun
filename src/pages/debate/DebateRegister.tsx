@@ -318,9 +318,6 @@ export default function DebateRegister() {
                     );
                   })}
                 </div>
-                {showShares && (
-                  <p className="mt-2 text-xs text-white/50">Based on {sideStats.total} registration{sideStats.total === 1 ? '' : 's'} so far.</p>
-                )}
               </div>
             )}
             <div className="grid gap-4 sm:grid-cols-2">
