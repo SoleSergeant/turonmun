@@ -8,6 +8,8 @@ import { SECTION_LIST } from '@/content/sections';
 import { reloadContent, getSection } from '@/content/store';
 import { isAdminHost } from '@/lib/adminPath';
 import { DEBATE_SITE_URL, DEBATE_BASE } from '@/pages/debate/paths';
+import { confirmAction } from '@/components/admin/ConfirmDialog';
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 
 interface Row {
   key: string;
@@ -35,6 +37,7 @@ const SiteContent = () => {
   const [activeKey, setActiveKey] = useState(SECTION_LIST[0].key);
   const [draft, setDraft] = useState<Record<string, unknown>>({});
   const [dirty, setDirty] = useState(false);
+  useUnsavedChanges(dirty);
   const [saving, setSaving] = useState(false);
 
   const section = SECTION_LIST.find(s => s.key === activeKey)!;
@@ -64,8 +67,8 @@ const SiteContent = () => {
     return Object.entries(g);
   }, []);
 
-  const choose = (key: string) => {
-    if (dirty && !confirm('You have unsaved changes in this section. Discard them?')) return;
+  const choose = async (key: string) => {
+    if (dirty && !(await confirmAction('You have unsaved changes in this section. Discard them?', { title: 'Unsaved changes', confirmLabel: 'Discard changes', danger: true }))) return;
     setActiveKey(key);
   };
 
@@ -88,7 +91,7 @@ const SiteContent = () => {
   };
 
   const reset = async () => {
-    if (!confirm(`Reset "${section.title}" to the original built-in text? Your edits to this section will be lost.`)) return;
+    if (!(await confirmAction(`Reset "${section.title}" to the original built-in text? Your edits to this section will be lost.`, { title: 'Reset section', confirmLabel: 'Reset', danger: true }))) return;
     const { error } = await (supabase.from('site_content' as any) as any).delete().eq('key', activeKey);
     if (error) {
       toast({ title: 'Could not reset', description: error.message, variant: 'destructive' });

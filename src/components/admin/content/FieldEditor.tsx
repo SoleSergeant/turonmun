@@ -3,6 +3,7 @@ import { ChevronDown, ChevronRight, ArrowUp, ArrowDown, Trash2, Plus, Upload, Lo
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import type { Field } from '@/content/types';
+import { confirmAction } from '@/components/admin/ConfirmDialog';
 
 type Obj = Record<string, any>;
 
@@ -87,8 +88,8 @@ function ListEditor({ field, value, onChange }: { field: Extract<Field, { type: 
     onChange(next);
     setOpen(j);
   };
-  const remove = (i: number) => {
-    if (!confirm(`Remove this ${field.itemLabel.toLowerCase()}?`)) return;
+  const remove = async (i: number) => {
+    if (!(await confirmAction(`Remove this ${field.itemLabel.toLowerCase()}?`, { title: 'Remove item', confirmLabel: 'Remove', danger: true }))) return;
     onChange(items.filter((_, idx) => idx !== i));
     setOpen(null);
   };

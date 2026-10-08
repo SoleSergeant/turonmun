@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Resource } from './types';
 import { useToast } from '@/hooks/use-toast';
+import { confirmAction } from '@/components/admin/ConfirmDialog';
 
 export const initialFormState = {
   id: '',
@@ -42,8 +43,8 @@ export const useResourcesManager = () => {
     } catch (error) {
       console.error('Error fetching resources:', error);
       toast({
-        title: "Error",
-        description: "Failed to load resources",
+        title: "Could not load resources",
+        description: (error as any)?.message,
         variant: "destructive",
       });
     } finally {
@@ -57,7 +58,7 @@ export const useResourcesManager = () => {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this resource?')) return;
+    if (!(await confirmAction('Are you sure you want to delete this resource?', { title: 'Delete resource', danger: true }))) return;
 
     try {
       const { error } = await supabase
@@ -69,14 +70,13 @@ export const useResourcesManager = () => {
 
       setResources(prev => prev.filter(r => r.id !== id));
       toast({
-        title: "Success",
-        description: "Resource deleted successfully",
+        title: "Resource deleted",
       });
     } catch (error) {
       console.error('Error deleting resource:', error);
       toast({
-        title: "Error",
-        description: "Failed to delete resource",
+        title: "Could not delete resource",
+        description: (error as any)?.message,
         variant: "destructive",
       });
     }

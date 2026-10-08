@@ -171,6 +171,7 @@ const App = () => {
           <Route path="/content" element={<AdminRoute allow={['sg']}><SiteContent /></AdminRoute>} />
           <Route path="/homepage" element={<Navigate to="/content" replace />} />
           <Route path="/check-in" element={<CheckInRoute><CheckIn /></CheckInRoute>} />
+          <Route path="/reset-password-change" element={<ResetPasswordChange />} />
           <Route path="/forms" element={<AdminRoute allow={['sg']}><FormSettings /></AdminRoute>} />
           <Route path="/accounts" element={<AdminRoute allow={['sg']}><AdminAccounts /></AdminRoute>} />
           <Route path="/seasons" element={<AdminRoute allow={['sg']}><Seasons /></AdminRoute>} />
@@ -201,6 +202,7 @@ const App = () => {
               Without this route the chair subdomain's catch-all bounced the
               Google sign-in back to the login page. */}
           <Route path="/auth/callback" element={<AuthCallback />} />
+          <Route path="/reset-password-change" element={<ResetPasswordChange />} />
           <Route element={<ChairRoute><ChairDashboardLayout /></ChairRoute>}>
             <Route path="/dashboard" element={<ChairOverview />} />
             <Route path="/announcements" element={<ChairAnnouncements />} />

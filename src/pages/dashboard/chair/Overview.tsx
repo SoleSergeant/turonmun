@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { useOutletContext } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import CheckInPass from '@/components/dashboard/CheckInPass';
 
 interface OverviewProps {
   committees: any[];
@@ -68,16 +69,16 @@ export default function ChairOverview() {
   ];
 
   // Fetch chair's own admin record for the check-in QR
-  const [me, setMe] = useState<{ id: string; checked_in_at: string | null } | null>(null);
+  const [me, setMe] = useState<{ id: string; full_name: string | null; checked_in_at: string | null } | null>(null);
   useEffect(() => {
     (async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user?.email) return;
       const { data } = await supabase
         .from('admin_users')
-        .select('id, checked_in_at')
-        .eq('email', user.email)
-        .single();
+        .select('id, full_name, checked_in_at')
+        .eq('email', user.email.toLowerCase())
+        .maybeSingle();
       if (data) setMe(data as any);
     })();
   }, []);
@@ -111,6 +112,13 @@ export default function ChairOverview() {
               Arrived at {new Date(me.checked_in_at).toLocaleString()}
             </p>
           </div>
+        </motion.div>
+      )}
+
+      {/* Check-in pass until they've arrived */}
+      {me && !me.checked_in_at && (
+        <motion.div variants={itemVariants}>
+          <CheckInPass kind="chair" id={me.id} name={me.full_name || 'Chair'} />
         </motion.div>
       )}
 

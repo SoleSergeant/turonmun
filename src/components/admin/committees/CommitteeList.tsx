@@ -4,6 +4,7 @@ import { Edit, Trash2, Globe, FileBarChart, Landmark, Shield } from 'lucide-reac
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import type { Committee } from './types';
+import { confirmAction } from '@/components/admin/ConfirmDialog';
 
 interface CommitteeListProps {
   committees: Committee[];
@@ -24,7 +25,7 @@ const CommitteeList = ({ committees, onEdit, loading, fetchCommittees }: Committ
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to deactivate this committee? It will be hidden from all lists.')) return;
+    if (!(await confirmAction('Are you sure you want to deactivate this committee? It will be hidden from all lists.', { title: 'Deactivate committee', confirmLabel: 'Deactivate', danger: true }))) return;
 
     try {
       // Soft-delete: set is_active = false.

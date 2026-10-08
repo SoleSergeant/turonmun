@@ -31,6 +31,7 @@ import {
 } from 'lucide-react';
 import { Checkbox } from "@/components/ui/checkbox";
 import { useNavigate } from 'react-router-dom';
+import { confirmAction } from '@/components/admin/ConfirmDialog';
 
 // Shared country list moved to @/data/countries.ts
 
@@ -146,8 +147,8 @@ const DelegateManagement = () => {
     } catch (error: any) {
       console.error('Error fetching delegates:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to load delegates',
+        title: 'Could not load delegates',
+        description: error?.message,
         variant: 'destructive',
       });
     } finally {
@@ -245,7 +246,7 @@ const DelegateManagement = () => {
       });
       return;
     }
-    if (!confirm(`Send a payment reminder to ${list.length} unpaid delegate${list.length === 1 ? '' : 's'}?`)) return;
+    if (!(await confirmAction(`Send a payment reminder to ${list.length} unpaid delegate${list.length === 1 ? '' : 's'}?`, { title: 'Send payment reminders', confirmLabel: 'Send' }))) return;
     setEmailBusy(true);
     let result: SendResult;
     let failure: string | null = null;
@@ -273,10 +274,10 @@ const DelegateManagement = () => {
 
   const markSelectedPaid = async () => {
     const ids = [...selectedDelegates];
-    if (!confirm(`Mark ${ids.length} delegate${ids.length === 1 ? '' : 's'} as paid?`)) return;
+    if (!(await confirmAction(`Mark ${ids.length} delegate${ids.length === 1 ? '' : 's'} as paid?`, { title: 'Mark as paid', confirmLabel: 'Mark as paid' }))) return;
     const { error } = await (supabase.from('applications') as any).update({ payment_status: 'paid' }).in('id', ids);
     if (error) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
+      toast({ title: 'Something went wrong', description: error.message, variant: 'destructive' });
       return;
     }
     setDelegates(prev => prev.map(d => ids.includes(d.id) ? { ...d, payment_status: 'paid' } : d));
@@ -285,7 +286,7 @@ const DelegateManagement = () => {
   };
 
   const handleDeleteDelegate = async (delegateId: string) => {
-    if (!confirm('Are you sure you want to delete this delegate? This action cannot be undone.')) {
+    if (!(await confirmAction('Are you sure you want to delete this delegate? This action cannot be undone.', { title: 'Delete delegate', danger: true }))) {
       return;
     }
 
@@ -303,8 +304,7 @@ const DelegateManagement = () => {
       setDelegates(prev => prev.filter(d => d.id !== delegateId));
 
       toast({
-        title: 'Success',
-        description: 'Delegate deleted successfully',
+        title: 'Delegate deleted',
       });
     } catch (error: any) {
       console.error('Error deleting delegate:', error);
@@ -324,7 +324,7 @@ const DelegateManagement = () => {
       'Phone',
       'School',
       'Grade',
-      'Country',
+      'Home city / country',
       'Committee 1',
       'Committee 2',
       'Committee 3',
@@ -358,8 +358,7 @@ const DelegateManagement = () => {
     downloadCsv(datedFilename('delegates'), [headers, ...rows]);
 
     toast({
-      title: 'Success',
-      description: `Exported ${filteredDelegates.length} delegates to CSV`,
+      title: `Exported ${filteredDelegates.length} delegates`,
     });
   };
 
@@ -417,7 +416,7 @@ const DelegateManagement = () => {
       setFilteredDelegates(prev => prev.map(d => d.id === id ? { ...d, payment_status: newStatus as any } : d));
       toast({ title: 'Payment status updated', description: `Marked as ${newStatus}` });
     } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' });
+      toast({ title: 'Something went wrong', description: err.message, variant: 'destructive' });
     }
   };
 
@@ -433,7 +432,7 @@ const DelegateManagement = () => {
       setFilteredDelegates(prev => prev.map(d => d.id === id ? { ...d, contacted: next } : d));
       toast({ title: next ? 'Marked as contacted' : 'Marked as not contacted' });
     } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' });
+      toast({ title: 'Something went wrong', description: err.message, variant: 'destructive' });
     }
   };
 
@@ -577,7 +576,8 @@ const DelegateManagement = () => {
         {/* Delegates Table */}
         <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full">
+            {/* Secondary columns are hidden on phones; everything is in the detail view. */}
+            <table className="w-full max-md:[&_th:nth-child(3)]:hidden max-md:[&_td:nth-child(3)]:hidden max-md:[&_th:nth-child(4)]:hidden max-md:[&_td:nth-child(4)]:hidden max-md:[&_th:nth-child(7)]:hidden max-md:[&_td:nth-child(7)]:hidden">
               <thead className="bg-gray-50 border-b">
                 <tr>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -667,10 +667,11 @@ const DelegateManagement = () => {
                           <div className="text-xs font-medium text-blue-600">1. {delegate.committee_preference_1}</div>
                           <div className="text-xs text-gray-500">2. {delegate.committee_preference_2}</div>
                           <div className="text-xs text-gray-400">3. {delegate.committee_preference_3}</div>
-                          <div className="text-xs text-gray-400 flex items-center gap-1">
-                            <MapPin className="h-3 w-3" />
-                            {delegate.country_preference}
-                          </div>
+                          {delegate.country_preference && (
+                            <div className="text-xs text-gray-400" title="Where the delegate is from (not their assigned country)">
+                              From {delegate.country_preference}
+                            </div>
+                          )}
                         </div>
                       </td>
                       <td className="px-4 py-4">
@@ -915,8 +916,7 @@ const DelegateManagement = () => {
                     }
 
                     toast({
-                      title: 'Success',
-                      description: 'Delegate information updated successfully',
+                      title: 'Delegate updated',
                     });
 
                     setShowEditModal(false);
@@ -924,7 +924,7 @@ const DelegateManagement = () => {
                   } catch (error: any) {
                     console.error('Error updating delegate:', error);
                     toast({
-                      title: 'Error',
+                      title: 'Something went wrong',
                       description: error.message || error.hint || 'Failed to update delegate information',
                       variant: 'destructive',
                     });
@@ -972,7 +972,7 @@ const DelegateManagement = () => {
                         />
                       </div>
                       <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Country</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Home city / country</label>
                         <input
                           type="text"
                           name="country"

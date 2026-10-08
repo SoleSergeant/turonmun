@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { sendEmails, templates, partialResult, wasDelivered, type SendResult } from '@/lib/email';
 import { isChairApplication } from '@/lib/applications';
+import { confirmAction } from '@/components/admin/ConfirmDialog';
 
 interface DecisionApp {
   id: string;
@@ -36,7 +37,7 @@ const DecisionEmailPanel: React.FC<{ applications: DecisionApp[]; onSent: () => 
     const list = pending[kind];
     if (list.length === 0) return;
     const label = kind === 'approved' ? 'acceptance' : 'rejection';
-    if (!confirm(`Send the ${label} email to ${list.length} delegate${list.length === 1 ? '' : 's'}?`)) return;
+    if (!(await confirmAction(`Send the ${label} email to ${list.length} delegate${list.length === 1 ? '' : 's'}?`, { title: 'Send decision emails', confirmLabel: 'Send' }))) return;
 
     setBusy(kind);
     const messages = list.map(a =>

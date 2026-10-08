@@ -24,6 +24,7 @@ import {
   ChevronDown,
 } from 'lucide-react';
 import { useToast } from "@/hooks/use-toast";
+import { confirmAction } from '@/components/admin/ConfirmDialog';
 
 // Secondary Supabase client — used to create auth users without logging out the current admin session
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
@@ -134,7 +135,7 @@ const ChairManagement = () => {
   useEffect(() => { fetchChairApps(); }, [fetchChairApps]);
 
   const handleRejectApp = async (appId: string) => {
-    if (!confirm('Reject this chair application?')) return;
+    if (!(await confirmAction('Reject this chair application?', { title: 'Reject chair application', confirmLabel: 'Reject', danger: true }))) return;
     const { error } = await (supabase.from('applications') as any)
       .update({ status: 'rejected', reviewed_at: new Date().toISOString() })
       .eq('id', appId);
@@ -150,7 +151,7 @@ const ChairManagement = () => {
   // their mind. Also clears any assigned committee on the corresponding
   // admin_users row (if one was created via Accept & Assign).
   const handleRevertApp = async (app: ChairApp) => {
-    if (!confirm(`Revert ${app.full_name}'s decision back to pending?`)) return;
+    if (!(await confirmAction(`Revert ${app.full_name}'s decision back to pending?`, { title: 'Revert decision', confirmLabel: 'Revert' }))) return;
     try {
       const { error } = await (supabase.from('applications') as any)
         .update({ status: 'pending', reviewed_at: null })
@@ -183,7 +184,7 @@ const ChairManagement = () => {
       await fetchChairApps();
       toast({ title: 'Reverted to pending', description: `${app.full_name} is back in the pending queue.` });
     } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' });
+      toast({ title: 'Something went wrong', description: err.message, variant: 'destructive' });
     }
   };
 
@@ -216,7 +217,7 @@ const ChairManagement = () => {
       fetchChairApps();
       fetchData();
     } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' });
+      toast({ title: 'Something went wrong', description: err.message, variant: 'destructive' });
     } finally {
       setAssignLoading(false);
     }
@@ -275,8 +276,8 @@ const ChairManagement = () => {
     } catch (error: any) {
       console.error('Error fetching data:', error);
       toast({
-        title: "Error",
-        description: "Failed to load chair data",
+        title: 'Could not load chair data',
+        description: error?.message,
         variant: "destructive",
       });
     } finally {
@@ -364,8 +365,8 @@ const ChairManagement = () => {
       }
 
       toast({
-        title: "Success",
-        description: addMode === 'existing' ? `${fullName} promoted to ${formData.role}` : 'New chair account created',
+        title: addMode === 'existing' ? 'Chair added' : 'Chair account created',
+        description: addMode === 'existing' ? `${fullName} is now a ${formData.role === 'co_chair' ? 'co-chair' : 'chair'}` : `${fullName} can now sign in`,
       });
 
       setShowAddModal(false);
@@ -378,8 +379,8 @@ const ChairManagement = () => {
     } catch (error: any) {
       console.error('Error adding chair:', error);
       toast({
-        title: "Error",
-        description: error.message || 'Failed to add chair',
+        title: 'Could not add chair',
+        description: error.message,
         variant: "destructive",
       });
     } finally {
@@ -438,8 +439,7 @@ const ChairManagement = () => {
       }
 
       toast({
-        title: "Success",
-        description: "Chair updated successfully",
+        title: 'Chair updated',
       });
 
       setShowEditModal(false);
@@ -448,8 +448,8 @@ const ChairManagement = () => {
     } catch (error: any) {
       console.error('Error updating chair:', error);
       toast({
-        title: "Error",
-        description: error.message || "Failed to update chair",
+        title: 'Could not update chair',
+        description: error.message,
         variant: "destructive",
       });
     } finally {
@@ -458,7 +458,7 @@ const ChairManagement = () => {
   };
 
   const handleDeleteChair = async (chair: Chair) => {
-    if (!confirm(`Remove ${chair.full_name} as ${chair.role === 'co_chair' ? 'co-chair' : 'chair'}? Their login stays, but they lose chair access.`)) return;
+    if (!(await confirmAction(`Remove ${chair.full_name} as ${chair.role === 'co_chair' ? 'co-chair' : 'chair'}? Their login stays, but they lose chair access.`, { title: 'Remove chair', confirmLabel: 'Remove', danger: true }))) return;
 
     try {
       // 1. Take their name off their own committee (matched by committee, not
@@ -489,8 +489,8 @@ const ChairManagement = () => {
     } catch (error: any) {
       console.error('Error deleting chair:', error);
       toast({
-        title: "Error",
-        description: error.message || "Failed to delete chair",
+        title: 'Could not delete chair',
+        description: error.message,
         variant: "destructive",
       });
     }
@@ -611,7 +611,8 @@ const ChairManagement = () => {
             </div>
           </div>
           <div className="overflow-x-auto">
-            <table className="w-full">
+            {/* Secondary columns are hidden on phones; everything is in the detail view. */}
+            <table className="w-full max-md:[&_th:nth-child(2)]:hidden max-md:[&_td:nth-child(2)]:hidden max-md:[&_th:nth-child(3)]:hidden max-md:[&_td:nth-child(3)]:hidden max-md:[&_th:nth-child(4)]:hidden max-md:[&_td:nth-child(4)]:hidden">
               <thead className="bg-gray-50 border-b">
                 <tr>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Applicant</th>
@@ -746,7 +747,7 @@ const ChairManagement = () => {
         {/* Chairs Table */}
         <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full">
+            <table className="w-full max-md:[&_th:nth-child(2)]:hidden max-md:[&_td:nth-child(2)]:hidden max-md:[&_th:nth-child(3)]:hidden max-md:[&_td:nth-child(3)]:hidden max-md:[&_th:nth-child(5)]:hidden max-md:[&_td:nth-child(5)]:hidden">
               <thead className="bg-gray-50 border-b">
                 <tr>
                   <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Chair</th>

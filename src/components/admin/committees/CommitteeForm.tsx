@@ -9,6 +9,7 @@ import type { CommitteeFormData } from './types';
 import ImageUpload from './ImageUpload';
 import { useFlagOverrides } from '@/hooks/useFlagOverrides';
 import { getCountryCode } from '@/utils/countryCodes';
+import { confirmAction } from '@/components/admin/ConfirmDialog';
 
 // ── Inline flag override control ──────────────────────────────────────
 // Renders the current best-available flag (override → flagcdn → icon)
@@ -44,7 +45,7 @@ const FlagOverrideButton: React.FC<{ country: string }> = ({ country }) => {
 
   const onReset = async () => {
     if (!hasOverride) return;
-    if (!confirm(`Remove the custom flag for ${trimmed}? It will fall back to the automatic flag.`)) return;
+    if (!(await confirmAction(`Remove the custom flag for ${trimmed}? It will fall back to the automatic flag.`, { title: 'Remove custom flag', confirmLabel: 'Remove', danger: true }))) return;
     try {
       await reset(trimmed);
       toast({ title: 'Flag reset', description: `${trimmed} is back to the automatic flag.` });
@@ -307,8 +308,7 @@ const CommitteeForm = ({
         if (error) throw error;
 
         toast({
-          title: "Success",
-          description: "Committee updated successfully",
+          title: "Committee updated",
         });
       } else {
         // Create
@@ -329,8 +329,7 @@ const CommitteeForm = ({
         if (error) throw error;
         
         toast({
-          title: "Success",
-          description: "Committee created successfully",
+          title: "Committee created",
         });
       }
       
@@ -339,8 +338,8 @@ const CommitteeForm = ({
     } catch (error: any) {
       console.error('Error saving committee:', error);
       toast({
-        title: "Error",
-        description: error.message || "Failed to save committee",
+        title: 'Could not save committee',
+        description: error.message,
         variant: "destructive",
       });
     } finally {

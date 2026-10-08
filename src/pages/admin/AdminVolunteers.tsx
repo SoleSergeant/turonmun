@@ -195,7 +195,8 @@ const AdminVolunteers: React.FC = () => {
           </div>
         ) : (
           <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-            <table className="w-full text-sm">
+            {/* Secondary columns are hidden on phones; everything is in the detail view. */}
+            <table className="w-full text-sm max-md:[&_th:nth-child(2)]:hidden max-md:[&_td:nth-child(2)]:hidden max-md:[&_th:nth-child(3)]:hidden max-md:[&_td:nth-child(3)]:hidden max-md:[&_th:nth-child(6)]:hidden max-md:[&_td:nth-child(6)]:hidden">
               <thead className="bg-gray-50 border-b border-gray-200">
                 <tr className="text-left text-[11px] font-bold text-gray-500 uppercase tracking-wide">
                   <th className="px-4 py-3">Volunteer</th>

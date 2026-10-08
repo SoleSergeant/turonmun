@@ -4,11 +4,12 @@ import AdminLayout from '@/components/admin/AdminLayout';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { downloadCsv, datedFilename } from '@/lib/csv';
-import { sendEmails, templates } from '@/lib/email';
+import { sendEmails, templates, partialResult, wasDelivered, type SendResult } from '@/lib/email';
 import { EXPERIENCE, type DebateRegistration } from '@/pages/debate/DebateRegister';
 import { DEBATE_SITE_URL } from '@/pages/debate/paths';
 import { sideShares } from '@/pages/debate/sides';
 import { useContent } from '@/content/store';
+import { confirmAction } from '@/components/admin/ConfirmDialog';
 
 type Status = DebateRegistration['status'];
 
@@ -83,12 +84,13 @@ const DebateRegistrations = () => {
     setRows(prev => prev.map(r => (ids.includes(r.id) ? { ...r, ...fields } : r)));
 
   const setStatus = async (ids: string[], status: Status) => {
-    if (ids.length > 1 && !confirm(`Mark ${ids.length} registrations as ${STATUSES.find(s => s.value === status)?.label.toLowerCase()}?`)) return;
+    if (ids.length > 1 && !(await confirmAction(`Mark ${ids.length} registrations as ${STATUSES.find(s => s.value === status)?.label.toLowerCase()}?`, { title: 'Bulk update', confirmLabel: 'Apply' }))) return;
     const { error } = await (supabase.from('debate_registrations' as any) as any)
-      .update({ status, reviewed_at: new Date().toISOString() })
+      // A new decision hasn't been emailed yet.
+      .update({ status, reviewed_at: new Date().toISOString(), decision_emailed_at: null })
       .in('id', ids);
     if (error) { toast({ title: 'Update failed', description: error.message, variant: 'destructive' }); return; }
-    patchLocal(ids, { status });
+    patchLocal(ids, { status, decision_emailed_at: null });
     setSelected(new Set());
     toast({ title: `Updated ${ids.length}` });
   };
@@ -102,7 +104,7 @@ const DebateRegistrations = () => {
   };
 
   const remove = async (r: DebateRegistration) => {
-    if (!confirm(`Delete ${r.full_name}'s registration? They will be able to register again.`)) return;
+    if (!(await confirmAction(`Delete ${r.full_name}'s registration? They will be able to register again.`, { title: 'Delete registration', danger: true }))) return;
     const { error } = await (supabase.from('debate_registrations' as any) as any).delete().eq('id', r.id);
     if (error) { toast({ title: 'Delete failed', description: error.message, variant: 'destructive' }); return; }
     setRows(prev => prev.filter(x => x.id !== r.id));
@@ -118,6 +120,40 @@ const DebateRegistrations = () => {
         r.status, r.admin_notes, new Date(r.created_at).toLocaleString(),
       ]),
     ]);
+  };
+
+  // Decision emails: everyone accepted / waitlisted / rejected who hasn't
+  // been told yet. Stamps decision_emailed_at so nobody is emailed twice;
+  // changing someone's status again lets you send the new decision.
+  const DECIDED = ['approved', 'waitlisted', 'rejected'] as const;
+  const untold = rows.filter(r => (DECIDED as readonly string[]).includes(r.status) && !r.decision_emailed_at);
+
+  const sendDecisions = async () => {
+    if (!untold.length) return;
+    const by = DECIDED.map(s => `${untold.filter(r => r.status === s).length} ${STATUSES.find(x => x.value === s)?.label.toLowerCase()}`).join(', ');
+    if (!(await confirmAction(`Email ${untold.length} people their result (${by})?`, { title: 'Send decision emails', confirmLabel: 'Send' }))) return;
+    setEmailBusy(true);
+    let result: SendResult;
+    let failure: string | null = null;
+    try {
+      result = await sendEmails(
+        untold.map(r => templates.debateDecision({ to: r.email, name: r.full_name, status: r.status as typeof DECIDED[number], event: debate.name })),
+        'debate_decision',
+      );
+    } catch (err: any) {
+      result = partialResult(err);
+      failure = err.message;
+    }
+    const ids = untold.filter(r => wasDelivered(result, r.email)).map(r => r.id);
+    const now = new Date().toISOString();
+    if (ids.length) {
+      const { error } = await (supabase.from('debate_registrations' as any) as any).update({ decision_emailed_at: now }).in('id', ids);
+      if (error) toast({ title: `Sent ${ids.length}, but couldn't record it`, description: `${error.message}. These people may be emailed again.`, variant: 'destructive' });
+      else patchLocal(ids, { decision_emailed_at: now });
+    }
+    if (failure) toast({ title: 'Email stopped', description: `${failure}. ${ids.length} sent; try again for the rest.`, variant: 'destructive' });
+    else toast({ title: `Sent ${ids.length} decision email${ids.length === 1 ? '' : 's'}` });
+    setEmailBusy(false);
   };
 
   const sendEmail = async (subject: string, body: string) => {
@@ -170,6 +206,20 @@ const DebateRegistrations = () => {
           </div>
         ) : (
           <>
+            {untold.length > 0 && (
+              <div className="flex flex-col gap-3 rounded-lg border border-blue-200 bg-blue-50 p-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="text-sm text-blue-900">
+                  <p className="font-semibold">{untold.length} {untold.length === 1 ? "person hasn't" : "people haven't"} been told their result</p>
+                  <p className="text-blue-800">
+                    {DECIDED.map(s => ({ s, n: untold.filter(r => r.status === s).length })).filter(x => x.n).map(x => `${x.n} ${STATUSES.find(v => v.value === x.s)?.label.toLowerCase()}`).join(' · ')}
+                  </p>
+                </div>
+                <button onClick={sendDecisions} disabled={emailBusy} className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50">
+                  {emailBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mail className="h-4 w-4" />} Email their results
+                </button>
+              </div>
+            )}
+
             <div className="flex flex-wrap gap-2">
               {[{ value: 'all', label: 'All' }, ...STATUSES].map(s => (
                 <button

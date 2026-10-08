@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import ForgotPasswordLink from '@/components/admin/ForgotPasswordLink';
 import { useNavigate } from 'react-router-dom';
 import { Shield } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
@@ -124,9 +125,12 @@ const ChairLogin = () => {
                         />
                     </div>
                     <div>
-                        <label htmlFor="password" className="block text-sm font-medium text-neutral-700 mb-1">
-                            Password
-                        </label>
+                        <div className="mb-1 flex items-center justify-between">
+                            <label htmlFor="password" className="block text-sm font-medium text-neutral-700">
+                                Password
+                            </label>
+                            <ForgotPasswordLink email={email} subdomain="chair" />
+                        </div>
                         <input
                             id="password"
                             type="password"

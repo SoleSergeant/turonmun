@@ -3,6 +3,7 @@ import { Mail, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { sendEmails, templates, partialResult, wasDelivered, type SendResult } from '@/lib/email';
+import { confirmAction } from '@/components/admin/ConfirmDialog';
 
 interface PendingSeat {
   id: string;
@@ -50,7 +51,7 @@ const NotifySeatsButton: React.FC = () => {
   const notify = async () => {
     const fresh = await load();
     if (fresh.length === 0) return;
-    if (!confirm(`Email ${fresh.length} delegate${fresh.length === 1 ? '' : 's'} their committee and country?`)) return;
+    if (!(await confirmAction(`Email ${fresh.length} delegate${fresh.length === 1 ? '' : 's'} their committee and country?`, { title: 'Send allocation emails', confirmLabel: 'Send' }))) return;
     setBusy(true);
     let result: SendResult;
     let failure: string | null = null;

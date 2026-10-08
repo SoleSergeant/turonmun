@@ -6,6 +6,8 @@ import { useToast } from '@/hooks/use-toast';
 import { useAdminRole, ROLE_LABELS, AdminRole } from '@/hooks/useAdminRole';
 import { adminPath } from '@/lib/adminPath';
 import { getCurrentSeason } from '@/lib/season';
+import { ConfirmHost } from '@/components/admin/ConfirmDialog';
+import { confirmLeave } from '@/hooks/useUnsavedChanges';
 import {
   LayoutDashboard,
   Users,
@@ -115,6 +117,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
         .filter(g => g.items.length > 0);
 
   const handleLogout = async () => {
+    if (!(await confirmLeave())) return;
     try {
       await supabase.auth.signOut();
       toast({
@@ -184,7 +187,15 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
                     <li key={item.path}>
                       <Link
                         to={adminPath(item.path)}
-                        onClick={() => setSidebarOpen(false)}
+                        onClick={async (e) => {
+                          // Ask before leaving a page with unsaved edits
+                          // (new-tab clicks open normally).
+                          if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+                          e.preventDefault();
+                          if (!(await confirmLeave())) return;
+                          setSidebarOpen(false);
+                          navigate(adminPath(item.path));
+                        }}
                         className={`flex items-center px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group ${active
                             ? 'bg-white/10 text-white shadow-sm border border-white/5'
                             : 'text-diplomatic-100 hover:bg-white/5 hover:text-white hover:translate-x-1'
@@ -264,10 +275,11 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
         </header>
 
         {/* Main content */}
-        <main className="flex-1 overflow-y-auto p-6">
+        <main className="flex-1 overflow-y-auto p-4 sm:p-6">
           {children}
         </main>
       </div>
+      <ConfirmHost />
     </div>
   );
 };

@@ -50,8 +50,8 @@ export const useCommitteeData = () => {
     } catch (error) {
       console.error('Error fetching committees:', error);
       toast({
-        title: "Error",
-        description: "Failed to load committees",
+        title: "Could not load committees",
+        description: (error as any)?.message,
         variant: "destructive",
       });
     } finally {

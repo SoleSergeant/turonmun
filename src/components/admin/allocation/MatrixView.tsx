@@ -141,8 +141,8 @@ const MatrixView = () => {
     } catch (error: any) {
       console.error('Error fetching data:', error);
       toast({
-        title: "Error",
-        description: error.message || "Failed to load data",
+        title: 'Could not load data',
+        description: error.message,
         variant: "destructive",
       });
     } finally {
@@ -230,7 +230,7 @@ const MatrixView = () => {
         description: `${country} → ${delegate?.full_name} in ${committees.find(c => c.id === committeeId)?.abbreviation}`,
       });
     } catch (error: any) {
-      toast({ title: 'Error', description: error.message || 'Failed to assign country', variant: 'destructive' });
+      toast({ title: 'Something went wrong', description: error.message || 'Failed to assign country', variant: 'destructive' });
     }
   };
 
@@ -249,7 +249,7 @@ const MatrixView = () => {
       });
       toast({ title: 'Unassigned', description: country });
     } catch (error: any) {
-      toast({ title: 'Error', description: error.message || 'Failed to unassign country', variant: 'destructive' });
+      toast({ title: 'Something went wrong', description: error.message || 'Failed to unassign country', variant: 'destructive' });
     }
   };
 
@@ -293,8 +293,7 @@ const MatrixView = () => {
     setMatrix(prev => prev.filter(m => m.country !== countryToDelete));
 
     toast({
-      title: "Success",
-      description: `Removed ${countryToDelete} from the matrix`,
+      title: `Removed ${countryToDelete} from the matrix`,
     });
   };
 
@@ -303,7 +302,7 @@ const MatrixView = () => {
 
     if (selectedCountries.includes(newCountry.trim())) {
       toast({
-        title: "Error",
+        title: 'Something went wrong',
         description: "Country already exists in the matrix",
         variant: "destructive",
       });
@@ -350,8 +349,7 @@ const MatrixView = () => {
     setShowAddCountryDialog(false);
 
     toast({
-      title: "Success",
-      description: `Added ${newCountry.trim()} to the matrix`,
+      title: `Added ${newCountry.trim()} to the matrix`,
     });
   };
 
@@ -420,8 +418,7 @@ const MatrixView = () => {
     ]);
 
     toast({
-      title: "Success",
-      description: "Matrix exported to CSV",
+      title: "Matrix exported to CSV",
     });
   };
 

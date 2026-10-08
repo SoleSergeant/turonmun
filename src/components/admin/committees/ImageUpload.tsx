@@ -172,8 +172,8 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
     } catch (error: any) {
       console.error('Error removing image:', error);
       toast({
-        title: "Error",
-        description: "Failed to remove image from storage",
+        title: 'Could not remove image from storage',
+        description: error?.message,
         variant: "destructive",
       });
     }

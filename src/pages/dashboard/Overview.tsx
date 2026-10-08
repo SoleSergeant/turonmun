@@ -17,6 +17,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import type { Tables } from '@/integrations/supabase/types';
 import { useContent, useFill, rich } from '@/content/store';
+import CheckInPass from '@/components/dashboard/CheckInPass';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -216,6 +217,18 @@ function Overview() {
               Arrived at {new Date((application as any).checked_in_at).toLocaleString()}
             </p>
           </div>
+        </motion.div>
+      )}
+
+      {/* Check-in pass: accepted, seated, not yet arrived */}
+      {application && status === 'approved' && application.assigned_committee_id && !(application as any).checked_in_at && (
+        <motion.div variants={itemVariants}>
+          <CheckInPass
+            kind="delegate"
+            id={application.id}
+            name={displayName}
+            detail={[committee?.name, assignment?.country_name || assignment?.country].filter(Boolean).join(' · ')}
+          />
         </motion.div>
       )}
 

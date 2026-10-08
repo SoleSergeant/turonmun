@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import ForgotPasswordLink from '@/components/admin/ForgotPasswordLink';
 import { useNavigate } from 'react-router-dom';
 import { Shield } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
@@ -60,7 +61,7 @@ const AdminLogin = () => {
     if (!username || !password) {
       toast({
         title: "Missing Fields",
-        description: "Please enter both username and password",
+        description: "Please enter your email and password",
         variant: "destructive",
       });
       return;
@@ -127,11 +128,12 @@ const AdminLogin = () => {
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
             <label htmlFor="username" className="block text-sm font-medium text-neutral-700 mb-1">
-              Email or Username
+              Email
             </label>
             <input
               id="username"
-              type="text"
+              type="email"
+              autoComplete="email"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               className="w-full px-4 py-2 border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-diplomatic-500"
@@ -141,9 +143,12 @@ const AdminLogin = () => {
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-neutral-700 mb-1">
-              Password
-            </label>
+            <div className="mb-1 flex items-center justify-between">
+              <label htmlFor="password" className="block text-sm font-medium text-neutral-700">
+                Password
+              </label>
+              <ForgotPasswordLink email={username} subdomain="admin" />
+            </div>
             <input
               id="password"
               type="password"

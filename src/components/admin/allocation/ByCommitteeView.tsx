@@ -68,7 +68,7 @@ const ByCommitteeView = () => {
       const custom = (matrixCountries || []).map((m: any) => m.country_name).filter(Boolean);
       setCountryOptions(Array.from(new Set([...COMMON_COUNTRIES, ...custom])).sort());
     } catch (err: any) {
-      toast({ title: 'Error', description: err.message || 'Failed to load allocation data', variant: 'destructive' });
+      toast({ title: 'Something went wrong', description: err.message || 'Failed to load allocation data', variant: 'destructive' });
     } finally {
       setLoading(false);
     }
@@ -100,7 +100,7 @@ const ByCommitteeView = () => {
       setAssignments(prev => [...prev, row as Assignment]);
       toast({ title: 'Assigned', description: `${delegateName(delegateId)} → ${label}` });
     } catch (err: any) {
-      toast({ title: 'Error', description: err.message || 'Failed to assign', variant: 'destructive' });
+      toast({ title: 'Something went wrong', description: err.message || 'Failed to assign', variant: 'destructive' });
     }
   };
 
@@ -110,7 +110,7 @@ const ByCommitteeView = () => {
       setAssignments(prev => prev.filter(a => a.id !== assignment.id));
       toast({ title: 'Unassigned' });
     } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' });
+      toast({ title: 'Something went wrong', description: err.message, variant: 'destructive' });
     }
   };
 
@@ -132,7 +132,7 @@ const ByCommitteeView = () => {
       setAssignments(prev => prev.map(a => a.id === assignment.id ? { ...a, country: label } : a));
       toast({ title: 'Country updated', description: label });
     } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' });
+      toast({ title: 'Something went wrong', description: err.message, variant: 'destructive' });
     }
   };
 

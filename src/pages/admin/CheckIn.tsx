@@ -6,8 +6,11 @@ import { getCurrentSeason, inSeason } from '@/lib/season';
 import { useToast } from '@/hooks/use-toast';
 import {
   Search, CheckCircle2, AlertTriangle, Undo2,
-  Users, Download, Loader2, Sparkles, X, Shield,
+  Users, Download, Loader2, Sparkles, X, Shield, QrCode,
 } from 'lucide-react';
+import { confirmAction } from '@/components/admin/ConfirmDialog';
+import QrScanDialog from '@/components/admin/QrScanDialog';
+import { parseCheckInCode } from '@/lib/checkInCode';
 
 type PersonKind = 'delegate' | 'chair';
 
@@ -42,9 +45,11 @@ const CheckIn = () => {
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<Person | null>(null);
   const [confirming, setConfirming] = useState(false);
+  const [scanning, setScanning] = useState(false);
 
-  const fetchAll = useCallback(async () => {
-    setLoading(true);
+  // quiet = background refresh: no spinner, no error toast.
+  const fetchAll = useCallback(async (quiet = false) => {
+    if (!quiet) setLoading(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
       const { data: admin } = await supabase.from('admin_users').select('id').eq('email', user?.email).single();
@@ -96,13 +101,22 @@ const CheckIn = () => {
       setCommittees((comms as any) || []);
       setAssignments((asgs as any) || []);
     } catch (err: any) {
-      toast({ title: 'Error loading check-in list', description: err.message, variant: 'destructive' });
+      if (!quiet) toast({ title: 'Error loading check-in list', description: err.message, variant: 'destructive' });
     } finally {
-      setLoading(false);
+      if (!quiet) setLoading(false);
     }
   }, [toast]);
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
+
+  // Several desks check people in at once: refresh quietly every 20 s
+  // while the tab is visible, so everyone sees the same list.
+  useEffect(() => {
+    const id = setInterval(() => {
+      if (document.visibilityState === 'visible') fetchAll(true);
+    }, 20_000);
+    return () => clearInterval(id);
+  }, [fetchAll]);
 
   const committeeName = (id: string | null | undefined) =>
     committees.find(c => c.id === id)?.name || 'Unassigned';
@@ -139,16 +153,30 @@ const CheckIn = () => {
   }, [people, search, hideArrived, assignments, committees]);
 
   // Goes through set_check_in() (migration 036) so the registration desk
-  // doesn't need UPDATE rights on whole tables. Falls back to a direct update
-  // until that migration has been applied.
+  // doesn't need UPDATE rights on whole tables.
   const setCheckIn = async (p: Person, checked: boolean) => {
     const { error } = await (supabase.rpc as any)('set_check_in', { p_kind: p.kind === 'delegate' ? 'delegate' : 'chair', p_id: p.id, p_checked: checked });
-    if (!error) return;
-    if (error.code !== 'PGRST202') throw error;
-    const { error: updErr } = await (supabase.from(p.kind === 'delegate' ? 'applications' : 'admin_users') as any)
-      .update({ checked_in_at: checked ? new Date().toISOString() : null, checked_in_by: checked ? adminId : null })
-      .eq('id', p.id);
-    if (updErr) throw updErr;
+    if (error) throw error;
+  };
+
+  const onScan = (text: string) => {
+    setScanning(false);
+    const code = parseCheckInCode(text);
+    if (!code) {
+      toast({ title: 'Not a TuronMUN code', description: 'Ask them to open their dashboard, or search by name.', variant: 'destructive' });
+      return;
+    }
+    const person = people.find(p => p.kind === code.kind && p.id === code.id);
+    if (!person) {
+      toast({
+        title: 'Not on the check-in list',
+        description: 'Only accepted delegates with a seat (and chairs with a committee) can check in. Search by name to double-check.',
+        variant: 'destructive',
+      });
+      return;
+    }
+    setSearch('');
+    setSelected(person);
   };
 
   const confirmCheckIn = async () => {
@@ -161,21 +189,21 @@ const CheckIn = () => {
       toast({ title: 'Checked in', description: `${selected.full_name} — hand them their badge.` });
       setSelected(null);
     } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' });
+      toast({ title: 'Something went wrong', description: err.message, variant: 'destructive' });
     } finally {
       setConfirming(false);
     }
   };
 
   const undoCheckIn = async (p: Person) => {
-    if (!confirm(`Undo check-in for ${p.full_name}?`)) return;
+    if (!(await confirmAction(`Undo check-in for ${p.full_name}?`, { title: 'Undo check-in', confirmLabel: 'Undo check-in', danger: true }))) return;
     try {
       await setCheckIn(p, false);
       setPeople(prev => prev.map(x => x.id === p.id ? { ...x, checked_in_at: null, checked_in_by: null } : x));
       toast({ title: 'Check-in reverted', description: p.full_name });
       setSelected(null);
     } catch (err: any) {
-      toast({ title: 'Error', description: err.message, variant: 'destructive' });
+      toast({ title: 'Something went wrong', description: err.message, variant: 'destructive' });
     }
   };
 
@@ -216,11 +244,15 @@ const CheckIn = () => {
             <h2 className="text-2xl font-semibold text-gray-900 flex items-center gap-2">
               <Sparkles className="h-6 w-6 text-amber-500" /> Event Check-in
             </h2>
-            <p className="text-gray-600 text-sm">Search a delegate or chair by name, then confirm to hand out their badge.</p>
+            <p className="text-gray-600 text-sm">Scan their QR code or search by name, then confirm to hand out their badge.</p>
           </div>
           <div className="flex items-center gap-2">
             <button
-              onClick={fetchAll}
+              onClick={() => setScanning(true)}
+              className="flex items-center gap-2 px-3 py-2 bg-diplomatic-600 text-white rounded-lg text-sm font-medium hover:bg-diplomatic-700"
+            ><QrCode className="h-4 w-4" /> Scan QR</button>
+            <button
+              onClick={() => fetchAll()}
               className="px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm hover:bg-gray-50"
             >Refresh</button>
             <button
@@ -424,6 +456,7 @@ const CheckIn = () => {
           </div>
         )}
       </div>
+      {scanning && <QrScanDialog onResult={onScan} onClose={() => setScanning(false)} />}
     </AdminLayout>
   );
 };

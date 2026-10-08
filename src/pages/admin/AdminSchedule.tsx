@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { PlusCircle, Edit, Trash2, Clock, MapPin, Calendar } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Checkbox } from '@/components/ui/checkbox';
+import { confirmAction } from '@/components/admin/ConfirmDialog';
 
 interface ScheduleEvent {
   id: string;
@@ -62,7 +63,7 @@ const AdminSchedule = () => {
       }
     } catch (error) {
       console.error('Error fetching schedule:', error);
-      toast({ title: 'Error', description: 'Failed to load schedule', variant: 'destructive' });
+      toast({ title: 'Could not load schedule', description: error?.message, variant: 'destructive' });
     } finally {
       setLoading(false);
     }
@@ -86,7 +87,7 @@ const AdminSchedule = () => {
       toast({ title: 'Date updated', description: 'All events moved to the new date.' });
     } catch (error) {
       console.error('Error updating conference date:', error);
-      toast({ title: 'Error', description: 'Failed to update conference date', variant: 'destructive' });
+      toast({ title: 'Could not update conference date', description: error?.message, variant: 'destructive' });
     } finally {
       setIsUpdatingDate(false);
     }
@@ -121,7 +122,7 @@ const AdminSchedule = () => {
   };
 
   const handleDeleteEvent = async (id: string) => {
-    if (!confirm('Delete this event?')) return;
+    if (!(await confirmAction('Delete this event?', { title: 'Delete event', danger: true }))) return;
     try {
       const { error } = await supabase.from('schedule_events').delete().eq('id', id);
       if (error) throw error;
@@ -129,7 +130,7 @@ const AdminSchedule = () => {
       toast({ title: 'Deleted', description: 'Event removed.' });
     } catch (error) {
       console.error('Error deleting event:', error);
-      toast({ title: 'Error', description: 'Failed to delete event', variant: 'destructive' });
+      toast({ title: 'Could not delete event', description: error?.message, variant: 'destructive' });
     }
   };
 
@@ -173,7 +174,7 @@ const AdminSchedule = () => {
       fetchSchedule();
     } catch (error) {
       console.error('Error saving event:', error);
-      toast({ title: 'Error', description: 'Failed to save event', variant: 'destructive' });
+      toast({ title: 'Could not save event', description: error?.message, variant: 'destructive' });
     } finally {
       setIsSubmittingEvent(false);
     }

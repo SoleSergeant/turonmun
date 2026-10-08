@@ -19,6 +19,7 @@ export type EmailKind =
   | 'seat_assigned'
   | 'payment_reminder'
   | 'message_reply'
+  | 'debate_decision'
   | 'custom';
 
 const BATCH = 100;
@@ -156,6 +157,27 @@ export const templates = {
       { label: 'Open my dashboard', href: `${SITE_URL}/dashboard` },
     ),
   }),
+
+  debateDecision: (p: { to: string; name: string; status: 'approved' | 'waitlisted' | 'rejected'; event: string }): OutgoingEmail => {
+    const lines = {
+      approved: `Congratulations! Your registration for ${p.event} has been accepted. We will send the schedule and round details closer to the date.`,
+      waitlisted: `Thank you for registering for ${p.event}. All places are currently taken, so you are on the waiting list. We will email you as soon as a place opens.`,
+      rejected: `Thank you for registering for ${p.event}. Unfortunately we can't offer you a place this time. We hope to see you at a future round.`,
+    };
+    const subjects = {
+      approved: `You're in: ${p.event}`,
+      waitlisted: `${p.event}: you're on the waiting list`,
+      rejected: `Your ${p.event} registration`,
+    };
+    return {
+      to: p.to,
+      subject: subjects[p.status],
+      html: layout(
+        textToHtml(`Dear ${firstName(p.name)},\n\n${lines[p.status]}\n\nBest regards,\nThe ${p.event} team`),
+        { label: 'View my registration', href: `${SITE_URL}/debat/register` },
+      ),
+    };
+  },
 
   messageReply: (p: { to: string; name: string; originalSubject: string; reply: string }): OutgoingEmail => ({
     to: p.to,

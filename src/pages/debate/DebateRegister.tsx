@@ -29,6 +29,7 @@ export interface DebateRegistration {
   agreed_to_rules: boolean;
   status: 'pending' | 'approved' | 'waitlisted' | 'rejected';
   admin_notes: string | null;
+  decision_emailed_at?: string | null;
   created_at: string;
   updated_at: string;
 }

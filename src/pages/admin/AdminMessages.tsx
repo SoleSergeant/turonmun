@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { CheckCircle, Mail, Trash2, Reply, Loader2, CornerDownRight } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { sendEmails, templates } from '@/lib/email';
+import { confirmAction } from '@/components/admin/ConfirmDialog';
 
 interface Message {
   id: string;
@@ -55,7 +56,7 @@ const AdminMessages = () => {
       if (error) throw error;
       setMessages((data as Message[]) || []);
     } catch (error: any) {
-      toast({ title: 'Error', description: 'Failed to load messages', variant: 'destructive' });
+      toast({ title: 'Could not load messages', description: error?.message, variant: 'destructive' });
     } finally {
       setLoading(false);
     }
@@ -67,17 +68,17 @@ const AdminMessages = () => {
   const markAsRead = async (id: string) => {
     const { error } = await (supabase.from('contact_messages') as any).update({ is_read: true }).eq('id', id);
     if (error) {
-      toast({ title: 'Error', description: 'Failed to mark message as read', variant: 'destructive' });
+      toast({ title: 'Could not mark message as read', description: error?.message, variant: 'destructive' });
       return;
     }
     patch(id, { is_read: true });
   };
 
   const deleteMessage = async (message: Message) => {
-    if (!confirm(`Delete the message from ${message.full_name}? This cannot be undone.`)) return;
+    if (!(await confirmAction(`Delete the message from ${message.full_name}? This cannot be undone.`, { title: 'Delete message', danger: true }))) return;
     const { error } = await supabase.from('contact_messages').delete().eq('id', message.id);
     if (error) {
-      toast({ title: 'Error', description: 'Failed to delete message', variant: 'destructive' });
+      toast({ title: 'Could not delete message', description: error?.message, variant: 'destructive' });
       return;
     }
     setMessages(prev => prev.filter(m => m.id !== message.id));

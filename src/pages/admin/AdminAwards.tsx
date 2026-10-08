@@ -45,7 +45,7 @@ const AdminAwards = () => {
   const updateSettings = async (patch: { locked?: boolean; published?: boolean }) => {
     const { error } = await (supabase.from('award_settings' as any) as any)
       .update({ ...patch, updated_at: new Date().toISOString() }).eq('id', 1);
-    if (error) { toast({ title: 'Error', description: error.message, variant: 'destructive' }); return; }
+    if (error) { toast({ title: 'Something went wrong', description: error.message, variant: 'destructive' }); return; }
     if (patch.locked !== undefined) setLocked(patch.locked);
     if (patch.published !== undefined) setPublished(patch.published);
     toast({ title: 'Updated' });

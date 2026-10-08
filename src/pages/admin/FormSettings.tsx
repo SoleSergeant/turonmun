@@ -28,6 +28,8 @@ import CommitteePreferencesStep from '@/components/registration/CommitteePrefere
 import EssayStep from '@/components/registration/EssayStep';
 import AdditionalInfoStep from '@/components/registration/AdditionalInfoStep';
 import RegistrationSteps from '@/components/registration/RegistrationSteps';
+import { confirmAction } from '@/components/admin/ConfirmDialog';
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
 const uuid = () => Math.random().toString(36).slice(2, 10);
@@ -80,8 +82,8 @@ const CustomQuestionsEditorStep: React.FC<{
 
   const cancelEdit = () => { setEditingId(null); setEditDraft(null); };
 
-  const deleteQ = (id: string) => {
-    if (!window.confirm('Delete this question?')) return;
+  const deleteQ = async (id: string) => {
+    if (!(await confirmAction('Delete this question?', { title: 'Delete question', danger: true }))) return;
     onUpdate(questions.filter(q => q.id !== id));
   };
 
@@ -334,8 +336,8 @@ const FormBuilderSection: React.FC<{
   const toggleVisible = (id: string) =>
     onUpdate(questions.map(q => q.id === id ? { ...q, visible: !q.visible } : q));
 
-  const deleteQ = (id: string) => {
-    if (!window.confirm('Delete this question?')) return;
+  const deleteQ = async (id: string) => {
+    if (!(await confirmAction('Delete this question?', { title: 'Delete question', danger: true }))) return;
     onUpdate(questions.filter(q => q.id !== id));
   };
 
@@ -794,6 +796,15 @@ const FormSettingsPage = () => {
   const set = (field: keyof FormSettings, value: any) =>
     setDraft(prev => prev ? { ...prev, [field]: value } : prev);
 
+  const dirty = !!draft && !!settings[tab] && JSON.stringify(draft) !== JSON.stringify(settings[tab]);
+  useUnsavedChanges(dirty);
+
+  const switchTab = async (t: typeof tab) => {
+    if (t === tab) return;
+    if (dirty && !(await confirmAction(`You have unsaved changes to the ${tab} form. Discard them?`, { title: 'Unsaved changes', confirmLabel: 'Discard changes', danger: true }))) return;
+    setTab(t);
+  };
+
   // ── Save ───────────────────────────────────────────────────────────────────
   const handleSave = async () => {
     if (!draft) return;
@@ -903,7 +914,7 @@ const FormSettingsPage = () => {
         {/* Tabs */}
         <div className="flex gap-2">
           {(['delegate', 'chair', 'volunteer'] as const).map(t => (
-            <button key={t} onClick={() => setTab(t)}
+            <button key={t} onClick={() => switchTab(t)}
               className={`px-5 py-2 rounded-lg text-sm font-semibold transition-colors ${tab === t ? 'bg-blue-600 text-white shadow' : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'}`}>
               {t === 'delegate' ? 'Delegate Registration' : t === 'chair' ? 'Chair Application' : 'Volunteer Application'}
             </button>

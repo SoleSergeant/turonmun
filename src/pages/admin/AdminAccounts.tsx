@@ -5,6 +5,7 @@ import AdminLayout from '@/components/admin/AdminLayout';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { ROLE_LABELS } from '@/hooks/useAdminRole';
+import { confirmAction } from '@/components/admin/ConfirmDialog';
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
@@ -111,7 +112,7 @@ const AdminAccounts = () => {
   };
 
   const remove = async (account: Account) => {
-    if (!confirm(`Remove ${account.full_name || account.email}'s admin access? Their login stays, but they lose the admin panel.`)) return;
+    if (!(await confirmAction(`Remove ${account.full_name || account.email}'s admin access? Their login stays, but they lose the admin panel.`, { title: 'Remove admin access', confirmLabel: 'Remove access', danger: true }))) return;
     const { error } = await supabase.from('admin_users').delete().eq('id', account.id);
     if (error) {
       toast({ title: 'Could not remove', description: error.message, variant: 'destructive' });

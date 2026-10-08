@@ -35,6 +35,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useAdminRole } from '@/hooks/useAdminRole';
+import { confirmAction } from '@/components/admin/ConfirmDialog';
 
 interface Application {
   id: string;
@@ -182,8 +183,8 @@ const AdminApplications = () => {
     } catch (error: any) {
       console.error('Error in fetchApplications:', error);
       toast({
-        title: "Error",
-        description: error.message || "Failed to load applications. Please check your connection and try again.",
+        title: 'Could not load applications. Please check your connection and try again.',
+        description: error.message,
         variant: "destructive",
       });
       // Keep what's already on screen after a failed refresh.
@@ -256,8 +257,8 @@ const AdminApplications = () => {
     } catch (error) {
       console.error('Error updating application status:', error);
       toast({
-        title: "Error",
-        description: "Failed to update application status",
+        title: 'Could not update application status',
+        description: error?.message,
         variant: "destructive",
       });
     }
@@ -372,7 +373,7 @@ const AdminApplications = () => {
 
   const bulkUpdate = async (fields: Record<string, string>, label: string) => {
     const ids = Array.from(selected);
-    if (!confirm(`${label}: apply to ${ids.length} application${ids.length === 1 ? '' : 's'}?`)) return;
+    if (!(await confirmAction(`${label}: apply to ${ids.length} application${ids.length === 1 ? '' : 's'}?`, { title: 'Bulk update', confirmLabel: 'Apply' }))) return;
     setBulkBusy(true);
     try {
       const { error } = await (supabase.from('applications') as any)

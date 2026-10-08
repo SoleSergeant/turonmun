@@ -3,6 +3,7 @@ import {
   X, Mail, MessageSquare, MapPin, School, Cake, FileText,
   Heart, CheckCircle, XCircle, Clock, User, Wallet,
 } from 'lucide-react';
+import { confirmAction } from '@/components/admin/ConfirmDialog';
 
 export interface VolunteerApplication {
   id: string;
@@ -244,7 +245,7 @@ const VolunteerApplicationModal: React.FC<Props> = ({
                     type="button"
                     disabled={busy}
                     onClick={async () => {
-                      if (!confirm(`Permanently delete ${application.full_name}'s volunteer application?`)) return;
+                      if (!(await confirmAction(`Permanently delete ${application.full_name}'s volunteer application?`, { title: 'Delete application', danger: true }))) return;
                       setBusy(true);
                       try { await onDelete(application.id); } finally { setBusy(false); }
                     }}

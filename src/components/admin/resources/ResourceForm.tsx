@@ -121,8 +121,7 @@ const ResourceForm: React.FC<ResourceFormProps> = ({
         if (error) throw error;
 
         toast({
-          title: "Success",
-          description: "Resource updated successfully",
+          title: "Resource updated",
         });
       } else {
         // Create
@@ -133,8 +132,7 @@ const ResourceForm: React.FC<ResourceFormProps> = ({
         if (error) throw error;
 
         toast({
-          title: "Success",
-          description: "Resource created successfully",
+          title: "Resource created",
         });
       }
 
@@ -144,8 +142,8 @@ const ResourceForm: React.FC<ResourceFormProps> = ({
     } catch (error: any) {
       console.error('Error saving resource:', error);
       toast({
-        title: "Error",
-        description: error.message || "Failed to save resource",
+        title: 'Could not save resource',
+        description: error.message,
         variant: "destructive",
       });
     } finally {
