@@ -95,9 +95,9 @@ const AdminMessages = () => {
       );
 
       const { data: { user } } = await supabase.auth.getUser();
-      const { data: admin } = await supabase.from('admin_users').select('id').eq('email', user?.email ?? '').maybeSingle();
+      const { data: admin } = await supabase.from('admin_users').select('id').eq('email', (user?.email ?? '').toLowerCase()).maybeSingle();
       const respondedAt = new Date().toISOString();
-      await (supabase.from('contact_messages') as any)
+      const { error: saveErr } = await (supabase.from('contact_messages') as any)
         .update({
           is_read: true,
           responded_at: respondedAt,
@@ -106,10 +106,15 @@ const AdminMessages = () => {
         })
         .eq('id', message.id);
 
-      patch(message.id, { is_read: true, responded_at: respondedAt, response_message: reply });
       setReplyingTo(null);
       setReplyText('');
-      toast({ title: 'Reply sent', description: `Emailed ${message.email}` });
+      if (saveErr) {
+        // The email went out; only the bookkeeping failed. Say so, so nobody replies twice.
+        toast({ title: 'Reply emailed, but not marked as answered', description: `${saveErr.message}. Don't send it again.`, variant: 'destructive' });
+      } else {
+        patch(message.id, { is_read: true, responded_at: respondedAt, response_message: reply });
+        toast({ title: 'Reply sent', description: `Emailed ${message.email}` });
+      }
     } catch (err: any) {
       toast({ title: 'Reply failed', description: err.message, variant: 'destructive' });
     } finally {

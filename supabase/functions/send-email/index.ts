@@ -1,8 +1,9 @@
 // send-email — sends admin-panel email through Resend.
 //
 // Deploy:   supabase functions deploy send-email
-// Secrets:  supabase secrets set RESEND_API_KEY=re_... EMAIL_FROM="TuronMUN <noreply@turonmun.uz>"
-//           (optional) EMAIL_REPLY_TO=info@turonmun.uz
+// Secrets:  supabase secrets set RESEND_API_KEY=re_... EMAIL_FROM="TuronMUN <noreply@turonmun.com>"
+//           (optional) EMAIL_REPLY_TO=info@turonmun.com
+// The sending domain must be verified in Resend.
 //
 // Only active SG / Academics / Logistics accounts may call it. Each recipient
 // gets their own copy (nobody sees the other addresses), and every call is
@@ -50,7 +51,7 @@ Deno.serve(async (req) => {
   const { data: admin } = await service
     .from('admin_users')
     .select('full_name, role, is_active')
-    .eq('email', user.email)
+    .eq('email', user.email.toLowerCase())
     .maybeSingle();
   if (!admin?.is_active || !ALLOWED_ROLES.includes(admin.role)) {
     return json({ error: 'Your role cannot send email' }, 403);
@@ -62,8 +63,11 @@ Deno.serve(async (req) => {
   } catch {
     return json({ error: 'Invalid JSON' }, 400);
   }
-  const messages = (body.messages || []).filter(m => isEmail(m?.to) && m.subject && m.html);
-  if (messages.length === 0) return json({ error: 'No valid messages' }, 400);
+  const all = body.messages || [];
+  const messages = all.filter(m => isEmail(m?.to) && m.subject && m.html);
+  // Reported back so the panel only marks people who were actually emailed.
+  const skipped = all.filter(m => !messages.includes(m)).map(m => m?.to ?? '');
+  if (messages.length === 0) return json({ error: 'No valid email addresses', skipped }, 400);
   if (messages.length > MAX_PER_CALL) return json({ error: `At most ${MAX_PER_CALL} messages per call` }, 400);
 
   const replyTo = Deno.env.get('EMAIL_REPLY_TO');
@@ -94,5 +98,5 @@ Deno.serve(async (req) => {
     details: { kind, recipients: messages.map(m => m.to), subject: messages[0].subject },
   });
 
-  return json({ sent: messages.length });
+  return json({ sent: messages.length, delivered: messages.map(m => m.to), skipped });
 });

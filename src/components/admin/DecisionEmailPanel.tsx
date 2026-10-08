@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Mail, Copy, Loader2, CheckCircle2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { sendEmails, templates } from '@/lib/email';
+import { sendEmails, templates, partialResult, wasDelivered, type SendResult } from '@/lib/email';
 import { isChairApplication } from '@/lib/applications';
 
 interface DecisionApp {
@@ -39,32 +39,44 @@ const DecisionEmailPanel: React.FC<{ applications: DecisionApp[]; onSent: () => 
     if (!confirm(`Send the ${label} email to ${list.length} delegate${list.length === 1 ? '' : 's'}?`)) return;
 
     setBusy(kind);
+    const messages = list.map(a =>
+      kind === 'approved'
+        ? templates.decisionAccepted({ to: a.email, name: a.full_name })
+        : templates.decisionRejected({ to: a.email, name: a.full_name }),
+    );
+    // Even when a send fails partway, record who did get it so nobody is
+    // emailed twice on retry.
+    let result: SendResult;
+    let failure: string | null = null;
     try {
-      const messages = list.map(a =>
-        kind === 'approved'
-          ? templates.decisionAccepted({ to: a.email, name: a.full_name })
-          : templates.decisionRejected({ to: a.email, name: a.full_name }),
-      );
-      const sent = await sendEmails(messages, kind === 'approved' ? 'decision_accepted' : 'decision_rejected');
+      result = await sendEmails(messages, kind === 'approved' ? 'decision_accepted' : 'decision_rejected');
+    } catch (err: any) {
+      result = partialResult(err);
+      failure = err.message;
+    }
 
+    const ids = list.filter(a => wasDelivered(result, a.email)).map(a => a.id);
+    let recordError: string | null = null;
+    if (ids.length) {
       const { error } = await (supabase.from('applications') as any)
         .update({ decision_emailed_at: new Date().toISOString() })
-        .in('id', list.slice(0, sent).map(a => a.id));
-      if (error) {
-        toast({
-          title: `Sent ${sent} email${sent === 1 ? '' : 's'}`,
-          description: 'Could not record the send (has migration 038 been applied?). These people may be emailed again.',
-          variant: 'destructive',
-        });
-      } else {
-        toast({ title: `Sent ${sent} ${label} email${sent === 1 ? '' : 's'}` });
-      }
-      onSent();
-    } catch (err: any) {
-      toast({ title: 'Email failed', description: err.message, variant: 'destructive' });
-    } finally {
-      setBusy(null);
+        .in('id', ids);
+      if (error) recordError = error.message;
     }
+
+    const sentLine = `${ids.length} ${label} email${ids.length === 1 ? '' : 's'} sent`;
+    if (failure) {
+      toast({ title: 'Email stopped', description: `${failure}. ${sentLine} and recorded; try again for the rest.`, variant: 'destructive' });
+    } else if (recordError) {
+      toast({ title: sentLine, description: `Could not record the send (${recordError}). These people may be emailed again.`, variant: 'destructive' });
+    } else {
+      toast({
+        title: sentLine,
+        description: result.skipped.length ? `Skipped ${result.skipped.length} invalid address${result.skipped.length === 1 ? '' : 'es'}: ${result.skipped.join(', ')}` : undefined,
+      });
+    }
+    onSent();
+    setBusy(null);
   };
 
   const copy = async (kind: 'approved' | 'rejected') => {

@@ -73,6 +73,12 @@ const DebateRegistrations = () => {
     );
   }, [rows, search, statusFilter, sideFilter]);
 
+  // Bulk actions must never reach rows the filter hides.
+  useEffect(() => {
+    const visible = new Set(shown.map(r => r.id));
+    setSelected(prev => ([...prev].every(id => visible.has(id)) ? prev : new Set([...prev].filter(id => visible.has(id)))));
+  }, [shown]);
+
   const patchLocal = (ids: string[], fields: Partial<DebateRegistration>) =>
     setRows(prev => prev.map(r => (ids.includes(r.id) ? { ...r, ...fields } : r)));
 
@@ -118,8 +124,11 @@ const DebateRegistrations = () => {
     const recipients = rows.filter(r => selected.has(r.id));
     setEmailBusy(true);
     try {
-      const sent = await sendEmails(recipients.map(r => templates.custom({ to: r.email, subject, body })), 'custom');
-      toast({ title: `Email sent to ${sent}` });
+      const { sent, skipped } = await sendEmails(recipients.map(r => templates.custom({ to: r.email, subject, body })), 'custom');
+      toast({
+        title: `Email sent to ${sent}`,
+        description: skipped.length ? `Skipped invalid: ${skipped.join(', ')}` : undefined,
+      });
       setEmailOpen(false);
     } catch (err: any) {
       toast({ title: 'Email failed', description: err.message, variant: 'destructive' });

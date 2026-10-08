@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { Mail, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { sendEmails, templates } from '@/lib/email';
+import { sendEmails, templates, partialResult, wasDelivered, type SendResult } from '@/lib/email';
 
 interface PendingSeat {
   id: string;
@@ -52,21 +52,28 @@ const NotifySeatsButton: React.FC = () => {
     if (fresh.length === 0) return;
     if (!confirm(`Email ${fresh.length} delegate${fresh.length === 1 ? '' : 's'} their committee and country?`)) return;
     setBusy(true);
+    let result: SendResult;
+    let failure: string | null = null;
     try {
-      const sent = await sendEmails(
+      result = await sendEmails(
         fresh.map(p => templates.seatAssigned({ to: p.email, name: p.name, committee: p.committee, country: p.country })),
         'seat_assigned',
       );
-      await (supabase.from('country_assignments') as any)
-        .update({ notified_at: new Date().toISOString() })
-        .in('id', fresh.slice(0, sent).map(p => p.id));
-      toast({ title: `Sent ${sent} allocation email${sent === 1 ? '' : 's'}` });
-      await load();
     } catch (err: any) {
-      toast({ title: 'Email failed', description: err.message, variant: 'destructive' });
-    } finally {
-      setBusy(false);
+      result = partialResult(err);
+      failure = err.message;
     }
+    // Record everyone who got it, even after a partial failure.
+    const ids = fresh.filter(p => wasDelivered(result, p.email)).map(p => p.id);
+    const { error } = ids.length
+      ? await (supabase.from('country_assignments') as any).update({ notified_at: new Date().toISOString() }).in('id', ids)
+      : { error: null };
+    const sentLine = `Sent ${ids.length} allocation email${ids.length === 1 ? '' : 's'}`;
+    if (failure) toast({ title: 'Email stopped', description: `${failure}. ${sentLine.toLowerCase()}; try again for the rest.`, variant: 'destructive' });
+    else if (error) toast({ title: sentLine, description: `Could not record the send (${error.message}). These people may be emailed again.`, variant: 'destructive' });
+    else toast({ title: sentLine, description: result.skipped.length ? `Skipped invalid: ${result.skipped.join(', ')}` : undefined });
+    await load();
+    setBusy(false);
   };
 
   if (!available) return null;

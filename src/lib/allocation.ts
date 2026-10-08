@@ -93,8 +93,9 @@ export function checkSeat(opts: {
 
 const codeFor = (country: string) => (getCountryCode(country) || '').toUpperCase() || null;
 
-// PostgREST answers PGRST202 when the function doesn't exist yet.
-const missingFunction = (error: { code?: string } | null) => error?.code === 'PGRST202';
+// Seats are only ever written through the database functions from migration
+// 037, which enforce the seat rules (approved + paid, roster, capacity, no
+// double booking) on the server.
 
 export async function assignSeat(applicationId: string, committeeId: string, country: string): Promise<SeatAssignment> {
   const label = country.trim();
@@ -104,32 +105,13 @@ export async function assignSeat(applicationId: string, committeeId: string, cou
     p_country: label,
     p_country_code: codeFor(label),
   });
-  if (!error) return data as SeatAssignment;
-  if (!missingFunction(error)) throw error;
-
-  const { data: row, error: insErr } = await (supabase.from('country_assignments') as any)
-    .insert({
-      application_id: applicationId,
-      committee_id: committeeId,
-      country: label,
-      country_name: label,
-      country_code: codeFor(label),
-    })
-    .select()
-    .single();
-  if (insErr) throw insErr;
-  await (supabase.from('applications') as any).update({ assigned_committee_id: committeeId }).eq('id', applicationId);
-  return row as SeatAssignment;
+  if (error) throw error;
+  return data as SeatAssignment;
 }
 
 export async function unassignSeat(assignment: Pick<SeatAssignment, 'id' | 'application_id'>): Promise<void> {
   const { error } = await (supabase.rpc as any)('unassign_seat', { p_assignment_id: assignment.id });
-  if (!error) return;
-  if (!missingFunction(error)) throw error;
-
-  const { error: delErr } = await supabase.from('country_assignments').delete().eq('id', assignment.id);
-  if (delErr) throw delErr;
-  await (supabase.from('applications') as any).update({ assigned_committee_id: null }).eq('id', assignment.application_id);
+  if (error) throw error;
 }
 
 export async function changeSeatCountry(assignmentId: string, country: string): Promise<void> {
@@ -139,11 +121,5 @@ export async function changeSeatCountry(assignmentId: string, country: string): 
     p_country: label,
     p_country_code: codeFor(label),
   });
-  if (!error) return;
-  if (!missingFunction(error)) throw error;
-
-  const { error: updErr } = await (supabase.from('country_assignments') as any)
-    .update({ country: label, country_name: label, country_code: codeFor(label) })
-    .eq('id', assignmentId);
-  if (updErr) throw updErr;
+  if (error) throw error;
 }

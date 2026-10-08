@@ -32,7 +32,7 @@ run 037 again to add the unique indexes.
 
 ## 2. Email (Resend)
 
-1. Create a Resend account and verify the sending domain (e.g. `turonmun.uz`).
+1. Create a Resend account and verify the sending domain (e.g. `turonmun.com`).
 2. Deploy the function and set its secrets:
 
 ```bash
@@ -40,7 +40,7 @@ supabase functions deploy send-email
 ```
 
 ```bash
-supabase secrets set RESEND_API_KEY=re_xxx EMAIL_FROM="TuronMUN <noreply@turonmun.uz>" EMAIL_REPLY_TO=info@turonmun.uz
+supabase secrets set RESEND_API_KEY=re_xxx EMAIL_FROM="TuronMUN <noreply@turonmun.com>" EMAIL_REPLY_TO=info@turonmun.com
 ```
 
 Only active `sg`, `academics` and `logistics` accounts can send. Every send is
@@ -49,7 +49,7 @@ recorded in the activity log.
 Templates (acceptance, rejection, allocation, payment reminder, message reply)
 live in `src/lib/email.ts`; edit the wording there.
 
-Set `VITE_SITE_URL` in Vercel if the public site is not `https://turonmun.uz`;
+Set `VITE_SITE_URL` in Vercel if the public site is not `https://www.turonmun.com`;
 it is used for the buttons inside emails.
 
 ## 3. Starting the next season

@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { downloadCsv, datedFilename } from '@/lib/csv';
 import { getCurrentSeason, inSeason } from '@/lib/season';
 import { useToast } from '@/hooks/use-toast';
+import { useAdminRole } from '@/hooks/useAdminRole';
 import {
   Search, Filter, Download, RefreshCw, Heart, CheckCircle, XCircle, Clock,
   MessageSquare, Wallet, Eye, AlertCircle,
@@ -44,6 +45,7 @@ const csvRows = (rows: VolunteerApplication[]) => [
 
 const AdminVolunteers: React.FC = () => {
   const { toast } = useToast();
+  const { role } = useAdminRole();
   const [apps, setApps] = useState<VolunteerApplication[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -113,8 +115,11 @@ const AdminVolunteers: React.FC = () => {
   };
 
   const handleDelete = async (id: string) => {
-    const { error } = await (supabase.from('volunteer_applications') as any).delete().eq('id', id);
-    if (error) { toast({ title: 'Delete failed', description: error.message, variant: 'destructive' }); return; }
+    const { data, error } = await (supabase.from('volunteer_applications') as any).delete().eq('id', id).select('id');
+    if (error || !data?.length) {
+      toast({ title: 'Delete failed', description: error?.message || 'Only the Secretary-General can delete applications.', variant: 'destructive' });
+      return;
+    }
     setApps(prev => prev.filter(a => a.id !== id));
     setSelected(null);
     toast({ title: 'Application deleted' });
@@ -248,7 +253,7 @@ const AdminVolunteers: React.FC = () => {
           onClose={() => setSelected(null)}
           onStatusChange={handleStatusChange}
           onPaymentStatusChange={handlePaymentStatusChange}
-          onDelete={handleDelete}
+          onDelete={role === 'sg' ? handleDelete : undefined}
         />
       )}
     </AdminLayout>

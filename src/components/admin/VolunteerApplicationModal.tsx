@@ -29,7 +29,8 @@ interface Props {
   onClose: () => void;
   onStatusChange: (id: string, status: VolunteerApplication['status']) => Promise<void>;
   onPaymentStatusChange: (id: string, paymentStatus: VolunteerApplication['payment_status']) => Promise<void>;
-  onDelete: (id: string) => Promise<void>;
+  /** Omitted for roles that can't delete (only the SG can). */
+  onDelete?: (id: string) => Promise<void>;
 }
 
 const STATUSES: VolunteerApplication['status'][] = ['pending', 'approved', 'rejected', 'waitlisted', 'contacted'];
@@ -239,7 +240,7 @@ const VolunteerApplicationModal: React.FC<Props> = ({
                       {PAYMENT_STATUSES.map(s => <option key={s} value={s} className="capitalize">{s}</option>)}
                     </select>
                   </div>
-                  <button
+                  {onDelete && <button
                     type="button"
                     disabled={busy}
                     onClick={async () => {
@@ -250,7 +251,7 @@ const VolunteerApplicationModal: React.FC<Props> = ({
                     className="w-full px-4 py-2 rounded-lg border border-red-200 text-red-700 text-sm font-semibold hover:bg-red-50 transition-colors disabled:opacity-50"
                   >
                     Delete Application
-                  </button>
+                  </button>}
                 </div>
               </section>
             </div>

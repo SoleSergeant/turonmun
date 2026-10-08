@@ -135,9 +135,13 @@ const ChairManagement = () => {
 
   const handleRejectApp = async (appId: string) => {
     if (!confirm('Reject this chair application?')) return;
-    await (supabase.from('applications') as any)
-      .update({ status: 'rejected' })
+    const { error } = await (supabase.from('applications') as any)
+      .update({ status: 'rejected', reviewed_at: new Date().toISOString() })
       .eq('id', appId);
+    if (error) {
+      toast({ title: 'Could not reject', description: error.message, variant: 'destructive' });
+      return;
+    }
     fetchChairApps();
     toast({ title: 'Application rejected' });
   };
@@ -148,14 +152,33 @@ const ChairManagement = () => {
   const handleRevertApp = async (app: ChairApp) => {
     if (!confirm(`Revert ${app.full_name}'s decision back to pending?`)) return;
     try {
-      await (supabase.from('applications') as any)
+      const { error } = await (supabase.from('applications') as any)
         .update({ status: 'pending', reviewed_at: null })
         .eq('id', app.id);
+      if (error) throw error;
 
-      // If they were also added to admin_users (i.e. Accept & Assigned), deactivate that.
-      await (supabase.from('admin_users') as any)
-        .update({ is_active: false, committee_id: null })
-        .eq('email', app.email);
+      // If Accept & Assign made them a chair, undo that: deactivate the chair
+      // account (never a staff account with the same email) and take their
+      // name off the committee.
+      const { data: chairRows, error: findErr } = await (supabase.from('admin_users') as any)
+        .select('id, role, committee_id')
+        .eq('email', app.email.trim().toLowerCase())
+        .in('role', ['chair', 'co_chair']);
+      if (findErr) throw findErr;
+      for (const row of (chairRows || []) as { id: string; role: string; committee_id: string | null }[]) {
+        if (row.committee_id) {
+          const field = row.role === 'co_chair' ? 'co_chair' : 'chair';
+          const { error } = await (supabase.from('committees') as any)
+            .update({ [field]: null })
+            .eq('id', row.committee_id)
+            .eq(field, app.full_name);
+          if (error) throw error;
+        }
+        const { error } = await (supabase.from('admin_users') as any)
+          .update({ is_active: false, committee_id: null })
+          .eq('id', row.id);
+        if (error) throw error;
+      }
 
       await fetchChairApps();
       toast({ title: 'Reverted to pending', description: `${app.full_name} is back in the pending queue.` });
@@ -292,13 +315,13 @@ const ChairManagement = () => {
     try {
       let userId = '';
       let fullName = formData.full_name;
-      let email = formData.email;
+      let email = formData.email.trim().toLowerCase();
 
       if (addMode === 'existing') {
         if (!selectedExistingUser) throw new Error('Please search for and select an existing user.');
         userId = selectedExistingUser.id;
         fullName = selectedExistingUser.full_name;
-        email = selectedExistingUser.email;
+        email = selectedExistingUser.email.trim().toLowerCase();
       } else {
         // Create new user via secondary client (keeps admin session intact)
         const tempClient = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
@@ -336,7 +359,8 @@ const ChairManagement = () => {
       // Assign to committee if selected
       if (formData.committee_id) {
         const field = formData.role === 'chair' ? 'chair' : 'co_chair';
-        await supabase.from('committees').update({ [field]: fullName }).eq('id', formData.committee_id);
+        const { error: cErr } = await supabase.from('committees').update({ [field]: fullName }).eq('id', formData.committee_id);
+        if (cErr) throw new Error(`Account created, but the committee wasn't updated: ${cErr.message}`);
       }
 
       toast({
@@ -375,7 +399,7 @@ const ChairManagement = () => {
         .from('admin_users')
         .update({
           full_name: formData.full_name,
-          email: formData.email,
+          email: formData.email.trim().toLowerCase(),
           role: formData.role,
           committee_id: formData.committee_id || null,
         })
@@ -397,7 +421,8 @@ const ChairManagement = () => {
           if (oldCommittee.co_chair === selectedChair.full_name) updates.co_chair = null;
 
           if (Object.keys(updates).length > 0) {
-            await supabase.from('committees').update(updates).eq('id', selectedChair.committee_id);
+            const { error: oldErr } = await supabase.from('committees').update(updates).eq('id', selectedChair.committee_id);
+            if (oldErr) throw oldErr;
           }
         }
       }
@@ -405,10 +430,11 @@ const ChairManagement = () => {
       // Then assign to new committee
       if (formData.committee_id) {
         const updateField = formData.role === 'chair' ? 'chair' : 'co_chair';
-        await supabase
+        const { error: newErr } = await supabase
           .from('committees')
           .update({ [updateField]: formData.full_name })
           .eq('id', formData.committee_id);
+        if (newErr) throw newErr;
       }
 
       toast({
@@ -431,39 +457,33 @@ const ChairManagement = () => {
     }
   };
 
-  const handleDeleteChair = async (id: string, fullName: string) => {
-    if (!confirm('Are you sure you want to delete this chair? This action cannot be undone.')) return;
+  const handleDeleteChair = async (chair: Chair) => {
+    if (!confirm(`Remove ${chair.full_name} as ${chair.role === 'co_chair' ? 'co-chair' : 'chair'}? Their login stays, but they lose chair access.`)) return;
 
     try {
-      // 1. Remove from any committees
-      // We need to find committees where this person is assigned
-      const { data: committeeData } = await supabase
-        .from('committees')
-        .select('*')
-        .or(`chair.eq.${fullName},co_chair.eq.${fullName}`);
-
-      if (committeeData && committeeData.length > 0) {
-        for (const committee of committeeData) {
-          const updates: any = {};
-          if (committee.chair === fullName) updates.chair = null;
-          if (committee.co_chair === fullName) updates.co_chair = null;
-
-          await supabase.from('committees').update(updates).eq('id', committee.id);
-        }
+      // 1. Take their name off their own committee (matched by committee, not
+      //    just by name, so someone else with the same name is untouched).
+      if (chair.committee_id) {
+        const field = chair.role === 'co_chair' ? 'co_chair' : 'chair';
+        const { error: cErr } = await (supabase.from('committees') as any)
+          .update({ [field]: null })
+          .eq('id', chair.committee_id)
+          .eq(field, chair.full_name);
+        if (cErr) throw cErr;
       }
+      const id = chair.id;
 
       // 2. Delete from admin_users
-      const { error } = await supabase
+      const { data: removed, error } = await supabase
         .from('admin_users')
         .delete()
-        .eq('id', id);
+        .eq('id', id)
+        .select('id');
 
       if (error) throw error;
+      if (!removed?.length) throw new Error('Nothing was removed. You may not have permission.');
 
-      toast({
-        title: "Success",
-        description: "Chair deleted successfully (Auth account may still exist)",
-      });
+      toast({ title: 'Chair removed', description: `${chair.full_name} no longer has chair access.` });
 
       fetchData();
     } catch (error: any) {
@@ -795,7 +815,7 @@ const ChairManagement = () => {
                             <Edit className="h-4 w-4" />
                           </button>
                           <button
-                            onClick={() => handleDeleteChair(chair.id, chair.full_name)}
+                            onClick={() => handleDeleteChair(chair)}
                             className="p-1 text-red-600 hover:bg-red-100 rounded"
                             title="Delete"
                           >

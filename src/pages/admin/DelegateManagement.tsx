@@ -4,10 +4,11 @@ import { supabase } from '@/integrations/supabase/client';
 import { downloadCsv, datedFilename } from '@/lib/csv';
 import { getCurrentSeason, inSeason } from '@/lib/season';
 import { adminPath } from '@/lib/adminPath';
-import { sendEmails, templates } from '@/lib/email';
+import { sendEmails, templates, partialResult, wasDelivered, type SendResult } from '@/lib/email';
 import { isChairApplication } from '@/lib/applications';
 import { COMMON_COUNTRIES } from '@/data/countries';
 import { useToast } from '@/hooks/use-toast';
+import { useAdminRole } from '@/hooks/useAdminRole';
 import {
   Search,
   Filter,
@@ -47,7 +48,7 @@ interface Delegate {
   assigned_committee?: string;
   assigned_country?: string;
   application_status: 'pending' | 'accepted' | 'rejected' | 'waitlist' | 'more_info';
-  payment_status: 'pending' | 'paid' | 'overdue';
+  payment_status: 'pending' | 'paid' | 'overdue' | 'refunded';
   payment_amount: number | null;
   contacted: boolean;
   payment_reminded_at?: string | null;
@@ -61,6 +62,8 @@ interface Delegate {
 
 const DelegateManagement = () => {
   const { toast } = useToast();
+  const { role } = useAdminRole();
+  const canDelete = role === 'sg';
   const navigate = useNavigate();
   const [delegates, setDelegates] = useState<Delegate[]>([]);
   const [filteredDelegates, setFilteredDelegates] = useState<Delegate[]>([]);
@@ -94,10 +97,8 @@ const DelegateManagement = () => {
         .from('country_assignments') as any)
         .select('*, committees(name)');
 
-      // Chairs and delegates share the applications table; this section is for
-      // delegates only. Exclude chairs the same way the rest of the app detects
-      // them: the notes marker written at submit time is ground truth, the
-      // application_type column is a secondary signal.
+      // Chairs and delegates share the applications table; this page is for
+      // delegates only.
       const delegatesOnly = (data || []).filter((app: any) => !isChairApplication(app));
 
       // Map database records to Delegate interface
@@ -115,7 +116,7 @@ const DelegateManagement = () => {
           email: app.email,
           school: app.institution,
           grade: gradeMatch ? gradeMatch[1].trim() : 'N/A',
-          phone: app.phone || 'N/A',
+          phone: app.phone || '',
           committee_preference_1: app.committee_preference1,
           committee_preference_2: app.committee_preference2,
           committee_preference_3: app.committee_preference3,
@@ -132,7 +133,11 @@ const DelegateManagement = () => {
           registration_date: new Date(app.created_at || '').toLocaleDateString(),
           experience_level: app.experience === '6+' ? 'advanced' : app.experience === '3-5' ? 'intermediate' : 'beginner',
           dietary_requirements: app.dietary_restrictions || undefined,
-          emergency_contact: app.emergency_contact_relation || 'N/A'
+          emergency_contact: [
+            app.emergency_contact_name,
+            app.emergency_contact_phone,
+            app.emergency_contact_relation && `(${app.emergency_contact_relation})`,
+          ].filter(Boolean).join(' · '),
         };
       });
 
@@ -203,11 +208,14 @@ const DelegateManagement = () => {
   const sendEmail = async (subject: string, body: string) => {
     setEmailBusy(true);
     try {
-      const sent = await sendEmails(
+      const { sent, skipped } = await sendEmails(
         emailRecipients.map(d => templates.custom({ to: d.email, subject, body })),
         'custom',
       );
-      toast({ title: `Email sent to ${sent} delegate${sent === 1 ? '' : 's'}` });
+      toast({
+        title: `Email sent to ${sent} delegate${sent === 1 ? '' : 's'}`,
+        description: skipped.length ? `Skipped invalid: ${skipped.join(', ')}` : undefined,
+      });
       setShowEmailModal(false);
     } catch (err: any) {
       toast({ title: 'Email failed', description: err.message, variant: 'destructive' });
@@ -216,12 +224,13 @@ const DelegateManagement = () => {
     }
   };
 
-  // Payment reminders go to approved delegates who haven't paid. Without an
-  // explicit selection, people reminded in the last 3 days are skipped.
+  // Payment reminders go to approved delegates who haven't paid (refunded
+  // ones are done). Without an explicit selection, people reminded in the
+  // last 3 days are skipped.
   const REMIND_GAP_MS = 3 * 24 * 60 * 60 * 1000;
   const unpaidToRemind = (onlySelected: boolean) =>
     delegates.filter(d =>
-      d.payment_status !== 'paid' &&
+      d.payment_status !== 'paid' && d.payment_status !== 'refunded' &&
       (onlySelected
         ? selectedDelegates.includes(d.id)
         : !d.payment_reminded_at || Date.now() - new Date(d.payment_reminded_at).getTime() > REMIND_GAP_MS),
@@ -238,21 +247,28 @@ const DelegateManagement = () => {
     }
     if (!confirm(`Send a payment reminder to ${list.length} unpaid delegate${list.length === 1 ? '' : 's'}?`)) return;
     setEmailBusy(true);
+    let result: SendResult;
+    let failure: string | null = null;
     try {
-      const sent = await sendEmails(
+      result = await sendEmails(
         list.map(d => templates.paymentReminder({ to: d.email, name: d.full_name, amount: d.payment_amount })),
         'payment_reminder',
       );
-      const now = new Date().toISOString();
-      const ids = list.slice(0, sent).map(d => d.id);
-      await (supabase.from('applications') as any).update({ payment_reminded_at: now }).in('id', ids);
-      setDelegates(prev => prev.map(d => ids.includes(d.id) ? { ...d, payment_reminded_at: now } : d));
-      toast({ title: `Sent ${sent} payment reminder${sent === 1 ? '' : 's'}` });
     } catch (err: any) {
-      toast({ title: 'Reminders failed', description: err.message, variant: 'destructive' });
-    } finally {
-      setEmailBusy(false);
+      result = partialResult(err);
+      failure = err.message;
     }
+    // Record everyone who got it, even after a partial failure.
+    const now = new Date().toISOString();
+    const ids = list.filter(d => wasDelivered(result, d.email)).map(d => d.id);
+    if (ids.length) {
+      const { error } = await (supabase.from('applications') as any).update({ payment_reminded_at: now }).in('id', ids);
+      if (!error) setDelegates(prev => prev.map(d => ids.includes(d.id) ? { ...d, payment_reminded_at: now } : d));
+    }
+    const sentLine = `Sent ${ids.length} payment reminder${ids.length === 1 ? '' : 's'}`;
+    if (failure) toast({ title: 'Reminders stopped', description: `${failure}. ${sentLine.toLowerCase()}; try again for the rest.`, variant: 'destructive' });
+    else toast({ title: sentLine, description: result.skipped.length ? `Skipped invalid: ${result.skipped.join(', ')}` : undefined });
+    setEmailBusy(false);
   };
 
   const markSelectedPaid = async () => {
@@ -274,12 +290,15 @@ const DelegateManagement = () => {
     }
 
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('applications')
         .delete()
-        .eq('id', delegateId);
+        .eq('id', delegateId)
+        .select('id');
 
       if (error) throw error;
+      // RLS hides a refused delete (no error, nothing deleted).
+      if (!data?.length) throw new Error('Only the Secretary-General can delete delegates.');
 
       setDelegates(prev => prev.filter(d => d.id !== delegateId));
 
@@ -290,8 +309,8 @@ const DelegateManagement = () => {
     } catch (error: any) {
       console.error('Error deleting delegate:', error);
       toast({
-        title: 'Error',
-        description: 'Failed to delete delegate',
+        title: 'Could not delete delegate',
+        description: error.message,
         variant: 'destructive',
       });
     }
@@ -363,6 +382,9 @@ const DelegateManagement = () => {
     });
 
     setFilteredDelegates(filtered);
+    // Bulk actions must never reach rows the filter hides.
+    const visible = new Set(filtered.map(d => d.id));
+    setSelectedDelegates(prev => (prev.every(id => visible.has(id)) ? prev : prev.filter(id => visible.has(id))));
   }, [delegates, searchTerm, committeeFilter, paymentFilter]);
 
   const getStatusColor = (status: string) => {
@@ -379,6 +401,7 @@ const DelegateManagement = () => {
     switch (status) {
       case 'paid': return 'bg-green-100 text-green-800';
       case 'overdue': return 'bg-red-100 text-red-800';
+      case 'refunded': return 'bg-gray-100 text-gray-700';
       default: return 'bg-yellow-100 text-yellow-800';
     }
   };
@@ -543,6 +566,7 @@ const DelegateManagement = () => {
                     <option value="paid">Paid</option>
                     <option value="pending">Pending</option>
                     <option value="overdue">Overdue</option>
+                    <option value="refunded">Refunded</option>
                   </select>
                 </div>
               </div>
@@ -623,7 +647,7 @@ const DelegateManagement = () => {
                         <div>
                           <div className="text-sm font-medium text-gray-900">{delegate.full_name}</div>
                           <div className="text-sm text-gray-500">{delegate.email}</div>
-                          <div className="text-xs text-gray-400">{delegate.phone}</div>
+                          <div className="text-xs text-gray-400">{delegate.phone || '—'}</div>
                         </div>
                       </td>
                       <td className="px-4 py-4">
@@ -692,6 +716,7 @@ const DelegateManagement = () => {
                             <option value="pending">pending</option>
                             <option value="paid">paid</option>
                             <option value="overdue">overdue</option>
+                            <option value="refunded">refunded</option>
                           </select>
                         </div>
                       </td>
@@ -737,13 +762,15 @@ const DelegateManagement = () => {
                           >
                             <Edit className="h-4 w-4" />
                           </button>
-                          <button
-                            onClick={() => handleDeleteDelegate(delegate.id)}
-                            className="p-1 text-red-600 hover:bg-red-100 rounded"
-                            title="Delete"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
+                          {canDelete && (
+                            <button
+                              onClick={() => handleDeleteDelegate(delegate.id)}
+                              className="p-1 text-red-600 hover:bg-red-100 rounded"
+                              title="Delete"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          )}
                         </div>
                       </td>
                     </tr>
@@ -805,7 +832,7 @@ const DelegateManagement = () => {
                     </div>
                     <div>
                       <label className="text-sm font-medium text-gray-500">Phone</label>
-                      <p className="text-gray-900">{selectedDelegate.phone}</p>
+                      <p className="text-gray-900">{selectedDelegate.phone || '—'}</p>
                     </div>
                     <div>
                       <label className="text-sm font-medium text-gray-500">School</label>
@@ -848,7 +875,7 @@ const DelegateManagement = () => {
                   )}
                   <div>
                     <label className="text-sm font-medium text-gray-500">Emergency Contact</label>
-                    <p className="text-gray-900">{selectedDelegate.emergency_contact}</p>
+                    <p className="text-gray-900">{selectedDelegate.emergency_contact || 'Not given'}</p>
                   </div>
                 </div>
               </div>
@@ -965,6 +992,7 @@ const DelegateManagement = () => {
                           <option value="pending">Pending</option>
                           <option value="paid">Paid</option>
                           <option value="overdue">Overdue</option>
+                          <option value="refunded">Refunded</option>
                         </select>
                       </div>
                     </div>

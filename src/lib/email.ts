@@ -23,9 +23,31 @@ export type EmailKind =
 
 const BATCH = 100;
 
-/** Sends in batches of 100. Returns how many were sent before any failure. */
-export async function sendEmails(messages: OutgoingEmail[], kind: EmailKind): Promise<number> {
-  let sent = 0;
+export interface SendResult {
+  sent: number;
+  /** Lower-cased addresses that were actually emailed. */
+  delivered: Set<string>;
+  /** Addresses the server refused as invalid. */
+  skipped: string[];
+}
+
+export class EmailError extends Error {
+  constructor(message: string, public result: SendResult) {
+    super(message);
+  }
+}
+
+/** True when this address was emailed in `result`. */
+export const wasDelivered = (result: SendResult, email: string | null | undefined) =>
+  !!email && result.delivered.has(email.trim().toLowerCase());
+
+/**
+ * Sends in batches of 100. Throws EmailError when a batch fails; its
+ * `result` still lists who was emailed before the failure, so callers can
+ * record those people and not email them twice.
+ */
+export async function sendEmails(messages: OutgoingEmail[], kind: EmailKind): Promise<SendResult> {
+  const result: SendResult = { sent: 0, delivered: new Set(), skipped: [] };
   for (let i = 0; i < messages.length; i += BATCH) {
     const chunk = messages.slice(i, i + BATCH);
     const { data, error } = await supabase.functions.invoke('send-email', { body: { messages: chunk, kind } });
@@ -36,18 +58,23 @@ export async function sendEmails(messages: OutgoingEmail[], kind: EmailKind): Pr
         const ctx = (error as any).context;
         if (ctx?.json) detail = (await ctx.json())?.error || detail;
       } catch { /* keep generic message */ }
-      const err = new Error(sent > 0 ? `${detail} (${sent} sent before the error)` : detail);
-      (err as any).sent = sent;
-      throw err;
+      throw new EmailError(result.sent > 0 ? `${detail} (${result.sent} sent before the error)` : detail, result);
     }
-    sent += (data as any)?.sent ?? chunk.length;
+    const delivered: string[] = (data as any)?.delivered ?? chunk.map(m => m.to);
+    delivered.forEach(e => result.delivered.add(e.trim().toLowerCase()));
+    result.skipped.push(...((data as any)?.skipped ?? []));
+    result.sent += delivered.length;
   }
-  return sent;
+  return result;
 }
+
+/** The result carried by a failed send, or an empty one. */
+export const partialResult = (err: unknown): SendResult =>
+  err instanceof EmailError ? err.result : { sent: 0, delivered: new Set(), skipped: [] };
 
 // ── Templates ──────────────────────────────────────────────────────────
 
-const SITE_URL = (import.meta.env.VITE_SITE_URL as string | undefined) || 'https://turonmun.uz';
+const SITE_URL = (import.meta.env.VITE_SITE_URL as string | undefined) || 'https://www.turonmun.com';
 
 const escapeHtml = (s: string) =>
   s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');

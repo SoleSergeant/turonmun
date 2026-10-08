@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import ApplicationManagementModal from '@/components/admin/ApplicationManagementModal';
 import DecisionEmailPanel from '@/components/admin/DecisionEmailPanel';
@@ -121,18 +121,22 @@ const AdminApplications = () => {
 
     checkAuth();
 
-    // Set up a realtime subscription to applications
+    // Live updates: one quiet refresh per burst of changes (a bulk update
+    // fires one event per row).
+    let timer: ReturnType<typeof setTimeout> | undefined;
     const subscription = supabase
-      .channel('applications')
+      .channel('admin-applications')
       .on('postgres_changes',
         { event: '*', schema: 'public', table: 'applications' },
         () => {
-          fetchApplications();
+          clearTimeout(timer);
+          timer = setTimeout(() => fetchApplications(), 1000);
         }
       )
       .subscribe();
 
     return () => {
+      clearTimeout(timer);
       subscription.unsubscribe();
     };
   }, []);
@@ -141,11 +145,13 @@ const AdminApplications = () => {
     filterApplications();
   }, [applications, statusFilter, typeFilter, searchQuery]);
 
+  // Only the first load shows the full-page spinner; later refreshes keep the
+  // list (and any open application) on screen.
+  const loadedRef = useRef(false);
+
   const fetchApplications = async () => {
     try {
-      if (applications.length === 0) {
-        setLoading(true);
-      }
+      if (!loadedRef.current) setLoading(true);
 
       const season = await getCurrentSeason();
       const { data, error } = await inSeason(supabase
@@ -172,6 +178,7 @@ const AdminApplications = () => {
       })) as Application[];
 
       setApplications(typedData);
+      loadedRef.current = true;
     } catch (error: any) {
       console.error('Error in fetchApplications:', error);
       toast({
@@ -179,7 +186,10 @@ const AdminApplications = () => {
         description: error.message || "Failed to load applications. Please check your connection and try again.",
         variant: "destructive",
       });
-      setApplications([]);
+      // Keep what's already on screen after a failed refresh.
+      if (!loadedRef.current) setApplications([]);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -209,6 +219,9 @@ const AdminApplications = () => {
     }
 
     setFilteredApplications(filtered);
+    // Bulk actions must never reach rows the filter hides.
+    const visible = new Set(filtered.map(a => a.id));
+    setSelected(prev => ([...prev].every(id => visible.has(id)) ? prev : new Set([...prev].filter(id => visible.has(id)))));
   };
 
   const updateApplicationStatus = async (id: string, status: 'approved' | 'rejected' | 'waitlisted') => {
@@ -308,12 +321,15 @@ const AdminApplications = () => {
     if (!id) return;
     
     try {
-      const { error } = await supabase
+      const { data, error } = await supabase
         .from('applications' as any)
         .delete()
-        .eq('id', id);
+        .eq('id', id)
+        .select('id');
 
       if (error) throw error;
+      // RLS hides a refused delete (no error, nothing deleted).
+      if (!data?.length) throw new Error('Nothing was deleted. Only the Secretary-General can delete applications.');
 
       // Update local state
       setApplications(prev => prev.filter(app => app.id !== id));
@@ -335,7 +351,7 @@ const AdminApplications = () => {
       const errorMessage = error.message || (typeof error === 'string' ? error : "Unknown error");
       toast({
         title: "Delete Failed",
-        description: `Error: ${errorMessage}. This might happen if the application has related data in other tables like feedback.`,
+        description: errorMessage,
         variant: "destructive",
       });
     }
