@@ -22,6 +22,7 @@ import { useAdminRole, AdminRole } from '@/hooks/useAdminRole';
 import { adminPath } from '@/lib/adminPath';
 import { isChairApplication } from '@/lib/applications';
 import { getCurrentSeason, inSeason } from '@/lib/season';
+import DashboardStats, { type DelegateRow, type StatRow } from '@/components/admin/DashboardStats';
 
 type Role = NonNullable<AdminRole>;
 
@@ -45,15 +46,18 @@ interface Snapshot {
   pendingChairs: number;
   pendingVolunteers: number;
   unansweredMessages: number;
-  seated: number;
-  arrived: number;
-  approvedDelegates: number;
-  paidDelegates: number;
+}
+
+interface Stats {
+  delegates: DelegateRow[];
+  chairs: StatRow[];
+  volunteers: StatRow[];
+  debaters: StatRow[] | null;
 }
 
 const ACADEMIC: Role[] = ['sg', 'academics'];
 
-const APP_COLUMNS = 'id, status, payment_status, assigned_committee_id, notes, application_type, checked_in_at';
+const APP_COLUMNS = 'id, status, payment_status, payment_amount, assigned_committee_id, application_type, checked_in_at, created_at';
 
 /** Runs a select; when an optional column is missing (migration not applied) retries without it. */
 async function selectWithOptional(table: string, base: string, optional: string, season: Awaited<ReturnType<typeof getCurrentSeason>>) {
@@ -69,12 +73,13 @@ const AdminDashboard = () => {
   const [snap, setSnap] = useState<Snapshot | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [recent, setRecent] = useState<any[]>([]);
+  const [stats, setStats] = useState<Stats | null>(null);
 
   useEffect(() => {
     (async () => {
       try {
         const season = await getCurrentSeason();
-        const [apps, seats, messages, volunteers, recentApps] = await Promise.all([
+        const [apps, seats, messages, volunteers, recentApps, debate] = await Promise.all([
           selectWithOptional('applications', APP_COLUMNS, 'decision_emailed_at', season),
           (async () => {
             const r = await (supabase.from('country_assignments') as any).select('application_id, notified_at');
@@ -83,10 +88,11 @@ const AdminDashboard = () => {
             return { rows: (r2.data || []) as any[], hasOptional: false };
           })(),
           (supabase.from('contact_messages') as any).select('id, responded_at'),
-          inSeason((supabase.from('volunteer_applications') as any).select('id, status'), season),
+          inSeason((supabase.from('volunteer_applications') as any).select('id, status, created_at'), season),
           inSeason(supabase.from('applications').select('id, full_name, institution, status, created_at, notes, application_type'), season)
             .order('created_at', { ascending: false })
             .limit(6),
+          (supabase.from('debate_registrations' as any) as any).select('status, created_at'),
         ]);
 
         const delegates = apps.rows.filter(a => !isChairApplication(a));
@@ -105,12 +111,17 @@ const AdminDashboard = () => {
           pendingChairs: chairs.filter(a => !a.status || a.status === 'pending').length,
           pendingVolunteers: ((volunteers.data || []) as any[]).filter(v => v.status === 'pending').length,
           unansweredMessages: ((messages.data || []) as any[]).filter(m => !m.responded_at).length,
-          seated: approved.filter(a => seatedIds.has(a.id)).length,
-          arrived: approved.filter(a => seatedIds.has(a.id) && a.checked_in_at).length,
-          approvedDelegates: approved.length,
-          paidDelegates: approved.filter(a => a.payment_status === 'paid').length,
         });
         setRecent((recentApps.data || []) as any[]);
+        setStats({
+          delegates: delegates.map(a => ({
+            created_at: a.created_at, status: a.status, payment_status: a.payment_status, payment_amount: a.payment_amount,
+            seated: seatedIds.has(a.id), checked_in: !!a.checked_in_at,
+          })),
+          chairs: chairs.map(a => ({ created_at: a.created_at, status: a.status })),
+          volunteers: (volunteers.data || []) as StatRow[],
+          debaters: debate.error ? null : ((debate.data || []) as StatRow[]),
+        });
       } catch (err: any) {
         setError(err.message || 'Could not load the dashboard');
       }
@@ -183,21 +194,7 @@ const AdminDashboard = () => {
             </div>
           )}
 
-          {canSeeDelegates && (
-            <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-              {[
-                { label: 'Approved delegates', value: snap.approvedDelegates },
-                { label: 'Paid', value: snap.paidDelegates },
-                { label: 'Seated', value: snap.seated },
-                { label: 'Checked in', value: snap.seated > 0 ? `${snap.arrived} / ${snap.seated}` : '—' },
-              ].map(k => (
-                <div key={k.label} className="rounded-lg border bg-white p-4 shadow-sm">
-                  <p className="text-sm text-gray-500">{k.label}</p>
-                  <p className="text-2xl font-semibold text-gray-900">{k.value}</p>
-                </div>
-              ))}
-            </div>
-          )}
+          {canSeeDelegates && stats && <DashboardStats {...stats} />}
 
           {canSeeDelegates && recent.length > 0 && (
             <div className="rounded-xl border bg-white shadow-sm">
