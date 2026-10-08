@@ -14,10 +14,12 @@ html {
   text-size-adjust: 100%;
 }
 
-/* Better tap targets for mobile (minimum 44x44px) */
+/* Better tap targets for mobile (minimum 44x44px). Checkboxes and radios
+   are left out: stretching them to 44px drew huge empty boxes; their
+   labels are the tap target. */
 button,
 a,
-input,
+input:not([type="checkbox"]):not([type="radio"]),
 select,
 textarea {
   min-height: 44px;

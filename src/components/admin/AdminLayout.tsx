@@ -48,7 +48,6 @@ const NAV: { group: string; items: NavItem[] }[] = [
   {
     group: 'People',
     items: [
-      { path: '/applications', label: 'Applications', icon: FileText, roles: ACADEMIC },
       { path: '/delegates', label: 'Delegates', icon: Users, roles: ACADEMIC },
       { path: '/chairs', label: 'Chairs', icon: Shield, roles: ACADEMIC },
       { path: '/volunteers', label: 'Volunteers', icon: Heart, roles: ['sg', 'logistics'] },

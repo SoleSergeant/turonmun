@@ -73,6 +73,8 @@ interface ApplicationManagementModalProps {
   onUpdateStatus: (id: string, status: 'approved' | 'rejected' | 'waitlisted') => void;
   // Omit to hide the Delete control (e.g. for Academics Manager).
   onDelete?: (id: string) => void;
+  /** Shown above the answers: payment, seat, editing (delegates page). */
+  adminPanel?: React.ReactNode;
 }
 
 const ApplicationManagementModal: React.FC<ApplicationManagementModalProps> = ({
@@ -80,7 +82,17 @@ const ApplicationManagementModal: React.FC<ApplicationManagementModalProps> = ({
   onClose,
   onUpdateStatus,
   onDelete,
+  adminPanel,
 }) => {
+  // Esc closes, unless a confirm dialog is open on top of this one.
+  React.useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && !document.querySelector('[role="alertdialog"]')) onClose();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose]);
+
   // ── Helpers ──────────────────────────────────────────────
   const calculateAge = (dob: string) => {
     if (!dob) return null;
@@ -220,7 +232,7 @@ const ApplicationManagementModal: React.FC<ApplicationManagementModalProps> = ({
       <div className="absolute inset-4 md:inset-8 lg:inset-12 bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col max-w-6xl mx-auto">
         
         {/* ─── Header ─── */}
-        <div className="flex items-center justify-between px-8 py-5 border-b border-gray-200 bg-gradient-to-r from-slate-800 to-slate-900">
+        <div className="relative flex flex-wrap items-center justify-between gap-3 px-5 py-4 pr-14 sm:px-8 sm:py-5 border-b border-gray-200 bg-gradient-to-r from-slate-800 to-slate-900">
           <div className="flex items-center space-x-4">
             {photoUrl ? (
               <img src={photoUrl} alt={application.full_name}
@@ -249,7 +261,7 @@ const ApplicationManagementModal: React.FC<ApplicationManagementModalProps> = ({
             </div>
           </div>
           
-          <div className="flex items-center space-x-3">
+          <div className="flex flex-wrap items-center gap-2">
             {/* Application type badge — uses column when available, notes as fallback */}
             {isChair ? (
               <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-500/20 text-purple-200 text-xs font-bold border border-purple-400/30">
@@ -264,7 +276,8 @@ const ApplicationManagementModal: React.FC<ApplicationManagementModalProps> = ({
               {getStatusIcon(application.status)}
               <span className="capitalize">{application.status}</span>
             </div>
-            <button onClick={onClose} className="p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-colors">
+            {/* Pinned to the corner so it's always reachable on narrow screens. */}
+            <button onClick={onClose} aria-label="Close" className="absolute right-3 top-3 p-2 text-white/70 hover:text-white hover:bg-white/10 rounded-full transition-colors">
               <X size={22} />
             </button>
           </div>
@@ -272,6 +285,7 @@ const ApplicationManagementModal: React.FC<ApplicationManagementModalProps> = ({
         
         {/* ─── Content ─── */}
         <div className="flex-1 overflow-y-auto p-6 md:p-8">
+          {adminPanel && <div className="mb-6">{adminPanel}</div>}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
             {/* ════════ LEFT COLUMN ════════ */}
@@ -683,7 +697,7 @@ const ApplicationManagementModal: React.FC<ApplicationManagementModalProps> = ({
         </div>
         
         {/* ─── Action Footer ─── */}
-        <div className="border-t border-gray-200 px-8 py-4 bg-gray-50/80 flex items-center justify-between flex-wrap gap-3">
+        <div className="border-t border-gray-200 px-5 sm:px-8 py-4 bg-gray-50/80 flex items-center justify-between flex-wrap gap-3">
           <div className="flex items-center gap-3">
             <div className="text-xs text-gray-400">
               Submitted {formatDate(application.created_at)} · <span className="font-mono">#{application.id.substring(0, 8)}</span>

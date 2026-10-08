@@ -129,9 +129,9 @@ const AdminDashboard = () => {
   }, []);
 
   const todos: Todo[] = snap ? [
-    { key: 'review', count: snap.pendingReview, title: 'Applications to review', hint: 'Delegate applications waiting for a decision', path: '/applications', icon: UserCheck, roles: ACADEMIC, tone: 'text-purple-600 bg-purple-50' },
-    { key: 'decisions', count: snap.decisionsUnsent, title: 'Decision emails not sent', hint: 'Accepted or rejected, but not told yet', path: '/applications', icon: Send, roles: ACADEMIC, tone: 'text-blue-600 bg-blue-50' },
-    { key: 'unpaid', count: snap.unpaid, title: 'Accepted but unpaid', hint: 'Send a payment reminder from Delegates', path: '/delegates', icon: CreditCard, roles: ACADEMIC, tone: 'text-amber-600 bg-amber-50' },
+    { key: 'review', count: snap.pendingReview, title: 'Applications to review', hint: 'Delegate applications waiting for a decision', path: '/delegates?stage=review', icon: UserCheck, roles: ACADEMIC, tone: 'text-purple-600 bg-purple-50' },
+    { key: 'decisions', count: snap.decisionsUnsent, title: 'Decision emails not sent', hint: 'Accepted or rejected, but not told yet', path: '/delegates', icon: Send, roles: ACADEMIC, tone: 'text-blue-600 bg-blue-50' },
+    { key: 'unpaid', count: snap.unpaid, title: 'Accepted but unpaid', hint: 'Send a payment reminder from Delegates', path: '/delegates?stage=unpaid', icon: CreditCard, roles: ACADEMIC, tone: 'text-amber-600 bg-amber-50' },
     { key: 'seat', count: snap.paidNoSeat, title: 'Paid, no seat yet', hint: 'Ready to allocate', path: '/allocation', icon: MapPin, roles: ACADEMIC, tone: 'text-teal-600 bg-teal-50' },
     { key: 'announce', count: snap.seatsUnannounced, title: 'Seats not announced', hint: 'Seated delegates who haven’t been emailed', path: '/allocation', icon: Mail, roles: ACADEMIC, tone: 'text-indigo-600 bg-indigo-50' },
     { key: 'chairs', count: snap.pendingChairs, title: 'Chair applications', hint: 'Waiting for a decision', path: '/chairs', icon: Shield, roles: ACADEMIC, tone: 'text-orange-600 bg-orange-50' },
@@ -200,7 +200,7 @@ const AdminDashboard = () => {
             <div className="rounded-xl border bg-white shadow-sm">
               <div className="flex items-center justify-between border-b px-5 py-3">
                 <h3 className="font-semibold text-gray-800">Latest applications</h3>
-                <Link to={adminPath('/applications')} className="text-sm text-diplomatic-600 hover:underline">All applications</Link>
+                <Link to={adminPath('/delegates')} className="text-sm text-diplomatic-600 hover:underline">All delegates</Link>
               </div>
               <ul className="divide-y divide-gray-100">
                 {recent.map(a => (

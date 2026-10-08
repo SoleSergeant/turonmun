@@ -188,6 +188,35 @@ const ChairManagement = () => {
     }
   };
 
+  // A rejected chair is often still a strong delegate: move the application
+  // into the delegate pipeline as pending, instead of asking them to re-apply.
+  const handleMakeDelegate = async (app: ChairApp) => {
+    if (!(await confirmAction(
+      `Move ${app.full_name} into the delegate pipeline? Their application becomes a pending delegate application in Delegates.`,
+      { title: 'Make delegate', confirmLabel: 'Make delegate' },
+    ))) return;
+    const strippedNotes = (app.notes || '')
+      .split('\n')
+      .filter(line => !line.includes('APPLICATION TYPE: chair'))
+      .join('\n')
+      .trim();
+    const conversionNote = `Converted from a rejected chair application on ${new Date().toLocaleDateString()}.`;
+    const { error } = await (supabase.from('applications') as any)
+      .update({
+        application_type: 'delegate',
+        notes: strippedNotes ? `${conversionNote}\n${strippedNotes}` : conversionNote,
+        status: 'pending',
+        reviewed_at: null,
+      })
+      .eq('id', app.id);
+    if (error) {
+      toast({ title: 'Could not convert', description: error.message, variant: 'destructive' });
+      return;
+    }
+    await fetchChairApps();
+    toast({ title: 'Moved to Delegates', description: `${app.full_name} is now a pending delegate application.` });
+  };
+
   const handleAcceptAndAssign = async () => {
     if (!assignModal) return;
     if (!assignCommitteeId) {
@@ -725,13 +754,22 @@ const ChairManagement = () => {
                             </button>
                           </div>
                         ) : app.status === 'rejected' ? (
-                          <button
-                            onClick={() => handleRevertApp(app)}
-                            className="flex items-center gap-1 px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded hover:bg-gray-200 transition-colors"
-                            title="Move back to pending"
-                          >
-                            Revert
-                          </button>
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <button
+                              onClick={() => handleMakeDelegate(app)}
+                              className="flex items-center gap-1 px-2 py-1 bg-sky-100 text-sky-800 text-xs rounded hover:bg-sky-200 transition-colors"
+                              title="Move this application into the delegate pipeline"
+                            >
+                              Make delegate
+                            </button>
+                            <button
+                              onClick={() => handleRevertApp(app)}
+                              className="flex items-center gap-1 px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded hover:bg-gray-200 transition-colors"
+                              title="Move back to pending"
+                            >
+                              Revert
+                            </button>
+                          </div>
                         ) : (
                           <span className="text-xs text-gray-400 italic">—</span>
                         )}

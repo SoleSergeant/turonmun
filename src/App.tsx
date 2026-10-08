@@ -52,9 +52,8 @@ const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
 const AdminCommittees = lazy(() => import("./pages/admin/AdminCommittees"));
 const AdminSchedule = lazy(() => import("./pages/admin/AdminSchedule"));
 const AdminResources = lazy(() => import("./pages/admin/AdminResources"));
-const AdminApplications = lazy(() => import("./pages/admin/AdminApplications"));
 const AdminMessages = lazy(() => import("./pages/admin/AdminMessages"));
-const DelegateManagement = lazy(() => import("./pages/admin/DelegateManagement"));
+const Delegates = lazy(() => import("./pages/admin/Delegates"));
 const Allocation = lazy(() => import("./pages/admin/Allocation"));
 const ChairManagement = lazy(() => import("./pages/admin/ChairManagement"));
 const AdminVolunteers = lazy(() => import("./pages/admin/AdminVolunteers"));
@@ -142,6 +141,12 @@ const ScrollToTop = () => {
   return null;
 };
 
+// Old admin address → new one, keeping the query (?stage=…, ?subdomain=…).
+const KeepQueryRedirect = ({ to }: { to: string }) => {
+  const { search } = useLocation();
+  return <Navigate to={`${to}${search}`} replace />;
+};
+
 const App = () => {
   const { isOpen, closeMessage } = useSecretMessage();
   const [showSplash, setShowSplash] = useState(true);
@@ -157,9 +162,9 @@ const App = () => {
           <Route path="/committees" element={<AdminRoute allow={['sg','academics']}><AdminCommittees /></AdminRoute>} />
           <Route path="/schedule" element={<AdminRoute allow={['sg','academics']}><AdminSchedule /></AdminRoute>} />
           <Route path="/resources" element={<AdminRoute allow={['sg','academics']}><AdminResources /></AdminRoute>} />
-          <Route path="/applications" element={<AdminRoute allow={['sg','academics']}><AdminApplications /></AdminRoute>} />
+          <Route path="/applications" element={<KeepQueryRedirect to="/delegates" />} />
           <Route path="/messages" element={<AdminRoute allow={['sg']}><AdminMessages /></AdminRoute>} />
-          <Route path="/delegates" element={<AdminRoute allow={['sg','academics']}><DelegateManagement /></AdminRoute>} />
+          <Route path="/delegates" element={<AdminRoute allow={['sg','academics']}><Delegates /></AdminRoute>} />
           <Route path="/allocation" element={<AdminRoute allow={['sg','academics']}><Allocation /></AdminRoute>} />
           <Route path="/country-matrix" element={<Navigate to="/allocation?view=matrix" replace />} />
           <Route path="/chairs" element={<AdminRoute allow={['sg','academics']}><ChairManagement /></AdminRoute>} />

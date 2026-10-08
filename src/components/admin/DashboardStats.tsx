@@ -101,7 +101,7 @@ export default function DashboardStats({ delegates, chairs, volunteers, debaters
       </div>
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <TypeTile icon={Users} label="Delegates" total={delegates.length} week={thisWeek(delegates)} to="/applications" />
+        <TypeTile icon={Users} label="Delegates" total={delegates.length} week={thisWeek(delegates)} to="/delegates" />
         <TypeTile icon={Shield} label="Chairs" total={chairs.length} week={thisWeek(chairs)} to="/chairs" />
         <TypeTile icon={Heart} label="Volunteers" total={volunteers.length} week={thisWeek(volunteers)} to="/volunteers" />
         {debaters && <TypeTile icon={Mic} label="Turon Debate" total={debaters.length} week={thisWeek(debaters)} to="/debate" />}
