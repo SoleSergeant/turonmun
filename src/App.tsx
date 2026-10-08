@@ -44,7 +44,6 @@ const RegistrationSelection = lazy(() => import("./pages/RegistrationSelection")
 const ChairApplication = lazy(() => import("./pages/ChairApplication"));
 const VolunteerApplication = lazy(() => import("./pages/VolunteerApplication"));
 const NotFound = lazy(() => import("./pages/NotFound"));
-const MunCommand = lazy(() => import("./pages/MunCommand"));
 const Awards = lazy(() => import("./pages/Awards"));
 
 // Admin pages — only ever loaded for the admin subdomain
@@ -241,7 +240,6 @@ const App = () => {
         <Route path="/seasons/Season5" element={<Navigate to="/seasons/5" replace />} />
         {/* Every past season (built-in and admin-added) — see Site content → Seasons */}
         <Route path="/seasons/:slug" element={<SeasonRoute />} />
-        <Route path="/mun-command" element={<MunCommand />} />
 
         {/* Turon Debate at turonmun.com/debat (same pages as debat.turonmun.com) */}
         <Route path="/debat" element={<DebateLanding />} />
