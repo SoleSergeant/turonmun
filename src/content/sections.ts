@@ -343,7 +343,7 @@ const seo = {
   default_title: 'TuronMUN - Model United Nations Conference',
   default_description: 'Join TuronMUN for an enriching Model United Nations experience. Develop diplomacy, debate, and leadership skills with students from around the world.',
   keywords: 'MUN, Model United Nations, TuronMUN, Uzbekistan, Fergana, debate, diplomacy, UN, conference',
-  share_image: 'https://www.turonmun.com/og-image.png',
+  share_image: 'https://www.turonmun.com/og-image.png?v=2',
 };
 
 const extras = {
