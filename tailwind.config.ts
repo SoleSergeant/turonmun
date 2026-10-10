@@ -65,6 +65,34 @@ export default {
 					ring: 'hsl(var(--sidebar-ring))'
 				},
 				// New MUN specific colors - elegant, diplomatic palette
+				// Turon Debate brand (logo files in public/debate): blue #013399, maroon #800032.
+				'debate-blue': {
+					DEFAULT: '#013399',
+					50: '#eef3fc',
+					100: '#dce6f9',
+					200: '#b9cdf2',
+					300: '#8aa9e6',
+					400: '#4f78d1',
+					500: '#1a4bb5',
+					600: '#013399',
+					700: '#01297a',
+					800: '#011f5c',
+					900: '#001644',
+					950: '#000d2b',
+				},
+				'debate-maroon': {
+					DEFAULT: '#800032',
+					50: '#fdf0f4',
+					100: '#fadde6',
+					200: '#f2b6c8',
+					300: '#e680a0',
+					400: '#c9466f',
+					500: '#a8164a',
+					600: '#800032',
+					700: '#6a0029',
+					800: '#540021',
+					900: '#3d0018',
+				},
 				diplomatic: {
 					50: '#eef0f6',
 					100: '#d8dce9',
@@ -111,6 +139,8 @@ export default {
 				sans: ['Inter', 'system-ui', 'sans-serif'],
 				display: ['Inter', 'system-ui', 'sans-serif'],
 				mono: ['Roboto Mono', 'monospace'],
+				// Wide grotesque close to the Turon Debate wordmark (loaded on debate pages only).
+				debate: ['Archivo', 'Inter', 'system-ui', 'sans-serif'],
 			},
 			borderRadius: {
 				lg: 'var(--radius)',

@@ -15,22 +15,28 @@ export function useDebateRegistrationOpen() {
   return { open: !!d.registration_open && beforeDeadline, deadline };
 }
 
-/** Visible keyboard focus for links and buttons on the dark background. */
+// ── Brand tokens ──────────────────────────────────────────────────────
+// Turon Debate: blue #013399 leads, maroon #800032 is for actions (the two
+// podiums in the logo). Light pages, like the logo's primary version.
+
+/** Visible keyboard focus. */
 export const focusRing =
-  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-300 focus-visible:ring-offset-2 focus-visible:ring-offset-diplomatic-950';
+  'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-debate-blue-400 focus-visible:ring-offset-2 focus-visible:ring-offset-white';
 
-/** Primary gold button. */
-export const goldButton =
-  `inline-flex items-center justify-center gap-2 rounded-xl bg-gold-400 font-semibold text-diplomatic-950 shadow-lg shadow-gold-500/20 transition hover:bg-gold-300 active:scale-[0.98] disabled:opacity-60 ${focusRing}`;
+/** Primary action (maroon). */
+export const primaryButton =
+  `inline-flex items-center justify-center gap-2 rounded-xl bg-debate-maroon font-semibold text-white shadow-lg shadow-debate-maroon/20 transition hover:bg-debate-maroon-700 active:scale-[0.98] disabled:opacity-60 ${focusRing}`;
 
-/**
- * Text inputs and selects. color-scheme darkens native date pickers; the
- * option colours are set explicitly because Chrome on Windows draws the
- * dropdown list itself with a white background, which made the (inherited)
- * white option text invisible.
- */
+/** Secondary action (blue outline). */
+export const secondaryButton =
+  `inline-flex items-center justify-center gap-2 rounded-xl border-2 border-debate-blue font-semibold text-debate-blue transition hover:bg-debate-blue-50 active:scale-[0.98] disabled:opacity-60 ${focusRing}`;
+
+/** Text inputs and selects. */
 export const inputCls =
-  'w-full rounded-lg border border-white/15 bg-white/[0.06] px-3 py-2.5 text-white [color-scheme:dark] placeholder:text-white/40 transition focus:border-gold-400 focus:outline-none focus:ring-2 focus:ring-gold-400/30 [&_option]:bg-diplomatic-900 [&_option]:text-white';
+  'w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-slate-900 placeholder:text-slate-400 transition focus:border-debate-blue focus:outline-none focus:ring-2 focus:ring-debate-blue/20';
+
+/** Headings in the wordmark's typeface. */
+export const headingCls = 'font-debate font-extrabold tracking-tight [font-stretch:112%]';
 
 /** Header + footer for the Turon Debate site (turonmun.com/debat). */
 export default function DebateLayout({ title, children, nav }: {
@@ -44,32 +50,38 @@ export default function DebateLayout({ title, children, nav }: {
   const seo = useContent('seo');
   const { user } = useAuth();
   const path = useDebatePath();
-  const navLink = `rounded-lg px-3 py-2 font-medium text-white/80 transition hover:bg-white/10 hover:text-white ${focusRing}`;
-  const iconLink = `rounded-lg p-2.5 transition hover:bg-white/10 hover:text-white ${focusRing}`;
+  const navLink = `rounded-lg px-3 py-2 font-medium text-slate-700 transition hover:bg-debate-blue-50 hover:text-debate-blue ${focusRing}`;
+  const iconLink = `rounded-lg p-2.5 text-white/75 transition hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white`;
 
   return (
     // Respect the visitor's "reduce motion" setting for every animation inside.
     <MotionConfig reducedMotion="user">
-      <div className="flex min-h-screen flex-col bg-diplomatic-950 text-white antialiased">
+      <div className="flex min-h-screen flex-col bg-white text-slate-900 antialiased">
         <Helmet>
           <title>{title ? `${title} | ${d.name}` : `${d.name} — ${d.tagline}`}</title>
           <meta name="description" content={d.intro} />
-          <meta name="theme-color" content="#050f1d" />
+          <meta name="theme-color" content="#013399" />
+          <link rel="icon" type="image/svg+xml" href="/debate/favicon.svg" />
+          <link rel="apple-touch-icon" href="/debate/apple-touch-icon.png" />
+          <link rel="preconnect" href="https://fonts.googleapis.com" />
+          <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+          <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@100..125,600..900&display=swap" />
         </Helmet>
 
         <a
           href="#content"
-          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-gold-400 focus:px-4 focus:py-2 focus:font-semibold focus:text-diplomatic-950"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-debate-maroon focus:px-4 focus:py-2 focus:font-semibold focus:text-white"
         >
           Skip to content
         </a>
 
         {/* fixed, not sticky: the site-wide overflow-x on <body> breaks sticky */}
-        <header className="fixed inset-x-0 top-0 z-30 border-b border-white/10 bg-diplomatic-950/85 backdrop-blur-md">
+        <header className="fixed inset-x-0 top-0 z-30 border-b border-slate-200 bg-white/90 backdrop-blur-md">
           <div className="container mx-auto flex h-14 items-center justify-between gap-3 px-4 sm:h-16">
-            <Link to={path('/')} className={`flex min-w-0 items-center gap-2.5 rounded-lg ${focusRing}`}>
-              <img src={general.logo_url} alt="" width={32} height={32} className="h-7 w-7 shrink-0 object-contain sm:h-8 sm:w-8" />
-              <span className="truncate font-display text-base font-bold tracking-tight sm:text-lg">{d.name}</span>
+            <Link to={path('/')} className={`flex min-w-0 items-center rounded-lg ${focusRing}`} aria-label={`${d.name} home`}>
+              {/* Full lockup on wider screens, the podium monogram on phones. */}
+              <img src="/debate/logo-horizontal.svg" alt={d.name} width={1335} height={443} className="hidden h-9 w-auto sm:block" />
+              <img src="/debate/favicon.svg" alt={d.name} width={32} height={32} className="h-8 w-8 sm:hidden" />
             </Link>
 
             {nav && nav.length > 0 && (
@@ -91,7 +103,7 @@ export default function DebateLayout({ title, children, nav }: {
                   Sign in
                 </Link>
               )}
-              <Link to={path('/register')} className={`${goldButton} px-4 py-2 text-sm`}>
+              <Link to={path('/register')} className={`${primaryButton} px-4 py-2 text-sm`}>
                 {d.register_button}
               </Link>
             </div>
@@ -100,24 +112,30 @@ export default function DebateLayout({ title, children, nav }: {
 
         <main id="content" className="flex-1 pt-14 sm:pt-16">{children}</main>
 
-        <footer className="border-t border-white/10 py-8 text-sm text-white/65">
-          <div className="container mx-auto flex flex-col items-center justify-between gap-4 px-4 sm:flex-row">
-            <p>
-              © {new Date().getFullYear()} {d.name} · by{' '}
-              <a href={seo.site_url} className={`rounded underline underline-offset-2 hover:text-white ${focusRing}`}>{general.site_name}</a>
-            </p>
+        <footer className="bg-debate-blue-900 text-sm text-white/75">
+          <div className="container mx-auto flex flex-col items-center justify-between gap-6 px-4 py-10 sm:flex-row">
+            <div className="flex flex-col items-center gap-2 sm:items-start">
+              <img src="/debate/logo-horizontal-reversed.svg" alt={d.name} width={1335} height={443} loading="lazy" className="h-10 w-auto" />
+              <p>
+                © {new Date().getFullYear()} · A{' '}
+                <a href={seo.site_url} className="rounded font-medium text-white underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white">{general.site_name}</a>{' '}
+                initiative
+              </p>
+            </div>
             <div className="flex items-center gap-1">
               {general.telegram_url && (
-                <a href={general.telegram_url} target="_blank" rel="noreferrer" aria-label="Telegram" className={iconLink}><Send className="h-4 w-4" /></a>
+                <a href={general.telegram_url} target="_blank" rel="noreferrer" aria-label="Telegram" className={iconLink}><Send className="h-5 w-5" /></a>
               )}
               {general.instagram_url && (
-                <a href={general.instagram_url} target="_blank" rel="noreferrer" aria-label="Instagram" className={iconLink}><Instagram className="h-4 w-4" /></a>
+                <a href={general.instagram_url} target="_blank" rel="noreferrer" aria-label="Instagram" className={iconLink}><Instagram className="h-5 w-5" /></a>
               )}
               {general.contact_email && (
-                <a href={`mailto:${general.contact_email}`} aria-label="Email" className={iconLink}><Mail className="h-4 w-4" /></a>
+                <a href={`mailto:${general.contact_email}`} aria-label="Email" className={iconLink}><Mail className="h-5 w-5" /></a>
               )}
             </div>
           </div>
+          {/* The two podium colours as a closing stripe. */}
+          <div aria-hidden className="flex h-1.5"><span className="flex-1 bg-white/90" /><span className="flex-1 bg-debate-maroon" /></div>
         </footer>
       </div>
     </MotionConfig>

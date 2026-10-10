@@ -4,7 +4,7 @@ import { CheckCircle2, Clock, XCircle, Hourglass, Loader2, Pencil, LogOut } from
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useContent } from '@/content/store';
-import DebateLayout, { useDebateRegistrationOpen, inputCls, goldButton, focusRing } from './DebateLayout';
+import DebateLayout, { useDebateRegistrationOpen, inputCls, primaryButton, focusRing, headingCls } from './DebateLayout';
 import { useDebatePath } from './paths';
 import { useSideStats } from './sides';
 
@@ -43,10 +43,10 @@ export const EXPERIENCE = [
 const HEARD_FROM = ['Telegram', 'Instagram', 'A friend', 'My school', 'TuronMUN', 'Other'];
 
 export const STATUS_INFO: Record<DebateRegistration['status'], { label: string; icon: typeof Clock; tone: string }> = {
-  pending: { label: 'Under review', icon: Clock, tone: 'border-amber-400/30 bg-amber-400/10 text-amber-200' },
-  approved: { label: 'Accepted', icon: CheckCircle2, tone: 'border-green-400/30 bg-green-400/10 text-green-200' },
-  waitlisted: { label: 'Waitlisted', icon: Hourglass, tone: 'border-orange-400/30 bg-orange-400/10 text-orange-200' },
-  rejected: { label: 'Not accepted', icon: XCircle, tone: 'border-red-400/30 bg-red-400/10 text-red-200' },
+  pending: { label: 'Under review', icon: Clock, tone: 'border-amber-200 bg-amber-50 text-amber-800' },
+  approved: { label: 'Accepted', icon: CheckCircle2, tone: 'border-green-200 bg-green-50 text-green-800' },
+  waitlisted: { label: 'Waitlisted', icon: Hourglass, tone: 'border-orange-200 bg-orange-50 text-orange-800' },
+  rejected: { label: 'Not accepted', icon: XCircle, tone: 'border-red-200 bg-red-50 text-red-800' },
 };
 
 type Form = Omit<DebateRegistration, 'id' | 'user_id' | 'status' | 'admin_notes' | 'created_at' | 'updated_at'>;
@@ -59,9 +59,9 @@ const emptyForm = (name: string, email: string): Form => ({
 function Field({ label, required, children, hint }: { label: string; required?: boolean; hint?: string; children: React.ReactNode }) {
   return (
     <label className="block text-sm">
-      <span className="mb-1 block text-white/80">{label}{required && <span className="text-gold-300"> *</span>}</span>
+      <span className="mb-1 block text-slate-700">{label}{required && <span className="text-debate-maroon"> *</span>}</span>
       {children}
-      {hint && <span className="mt-1 block text-xs text-white/60">{hint}</span>}
+      {hint && <span className="mt-1 block text-xs text-slate-500">{hint}</span>}
     </label>
   );
 }
@@ -155,15 +155,15 @@ export default function DebateRegister() {
   if (loading || !form) {
     return (
       <DebateLayout title="Register">
-        <div className="flex justify-center py-24"><Loader2 className="h-8 w-8 animate-spin text-gold-300" /></div>
+        <div className="flex justify-center py-24"><Loader2 className="h-8 w-8 animate-spin text-debate-blue" /></div>
       </DebateLayout>
     );
   }
 
   const signedInAs = (
-    <p className="mt-6 flex flex-wrap items-center justify-center gap-2 text-xs text-white/60">
+    <p className="mt-6 flex flex-wrap items-center justify-center gap-2 text-xs text-slate-500">
       Signed in as {user?.email}
-      <button onClick={() => logout()} className={`inline-flex items-center gap-1 rounded hover:text-white ${focusRing}`}><LogOut className="h-3 w-3" /> Sign out</button>
+      <button onClick={() => logout()} className={`inline-flex items-center gap-1 rounded hover:text-slate-900 ${focusRing}`}><LogOut className="h-3 w-3" /> Sign out</button>
     </p>
   );
 
@@ -181,19 +181,19 @@ export default function DebateRegister() {
       <DebateLayout title="My registration">
         <div className="container mx-auto max-w-2xl px-4 py-10 sm:py-16">
           <div className="text-center">
-            <CheckCircle2 className="mx-auto h-12 w-12 text-gold-300" />
-            <h1 className="mt-4 font-display text-3xl font-bold">{d.success_title}</h1>
-            <p className="mt-2 text-white/70">{d.success_text}</p>
+            <CheckCircle2 className="mx-auto h-12 w-12 text-debate-blue" />
+            <h1 className={`${headingCls} text-3xl text-debate-blue mt-4`}>{d.success_title}</h1>
+            <p className="mt-2 text-slate-600">{d.success_text}</p>
           </div>
 
           <div className={`mt-8 flex items-center justify-center gap-2 rounded-xl border px-4 py-3 font-semibold ${info.tone}`}>
             <info.icon className="h-5 w-5" /> Status: {info.label}
           </div>
 
-          <dl className="mt-6 divide-y divide-white/10 rounded-2xl border border-white/10 bg-white/[0.04]">
+          <dl className="mt-6 divide-y divide-slate-200 rounded-2xl border border-slate-200 bg-white">
             {rows.filter(([, v]) => v).map(([k, v]) => (
               <div key={k} className="flex justify-between gap-4 px-5 py-3 text-sm">
-                <dt className="text-white/65">{k}</dt>
+                <dt className="text-slate-500">{k}</dt>
                 <dd className="text-right">{v}</dd>
               </div>
             ))}
@@ -201,7 +201,7 @@ export default function DebateRegister() {
 
           {existing.status === 'pending' && (
             <div className="mt-6 text-center">
-              <button onClick={() => setEditing(true)} className={`inline-flex items-center gap-2 rounded-lg border border-white/15 px-4 py-2 text-sm hover:bg-white/10 ${focusRing}`}>
+              <button onClick={() => setEditing(true)} className={`inline-flex items-center gap-2 rounded-lg border border-slate-300 px-4 py-2 text-sm text-slate-700 hover:bg-slate-50 ${focusRing}`}>
                 <Pencil className="h-4 w-4" /> Edit my answers
               </button>
             </div>
@@ -217,9 +217,9 @@ export default function DebateRegister() {
     return (
       <DebateLayout title="Register">
         <div className="container mx-auto max-w-lg px-4 py-24 text-center">
-          <h1 className="font-display text-3xl font-bold">{d.form_title}</h1>
-          <p className="mt-4 rounded-xl border border-white/10 bg-white/5 px-5 py-4 text-white/70">{d.closed_message}</p>
-          <Link to={path('/')} className={`mt-6 inline-block rounded text-sm text-gold-300 hover:underline ${focusRing}`}>← Back</Link>
+          <h1 className={`${headingCls} text-3xl text-debate-blue`}>{d.form_title}</h1>
+          <p className="mt-4 rounded-xl border border-slate-200 bg-slate-50 px-5 py-4 text-slate-600">{d.closed_message}</p>
+          <Link to={path('/')} className={`mt-6 inline-block rounded text-sm text-debate-maroon hover:underline ${focusRing}`}>← Back</Link>
           {signedInAs}
         </div>
       </DebateLayout>
@@ -230,18 +230,18 @@ export default function DebateRegister() {
   return (
     <DebateLayout title="Register">
       <div className="container mx-auto max-w-2xl px-4 py-10 sm:py-16">
-        <h1 className="text-center font-display text-3xl font-bold">{d.form_title}</h1>
-        <p className="mt-2 text-center text-white/70">{d.form_intro}</p>
+        <h1 className={`${headingCls} text-3xl text-debate-blue text-center`}>{d.form_title}</h1>
+        <p className="mt-2 text-center text-slate-600">{d.form_intro}</p>
 
-        <form onSubmit={submit} className="mt-8 space-y-8 rounded-2xl border border-white/10 bg-white/[0.04] p-5 shadow-2xl shadow-black/30 sm:p-8">
+        <form onSubmit={submit} className="mt-8 space-y-8 rounded-2xl border border-slate-200 bg-white p-5 shadow-xl shadow-debate-blue/5 sm:p-8">
           <fieldset className="space-y-4">
-            <legend className="mb-2 text-xs font-semibold uppercase tracking-widest text-gold-300">About you</legend>
+            <legend className="mb-2 text-xs font-semibold uppercase tracking-widest text-debate-maroon">About you</legend>
             <Field label="Full name" required>
               <input required value={form.full_name} onChange={e => set('full_name', e.target.value)} className={inputCls} autoComplete="name" />
             </Field>
             <div className="grid gap-4 sm:grid-cols-2">
               <Field label="Email" hint="From your account">
-                <input value={user?.email || form.email} disabled className={`${inputCls} opacity-60`} />
+                <input value={user?.email || form.email} disabled className={`${inputCls} bg-slate-50 text-slate-500`} />
               </Field>
               <Field label="Phone" required>
                 <input required type="tel" value={form.phone} onChange={e => set('phone', e.target.value)} autoComplete="tel" inputMode="tel" placeholder="+998 90 123 45 67" className={inputCls} />
@@ -267,7 +267,7 @@ export default function DebateRegister() {
           </fieldset>
 
           <fieldset className="space-y-4">
-            <legend className="mb-2 text-xs font-semibold uppercase tracking-widest text-gold-300">Education</legend>
+            <legend className="mb-2 text-xs font-semibold uppercase tracking-widest text-debate-maroon">Education</legend>
             <div className="grid gap-4 sm:grid-cols-2">
               <Field label="School / university" required>
                 <input required value={form.institution} onChange={e => set('institution', e.target.value)} autoComplete="organization" className={inputCls} />
@@ -279,18 +279,18 @@ export default function DebateRegister() {
           </fieldset>
 
           <fieldset className="space-y-4">
-            <legend className="mb-2 text-xs font-semibold uppercase tracking-widest text-gold-300">Debate</legend>
+            <legend className="mb-2 text-xs font-semibold uppercase tracking-widest text-debate-maroon">Debate</legend>
             {sideStats.sides.length > 0 && (
               <div role="radiogroup" aria-labelledby="side-label" aria-describedby={d.side_hint ? 'side-hint' : undefined} aria-required="true">
-                <p id="side-label" className="text-sm text-white/80">{d.side_label}<span className="text-gold-300"> *</span></p>
-                {d.side_hint && <p id="side-hint" className="mt-1 text-xs text-white/60">{d.side_hint}</p>}
+                <p id="side-label" className="text-sm text-slate-700">{d.side_label}<span className="text-debate-maroon"> *</span></p>
+                {d.side_hint && <p id="side-hint" className="mt-1 text-xs text-slate-500">{d.side_hint}</p>}
                 <div className="mt-3 grid gap-3 sm:grid-cols-2">
                   {sideStats.shares.map(({ side, percent }) => {
                     const checked = form.preferred_side === side;
                     return (
                       <label
                         key={side}
-                        className={`relative cursor-pointer rounded-xl border p-4 transition has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-gold-300 ${checked ? 'border-gold-400 bg-gold-400/10' : 'border-white/15 bg-white/[0.03] hover:border-white/30'}`}
+                        className={`relative cursor-pointer rounded-xl border p-4 transition has-[:focus-visible]:ring-2 has-[:focus-visible]:ring-debate-blue-400 ${checked ? 'border-debate-blue bg-debate-blue-50' : 'border-slate-200 bg-white hover:border-slate-300'}`}
                       >
                         <input
                           type="radio"
@@ -302,16 +302,16 @@ export default function DebateRegister() {
                         />
                         <span className="flex items-center justify-between gap-3">
                           <span className="font-semibold">{side}</span>
-                          <span aria-hidden className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 ${checked ? 'border-gold-400' : 'border-white/30'}`}>
-                            {checked && <span className="h-2.5 w-2.5 rounded-full bg-gold-400" />}
+                          <span aria-hidden className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 ${checked ? 'border-debate-blue' : 'border-slate-300'}`}>
+                            {checked && <span className="h-2.5 w-2.5 rounded-full bg-debate-blue" />}
                           </span>
                         </span>
                         {showShares && (
                           <span className="mt-3 block">
-                            <span className="block h-1.5 overflow-hidden rounded-full bg-white/10">
-                              <span className="block h-full rounded-full bg-gold-400/80 transition-all" style={{ width: `${percent}%` }} />
+                            <span className="block h-1.5 overflow-hidden rounded-full bg-slate-100">
+                              <span className="block h-full rounded-full bg-debate-blue transition-all" style={{ width: `${percent}%` }} />
                             </span>
-                            <span className="mt-1.5 block text-xs text-white/65">{percent}% of registrations</span>
+                            <span className="mt-1.5 block text-xs text-slate-500">{percent}% of registrations</span>
                           </span>
                         )}
                       </label>
@@ -348,26 +348,26 @@ export default function DebateRegister() {
             </Field>
           </fieldset>
 
-          <label className="flex items-start gap-3 text-sm text-white/80">
+          <label className="flex items-start gap-3 text-sm text-slate-700">
             <input
               type="checkbox"
               checked={form.agreed_to_rules}
               onChange={e => set('agreed_to_rules', e.target.checked)}
-              className="mt-0.5 h-5 w-5 shrink-0 rounded border-white/30 bg-white/10 accent-gold-400"
+              className="mt-0.5 h-5 w-5 shrink-0 rounded border-slate-300 accent-debate-maroon"
             />
-            <span>{d.rules_label} <span className="text-gold-300">*</span></span>
+            <span>{d.rules_label} <span className="text-debate-maroon">*</span></span>
           </label>
 
-          <div ref={errorRef} aria-live="polite">{error && <p role="alert" className="rounded-lg border border-red-400/30 bg-red-500/10 px-3 py-2 text-sm text-red-200">{error}</p>}</div>
+          <div ref={errorRef} aria-live="polite">{error && <p role="alert" className="rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-sm text-red-700">{error}</p>}</div>
 
           <div className="flex flex-col-reverse items-center justify-end gap-3 sm:flex-row">
             {editing && (
-              <button type="button" onClick={() => setEditing(false)} className={`rounded-lg px-4 py-2.5 text-sm text-white/80 hover:bg-white/10 ${focusRing}`}>Cancel</button>
+              <button type="button" onClick={() => setEditing(false)} className={`rounded-lg px-4 py-2.5 text-sm text-slate-700 hover:bg-slate-100 ${focusRing}`}>Cancel</button>
             )}
             <button
               type="submit"
               disabled={saving}
-              className={`${goldButton} w-full px-6 py-3.5 sm:w-auto`}
+              className={`${primaryButton} w-full px-6 py-3.5 sm:w-auto`}
             >
               {saving && <Loader2 className="h-4 w-4 animate-spin" />}
               {existing ? 'Save changes' : 'Submit registration'}
