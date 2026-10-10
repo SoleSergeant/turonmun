@@ -389,6 +389,15 @@ const debate = {
   side_hint: "We'll try to match your choice, but sides may be reassigned to balance the rounds.",
   sides: ['Affirmative', 'Opposition', 'Government', 'Parents'],
   show_side_stats: true,
+  // Event day (Admin → Debate day, judges' panel)
+  judging_criteria: [
+    { label: 'Arguments & logic', max: 25 },
+    { label: 'Rebuttal', max: 25 },
+    { label: 'Speaking & presentation', max: 20 },
+    { label: 'Evidence / examples', max: 15 },
+    { label: 'Teamwork', max: 15 },
+  ],
+  reveal_teams: false,
   rules_label: 'I agree to follow the tournament rules and code of conduct.',
   success_title: 'Registration received',
   success_text: "Thank you for registering. We'll review your registration and contact you by email or Telegram.",
@@ -684,6 +693,11 @@ export const SECTIONS = {
       { key: 'sides', label: 'Sides to choose from', type: 'strings', hint: "e.g. Affirmative, Opposition, Government, Parents. Leave empty to hide the question. Renaming a side doesn't change answers already given." },
       { key: 'show_side_stats', label: 'Show what share of registrations picked each side', type: 'boolean', hint: 'e.g. "17% of registrations" under each side on the form. Rejected registrations are not counted.' },
       { key: 'rules_label', label: 'Form — rules checkbox', type: 'text' },
+      { key: 'judging_criteria', label: 'Judging criteria', type: 'list', itemLabel: 'Criterion', titleKey: 'label', hint: "Used on the judges' score sheets. Renaming a criterion after judging has started drops the points already given for it.", fields: [
+        { key: 'label', label: 'Criterion', type: 'text' },
+        { key: 'max', label: 'Points', type: 'number' },
+      ] },
+      { key: 'reveal_teams', label: 'Show teams to debaters', type: 'boolean', hint: "Accepted debaters see their team, position and one-on-one opponent on their registration page." },
       { key: 'success_title', label: 'After registering — title', type: 'text' },
       { key: 'success_text', label: 'After registering — text', type: 'textarea' },
     ],

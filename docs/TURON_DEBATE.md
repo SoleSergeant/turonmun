@@ -40,3 +40,21 @@ For `turonmun.com/debat` only step 1 is needed. Steps 2–4 are for the
   status, accept / waitlist / reject (one or many), add internal notes,
   email the selected people, export CSV.
 - Registration status changes appear in Admin → Activity log.
+
+## Debate day and judging
+
+Run `supabase/migrations/045_debate_judging.sql` once.
+
+- **Admin → Debate day** (SG, Academics)
+  - **Teams:** add teams A, B, C, D…, give each a name and a position, and put accepted debaters in them. Seats are numbered A1, A2… automatically.
+  - **One-on-one:** "Generate pairings" makes cross-team pairs; change anyone with the drop-downs.
+  - **Results:** live rankings.
+- **Judges:** add them in Admin accounts with the role *Debate judge*. They sign in at admin.turonmun.com and only see **Judging**, where they:
+  - score each team on the criteria,
+  - tap the winner of each one-on-one,
+  - see the rankings.
+
+  Judges see names, schools and teams, but no contact details.
+- **Rankings:** each team's score is the average of the judges' sheets. Ties are broken by one-on-one wins, and each one-on-one goes to whoever got more judges' votes.
+- **Criteria and points:** edited in Site content → Turon Debate → Judging criteria.
+- **Showing teams to debaters:** turn on "Show teams to debaters" in Site content when you're ready. Accepted debaters then see their team, position and one-on-one opponent on their registration page.

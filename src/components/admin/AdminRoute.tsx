@@ -42,6 +42,11 @@ const AdminRoute: React.FC<AdminRouteProps> = ({ children, allow }) => {
   // Allowed → render
   if (role && allowed.includes(role)) return <>{children}</>;
 
+  // Debate judges only have the judging panel
+  if (role === 'judge') {
+    return <Navigate to={`/judging${suffix}`} replace />;
+  }
+
   // Registration desk has its own home
   if (role === 'registration') {
     return <Navigate to={`/check-in${suffix}`} replace />;

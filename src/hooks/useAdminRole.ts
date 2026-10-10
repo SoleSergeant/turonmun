@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
-export type AdminRole = 'sg' | 'academics' | 'logistics' | 'registration' | null;
+export type AdminRole = 'sg' | 'academics' | 'logistics' | 'registration' | 'judge' | null;
 
 // Legacy roles treated as SG. Migration 036 rewrites these rows to 'sg';
 // this only keeps such accounts working until that migration has run.
@@ -39,7 +39,7 @@ const fetchSnapshot = async (): Promise<RoleSnapshot> => {
   let role: AdminRole = null;
   if (raw) {
     if (LEGACY_SG.has(raw)) role = 'sg';
-    else if (raw === 'sg' || raw === 'academics' || raw === 'logistics' || raw === 'registration') {
+    else if (raw === 'sg' || raw === 'academics' || raw === 'logistics' || raw === 'registration' || raw === 'judge') {
       role = raw;
     }
   }
@@ -104,4 +104,5 @@ export const ROLE_LABELS: Record<NonNullable<AdminRole>, string> = {
   academics: 'Academics Manager',
   logistics: 'Logistics Manager',
   registration: 'Registration Desk',
+  judge: 'Debate Judge',
 };

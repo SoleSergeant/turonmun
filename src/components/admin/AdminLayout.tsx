@@ -30,6 +30,8 @@ import {
   History,
   CalendarRange,
   Mic,
+  Swords,
+  Gavel,
   LucideIcon,
 } from 'lucide-react';
 
@@ -52,6 +54,8 @@ const NAV: { group: string; items: NavItem[] }[] = [
       { path: '/chairs', label: 'Chairs', icon: Shield, roles: ACADEMIC },
       { path: '/volunteers', label: 'Volunteers', icon: Heart, roles: ['sg', 'logistics'] },
       { path: '/debate', label: 'Turon Debate', icon: Mic, roles: ACADEMIC },
+      { path: '/debate-day', label: 'Debate day', icon: Swords, roles: ACADEMIC },
+      { path: '/judging', label: 'Judging', icon: Gavel, roles: ['sg', 'academics', 'judge'] },
     ],
   },
   {

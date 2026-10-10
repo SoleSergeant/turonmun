@@ -10,12 +10,13 @@ import { confirmAction } from '@/components/admin/ConfirmDialog';
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY as string;
 
-type StaffRole = 'sg' | 'academics' | 'logistics' | 'registration';
+type StaffRole = 'sg' | 'academics' | 'logistics' | 'registration' | 'judge';
 const STAFF_ROLES: { value: StaffRole; label: string; hint: string }[] = [
   { value: 'sg', label: 'Secretary-General', hint: 'Everything, including accounts, forms and seasons' },
   { value: 'academics', label: 'Academics', hint: 'Applications, delegates, chairs, committees, allocation, awards' },
   { value: 'logistics', label: 'Logistics', hint: 'Volunteers and check-in' },
   { value: 'registration', label: 'Registration desk', hint: 'Check-in only' },
+  { value: 'judge', label: 'Debate judge', hint: 'Turon Debate judging panel only: score teams, pick one-on-one winners, see rankings. No contact details.' },
 ];
 
 interface Account {

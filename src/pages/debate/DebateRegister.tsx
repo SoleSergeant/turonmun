@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
-import { CheckCircle2, Clock, XCircle, Hourglass, Loader2, Pencil, LogOut } from 'lucide-react';
+import { CheckCircle2, Clock, XCircle, Hourglass, Loader2, Pencil, LogOut, Users, Swords } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { useContent } from '@/content/store';
@@ -80,6 +80,8 @@ export default function DebateRegister() {
   const [error, setError] = useState<string | null>(null);
   const errorRef = useRef<HTMLDivElement>(null);
   const sideStats = useSideStats();
+  // Team + one-on-one opponent, once the organisers reveal them (migration 045).
+  const [assignment, setAssignment] = useState<{ team_label: string | null; team_name: string | null; team_position: string | null; slot: number | null; opponent: string | null } | null>(null);
   const showShares = d.show_side_stats && sideStats.total > 0;
 
   useEffect(() => {
@@ -95,6 +97,10 @@ export default function DebateRegister() {
         .maybeSingle();
       if (loadErr) setError('Registration is not available yet. Please try again later.');
       setExisting((data as DebateRegistration) || null);
+      if ((data as DebateRegistration | null)?.status === 'approved') {
+        const { data: mine } = await (supabase.rpc as any)('my_debate_assignment');
+        setAssignment(Array.isArray(mine) && mine.length ? mine[0] : null);
+      }
       setForm(data ? { ...emptyForm('', ''), ...(data as DebateRegistration) } : emptyForm(user.user_metadata?.full_name || '', user.email || ''));
       setLoading(false);
     })();
@@ -189,6 +195,28 @@ export default function DebateRegister() {
           <div className={`mt-8 flex items-center justify-center gap-2 rounded-xl border px-4 py-3 font-semibold ${info.tone}`}>
             <info.icon className="h-5 w-5" /> Status: {info.label}
           </div>
+
+          {assignment?.team_label && (
+            <div className="mt-4 grid gap-3 sm:grid-cols-2">
+              <div className="flex items-center gap-3 rounded-xl border border-debate-blue/20 bg-debate-blue-50 px-4 py-3">
+                <span className={`${headingCls} flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-debate-blue text-lg text-white`}>{assignment.team_label}</span>
+                <div className="text-sm">
+                  <p className="flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-debate-blue"><Users className="h-3.5 w-3.5" /> Your team</p>
+                  <p className="font-semibold text-slate-900">{assignment.team_name || `Team ${assignment.team_label}`}{assignment.slot ? ` · ${assignment.team_label}${assignment.slot}` : ''}</p>
+                  {assignment.team_position && <p className="text-slate-600">Position: {assignment.team_position}</p>}
+                </div>
+              </div>
+              {assignment.opponent && (
+                <div className="flex items-center gap-3 rounded-xl border border-debate-maroon/20 bg-debate-maroon-50 px-4 py-3">
+                  <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-debate-maroon text-white"><Swords className="h-5 w-5" /></span>
+                  <div className="text-sm">
+                    <p className="text-xs font-semibold uppercase tracking-wide text-debate-maroon">One-on-one</p>
+                    <p className="font-semibold text-slate-900">vs {assignment.opponent}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
           <dl className="mt-6 divide-y divide-slate-200 rounded-2xl border border-slate-200 bg-white">
             {rows.filter(([, v]) => v).map(([k, v]) => (

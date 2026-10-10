@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Search, Download, Mail, ChevronDown, ChevronRight, Loader2, ExternalLink, X } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Search, Download, Mail, ChevronDown, ChevronRight, Loader2, ExternalLink, X, Swords } from 'lucide-react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -9,6 +10,7 @@ import { EXPERIENCE, type DebateRegistration } from '@/pages/debate/DebateRegist
 import { DEBATE_SITE_URL } from '@/pages/debate/paths';
 import { sideShares } from '@/pages/debate/sides';
 import { useContent } from '@/content/store';
+import { adminPath } from '@/lib/adminPath';
 import { confirmAction } from '@/components/admin/ConfirmDialog';
 
 type Status = DebateRegistration['status'];
@@ -190,7 +192,10 @@ const DebateRegistrations = () => {
             <h2 className="text-2xl font-semibold text-gray-900">Turon Debate</h2>
             <p className="text-gray-600">Registrations from {debateSiteUrl.replace('https://', '')}. Edit the site itself in Site content → Turon Debate.</p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
+            <Link to={adminPath('/debate-day')} className="inline-flex items-center gap-1 rounded-lg bg-debate-blue px-3 py-2 text-sm font-medium text-white hover:bg-debate-blue-700">
+              <Swords className="h-4 w-4" /> Debate day
+            </Link>
             <a href={debateSiteUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 hover:bg-gray-50">
               <ExternalLink className="h-4 w-4" /> Open site
             </a>

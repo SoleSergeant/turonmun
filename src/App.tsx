@@ -54,6 +54,8 @@ const AdminSchedule = lazy(() => import("./pages/admin/AdminSchedule"));
 const AdminResources = lazy(() => import("./pages/admin/AdminResources"));
 const AdminMessages = lazy(() => import("./pages/admin/AdminMessages"));
 const Delegates = lazy(() => import("./pages/admin/Delegates"));
+const DebateDay = lazy(() => import("./pages/admin/DebateDay"));
+const Judging = lazy(() => import("./pages/admin/Judging"));
 const Allocation = lazy(() => import("./pages/admin/Allocation"));
 const ChairManagement = lazy(() => import("./pages/admin/ChairManagement"));
 const AdminVolunteers = lazy(() => import("./pages/admin/AdminVolunteers"));
@@ -170,6 +172,8 @@ const App = () => {
           <Route path="/chairs" element={<AdminRoute allow={['sg','academics']}><ChairManagement /></AdminRoute>} />
           <Route path="/volunteers" element={<AdminRoute allow={['sg','logistics']}><AdminVolunteers /></AdminRoute>} />
           <Route path="/debate" element={<AdminRoute allow={['sg','academics']}><DebateRegistrations /></AdminRoute>} />
+          <Route path="/debate-day" element={<AdminRoute allow={['sg','academics']}><DebateDay /></AdminRoute>} />
+          <Route path="/judging" element={<AdminRoute allow={['sg','academics','judge']}><Judging /></AdminRoute>} />
           <Route path="/analytics" element={<AdminRoute allow={['sg','academics']}><AdminAnalytics /></AdminRoute>} />
           <Route path="/awards" element={<AdminRoute allow={['sg','academics']}><AdminAwards /></AdminRoute>} />
           <Route path="/content" element={<AdminRoute allow={['sg']}><SiteContent /></AdminRoute>} />
