@@ -90,12 +90,12 @@ export default function DebateLanding() {
     <DebateLayout nav={nav}>
       {/* ── Hero + video ─────────────────────────────────────────────── */}
       <section className="relative overflow-hidden bg-gradient-to-b from-debate-blue-50 via-white to-white">
-        {/* Faint laurel emblem behind the headline */}
+        {/* Faint podiums behind the headline */}
         <img
-          src="/debate/emblem.svg"
+          src="/debate/podium.svg"
           alt=""
           aria-hidden
-          className="pointer-events-none absolute left-1/2 top-4 w-[26rem] max-w-none -translate-x-1/2 select-none opacity-[0.06] sm:w-[40rem]"
+          className="pointer-events-none absolute left-1/2 top-2 h-[22rem] w-auto max-w-none -translate-x-1/2 select-none opacity-[0.05] sm:h-[30rem]"
         />
 
         <div className="container relative mx-auto px-4 pb-14 pt-12 sm:pb-20 sm:pt-16">
@@ -121,7 +121,7 @@ export default function DebateLanding() {
                   <VideoFacade id={videoId} title={d.video_caption || d.name} />
                 ) : (
                   <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 text-white/80">
-                    <img src="/debate/emblem-reversed.svg" alt="" aria-hidden className="h-28 w-auto opacity-90 sm:h-36" />
+                    <img src="/debate/podium-reversed.svg" alt="" aria-hidden className="h-24 w-auto sm:h-32" />
                     <p className="flex items-center gap-2 text-sm font-medium"><Clapperboard className="h-4 w-4" /> Video coming soon</p>
                   </div>
                 )}
@@ -217,7 +217,7 @@ export default function DebateLanding() {
       {open && (
         <section className="container mx-auto px-4 py-16 sm:py-24">
           <div className="relative overflow-hidden rounded-3xl bg-debate-blue px-6 py-12 text-center text-white sm:px-12 sm:py-16">
-            <img src="/debate/emblem-reversed.svg" alt="" aria-hidden className="pointer-events-none absolute -right-16 -top-10 h-80 w-auto select-none opacity-10" />
+            <img src="/debate/podium-reversed.svg" alt="" aria-hidden className="pointer-events-none absolute -bottom-16 -right-8 h-72 w-auto select-none opacity-10" />
             <h2 className={`${headingCls} relative text-3xl sm:text-4xl`}>{d.cta_title}</h2>
             {d.cta_text && <p className="relative mt-3 text-white/80">{d.cta_text}</p>}
             <div className="relative mt-8 flex justify-center">

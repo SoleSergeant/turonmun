@@ -78,10 +78,9 @@ export default function DebateLayout({ title, children, nav }: {
         {/* fixed, not sticky: the site-wide overflow-x on <body> breaks sticky */}
         <header className="fixed inset-x-0 top-0 z-30 border-b border-slate-200 bg-white/90 backdrop-blur-md">
           <div className="container mx-auto flex h-14 items-center justify-between gap-3 px-4 sm:h-16">
-            <Link to={path('/')} className={`flex min-w-0 items-center rounded-lg ${focusRing}`} aria-label={`${d.name} home`}>
-              {/* Full lockup on wider screens, the podium monogram on phones. */}
-              <img src="/debate/logo-horizontal.svg" alt={d.name} width={1335} height={443} className="hidden h-9 w-auto sm:block" />
-              <img src="/debate/favicon.svg" alt={d.name} width={32} height={32} className="h-8 w-8 sm:hidden" />
+            <Link to={path('/')} className={`flex min-w-0 items-center gap-2 rounded-lg ${focusRing}`}>
+              <img src="/debate/podium.svg" alt="" width={502} height={671} className="h-8 w-auto shrink-0 sm:h-9" />
+              <span className={`${headingCls} truncate text-lg leading-none text-debate-blue sm:text-xl`}>{d.name}</span>
             </Link>
 
             {nav && nav.length > 0 && (
@@ -115,7 +114,10 @@ export default function DebateLayout({ title, children, nav }: {
         <footer className="bg-debate-blue-900 text-sm text-white/75">
           <div className="container mx-auto flex flex-col items-center justify-between gap-6 px-4 py-10 sm:flex-row">
             <div className="flex flex-col items-center gap-2 sm:items-start">
-              <img src="/debate/logo-horizontal-reversed.svg" alt={d.name} width={1335} height={443} loading="lazy" className="h-10 w-auto" />
+              <div className="flex items-center gap-2.5">
+                <img src="/debate/podium-reversed.svg" alt="" width={502} height={671} loading="lazy" className="h-10 w-auto" />
+                <span className={`${headingCls} text-xl leading-none text-white`}>{d.name}</span>
+              </div>
               <p>
                 © {new Date().getFullYear()} · A{' '}
                 <a href={seo.site_url} className="rounded font-medium text-white underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white">{general.site_name}</a>{' '}
