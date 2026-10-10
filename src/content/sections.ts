@@ -359,7 +359,6 @@ const extras = {
 // ── Turon Debate (debat.turonmun.com) ─────────────────────────────────
 const debate = {
   name: 'Turon Debate',
-  tagline: 'A new debate initiative by TuronMUN',
   intro: 'Sharpen your arguments, think on your feet and compete with debaters from across Uzbekistan. Watch the video to see how a round works, then register below.',
   video_url: '',
   video_caption: 'How a Turon Debate round works',
@@ -661,7 +660,6 @@ export const SECTIONS = {
     defaults: debate,
     fields: [
       { key: 'name', label: 'Name', type: 'text' },
-      { key: 'tagline', label: 'Tagline', type: 'text' },
       { key: 'intro', label: 'Intro', type: 'textarea' },
       { key: 'video_url', label: 'YouTube video link', type: 'url', hint: 'Paste the YouTube link (watch, youtu.be or shorts). Leave empty to show "Video coming soon".' },
       { key: 'video_caption', label: 'Video caption', type: 'text' },

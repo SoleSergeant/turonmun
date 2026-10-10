@@ -101,8 +101,7 @@ export default function DebateLanding() {
         <div className="container relative mx-auto px-4 pb-14 pt-12 sm:pb-20 sm:pt-16">
           {/* Rendered without a fade-in so the headline paints immediately. */}
           <div className="mx-auto max-w-3xl text-center">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-debate-maroon sm:text-xs">{d.tagline}</p>
-            <h1 className={`${headingCls} mt-4 text-[2.6rem] leading-[1.02] text-debate-blue sm:text-6xl md:text-7xl`}>
+            <h1 className={`${headingCls} text-[2.6rem] leading-[1.02] text-debate-blue sm:text-6xl md:text-7xl`}>
               {d.name}
             </h1>
             <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-slate-600 sm:text-lg">{d.intro}</p>

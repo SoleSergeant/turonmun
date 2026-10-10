@@ -47,7 +47,6 @@ export default function DebateLayout({ title, children, nav }: {
 }) {
   const d = useContent('debate');
   const general = useContent('general');
-  const seo = useContent('seo');
   const { user } = useAuth();
   const path = useDebatePath();
   const navLink = `rounded-lg px-3 py-2 font-medium text-slate-700 transition hover:bg-debate-blue-50 hover:text-debate-blue ${focusRing}`;
@@ -58,7 +57,7 @@ export default function DebateLayout({ title, children, nav }: {
     <MotionConfig reducedMotion="user">
       <div className="flex min-h-screen flex-col bg-white text-slate-900 antialiased">
         <Helmet>
-          <title>{title ? `${title} | ${d.name}` : `${d.name} — ${d.tagline}`}</title>
+          <title>{title ? `${title} | ${d.name}` : d.name}</title>
           <meta name="description" content={d.intro} />
           <meta name="theme-color" content="#013399" />
           <link rel="icon" type="image/svg+xml" href="/debate/favicon.svg" />
@@ -118,11 +117,7 @@ export default function DebateLayout({ title, children, nav }: {
                 <img src="/debate/podium-reversed.svg" alt="" width={502} height={671} loading="lazy" className="h-10 w-auto" />
                 <span className={`${headingCls} text-xl leading-none text-white`}>{d.name}</span>
               </div>
-              <p>
-                © {new Date().getFullYear()} · A{' '}
-                <a href={seo.site_url} className="rounded font-medium text-white underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white">{general.site_name}</a>{' '}
-                initiative
-              </p>
+              <p>© {new Date().getFullYear()} {d.name}</p>
             </div>
             <div className="flex items-center gap-1">
               {general.telegram_url && (
