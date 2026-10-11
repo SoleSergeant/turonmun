@@ -63,7 +63,7 @@ const Committees = () => {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3, delay: index * 0.05 }}
-                    className={`committee-detail-card h-96 ${isLastOdd ? 'md:col-span-2 md:justify-self-center md:w-1/2' : ''}`}
+                    className={`committee-detail-card h-full ${isLastOdd ? 'md:col-span-2 md:justify-self-center md:w-1/2' : ''}`}
                   >
                     <CommitteeCard
                       name={committee.name}

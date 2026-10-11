@@ -106,12 +106,18 @@ const queryClient = new QueryClient({
   },
 });
 
-// Lightweight fallback while a route chunk is being fetched.
-const RouteFallback = () => (
-  <div className="min-h-screen flex items-center justify-center bg-white">
-    <div className="w-8 h-8 border-4 border-diplomatic-500 border-t-transparent rounded-full animate-spin" />
-  </div>
-);
+// Lightweight fallback while a route chunk is being fetched. Navy on the
+// public site so pages don't flash white; the admin, chair and Turon Debate
+// pages are light.
+const RouteFallback = () => {
+  const subdomain = useSubdomain();
+  const dark = subdomain === 'none' && !window.location.pathname.startsWith('/debat');
+  return (
+    <div className={`min-h-screen flex items-center justify-center ${dark ? 'bg-diplomatic-900' : 'bg-white'}`}>
+      <div className={`w-8 h-8 border-4 border-t-transparent rounded-full animate-spin ${dark ? 'border-gold-400' : 'border-diplomatic-500'}`} />
+    </div>
+  );
+};
 
 // Scroll to top on route change
 const ScrollToTop = () => {

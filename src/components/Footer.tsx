@@ -62,6 +62,11 @@ export default function Footer() {
                 <ArrowRight size={14} className="mr-2 opacity-70" /> Resources
               </Link>
             </li>
+            <li>
+              <Link to="/debat" className="text-blue-200 hover:text-white transition-colors inline-flex items-center">
+                <ArrowRight size={14} className="mr-2 opacity-70" /> Turon Debate
+              </Link>
+            </li>
           </ul>
         </div>
 
@@ -88,7 +93,7 @@ export default function Footer() {
 
         {/* Important Info */}
         <div>
-          <h3 className="text-lg font-display font-semibold mb-6 text-white">Important Info</h3>
+          <h3 className="text-lg font-display font-semibold mb-6 text-white">TuronMUN</h3>
           <ul className="space-y-3">
             <li>
               <Link to="/about" className="text-blue-200 hover:text-white transition-colors inline-flex items-center">
@@ -114,7 +119,7 @@ export default function Footer() {
         </div>
       </div>
 
-      <div className="mt-12 pt-8 border-t border-blue-800/50 text-center text-blue-400 text-sm">
+      <div className="mt-12 pt-8 border-t border-blue-800/50 text-center text-blue-200 text-sm">
         <div className="flex flex-col md:flex-row justify-between items-center">
           <p>© {currentYear} {general.site_name}. All rights reserved.</p>
           <p className="mt-2 md:mt-0">{general.footer_credits_url ? <a href={general.footer_credits_url} target="_blank" rel="noopener" className="underline hover:text-white">{general.footer_credits}</a> : general.footer_credits}</p>

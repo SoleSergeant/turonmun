@@ -82,7 +82,8 @@ const SponsorsSection = () => {
                       viewport={{ once: true }}
                       transition={{ duration: 0.35 }}
                     >
-                      <div className="relative rounded-2xl bg-white/5 border border-white/10 backdrop-blur-md p-6 flex items-center justify-center shadow-lg shadow-black/30 transition-all will-change-transform">
+                      {/* White tiles so every logo (light or dark) reads the same on the navy section */}
+                      <div className="relative flex h-28 items-center justify-center rounded-2xl bg-white p-5 shadow-lg shadow-black/30 transition-all will-change-transform sm:h-32">
                         <motion.div
                           whileHover={{ scale: 1.03 }}
                           className="w-full h-full flex items-center justify-center"
@@ -91,7 +92,7 @@ const SponsorsSection = () => {
                             src={logo.src}
                             alt={logo.name}
                             loading="lazy"
-                            className="h-16 sm:h-20 object-contain opacity-90 group-hover:opacity-100 transition-opacity"
+                            className="h-full w-full object-contain"
                           />
                         </motion.div>
                       </div>

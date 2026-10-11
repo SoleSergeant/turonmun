@@ -129,7 +129,7 @@ export default function CommitteesSection() {
               key={committee.id}
               variants={itemVariants}
               custom={idx}
-              className="h-96 premium-card-hover"
+              className="h-full premium-card-hover"
             >
               <CommitteeCard
                 name={committee.name}

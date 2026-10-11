@@ -27,6 +27,8 @@ export interface TransformedScheduleEvent {
 export interface ScheduleDay {
   day: string;
   date: string;
+  /** YYYY-MM-DD */
+  isoDate: string;
   events: TransformedScheduleEvent[];
 }
 
@@ -74,6 +76,7 @@ async function fetchSchedule(): Promise<ScheduleDay[]> {
     .map((date, index) => ({
       day: `Day ${index + 1}`,
       date: formatDate(date),
+      isoDate: date,
       events: grouped[date].map((event) => ({
         time: `${event.start_time} - ${event.end_time}`,
         title: event.title,

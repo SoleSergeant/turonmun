@@ -87,10 +87,10 @@ const home_about = {
     { label: 'Seasons of Excellence', value: 7, suffix: '' },
   ],
   features: [
-    { title: 'Why TuronMUN?', description: 'Experience authentic international diplomacy through immersive crisis scenarios that place real global challenges in your hands.' },
-    { title: 'Why TuronMUN?', description: 'Transform into a master negotiator through thrilling consensus-building exercises that mirror high-stakes international diplomacy perfectly.' },
-    { title: 'Why TuronMUN?', description: 'Forge powerful connections with exceptional delegates who share your passion for justice and bring diverse cultural perspectives.' },
-    { title: 'Why TuronMUN?', description: 'Unleash your intellectual potential through masterfully designed challenges that sharpen analytical prowess and eloquent speaking abilities.' },
+    { title: 'Real crisis scenarios', description: 'Experience authentic international diplomacy through immersive crisis scenarios that place real global challenges in your hands.' },
+    { title: 'Negotiation that matters', description: 'Transform into a master negotiator through thrilling consensus-building exercises that mirror high-stakes international diplomacy perfectly.' },
+    { title: 'A network that lasts', description: 'Forge powerful connections with exceptional delegates who share your passion for justice and bring diverse cultural perspectives.' },
+    { title: 'Sharper thinking and speaking', description: 'Unleash your intellectual potential through masterfully designed challenges that sharpen analytical prowess and eloquent speaking abilities.' },
   ],
 };
 
@@ -102,7 +102,6 @@ const home_sections = {
   schedule_eyebrow: 'Event Schedule',
   schedule_title: 'Conference Agenda',
   schedule_intro: "Here's a preview of our event schedule. For the complete agenda and details, please visit the Schedule page.",
-  schedule_empty: 'The conference schedule will be available soon. Check back later for updates!',
   faq_eyebrow: 'Questions?',
   faq_title: 'Frequently Asked Questions',
   faq_intro: 'Find answers to common questions about our MUN conference, application process, and more.',
@@ -478,7 +477,6 @@ export const SECTIONS = {
       { key: 'schedule_eyebrow', label: 'Schedule — small label', type: 'text' },
       { key: 'schedule_title', label: 'Schedule — title', type: 'text' },
       { key: 'schedule_intro', label: 'Schedule — intro', type: 'textarea' },
-      { key: 'schedule_empty', label: 'Schedule — when empty', type: 'textarea' },
       { key: 'faq_eyebrow', label: 'FAQ — small label', type: 'text' },
       { key: 'faq_title', label: 'FAQ — title', type: 'text' },
       { key: 'faq_intro', label: 'FAQ — intro', type: 'textarea' },

@@ -72,12 +72,12 @@ export default function Navbar() {
         <NavbarLogo scrolled={isScrolled} />
 
         {/* Desktop Navigation */}
-        <div className="hidden lg:flex items-center space-x-1">
+        <div className="hidden xl:flex items-center space-x-1">
           <NavbarDesktop scrolled={isScrolled} isHomePage={isHomePage} navLinks={navLinks} />
         </div>
 
         {/* Mobile Menu Button */}
-        <div className="flex items-center lg:hidden gap-2">
+        <div className="flex items-center xl:hidden gap-2">
           <button
             onClick={toggleMenu}
             className="p-2 text-white"

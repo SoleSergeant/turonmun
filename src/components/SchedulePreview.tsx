@@ -19,8 +19,10 @@ export default function SchedulePreview() {
   const text = useContent('home_sections');
   const { scheduleData, loading, error } = useSchedule();
 
-  // One-day conference: show the single day's first 5 events as a preview
-  const day = scheduleData[0] ?? null;
+  // Preview the next conference day. Past days (last season) aren't shown on
+  // the homepage; the section hides until a new schedule is added.
+  const today = new Date().toISOString().slice(0, 10);
+  const day = scheduleData.find(d => d.isoDate >= today) ?? null;
 
   if (loading) {
     return (
@@ -57,29 +59,8 @@ export default function SchedulePreview() {
     );
   }
 
-  if (!day) {
-    return (
-      <section className="section bg-white">
-        <div className="container">
-          <div className="text-center mb-12">
-            <span className="chip mb-2">{text.schedule_eyebrow}</span>
-            <h2 className="text-3xl md:text-4xl font-bold mb-4">{text.schedule_title}</h2>
-            <p className="text-neutral-600 max-w-2xl mx-auto">
-              {text.schedule_empty}
-            </p>
-          </div>
-          
-          <div className="text-center py-12 glass-panel max-w-xl mx-auto">
-            <Calendar size={48} className="mx-auto text-diplomatic-300 mb-4" />
-            <p className="text-neutral-500 mb-4">No schedule available yet.</p>
-            <Link to="/schedule" className="btn-secondary">
-              Visit Schedule Page
-            </Link>
-          </div>
-        </div>
-      </section>
-    );
-  }
+  if (!day) return null;
+
 
   return (
     <section className="section bg-white">

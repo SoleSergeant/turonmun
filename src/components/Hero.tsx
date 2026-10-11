@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { ChevronRight, Calendar, Clock, MapPin, Users, Sparkles } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -84,19 +84,40 @@ const Hero = () => {
     }
   };
 
-  // Subtle floating light particles (cleaner: fewer and softer)
-  const particles = Array.from({ length: 10 }).map((_, index) => ({
-    id: index,
-    initialX: Math.random() * window.innerWidth,
-    initialY: Math.random() * window.innerHeight,
-    size: Math.random() * 1.5 + 1, // smaller circles
-    opacity: Math.random() * 0.18 + 0.06, // softer opacity
-    duration: Math.random() * 60 + 70, // very slow movement
-    delay: Math.random() * 12
-  }));
+  // Subtle floating light particles. Generated once: the typing effect
+  // re-renders every ~100 ms and must not restart their animations.
+  const particles = useMemo(() => Array.from({ length: 10 }).map((_, index) => {
+    const x = Math.random() * window.innerWidth;
+    const y = Math.random() * window.innerHeight;
+    return {
+      id: index,
+      size: Math.random() * 1.5 + 1,
+      opacity: Math.random() * 0.18 + 0.06,
+      duration: Math.random() * 60 + 70,
+      delay: Math.random() * 12,
+      initial: { x, y },
+      animate: {
+        y: [y, y - 40 - Math.random() * 30, y + 40 + Math.random() * 30, y],
+        x: [x, x + 40 + Math.random() * 30, x - 40 - Math.random() * 30, x],
+      },
+    };
+  }), []);
+
+  // While nothing is announced, the season card is a short "coming soon" note
+  // instead of four rows of TBD.
+  const isUnknown = (v: string) => !v || /^(tbd|tba|to be announced)$/i.test(v.trim());
+  const details = [
+    { icon: Calendar, label: 'Date',     value: season.date_text },
+    { icon: Clock,    label: 'Duration', value: season.duration_text },
+    { icon: MapPin,   label: 'Location', value: season.location_text },
+    { icon: Users,    label: 'Delegates', value: season.delegates_text },
+  ];
+  const announced = details.filter(d => !isUnknown(d.value));
+  const subtitle = season.subtitle && season.subtitle.replace(/[!.]/g, '').toLowerCase() !== (season.badge_label || '').replace(/[!.]/g, '').toLowerCase()
+    ? season.subtitle : null;
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-b from-diplomatic-900 via-diplomatic-800 to-diplomatic-700 py-10 sm:py-16">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-b from-diplomatic-900 via-diplomatic-800 to-diplomatic-700 pt-24 pb-12 sm:pt-28 sm:pb-16 lg:py-16">
       <div className="absolute inset-0 overflow-hidden">
         <motion.div
           className="absolute top-0 left-0 w-full h-full bg-world-map bg-no-repeat bg-center opacity-5"
@@ -116,24 +137,8 @@ const Hero = () => {
               opacity: particle.opacity,
               boxShadow: `0 0 ${particle.size}px rgba(247, 163, 28, 0.15)`
             }}
-            initial={{
-              x: particle.initialX,
-              y: particle.initialY
-            }}
-            animate={{
-              y: [
-                particle.initialY,
-                particle.initialY - 40 - Math.random() * 30,
-                particle.initialY + 40 + Math.random() * 30,
-                particle.initialY
-              ],
-              x: [
-                particle.initialX,
-                particle.initialX + 40 + Math.random() * 30,
-                particle.initialX - 40 - Math.random() * 30,
-                particle.initialX
-              ]
-            }}
+            initial={particle.initial}
+            animate={particle.animate}
             transition={{
               duration: particle.duration,
               repeat: Infinity,
@@ -177,7 +182,7 @@ const Hero = () => {
             variants={transitionVariants.containerVariants}
             initial="initial"
             animate="animate"
-            className="text-white px-4 sm:px-0 order-2 lg:order-1"
+            className="text-white px-4 sm:px-0"
           >
             <motion.span
               variants={transitionVariants.slideInDown}
@@ -197,10 +202,10 @@ const Hero = () => {
               </motion.span>
               <motion.span
                 variants={transitionVariants.fadeVariants}
-                className="block text-gold-400 mt-2 min-h-[40px] text-base sm:text-xl md:text-2xl lg:text-3xl"
+                className="block text-white/90 mt-2 min-h-[40px] text-base sm:text-xl md:text-2xl lg:text-3xl"
               >
                 {currentPhrase}
-                <span className="animate-pulse ml-1">|</span>
+                <span className="animate-pulse ml-1 text-gold-400">|</span>
               </motion.span>
             </h1>
 
@@ -289,44 +294,13 @@ const Hero = () => {
           </motion.div>
 
           <motion.div
-            className="relative mt-0 mb-8 lg:mb-0 lg:mt-0 px-4 sm:px-0 order-1 lg:order-2 block"
+            className="relative w-full max-w-md lg:max-w-none mx-auto px-4 sm:px-0"
             variants={transitionVariants.scaleVariants}
             initial="initial"
             animate="animate"
           >
-            {/* Corner accents — desktop only */}
-            <motion.div
-              className="absolute top-5 left-0 w-32 h-32 border-t-2 border-l-2 border-gold-400/30 -translate-x-8 -translate-y-8 rounded-tl-3xl hidden sm:block"
-              variants={transitionVariants.slideInUp}
-            />
-            <motion.div
-              className="absolute bottom-5 right-0 w-32 h-32 border-b-2 border-r-2 border-gold-400/30 translate-x-8 translate-y-8 rounded-br-3xl hidden sm:block"
-              variants={transitionVariants.slideInDown}
-            />
-
-            <motion.div
-              className="relative z-10 glass-card p-4 sm:p-6 shadow-2xl"
-              whileHover={{
-                scale: 1.02,
-                transition: { type: "spring", stiffness: 300, damping: 20 }
-              }}
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-diplomatic-800/50 to-diplomatic-900/50 rounded-xl" />
-              <div className="absolute inset-0 bg-noise opacity-10 mix-blend-soft-light rounded-xl" />
-
-              {/* Decorative pulse dots */}
-              <div className="absolute -top-6 -left-6 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-diplomatic-800 border-4 border-diplomatic-700 flex items-center justify-center hidden sm:flex">
-                <div className="w-4 h-4 sm:w-6 sm:h-6 rounded-full bg-gradient-to-br from-gold-400 to-gold-500 animate-pulse" />
-              </div>
-              <div className="absolute -bottom-6 -right-6 w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-diplomatic-800 border-4 border-diplomatic-700 flex items-center justify-center hidden sm:flex">
-                <div className="w-4 h-4 sm:w-6 sm:h-6 rounded-full bg-gradient-to-br from-gold-400 to-gold-500 animate-pulse" />
-              </div>
-              <div className="absolute top-1/2 left-0 transform -translate-y-1/2 -translate-x-4 w-2 h-16 bg-diplomatic-700 rounded-r-full hidden sm:block" />
-              <div className="absolute top-1/2 right-0 transform -translate-y-1/2 translate-x-4 w-2 h-16 bg-diplomatic-700 rounded-l-full hidden sm:block" />
-
-              <div className="relative z-10 bg-diplomatic-800/80 backdrop-blur-sm rounded-lg p-4 sm:p-6 border border-white/5 shadow-inner">
-                <div className="absolute inset-0 bg-gradient-to-br from-transparent to-black/20 rounded-lg" />
-                <div className="absolute inset-0 bg-noise opacity-10 mix-blend-soft-light rounded-lg" />
+            <div className="relative z-10 glass-card p-2 sm:p-3 shadow-2xl">
+              <div className="relative z-10 bg-diplomatic-800/80 backdrop-blur-sm rounded-lg p-5 sm:p-6 border border-white/5">
 
                 {/* Header */}
                 <motion.div
@@ -340,22 +314,18 @@ const Hero = () => {
                   <h2 className="text-xl sm:text-2xl font-display font-bold text-white mb-1">
                     {season.heading}
                   </h2>
-                  <p className="text-sm text-white/60">
-                    {season.subtitle}
-                  </p>
+                  {subtitle && <p className="text-sm text-white/60">{subtitle}</p>}
                 </motion.div>
 
                 {/* Info rows */}
+                {announced.length === 0 ? (
+                  <p className="relative z-10 mb-5 text-center text-sm text-white/60">Dates and venue will be announced soon.</p>
+                ) : (
                 <motion.div
                   variants={transitionVariants.staggerContainerVariants}
                   className="space-y-3 relative z-10 mb-5"
                 >
-                  {[
-                    { icon: Calendar, label: 'Date',     value: season.date_text },
-                    { icon: Clock,    label: 'Duration',  value: season.duration_text },
-                    { icon: MapPin,   label: 'Location',  value: season.location_text },
-                    { icon: Users,    label: 'Delegates', value: season.delegates_text },
-                  ].map(({ icon: Icon, label, value }) => (
+                  {announced.map(({ icon: Icon, label, value }) => (
                     <motion.div
                       key={label}
                       variants={transitionVariants.staggerItemVariants}
@@ -363,12 +333,11 @@ const Hero = () => {
                     >
                       <Icon className="w-4 h-4 text-gold-400 flex-shrink-0" />
                       <span className="text-white/50 w-16 flex-shrink-0">{label}</span>
-                      <span className={value === 'To be announced' ? 'text-white/40 italic' : 'text-white font-medium'}>
-                        {value}
-                      </span>
+                      <span className="text-white font-medium">{value}</span>
                     </motion.div>
                   ))}
                 </motion.div>
+                )}
 
                 {/* Open/Close countdown */}
                 {countdown && (
@@ -384,7 +353,7 @@ const Hero = () => {
                 >
                   <Link
                     to="/register"
-                    className="block w-full text-center bg-gradient-to-r from-gold-500 to-gold-400 hover:from-gold-400 hover:to-gold-300 text-diplomatic-900 font-bold py-3 px-4 rounded-lg transition-all duration-200 text-sm shadow-gold hover:shadow-lg hover:-translate-y-0.5"
+                    className="block w-full text-center border border-gold-400/50 text-gold-300 hover:bg-gold-400/10 font-semibold py-3 px-4 rounded-lg transition-colors text-sm"
                   >
                     {season.apply_label}
                   </Link>
@@ -404,7 +373,7 @@ const Hero = () => {
                   </Link>
                 </motion.div>
               </div>
-            </motion.div>
+            </div>
           </motion.div>
         </div>
       </div>
