@@ -6,7 +6,7 @@ import { BrowserRouter, Routes, Route, useLocation, Navigate } from "react-route
 import { HelmetProvider } from "react-helmet-async";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
-import { lazy, Suspense, useEffect, useState } from 'react';
+import { lazy, Suspense, useCallback, useEffect, useState } from 'react';
 import { SecretMessage, useSecretMessage } from "@/components/easter-egg/SecretMessage";
 import { useSubdomain } from "./hooks/use-subdomain";
 
@@ -151,7 +151,14 @@ const KeepQueryRedirect = ({ to }: { to: string }) => {
 
 const App = () => {
   const { isOpen, closeMessage } = useSecretMessage();
-  const [showSplash, setShowSplash] = useState(true);
+  // Splash greets a visitor once per browser session, not on every reload or link.
+  const [showSplash, setShowSplash] = useState(() => {
+    try { return !sessionStorage.getItem('turonmun:splash'); } catch { return true; }
+  });
+  const endSplash = useCallback(() => {
+    setShowSplash(false);
+    try { sessionStorage.setItem('turonmun:splash', '1'); } catch { /* private mode */ }
+  }, []);
   const subdomain = useSubdomain();
 
   const renderRoutes = () => {
@@ -287,7 +294,7 @@ const App = () => {
         <TooltipProvider>
           <Toaster />
           <Sonner />
-          {showSplash && subdomain !== 'debate' && !window.location.pathname.startsWith('/debat') && <SplashScreen onComplete={() => setShowSplash(false)} />}
+          {showSplash && subdomain === 'none' && !window.location.pathname.startsWith('/debat') && <SplashScreen onComplete={endSplash} />}
           <BrowserRouter>
             <ScrollToTop />
 

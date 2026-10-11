@@ -80,24 +80,24 @@ export default function Navbar() {
         <div className="flex items-center lg:hidden gap-2">
           <button
             onClick={toggleMenu}
-            className={cn("p-2", isScrolled ? "text-white" : "text-diplomatic-800")}
+            className="p-2 text-white"
             aria-label="Toggle menu"
           >
             <div className="flex flex-col justify-center w-6 h-6 space-y-1.5 relative">
               <motion.span
                 animate={mobileMenuOpen ? { rotate: 45, y: 8 } : { rotate: 0, y: 0 }}
                 className={cn("w-6 h-0.5 block transition-transform origin-center", 
-                  isScrolled ? "bg-white" : "bg-diplomatic-800")}
+                  "bg-white")}
               ></motion.span>
               <motion.span
                 animate={mobileMenuOpen ? { opacity: 0 } : { opacity: 1 }}
                 className={cn("w-6 h-0.5 block transition-opacity", 
-                  isScrolled ? "bg-white" : "bg-diplomatic-800")}
+                  "bg-white")}
               ></motion.span>
               <motion.span
                 animate={mobileMenuOpen ? { rotate: -45, y: -8 } : { rotate: 0, y: 0 }}
                 className={cn("w-6 h-0.5 block transition-transform origin-center", 
-                  isScrolled ? "bg-white" : "bg-diplomatic-800")}
+                  "bg-white")}
               ></motion.span>
             </div>
           </button>

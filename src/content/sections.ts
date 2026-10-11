@@ -10,7 +10,7 @@ import { seasonsData, type SeasonData } from '@/data/seasonsData';
  * words in gold.
  */
 
-const LOGO = '/lovable-uploads/58911c41-3ed8-4807-8789-5df7d2fff02c.png';
+const LOGO = '/logos/turonmun-logo-320.png';
 
 // ── Reusable field sets ────────────────────────────────────────────────
 const titleDesc: Field[] = [

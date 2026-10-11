@@ -157,7 +157,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 bg-gradient-to-br from-white/20 to-white/5 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/10 shadow-inner">
               <img
-                src="/lovable-uploads/58911c41-3ed8-4807-8789-5df7d2fff02c.png"
+                src="/logos/turonmun-logo-320.png"
                 alt="TuronMUN Logo"
                 className="w-7 h-7 object-contain drop-shadow-md"
               />
