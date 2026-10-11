@@ -169,6 +169,7 @@ const about_page = {
     { date: 'July 28, 2025', title: 'United Celebration', description: 'Celebrating our anniversary with a special collaboration at Central Asian Medical University.', milestones: ['First joint MUN with a medical university', "Celebrating TuronMUN's anniversary with a special event", '6 vibrant committees in 3 languages'] },
     { date: 'November 9, 2025', title: 'Season 5', description: 'Our first conference under new Secretary-General, marking a new chapter in our growth', milestones: ['Historic partnership with Registan Private School', 'Beginning of a new era with new leadership', '5 committees in 2 languages'] },
     { date: 'March 29, 2026', title: 'Season 6', description: 'Our most ambitious season yet, continuing the legacy of leadership and diplomacy.', milestones: ['Continued partnership with SATashkent', '80 elite delegates across Uzbekistan', 'New awarding strategies'] },
+    { date: 'July 28, 2026', title: 'Season 7', description: 'Two years of TuronMUN, celebrated at Central Asian Medical University.', milestones: ['Two-year anniversary', '6 committees in English, Uzbek and Russian', 'First FIFA Post-World Cup Review Summit'] },
   ],
   seasons_title: 'Our Seasons of Diplomacy',
   seasons_intro: "Our journey through the seasons, showcasing our growth and the impact we've made in the MUN community.",
@@ -205,10 +206,10 @@ const past_conferences = {
 };
 
 // Menu order on the site follows this list's order.
-const MENU_ORDER = ['season1', 'season2', 'season3', 'season4', 'turonmun-camu', 'season5', 'season6'];
+const MENU_ORDER = ['season1', 'season2', 'season3', 'season4', 'turonmun-camu', 'season5', 'season6', 'season7'];
 const MENU_LABELS: Record<string, string> = {
   season1: 'Season 1', season2: 'Season 2', season3: 'Season 3', season4: 'Season 4',
-  'turonmun-camu': 'TuronMUN x CAMU', season5: 'Season 5', season6: 'Season 6',
+  'turonmun-camu': 'TuronMUN x CAMU', season5: 'Season 5', season6: 'Season 6', season7: 'Season 7',
 };
 export type PastSeason = SeasonData & { menu_label: string; show_in_menu: boolean };
 const past_seasons = {

@@ -309,6 +309,45 @@ export const seasonsData = [
       { url: "seasons/season 6/3.JPG", caption: "Delegates in Action" },
       { url: "seasons/season 6/4.JPG", caption: "Award Ceremony" }
     ]
+  },
+  {
+    id: "season7",
+    year: "2026",
+    title: "Season Seven",
+    date: "July 28, 2026",
+    endDate: "July 28, 2026",
+    location: "Central Asian Medical University, Fergana",
+    route: "/seasons/7",
+    theme: "Two-Year Anniversary",
+    description: "TuronMUN turned two. Our anniversary season returned to Central Asian Medical University with six committees in three languages.",
+    color: "from-diplomatic-800 to-diplomatic-950",
+    accentColor: "bg-diplomatic-800",
+    lightBg: "bg-diplomatic-50",
+    mediumBg: "bg-diplomatic-100",
+    borderColor: "border-diplomatic-500",
+    textColor: "text-diplomatic-950",
+    secondaryTextColor: "text-diplomatic-800",
+    patternStyle: "dots",
+    statistics: {
+      committees: 6,
+      participants: 120,
+      languages: "English, Uzbek, Russian",
+      location: "Central Asian Medical University, Fergana",
+    },
+    experience: "Season 7 marked two years of TuronMUN: a one-day conference at Central Asian Medical University bringing together delegates from across Uzbekistan in six committees, from a Historical Security Council to a FIFA Post-World Cup 2026 Review Summit.",
+    milestone: "Celebrated TuronMUN's two-year anniversary with committees in English, Uzbek and Russian, including the first FIFA Post-World Cup Review Summit.",
+    highlights: [
+      "Two-year anniversary of TuronMUN",
+      "6 committees in 3 languages",
+      "Historical Security Council, DISEC and a Crisis Committee",
+      "ECOSOC in Uzbek and IAEA in Russian",
+      "FIFA Post-World Cup 2026 Review Summit"
+    ],
+    organizers: [],
+    photos: [
+      // shortcut: venue photo until Season 7 event photos are added (public/seasons/season 7/)
+      { url: "images/camu-venue.jpg", caption: "Central Asian Medical University, Fergana" }
+    ]
   }
 ];
 
