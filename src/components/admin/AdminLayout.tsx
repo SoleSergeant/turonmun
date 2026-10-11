@@ -45,7 +45,10 @@ const ACADEMIC: NonNullable<AdminRole>[] = ['sg', 'academics'];
 const NAV: { group: string; items: NavItem[] }[] = [
   {
     group: 'Overview',
-    items: [{ path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['sg', 'academics', 'logistics'] }],
+    items: [
+      { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['sg', 'academics', 'logistics'] },
+      { path: '/analytics', label: 'Analytics', icon: BarChart3, roles: ACADEMIC },
+    ],
   },
   {
     group: 'People',
@@ -53,7 +56,12 @@ const NAV: { group: string; items: NavItem[] }[] = [
       { path: '/delegates', label: 'Delegates', icon: Users, roles: ACADEMIC },
       { path: '/chairs', label: 'Chairs', icon: Shield, roles: ACADEMIC },
       { path: '/volunteers', label: 'Volunteers', icon: Heart, roles: ['sg', 'logistics'] },
-      { path: '/debate', label: 'Turon Debate', icon: Mic, roles: ACADEMIC },
+    ],
+  },
+  {
+    group: 'Turon Debate',
+    items: [
+      { path: '/debate', label: 'Registrations', icon: Mic, roles: ACADEMIC },
       { path: '/debate-day', label: 'Debate day', icon: Swords, roles: ACADEMIC },
       { path: '/judging', label: 'Judging', icon: Gavel, roles: ['sg', 'academics', 'judge'] },
     ],
@@ -76,10 +84,6 @@ const NAV: { group: string; items: NavItem[] }[] = [
       { path: '/forms', label: 'Forms', icon: ClipboardList, roles: SG },
       { path: '/messages', label: 'Messages', icon: Mail, roles: SG },
     ],
-  },
-  {
-    group: 'Insights',
-    items: [{ path: '/analytics', label: 'Analytics', icon: BarChart3, roles: ACADEMIC }],
   },
   {
     group: 'Administration',

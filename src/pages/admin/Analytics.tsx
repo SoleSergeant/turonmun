@@ -265,11 +265,10 @@ const Analytics = () => {
     }
   };
 
-  const maxBarValue = Math.max(...data.registrationsByDay.map(d => d.count), 1);
 
   if (loading) {
     return (
-      <AdminLayout title="Analytics Dashboard">
+      <AdminLayout title="Analytics">
         <div className="flex items-center justify-center h-96">
           <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
         </div>
@@ -278,11 +277,11 @@ const Analytics = () => {
   }
 
   return (
-    <AdminLayout title="Analytics Dashboard">
+    <AdminLayout title="Analytics">
       <div className="space-y-6">
         {/* Header */}
         <div>
-          <h2 className="text-2xl font-semibold text-gray-900">Analytics Dashboard</h2>
+          <h2 className="text-2xl font-semibold text-gray-900">Analytics</h2>
           <p className="text-gray-600">Real-time registration trends and insights</p>
         </div>
 
@@ -330,55 +329,7 @@ const Analytics = () => {
           </div>
         </div>
 
-        {/* Registration Trend */}
-        <div className="bg-white rounded-lg shadow-sm border p-6">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900">Registration Trend</h3>
-              <p className="text-xs text-gray-500">Last 14 days</p>
-            </div>
-            <Calendar className="h-5 w-5 text-blue-500" />
-          </div>
-          <div className="relative" style={{ height: '160px' }}>
-            {/* Y-axis guides */}
-            <div className="absolute inset-0 flex flex-col justify-between pointer-events-none pb-6">
-              {[1, 0.75, 0.5, 0.25, 0].map(ratio => (
-                <div key={ratio} className="flex items-center gap-1">
-                  <span className="text-[9px] text-gray-300 w-5 text-right">{Math.round(maxBarValue * ratio)}</span>
-                  <div className="flex-1 border-t border-gray-100" />
-                </div>
-              ))}
-            </div>
-            {/* Bars */}
-            <div className="absolute inset-0 flex items-end gap-0.5 pl-7 pb-6">
-              {data.registrationsByDay.map((day) => {
-                const BAR_AREA = 110; // px available for bars
-                const barHeight = maxBarValue > 0 ? Math.max(Math.round((day.count / maxBarValue) * BAR_AREA), day.count > 0 ? 3 : 0) : 0;
-                const dateLabel = new Date(day.date + 'T00:00:00').toLocaleDateString('en', { month: 'short', day: 'numeric' });
-                return (
-                  <div key={day.date} className="flex-1 flex flex-col items-center justify-end group h-full">
-                    {/* Count on top */}
-                    {day.count > 0 && (
-                      <span className="text-[9px] font-bold text-blue-700 mb-0.5">{day.count}</span>
-                    )}
-                    {/* Bar */}
-                    <div
-                      className="w-full bg-blue-500 hover:bg-blue-600 transition-colors rounded-t"
-                      style={{ height: `${barHeight}px` }}
-                      title={`${dateLabel}: ${day.count} registrations`}
-                    />
-                    {/* Label */}
-                    <span className="text-[8px] text-gray-400 mt-1 whitespace-nowrap overflow-hidden text-center" style={{ maxWidth: '100%' }}>
-                      {dateLabel}
-                    </span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-
-        {/* Charts Row: Committee + Status */}
+        {/* Committees + locations */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Committee Distribution */}
           <div className="bg-white rounded-lg shadow-sm border p-6">
@@ -406,71 +357,6 @@ const Analytics = () => {
                   );
                 })
               )}
-            </div>
-          </div>
-
-          {/* Application Status */}
-          <div className="bg-white rounded-lg shadow-sm border p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Application Status</h3>
-            <div className="space-y-3">
-              {data.statusDistribution.map((item) => {
-                const pct = data.totalRegistrations > 0 ? Math.round((item.count / data.totalRegistrations) * 100) : 0;
-                return (
-                  <div key={item.status}>
-                    <div className="flex items-center justify-between mb-1">
-                      <div className="flex items-center space-x-2">
-                        <div className={`w-3 h-3 ${item.color} rounded-full`} />
-                        <span className="text-sm font-medium text-gray-700">{item.status}</span>
-                      </div>
-                      <span className="text-sm font-semibold text-gray-900">{item.count} <span className="text-gray-400 font-normal text-xs">({pct}%)</span></span>
-                    </div>
-                    <div className="w-full bg-gray-100 rounded-full h-2">
-                      <div className={`${item.color} h-2 rounded-full transition-all`} style={{ width: `${pct}%` }} />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-
-        {/* Payment + Revenue Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Payment Status */}
-          <div className="bg-white rounded-lg shadow-sm border p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-gray-900">Payment Status</h3>
-              <DollarSign className="h-5 w-5 text-green-500" />
-            </div>
-            <div className="space-y-3">
-              {data.paymentDistribution.map((item) => {
-                const pct = data.totalRegistrations > 0 ? Math.round((item.count / data.totalRegistrations) * 100) : 0;
-                return (
-                  <div key={item.status}>
-                    <div className="flex items-center justify-between mb-1">
-                      <div className="flex items-center space-x-2">
-                        <div className={`w-3 h-3 ${item.color} rounded-full`} />
-                        <span className="text-sm font-medium text-gray-700">{item.status}</span>
-                      </div>
-                      <span className="text-sm font-semibold text-gray-900">{item.count} <span className="text-gray-400 font-normal text-xs">({pct}%)</span></span>
-                    </div>
-                    <div className="w-full bg-gray-100 rounded-full h-2">
-                      <div className={`${item.color} h-2 rounded-full transition-all`} style={{ width: `${pct}%` }} />
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-            {/* Revenue summary */}
-            <div className="mt-5 pt-4 border-t border-gray-100 grid grid-cols-2 gap-4">
-              <div>
-                <p className="text-xs text-gray-500">Total Revenue</p>
-                <p className="text-lg font-bold text-gray-900">{data.totalRevenue.toLocaleString()} <span className="text-xs font-normal text-gray-500">UZS</span></p>
-              </div>
-              <div>
-                <p className="text-xs text-gray-500">Avg. Payment</p>
-                <p className="text-lg font-bold text-gray-900">{data.avgPayment.toLocaleString()} <span className="text-xs font-normal text-gray-500">UZS</span></p>
-              </div>
             </div>
           </div>
 

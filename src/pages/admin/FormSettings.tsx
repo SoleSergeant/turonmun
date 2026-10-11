@@ -2,11 +2,11 @@ import React, { useState, useEffect, useCallback } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import { supabase } from '@/integrations/supabase/client';
 import { getCurrentSeason, inSeason } from '@/lib/season';
-import type { FormSettings, CustomQuestion, FormQuestion } from '@/hooks/useFormSettings';
+import type { FormSettings, FormQuestion } from '@/hooks/useFormSettings';
 import { useToast } from '@/hooks/use-toast';
 import {
   ToggleLeft, ToggleRight, Calendar, Users, DollarSign,
-  Plus, Trash2, GripVertical, Loader2, Save, ClipboardList,
+  Plus, Trash2, Loader2, Save, ClipboardList,
   AlertCircle, CheckCircle2, Clock, RefreshCw, ChevronDown, ChevronUp,
   Eye, X, ChevronLeft, ChevronRight, EyeOff, Lock,
 } from 'lucide-react';
@@ -32,7 +32,6 @@ import { confirmAction } from '@/components/admin/ConfirmDialog';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
-const uuid = () => Math.random().toString(36).slice(2, 10);
 
 const BLANK_FORM_DATA = {
   fullName: '', dateOfBirth: '', gender: '', email: '', phone: '',
@@ -48,231 +47,6 @@ const BLANK_FORM_DATA = {
 };
 
 // ── Custom Questions Live Editor Step ──────────────────────────────────────────
-const CustomQuestionsEditorStep: React.FC<{
-  questions: CustomQuestion[];
-  onUpdate: (questions: CustomQuestion[]) => void;
-}> = ({ questions, onUpdate }) => {
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editDraft, setEditDraft] = useState<CustomQuestion | null>(null);
-  const [optionsText, setOptionsText] = useState('');
-
-  const inputE = 'w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white';
-
-  const startEdit = (q: CustomQuestion) => {
-    setEditDraft({ ...q });
-    setOptionsText((q.options ?? []).join('\n'));
-    setEditingId(q.id);
-  };
-
-  const startNew = () => {
-    const q: CustomQuestion = { id: Math.random().toString(36).slice(2, 10), label: '', type: 'text', required: false, options: [] };
-    setEditDraft(q);
-    setOptionsText('');
-    setEditingId(q.id);
-  };
-
-  const saveEdit = () => {
-    if (!editDraft || !editDraft.label.trim()) return;
-    const saved = { ...editDraft, options: optionsText ? optionsText.split('\n').map(s => s.trim()).filter(Boolean) : [] };
-    const exists = questions.some(q => q.id === saved.id);
-    onUpdate(exists ? questions.map(q => q.id === saved.id ? saved : q) : [...questions, saved]);
-    setEditingId(null);
-    setEditDraft(null);
-  };
-
-  const cancelEdit = () => { setEditingId(null); setEditDraft(null); };
-
-  const deleteQ = async (id: string) => {
-    if (!(await confirmAction('Delete this question?', { title: 'Delete question', danger: true }))) return;
-    onUpdate(questions.filter(q => q.id !== id));
-  };
-
-  const moveQ = (idx: number, dir: -1 | 1) => {
-    const qs = [...questions];
-    const target = idx + dir;
-    if (target < 0 || target >= qs.length) return;
-    [qs[idx], qs[target]] = [qs[target], qs[idx]];
-    onUpdate(qs);
-  };
-
-  const TYPE_LABELS: Record<string, string> = {
-    text: 'Short text', textarea: 'Long text', select: 'Dropdown', checkbox: 'Checkbox',
-  };
-
-  return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-        <div>
-          <h2 className="text-lg font-bold text-gray-900">Custom Questions</h2>
-          <p className="text-xs text-gray-400 mt-0.5">Edit here — changes save when you click "Save Changes" below</p>
-        </div>
-        <button
-          onClick={startNew}
-          className="flex items-center gap-1.5 px-3 py-2 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700 transition-colors font-medium"
-        >
-          <Plus size={14} /> Add Question
-        </button>
-      </div>
-
-      {/* Question list */}
-      <div className="divide-y divide-gray-100">
-        {questions.length === 0 && editingId === null && (
-          <div className="px-6 py-10 text-center text-gray-400 text-sm">
-            No custom questions yet. Click "Add Question" to create one.
-          </div>
-        )}
-
-        {questions.map((q, idx) => (
-          <div key={q.id}>
-            {/* Question row */}
-            <div className="flex items-center gap-3 px-6 py-4 hover:bg-gray-50 transition-colors">
-              {/* Reorder */}
-              <div className="flex flex-col gap-0.5 flex-shrink-0">
-                <button onClick={() => moveQ(idx, -1)} disabled={idx === 0}
-                  className="text-gray-300 hover:text-gray-600 disabled:opacity-30 text-xs leading-none">▲</button>
-                <button onClick={() => moveQ(idx, 1)} disabled={idx === questions.length - 1}
-                  className="text-gray-300 hover:text-gray-600 disabled:opacity-30 text-xs leading-none">▼</button>
-              </div>
-              <GripVertical size={14} className="text-gray-300 flex-shrink-0" />
-
-              {/* Info */}
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-gray-800 truncate">{q.label || <em className="text-gray-400">Untitled</em>}</p>
-                <p className="text-xs text-gray-400 mt-0.5">
-                  {TYPE_LABELS[q.type] ?? q.type}
-                  {q.required ? ' · Required' : ' · Optional'}
-                  {q.options && q.options.length > 0 ? ` · ${q.options.length} options` : ''}
-                </p>
-              </div>
-
-              {/* Actions */}
-              <div className="flex items-center gap-1 flex-shrink-0">
-                <button onClick={() => editingId === q.id ? cancelEdit() : startEdit(q)}
-                  className={`px-3 py-1.5 text-xs rounded-lg border transition-colors font-medium ${editingId === q.id ? 'bg-indigo-100 border-indigo-300 text-indigo-700' : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-50'}`}>
-                  {editingId === q.id ? 'Cancel' : 'Edit'}
-                </button>
-                <button onClick={() => deleteQ(q.id)}
-                  className="p-1.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
-                  <Trash2 size={14} />
-                </button>
-              </div>
-            </div>
-
-            {/* Inline editor — shown when this question is being edited */}
-            {editingId === q.id && editDraft && (
-              <div className="px-6 pb-5 pt-2 bg-indigo-50 border-t border-indigo-100">
-                <div className="space-y-3">
-                  <div>
-                    <label className="block text-xs font-semibold text-gray-600 mb-1">Question label *</label>
-                    <input className={inputE} placeholder="e.g. How did you hear about TuronMUN?"
-                      value={editDraft.label}
-                      onChange={e => setEditDraft(p => p ? { ...p, label: e.target.value } : p)} />
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className="block text-xs font-semibold text-gray-600 mb-1">Field type</label>
-                      <select className={inputE} value={editDraft.type}
-                        onChange={e => setEditDraft(p => p ? { ...p, type: e.target.value as CustomQuestion['type'] } : p)}>
-                        <option value="text">Short text</option>
-                        <option value="textarea">Long text</option>
-                        <option value="select">Dropdown select</option>
-                        <option value="checkbox">Checkbox (yes/no)</option>
-                      </select>
-                    </div>
-                    <div className="flex items-end pb-1">
-                      <label className="flex items-center gap-2 cursor-pointer text-sm text-gray-700">
-                        <input type="checkbox" className="rounded"
-                          checked={editDraft.required}
-                          onChange={e => setEditDraft(p => p ? { ...p, required: e.target.checked } : p)} />
-                        Required
-                      </label>
-                    </div>
-                  </div>
-                  {editDraft.type === 'select' && (
-                    <div>
-                      <label className="block text-xs font-semibold text-gray-600 mb-1">Options (one per line)</label>
-                      <textarea rows={4} className={`${inputE} resize-none font-mono text-xs`}
-                        placeholder={"Option A\nOption B\nOption C"}
-                        value={optionsText}
-                        onChange={e => setOptionsText(e.target.value)} />
-                    </div>
-                  )}
-                  <div className="flex gap-2 pt-1">
-                    <button onClick={saveEdit} disabled={!editDraft.label.trim()}
-                      className="px-4 py-1.5 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700 disabled:opacity-50 font-medium">
-                      Save Question
-                    </button>
-                    <button onClick={cancelEdit}
-                      className="px-4 py-1.5 border border-gray-300 text-sm rounded-lg hover:bg-gray-50">
-                      Cancel
-                    </button>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        ))}
-
-        {/* New question editor (when adding, no existing question selected) */}
-        {editingId !== null && !questions.some(q => q.id === editingId) && editDraft && (
-          <div className="px-6 py-5 bg-indigo-50 border-t border-indigo-100">
-            <p className="text-xs font-bold text-indigo-700 uppercase tracking-wide mb-3">New Question</p>
-            <div className="space-y-3">
-              <div>
-                <label className="block text-xs font-semibold text-gray-600 mb-1">Question label *</label>
-                <input className={inputE} placeholder="e.g. How did you hear about TuronMUN?"
-                  value={editDraft.label}
-                  onChange={e => setEditDraft(p => p ? { ...p, label: e.target.value } : p)} />
-              </div>
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-semibold text-gray-600 mb-1">Field type</label>
-                  <select className={inputE} value={editDraft.type}
-                    onChange={e => setEditDraft(p => p ? { ...p, type: e.target.value as CustomQuestion['type'] } : p)}>
-                    <option value="text">Short text</option>
-                    <option value="textarea">Long text</option>
-                    <option value="select">Dropdown select</option>
-                    <option value="checkbox">Checkbox (yes/no)</option>
-                  </select>
-                </div>
-                <div className="flex items-end pb-1">
-                  <label className="flex items-center gap-2 cursor-pointer text-sm text-gray-700">
-                    <input type="checkbox" className="rounded"
-                      checked={editDraft.required}
-                      onChange={e => setEditDraft(p => p ? { ...p, required: e.target.checked } : p)} />
-                    Required
-                  </label>
-                </div>
-              </div>
-              {editDraft.type === 'select' && (
-                <div>
-                  <label className="block text-xs font-semibold text-gray-600 mb-1">Options (one per line)</label>
-                  <textarea rows={4} className={`${inputE} resize-none font-mono text-xs`}
-                    placeholder={"Option A\nOption B\nOption C"}
-                    value={optionsText}
-                    onChange={e => setOptionsText(e.target.value)} />
-                </div>
-              )}
-              <div className="flex gap-2 pt-1">
-                <button onClick={saveEdit} disabled={!editDraft.label.trim()}
-                  className="px-4 py-1.5 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700 disabled:opacity-50 font-medium">
-                  Add Question
-                </button>
-                <button onClick={cancelEdit}
-                  className="px-4 py-1.5 border border-gray-300 text-sm rounded-lg hover:bg-gray-50">
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-};
-
-// ── Form Builder Section ───────────────────────────────────────────────────────
 const DEFAULT_STEP_COUNT = 4; // steps 1-4 are fully configurable; step 5 = fee/confirm
 
 const BLANK_FQ = (): FormQuestion => ({
@@ -564,27 +338,14 @@ const FormBuilderSection: React.FC<{
 // ── Form Preview Modal ──────────────────────────────────────────────────────────
 const FormPreviewModal: React.FC<{
   formType: 'delegate' | 'chair' | 'volunteer';
-  customQuestions: CustomQuestion[];
   formQuestions: FormQuestion[];
   stepLabels?: string[];
-  onUpdateQuestions: (qs: CustomQuestion[]) => void;
   onClose: () => void;
-}> = ({ formType, customQuestions, formQuestions, stepLabels, onUpdateQuestions, onClose }) => {
+}> = ({ formType, formQuestions, stepLabels, onClose }) => {
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({ ...BLANK_FORM_DATA });
 
-  // Local editable copy — changes propagate up to the draft via onUpdateQuestions
-  const [localQuestions, setLocalQuestions] = useState<CustomQuestion[]>(customQuestions);
-
-  const handleUpdateQuestions = (qs: CustomQuestion[]) => {
-    setLocalQuestions(qs);
-    onUpdateQuestions(qs);          // keep parent draft in sync
-  };
-
-  const hasCustomQ = localQuestions.length > 0 || step === 5;
-  // Always show step 5 as the questions/editor step; step 6 (or 5 if no questions) = submit
-  const QUESTIONS_STEP = 5;
-  const SUBMIT_STEP = 6;
+  const SUBMIT_STEP = 5;
   const totalSteps = SUBMIT_STEP;
 
   const noop = () => {};
@@ -612,7 +373,7 @@ const FormPreviewModal: React.FC<{
 
   const STEP_LABELS: Record<number, string> = {
     1: 'Personal Info', 2: 'Preferences', 3: 'Committees',
-    4: 'Essay', 5: 'Questions', 6: 'Submit',
+    4: 'Essay', 5: 'Submit',
   };
   const stepLabel = (s: number) => STEP_LABELS[s] ?? `Step ${s}`;
 
@@ -624,7 +385,6 @@ const FormPreviewModal: React.FC<{
           <Eye size={16} />
           <span>
             Preview — {formType === 'delegate' ? 'Delegate Registration' : formType === 'chair' ? 'Chair Application' : 'Volunteer Application'}
-            <span className="ml-2 text-xs font-normal bg-amber-200 text-amber-900 px-2 py-0.5 rounded-full">{localQuestions.length} custom question{localQuestions.length !== 1 ? 's' : ''}</span>
           </span>
         </div>
         <div className="flex items-center gap-3">
@@ -693,15 +453,7 @@ const FormPreviewModal: React.FC<{
               if (step === 4) return <EssayStep formData={formData} handleChange={handleChange} nextStep={noop} prevStep={noop} />;
             })()}
 
-            {/* Step 5 — Custom Questions editor (always shown so admin can add questions) */}
-            {step === QUESTIONS_STEP && (
-              <CustomQuestionsEditorStep
-                questions={localQuestions}
-                onUpdate={handleUpdateQuestions}
-              />
-            )}
-
-            {/* Step 6 — Submit step (always disabled in preview) */}
+            {/* Last step — submit (always disabled in preview) */}
             {step === SUBMIT_STEP && (
               <div className="relative">
                 <div className="absolute inset-0 z-10 bg-white/60 backdrop-blur-[2px] rounded-2xl flex items-center justify-center">
@@ -727,10 +479,6 @@ const FormPreviewModal: React.FC<{
   );
 };
 
-const BLANK_Q: Omit<CustomQuestion, 'id'> = {
-  label: '', type: 'text', required: false, options: [],
-};
-
 const inputCls = 'w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent';
 const labelCls = 'block text-xs font-semibold text-gray-600 mb-1';
 const sectionCls = 'bg-white rounded-xl border border-gray-200 shadow-sm p-5';
@@ -746,8 +494,6 @@ const FormSettingsPage = () => {
   // Local draft for the active tab
   const [draft, setDraft] = useState<FormSettings | null>(null);
   // Custom-question being edited
-  const [editingQ, setEditingQ] = useState<CustomQuestion | null>(null);
-  const [newOptions, setNewOptions] = useState('');
   // Form preview overlay
   const [previewOpen, setPreviewOpen] = useState(false);
 
@@ -790,7 +536,7 @@ const FormSettingsPage = () => {
 
   // Sync draft when tab changes
   useEffect(() => {
-    setDraft(settings[tab] ? { ...settings[tab], custom_questions: [...(settings[tab].custom_questions ?? [])] } : null);
+    setDraft(settings[tab] ? { ...settings[tab] } : null);
   }, [tab, settings]);
 
   const set = (field: keyof FormSettings, value: any) =>
@@ -820,7 +566,6 @@ const FormSettingsPage = () => {
           fee_amount: Number(draft.fee_amount),
           ielts_discount: Number(draft.ielts_discount),
           sat_discount: Number(draft.sat_discount),
-          custom_questions: draft.custom_questions,
           step_labels: draft.step_labels,
           form_questions: draft.form_questions ?? [],
         })
@@ -834,43 +579,6 @@ const FormSettingsPage = () => {
     } finally {
       setSaving(false);
     }
-  };
-
-  // ── Custom questions helpers ───────────────────────────────────────────────
-  const addQuestion = () => {
-    const q: CustomQuestion = { ...BLANK_Q, id: uuid() };
-    setEditingQ(q);
-    setNewOptions('');
-  };
-
-  const saveQuestion = () => {
-    if (!editingQ || !editingQ.label.trim()) return;
-    const q = { ...editingQ, options: newOptions ? newOptions.split('\n').map(s => s.trim()).filter(Boolean) : [] };
-    setDraft(prev => {
-      if (!prev) return prev;
-      const exists = prev.custom_questions.some(x => x.id === q.id);
-      return {
-        ...prev,
-        custom_questions: exists
-          ? prev.custom_questions.map(x => x.id === q.id ? q : x)
-          : [...prev.custom_questions, q],
-      };
-    });
-    setEditingQ(null);
-  };
-
-  const deleteQuestion = (id: string) =>
-    setDraft(prev => prev ? { ...prev, custom_questions: prev.custom_questions.filter(q => q.id !== id) } : prev);
-
-  const moveQuestion = (idx: number, dir: -1 | 1) => {
-    setDraft(prev => {
-      if (!prev) return prev;
-      const qs = [...prev.custom_questions];
-      const target = idx + dir;
-      if (target < 0 || target >= qs.length) return prev;
-      [qs[idx], qs[target]] = [qs[target], qs[idx]];
-      return { ...prev, custom_questions: qs };
-    });
   };
 
   // ── Derived ────────────────────────────────────────────────────────────────
@@ -901,10 +609,8 @@ const FormSettingsPage = () => {
       {previewOpen && (
         <FormPreviewModal
           formType={tab}
-          customQuestions={draft?.custom_questions ?? []}
           formQuestions={draft?.form_questions ?? []}
           stepLabels={draft?.step_labels}
-          onUpdateQuestions={qs => setDraft(prev => prev ? { ...prev, custom_questions: qs } : prev)}
           onClose={() => setPreviewOpen(false)}
         />
       )}
@@ -1102,105 +808,6 @@ const FormSettingsPage = () => {
                   </div>
                 ))}
               </div>
-            </div>
-
-            {/* ── Custom Questions ── */}
-            <div className={sectionCls}>
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="font-semibold text-gray-900 flex items-center gap-2">
-                  <ClipboardList size={16} className="text-indigo-600" /> Custom Questions
-                </h3>
-                <button onClick={addQuestion}
-                  className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-600 text-white text-xs rounded-lg hover:bg-indigo-700 transition-colors">
-                  <Plus size={13} /> Add Question
-                </button>
-              </div>
-
-              {draft.custom_questions.length === 0 ? (
-                <p className="text-sm text-gray-400 italic text-center py-4">No custom questions yet. Click "Add Question" to create one.</p>
-              ) : (
-                <div className="space-y-2">
-                  {draft.custom_questions.map((q, idx) => (
-                    <div key={q.id} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-                      {/* Reorder */}
-                      <div className="flex flex-col gap-0.5">
-                        <button onClick={() => moveQuestion(idx, -1)} disabled={idx === 0}
-                          className="text-gray-300 hover:text-gray-600 disabled:opacity-30 text-xs leading-none">▲</button>
-                        <button onClick={() => moveQuestion(idx, 1)} disabled={idx === draft.custom_questions.length - 1}
-                          className="text-gray-300 hover:text-gray-600 disabled:opacity-30 text-xs leading-none">▼</button>
-                      </div>
-                      <GripVertical size={14} className="text-gray-300 flex-shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-800 truncate">{q.label}</p>
-                        <p className="text-xs text-gray-400">
-                          {q.type}{q.required ? ' · required' : ' · optional'}
-                          {q.options && q.options.length > 0 ? ` · ${q.options.length} options` : ''}
-                        </p>
-                      </div>
-                      <button onClick={() => { setEditingQ({ ...q }); setNewOptions((q.options ?? []).join('\n')); }}
-                        className="text-xs px-2 py-1 bg-white border border-gray-300 rounded hover:bg-gray-50">Edit</button>
-                      <button onClick={() => deleteQuestion(q.id)}
-                        className="p-1 text-red-400 hover:text-red-600 hover:bg-red-50 rounded">
-                        <Trash2 size={14} />
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Question editor inline */}
-              {editingQ && (
-                <div className="mt-4 p-4 bg-indigo-50 border border-indigo-200 rounded-xl space-y-3">
-                  <p className="text-xs font-bold text-indigo-700 uppercase tracking-wide">
-                    {draft.custom_questions.some(q => q.id === editingQ.id) ? 'Edit' : 'New'} Question
-                  </p>
-                  <div>
-                    <label className={labelCls}>Question label *</label>
-                    <input className={inputCls} placeholder="e.g. How did you hear about TuronMUN?"
-                      value={editingQ.label}
-                      onChange={e => setEditingQ(prev => prev ? { ...prev, label: e.target.value } : prev)} />
-                  </div>
-                  <div className="grid grid-cols-2 gap-3">
-                    <div>
-                      <label className={labelCls}>Field type</label>
-                      <select className={inputCls} value={editingQ.type}
-                        onChange={e => setEditingQ(prev => prev ? { ...prev, type: e.target.value as CustomQuestion['type'] } : prev)}>
-                        <option value="text">Short text</option>
-                        <option value="textarea">Long text</option>
-                        <option value="select">Dropdown select</option>
-                        <option value="checkbox">Checkbox (yes/no)</option>
-                      </select>
-                    </div>
-                    <div className="flex items-end pb-1">
-                      <label className="flex items-center gap-2 cursor-pointer text-sm text-gray-700">
-                        <input type="checkbox" className="rounded"
-                          checked={editingQ.required}
-                          onChange={e => setEditingQ(prev => prev ? { ...prev, required: e.target.checked } : prev)} />
-                        Required
-                      </label>
-                    </div>
-                  </div>
-                  {editingQ.type === 'select' && (
-                    <div>
-                      <label className={labelCls}>Options (one per line)</label>
-                      <textarea rows={4} className={`${inputCls} resize-none font-mono text-xs`}
-                        placeholder={"Option A\nOption B\nOption C"}
-                        value={newOptions}
-                        onChange={e => setNewOptions(e.target.value)} />
-                    </div>
-                  )}
-                  <div className="flex gap-2 pt-1">
-                    <button onClick={saveQuestion} disabled={!editingQ.label.trim()}
-                      className="px-4 py-1.5 bg-indigo-600 text-white text-sm rounded-lg hover:bg-indigo-700 disabled:opacity-50">
-                      Save Question
-                    </button>
-                    <button onClick={() => setEditingQ(null)}
-                      className="px-4 py-1.5 border border-gray-300 text-sm rounded-lg hover:bg-gray-50">
-                      Cancel
-                    </button>
-                  </div>
-                </div>
-              )}
             </div>
 
             {/* ── Form Builder ── */}
