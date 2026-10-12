@@ -1,75 +1,27 @@
 import React, { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
-import {
-  Users,
-  FileText,
-  TrendingUp,
-  CheckCircle
-} from 'lucide-react';
-import { useOutletContext } from 'react-router-dom';
+import { Link, useOutletContext } from 'react-router-dom';
+import { ChevronRight } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import CheckInPass from '@/components/dashboard/CheckInPass';
+import { AWARD_DEFS } from './Awards';
 
-interface OverviewProps {
+interface OverviewContext {
   committees: any[];
-  applications: any[];
   positionPapers: any[];
   loading: boolean;
   assignedDelegates: any[];
-  submittedPapers: number;
+  noCommittee: boolean;
 }
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1,
-    },
-  },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 16 },
-  visible: { opacity: 1, y: 0 },
-};
+const isChairSubdomain = window.location.hostname.startsWith('chair.');
+const at = (sub: string) => (isChairSubdomain ? `/${sub}` : `/chair-dashboard/${sub}`);
 
 export default function ChairOverview() {
-  const context = useOutletContext<OverviewProps>();
-  const { committees, applications, positionPapers, loading, assignedDelegates, submittedPapers } = context || {};
-  const totalDelegates = assignedDelegates?.length || 0;
-  const totalCommittees = committees?.length || 0;
-  const totalPapers = positionPapers?.length || 0;
-  const submissionRate = totalDelegates > 0
-    ? Math.round((submittedPapers / totalDelegates) * 100)
-    : 0;
-
-  const stats = [
-    {
-      title: 'Total Delegates',
-      value: totalDelegates,
-      change: `${totalDelegates} currently assigned`,
-      icon: Users,
-      color: 'from-blue-400 to-blue-500'
-    },
-    {
-      title: 'Papers Submitted',
-      value: submittedPapers,
-      change: `${submissionRate}% submission rate`,
-      icon: FileText,
-      color: 'from-green-400 to-green-500'
-    },
-    {
-      title: 'Committees You Chair',
-      value: totalCommittees,
-      change: `${totalCommittees} active committee${totalCommittees === 1 ? '' : 's'}`,
-      icon: CheckCircle,
-      color: 'from-purple-400 to-purple-500'
-    }
-  ];
-
-  // Fetch chair's own admin record for the check-in QR
+  const { committees = [], positionPapers = [], loading, assignedDelegates = [], noCommittee } = useOutletContext<OverviewContext>() || ({} as OverviewContext);
+  const committee = committees[0];
   const [me, setMe] = useState<{ id: string; full_name: string | null; checked_in_at: string | null } | null>(null);
+  const [awardsPicked, setAwardsPicked] = useState<number | null>(null);
+
   useEffect(() => {
     (async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -83,105 +35,59 @@ export default function ChairOverview() {
     })();
   }, []);
 
-  if (loading) {
-    return (
-      <div className="flex items-center justify-center min-h-64">
-        <p className="text-white/60">Loading chair dashboard...</p>
-      </div>
-    );
-  }
+  useEffect(() => {
+    if (!committee?.id) return;
+    (supabase.from('committee_awards' as any) as any)
+      .select('award_type', { count: 'exact', head: true })
+      .eq('committee_id', committee.id)
+      .then(({ count, error }: any) => setAwardsPicked(error ? null : count ?? 0));
+  }, [committee?.id]);
+
+  if (loading) return <p className="py-16 text-center text-white/60">Loading…</p>;
+
+  const seated = assignedDelegates.length;
+  const arrived = assignedDelegates.filter(d => d.checked_in_at).length;
+  const submitted = positionPapers.filter(p => p.status && p.status !== 'draft').length;
+  const toReview = positionPapers.filter(p => p.status === 'submitted').length;
+
+  const rows = [
+    { label: 'Delegates seated', value: seated, hint: seated ? `${arrived} checked in` : 'None yet', to: 'delegates' },
+    { label: 'Position papers', value: submitted, hint: toReview ? `${toReview} waiting for your review` : submitted ? 'All reviewed' : 'None submitted yet', to: 'papers' },
+    { label: 'Awards picked', value: awardsPicked ?? '–', hint: `of ${AWARD_DEFS.length}`, to: 'awards' },
+  ];
 
   return (
-    <motion.div
-      className="space-y-6"
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-    >
-      {/* Checked-in confirmation banner */}
+    <div className="space-y-6">
+      {me && !me.checked_in_at && <CheckInPass kind="chair" id={me.id} name={me.full_name || 'Chair'} detail={committee?.name} />}
       {me?.checked_in_at && (
-        <motion.div
-          variants={itemVariants}
-          className="glass-card p-5 border border-emerald-400/40 bg-gradient-to-r from-emerald-500/10 to-transparent flex items-center gap-4"
-        >
-          <div className="w-12 h-12 rounded-xl bg-emerald-400/20 border border-emerald-400/40 flex items-center justify-center text-2xl">🟢</div>
-          <div>
-            <p className="text-emerald-300 font-bold text-sm uppercase tracking-widest mb-1">Checked in</p>
-            <p className="text-white text-lg font-semibold">You're all set — enjoy the conference!</p>
-            <p className="text-white/60 text-xs mt-0.5">
-              Arrived at {new Date(me.checked_in_at).toLocaleString()}
-            </p>
-          </div>
-        </motion.div>
+        <p className="rounded-xl border border-emerald-400/30 bg-emerald-400/10 px-5 py-4 text-emerald-200">
+          You're checked in ({new Date(me.checked_in_at).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' })}).
+        </p>
       )}
 
-      {/* Check-in pass until they've arrived */}
-      {me && !me.checked_in_at && (
-        <motion.div variants={itemVariants}>
-          <CheckInPass kind="chair" id={me.id} name={me.full_name || 'Chair'} />
-        </motion.div>
+      {!noCommittee && committee && (
+        <>
+          <section className="rounded-xl border border-white/10 bg-white/[0.04] p-5 sm:p-6">
+            <h2 className="text-xl font-semibold text-white">{committee.name}</h2>
+            {committee.description && <p className="mt-1 max-w-3xl text-white/65">{committee.description}</p>}
+            <Link to={at('command')} className="mt-4 inline-flex items-center gap-1 rounded-lg bg-gold-400 px-4 py-2.5 text-sm font-semibold text-diplomatic-950 hover:bg-gold-300">
+              Open MUN Command <ChevronRight className="h-4 w-4" aria-hidden />
+            </Link>
+          </section>
+
+          <ul className="grid gap-4 sm:grid-cols-3">
+            {rows.map(r => (
+              <li key={r.label}>
+                <Link to={at(r.to)} className="block h-full rounded-xl border border-white/10 bg-white/[0.04] p-5 hover:border-white/25">
+                  <p className="text-sm text-white/60">{r.label}</p>
+                  <p className="mt-1 text-3xl font-semibold tabular-nums text-white">{r.value}</p>
+                  <p className="mt-1 text-sm text-white/55">{r.hint}</p>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </>
       )}
-
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat, index) => {
-          const Icon = stat.icon;
-          return (
-            <motion.div key={stat.title} variants={itemVariants}>
-              <div className="glass-card p-6 relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-white/5 via-transparent to-gold-400/5 opacity-60" />
-                <div className="relative z-10">
-                  <div className="flex items-center justify-between mb-4">
-                    <div className={`w-12 h-12 bg-gradient-to-br ${stat.color} rounded-full flex items-center justify-center`}>
-                      <Icon className="w-6 h-6 text-white" />
-                    </div>
-                    <TrendingUp className="w-4 h-4 text-green-400" />
-                  </div>
-                  <h3 className="text-2xl font-bold text-white mb-1">{stat.value}</h3>
-                  <p className="text-sm text-white/60">{stat.title}</p>
-                  <p className="text-xs text-gold-400 mt-2">{stat.change}</p>
-                </div>
-              </div>
-            </motion.div>
-          );
-        })}
-      </div>
-
-      {/* Your Committees */}
-      <motion.div variants={itemVariants} className="glass-card p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-semibold text-white flex items-center gap-2">
-            <Users className="w-5 h-5" />
-            Your Committees
-          </h2>
-          <span className="text-sm text-gold-400">{totalCommittees} active</span>
-        </div>
-        {totalCommittees === 0 ? (
-          <p className="text-sm text-white/60">You are not assigned to any committees yet.</p>
-        ) : (
-          <div className="space-y-4">
-            {committees.map((committee) => {
-              const delegateCount = assignedDelegates.filter(app => app.assigned_committee_id === committee.id).length;
-              return (
-                <div key={committee.id} className="glass-panel p-4 rounded-lg">
-                  <div className="flex items-center justify-between mb-2">
-                    <div>
-                      <h3 className="text-white font-semibold">{committee.name}</h3>
-                      <p className="text-xs text-white/60">{committee.abbreviation}</p>
-                    </div>
-                    <span className="px-2 py-1 bg-green-500/20 text-green-400 text-xs rounded-full">
-                      Active
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between text-sm text-white/70">
-                    <span>{delegateCount} delegate{delegateCount === 1 ? '' : 's'}</span>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </motion.div>
-    </motion.div>
+    </div>
   );
 }

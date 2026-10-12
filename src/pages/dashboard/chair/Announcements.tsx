@@ -49,7 +49,7 @@ export default function ChairAnnouncements() {
 
   // Load announcements for all the chair's committees
   useEffect(() => {
-    if (!committees?.length) return;
+    if (!committees?.length) { if (!ctxLoading) setLoadingAnn(false); return; }
     const ids = committees.map((c: any) => c.id);
     supabase
       .from('committee_announcements' as any)
@@ -60,7 +60,7 @@ export default function ChairAnnouncements() {
         if (!error && data) setAnnouncements(data);
         setLoadingAnn(false);
       });
-  }, [committees]);
+  }, [committees, ctxLoading]);
 
   const handleSend = async () => {
     if (!announcementTitle.trim() || !announcementContent.trim()) {
@@ -79,7 +79,7 @@ export default function ChairAnnouncements() {
       const { data: adminUser } = await supabase
         .from('admin_users')
         .select('id')
-        .eq('email', user?.email)
+        .eq('email', (user?.email || '').toLowerCase())
         .single();
 
       const { data, error } = await (supabase
@@ -110,7 +110,11 @@ export default function ChairAnnouncements() {
 
   const handleDelete = async (id: string) => {
     if (!confirm('Delete this announcement?')) return;
-    await (supabase.from('committee_announcements' as any) as any).delete().eq('id', id);
+    const { data, error } = await (supabase.from('committee_announcements' as any) as any).delete().eq('id', id).select('id');
+    if (error || !data?.length) {
+      toast({ title: "Couldn't delete the announcement", description: error?.message, variant: 'destructive' });
+      return;
+    }
     setAnnouncements(prev => prev.filter(a => a.id !== id));
   };
 

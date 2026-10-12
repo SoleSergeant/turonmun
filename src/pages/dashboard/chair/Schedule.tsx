@@ -106,7 +106,6 @@ export default function ChairSchedule() {
             return (
               <motion.div
                 key={id}
-                initial={{ opacity: 0, x: -8 }}
                 animate={{ opacity: 1, x: 0 }}
                 transition={{ delay: idx * 0.03 }}
               >

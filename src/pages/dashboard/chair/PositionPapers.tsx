@@ -18,11 +18,13 @@ import {
 } from 'lucide-react';
 import { useOutletContext } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 
 interface PositionPapersProps {
   committees: any[];
   applications: any[];
   positionPapers: any[];
+  setPositionPapers: (papers: any[]) => void;
   loading: boolean;
   assignedDelegates: any[];
   submittedPapers: number;
@@ -45,8 +47,10 @@ const itemVariants = {
 
 export default function ChairPositionPapers() {
   const context = useOutletContext<PositionPapersProps>();
-  const { committees, applications, positionPapers: papersData, loading, assignedDelegates, submittedPapers } = context || {};
-  const [positionPapers, setPositionPapers] = useState(papersData || []);
+  const { committees, applications, positionPapers: papersData, setPositionPapers, loading, assignedDelegates, submittedPapers } = context || {};
+  // Shared with the layout, so papers loaded after this page opened still show.
+  const positionPapers = papersData || [];
+  const { toast } = useToast();
   const [selectedPaper, setSelectedPaper] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<'all' | 'submitted' | 'draft'>('all');
@@ -82,7 +86,7 @@ export default function ChairPositionPapers() {
     // Fallback for any legacy text-only papers
     const delegate = applications.find(app => app.id === paper.application_id);
     const fileName = `position_paper_${delegate?.full_name || 'delegate'}_${new Date().toISOString().split('T')[0]}.txt`;
-    const content = `Position Paper\n\nDelegate: ${delegate?.full_name}\nEmail: ${delegate?.email}\nCommittee: ${committees.find(c => c.id === delegate?.assigned_committee_id)?.name}\nSubmitted: ${new Date(paper.created_at).toLocaleDateString()}\n\n${paper.content || '(no text — see uploaded file)'}`;
+    const content = `Position Paper\n\nDelegate: ${delegate?.full_name}\nCommittee: ${committees.find(c => c.id === delegate?.assigned_committee_id)?.name}\nSubmitted: ${new Date(paper.created_at).toLocaleDateString()}\n\n${paper.content || '(no text — see uploaded file)'}`;
     const blob = new Blob([content], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const link = document.createElement('a');
@@ -99,7 +103,7 @@ export default function ChairPositionPapers() {
       // Get current user
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
-        alert('Error: No authenticated user found');
+        toast({ title: 'You are signed out', description: 'Sign in again to save this review.', variant: 'destructive' });
         return;
       }
 
@@ -107,11 +111,11 @@ export default function ChairPositionPapers() {
       const { data: adminUser, error: adminError } = await supabase
         .from('admin_users')
         .select('id')
-        .eq('email', user.email)
+        .eq('email', (user.email || '').toLowerCase())
         .single();
 
       if (adminError || !adminUser) {
-        alert('Error: User not authorized');
+        toast({ title: 'Not allowed', description: 'Your account is not set up as a chair.', variant: 'destructive' });
         return;
       }
 
@@ -129,8 +133,7 @@ export default function ChairPositionPapers() {
         .eq('id', selectedPaper.id);
 
       if (updateError) {
-        console.error('Error updating position paper:', updateError);
-        alert('Error submitting review');
+        toast({ title: "Couldn't save the review", description: updateError.message, variant: 'destructive' });
         return;
       }
 
@@ -141,12 +144,11 @@ export default function ChairPositionPapers() {
           : paper
       ));
 
-      alert('Review submitted successfully!');
+      toast({ title: 'Review saved' });
       setShowReviewModal(false);
       setSelectedPaper(null);
     } catch (error) {
-      console.error('Error submitting review:', error);
-      alert('Error submitting review');
+      toast({ title: "Couldn't save the review", description: (error as any)?.message, variant: 'destructive' });
     }
   };
 

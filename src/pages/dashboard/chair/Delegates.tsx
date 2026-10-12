@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Users, Mail, Phone, Globe, Flag, Search, Download, FileText, X } from 'lucide-react';
+import { Users, Globe, Flag, Search, Download, FileText, X } from 'lucide-react';
 import { useOutletContext } from 'react-router-dom';
 import { downloadCsv, datedFilename } from '@/lib/csv';
 
@@ -22,7 +22,7 @@ export default function ChairDelegates() {
   // Filter delegates based on search
   const filteredDelegates = (assignedDelegates || []).filter(delegate =>
     delegate.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    delegate.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    delegate.assigned_country?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     delegate.institution?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -33,13 +33,10 @@ export default function ChairDelegates() {
 
   // Export delegates to CSV
   const handleExport = () => {
-    if (!assignedDelegates || assignedDelegates.length === 0) {
-      alert('No delegates to export');
-      return;
-    }
+    if (!assignedDelegates || assignedDelegates.length === 0) return;
 
     // Create CSV header
-    const headers = ['Name', 'Email', 'Phone', 'Institution', 'Country', 'Position Paper Status'];
+    const headers = ['Name', 'Country', 'School or university', 'Position paper'];
 
     // Create CSV rows
     const rows = assignedDelegates.map(delegate => {
@@ -49,10 +46,8 @@ export default function ChairDelegates() {
 
       return [
         delegate.full_name || '',
-        delegate.email || '',
-        delegate.phone || '',
+        delegate.assigned_country || '',
         delegate.institution || '',
-        delegate.country || '',
         statusText
       ];
     });
@@ -81,7 +76,8 @@ export default function ChairDelegates() {
         </div>
         <button
           onClick={handleExport}
-          className="flex items-center gap-2 px-4 py-2 bg-gold-500 hover:bg-gold-600 text-white rounded-lg transition-colors"
+          disabled={!assignedDelegates?.length}
+          className="disabled:opacity-50 flex items-center gap-2 px-4 py-2 bg-gold-500 hover:bg-gold-600 text-white rounded-lg transition-colors"
         >
           <Download className="w-4 h-4" />
           Export List
@@ -93,7 +89,7 @@ export default function ChairDelegates() {
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-white/40" />
         <input
           type="text"
-          placeholder="Search delegates by name, email, or institution..."
+          placeholder="Search by name, country or school"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="w-full pl-10 pr-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-gold-400"
@@ -169,9 +165,6 @@ export default function ChairDelegates() {
             return (
               <motion.div
                 key={delegate.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.05 }}
                 className="glass-card p-6 border border-white/10 hover:border-gold-400/30 transition-all"
               >
                 <div className="flex items-start justify-between">
@@ -182,18 +175,6 @@ export default function ChairDelegates() {
                       </div>
                       <div>
                         <h3 className="text-lg font-semibold text-white">{delegate.full_name}</h3>
-                        <div className="flex items-center gap-4 text-sm text-white/60">
-                          <span className="flex items-center gap-1">
-                            <Mail className="w-3 h-3" />
-                            {delegate.email}
-                          </span>
-                          {delegate.phone && (
-                            <span className="flex items-center gap-1">
-                              <Phone className="w-3 h-3" />
-                              {delegate.phone}
-                            </span>
-                          )}
-                        </div>
                       </div>
                     </div>
 
@@ -209,7 +190,7 @@ export default function ChairDelegates() {
                         <p className="text-white/40 text-xs mb-1">Country</p>
                         <p className="text-white text-sm flex items-center gap-1">
                           <Flag className="w-3 h-3" />
-                          {delegate.country}
+                          {delegate.assigned_country || 'Not assigned yet'}
                         </p>
                       </div>
                       <div>

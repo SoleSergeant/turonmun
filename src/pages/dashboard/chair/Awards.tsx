@@ -5,7 +5,7 @@ import { Trophy, Lock, Save, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
-const AWARD_DEFS = [
+export const AWARD_DEFS = [
   { key: 'best_delegate', label: 'Best Delegate', color: 'text-gold-400' },
   { key: 'best_speaker', label: 'Best Speaker', color: 'text-emerald-400' },
   { key: 'honorable_mention', label: 'Honorable Mention', color: 'text-blue-400' },
@@ -33,7 +33,7 @@ export default function ChairAwards() {
     const load = async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
-        const { data: admin } = await supabase.from('admin_users').select('id').eq('email', user?.email).single();
+        const { data: admin } = await supabase.from('admin_users').select('id').eq('email', (user?.email || '').toLowerCase()).single();
         setAdminId((admin as any)?.id ?? null);
 
         const { data: settings } = await (supabase.from('award_settings' as any) as any).select('locked').eq('id', 1).single();
@@ -65,7 +65,7 @@ export default function ChairAwards() {
     assignedDelegates.filter((d: any) => d.assigned_committee_id === committeeId);
 
   const labelFor = (d: any) => {
-    const c = countryByApp[d.id] || d.country;
+    const c = countryByApp[d.id] || d.assigned_country;
     return c ? `${d.full_name} — ${c}` : d.full_name;
   };
 
@@ -82,14 +82,15 @@ export default function ChairAwards() {
             award_type: def.key,
             application_id: appId,
             winner_name: d?.full_name ?? null,
-            winner_country: countryByApp[appId] ?? d?.country ?? null,
+            winner_country: countryByApp[appId] || d?.assigned_country || null,
             nominated_by: adminId,
             updated_at: new Date().toISOString(),
           }, { onConflict: 'committee_id,award_type' });
           if (error) throw error;
         } else {
-          await (supabase.from('committee_awards' as any) as any)
+          const { error } = await (supabase.from('committee_awards' as any) as any)
             .delete().eq('committee_id', committeeId).eq('award_type', def.key);
+          if (error) throw error;
         }
       }
       toast({ title: 'Awards saved' });
@@ -105,7 +106,7 @@ export default function ChairAwards() {
   }
 
   return (
-    <motion.div className="space-y-6" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+    <motion.div className="space-y-6" animate={{ opacity: 1 }}>
       <div>
         <h2 className="text-2xl font-bold text-white flex items-center gap-2">
           <Trophy className="w-6 h-6 text-gold-400" /> Committee Awards

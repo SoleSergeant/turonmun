@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 import { getCountryCode } from '@/utils/countryCodes';
 import {
   Play, Pause, RotateCcw, SkipForward, UserPlus, X, Gavel, Vote,
@@ -108,7 +109,7 @@ export default function CommandCenter() {
 
     const loadCountries = () => {
       (supabase.from('country_assignments') as any)
-        .select('application_id, country_name')
+        .select('application_id, country, country_name')
         .eq('committee_id', committeeId)
         .then(({ data }: { data: any[] | null }) => {
           if (!data) return;
@@ -172,7 +173,7 @@ export default function CommandCenter() {
     const att = attendance.find(a => a.application_id === app.id);
     if (att?.status === 'absent') return false;
     if (speakerSearch) {
-      const assigned = assignedCountries[app.id] || app.country || '';
+      const assigned = assignedCountries[app.id] || (app as any).assigned_country || '';
       return (
         app.full_name.toLowerCase().includes(speakerSearch.toLowerCase()) ||
         assigned.toLowerCase().includes(speakerSearch.toLowerCase())
@@ -184,9 +185,9 @@ export default function CommandCenter() {
   const presentCount = attendance.filter(a => a.status === 'present').length;
   const quorum = Math.ceil(applications.length / 2);
 
-  // Returns the MUN-assigned country for a delegate, falling back to their residential country
+  // The delegate's MUN-assigned country (never their home country).
   const getAssignedCountry = (app: Tables<'applications'>) =>
-    assignedCountries[app.id] || app.country || '';
+    assignedCountries[app.id] || (app as any).assigned_country || '';
 
   // Sorted list of unique assigned country names (for the motion proposer dropdown)
   const assignedCountryNames = [...new Set(Object.values(assignedCountries))].sort();
@@ -200,7 +201,7 @@ export default function CommandCenter() {
 
   const handleAddManual = async () => {
     if (!manualName.trim() || !session) return;
-    await (supabase.from('speakers_list') as any).insert({
+    const { error } = await (supabase.from('speakers_list') as any).insert({
       session_id: session.id,
       application_id: null,
       delegate_name: manualName.trim(),
@@ -208,6 +209,7 @@ export default function CommandCenter() {
       position: speakers.length,
       speaking_time: parseInt(speakerTime) || 60,
     });
+    if (error) { toast({ title: "Couldn't add the speaker", description: error.message, variant: 'destructive' }); return; }
     setManualName(''); setManualCountry('');
     setShowAddSpeaker(false);
   };
@@ -259,9 +261,11 @@ export default function CommandCenter() {
     const newOrder = [...waitingSpeakers];
     const [removed] = newOrder.splice(di, 1);
     newOrder.splice(ti, 0, removed);
-    await Promise.all(newOrder.map((s, idx) =>
+    const results = await Promise.all(newOrder.map((s, idx) =>
       (supabase.from('speakers_list') as any).update({ position: idx }).eq('id', s.id)
     ));
+    const failed = results.find((r: any) => r.error);
+    if (failed) toast({ title: "Couldn't reorder speakers", description: failed.error.message, variant: 'destructive' });
     setDraggedId(null); setDragOverId(null);
   };
 
@@ -537,7 +541,7 @@ export default function CommandCenter() {
                   applications.map(app => {
                     const status = getRollStatus(app.id);
                     const munCountry = getAssignedCountry(app);
-                    const code = getCountryCode(munCountry || (app.country ?? '')).toLowerCase();
+                    const code = getCountryCode(munCountry || '').toLowerCase();
                     return (
                       <div key={app.id} className="flex items-center gap-3 px-5 py-3 border-b border-gray-100 last:border-0">
                         <img

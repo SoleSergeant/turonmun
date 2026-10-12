@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 import type {
   CommitteeSession,
   SpeakerEntry,
@@ -15,6 +16,12 @@ import type {
   SessionLog,
   EventType,
 } from '@/types/munCommand';
+
+// A failed write during a live session must be visible, or the chair thinks it worked.
+function saved<T extends { error?: { message?: string } | null }>(res: T): T {
+  if (res?.error) toast({ title: "Couldn't save that change", description: res.error.message || 'Check your connection and try again.', variant: 'destructive' });
+  return res;
+}
 
 interface UseMunCommandOptions {
   committeeId: string;
@@ -231,7 +238,7 @@ export function useMunCommand({ committeeId, isChair = false }: UseMunCommandOpt
 
   const createSession = useCallback(async () => {
     const { data: { user } } = await supabase.auth.getUser();
-    const { data, error } = await (supabase
+    const { data, error } = saved(await (supabase
       .from('committee_sessions') as any)
       .insert({
         committee_id: committeeId,
@@ -240,19 +247,19 @@ export function useMunCommand({ committeeId, isChair = false }: UseMunCommandOpt
         created_by: user?.id || null,
       })
       .select('*')
-      .single();
+      .single());
     if (!error && data) setSession(data as CommitteeSession);
     return data as CommitteeSession;
   }, [committeeId]);
 
   const updateSession = useCallback(async (updates: Partial<CommitteeSession>) => {
     if (!session) return;
-    const { data, error } = await (supabase
+    const { data, error } = saved(await (supabase
       .from('committee_sessions') as any)
       .update({ ...updates, updated_at: new Date().toISOString() })
       .eq('id', session.id)
       .select('*')
-      .single();
+      .single());
     if (!error && data) setSession(data as CommitteeSession);
   }, [session]);
 
@@ -263,12 +270,12 @@ export function useMunCommand({ committeeId, isChair = false }: UseMunCommandOpt
 
   const logEvent = useCallback(async (type: EventType, message: string, data: any = {}) => {
     if (!session) return;
-    await (supabase.from('session_logs') as any).insert({
+    saved(await (supabase.from('session_logs') as any).insert({
       session_id: session.id,
       event_type: type,
       message,
       event_data: data
-    });
+    }));
   }, [session]);
 
   const startTimer = useCallback(async (durationSeconds: number) => {
@@ -310,7 +317,7 @@ export function useMunCommand({ committeeId, isChair = false }: UseMunCommandOpt
   const addSpeaker = useCallback(async (applicationId: string, name: string, country: string, speakingTime = 60) => {
     if (!session) return;
     const nextPosition = speakers.length;
-    const { data, error } = await (supabase
+    const { data, error } = saved(await (supabase
       .from('speakers_list') as any)
       .insert({
         session_id: session.id,
@@ -321,7 +328,7 @@ export function useMunCommand({ committeeId, isChair = false }: UseMunCommandOpt
         speaking_time: speakingTime,
       })
       .select('*')
-      .single();
+      .single());
     if (!error && data) {
       setSpeakers(prev => [...prev, data as SpeakerEntry]);
     }
@@ -332,16 +339,16 @@ export function useMunCommand({ committeeId, isChair = false }: UseMunCommandOpt
     // Mark the current speaker as done
     const currentSpeaker = speakers.find(s => s.status === 'speaking');
     if (currentSpeaker) {
-      await (supabase.from('speakers_list') as any)
+      saved(await (supabase.from('speakers_list') as any)
         .update({ status: 'done' })
-        .eq('id', currentSpeaker.id);
+        .eq('id', currentSpeaker.id));
     }
     // Find the next waiting speaker
     const next = speakers.find(s => s.status === 'waiting');
     if (next) {
-      await (supabase.from('speakers_list') as any)
+      saved(await (supabase.from('speakers_list') as any)
         .update({ status: 'speaking', spoke_at: new Date().toISOString() })
-        .eq('id', next.id);
+        .eq('id', next.id));
       const totalTime = next.speaking_time + bonusSeconds;
       // Load the timer but leave it paused — chair starts it manually
       await updateSession({
@@ -365,7 +372,7 @@ export function useMunCommand({ committeeId, isChair = false }: UseMunCommandOpt
   }, [session, speakers, updateSession, loadSpeakers]);
 
   const removeSpeaker = useCallback(async (speakerId: string) => {
-    await (supabase.from('speakers_list') as any).delete().eq('id', speakerId);
+    saved(await (supabase.from('speakers_list') as any).delete().eq('id', speakerId));
     setSpeakers(prev => prev.filter(s => s.id !== speakerId));
   }, []);
 
@@ -418,20 +425,20 @@ export function useMunCommand({ committeeId, isChair = false }: UseMunCommandOpt
       } as Attendance];
     });
     // Persist to DB
-    await (supabase.from('attendance') as any).upsert({
+    saved(await (supabase.from('attendance') as any).upsert({
       session_id: session.id,
       application_id: applicationId,
       status,
       is_voting: isVoting,
       updated_at: new Date().toISOString()
-    });
+    }));
   }, [session]);
 
   const toggleVotingPower = useCallback(async (applicationId: string, canVote: boolean) => {
     if (!session) return;
-    await (supabase.from('attendance') as any).update({
+    saved(await (supabase.from('attendance') as any).update({
       is_voting: canVote
-    }).eq('session_id', session.id).eq('application_id', applicationId);
+    }).eq('session_id', session.id).eq('application_id', applicationId));
   }, [session]);
 
   // ─── Motion Actions ─────────────────────────────────────
@@ -473,7 +480,7 @@ export function useMunCommand({ committeeId, isChair = false }: UseMunCommandOpt
     setMotions(prev => [optimisticMotion, ...prev]);
 
     // Persist with the same client-generated ID (no .select() — avoids RLS SELECT block)
-    await (supabase.from('motions') as any).insert({
+    saved(await (supabase.from('motions') as any).insert({
       id: localId,
       session_id: session.id,
       proposed_by: applicationId || null,
@@ -483,7 +490,7 @@ export function useMunCommand({ committeeId, isChair = false }: UseMunCommandOpt
       description,
       speaking_time: speakingTime || null,
       total_time: totalTime || null,
-    });
+    }));
 
     await logEvent('motion_proposed', `New motion by ${proposerCountry}: ${description}`);
 
@@ -492,30 +499,30 @@ export function useMunCommand({ committeeId, isChair = false }: UseMunCommandOpt
   }, [session, logEvent]);
 
   const secondMotion = useCallback(async (motionId: string, applicationId: string) => {
-    await (supabase.from('motions') as any)
+    saved(await (supabase.from('motions') as any)
       .update({ status: 'seconded', seconded_by: applicationId })
-      .eq('id', motionId);
+      .eq('id', motionId));
     if (session) await loadMotions(session.id);
   }, [session, loadMotions]);
 
   const openVoting = useCallback(async (motionId: string) => {
     // Optimistic update — flip to 'voting' immediately so the panel appears at once
     setMotions(prev => prev.map(m => m.id === motionId ? { ...m, status: 'voting' as const } : m));
-    await (supabase.from('motions') as any)
+    saved(await (supabase.from('motions') as any)
       .update({ status: 'voting' })
-      .eq('id', motionId);
+      .eq('id', motionId));
     await updateSession({ current_mode: 'voting' });
     await logEvent('voting_opened', `Voting opened for motion`);
     // No loadMotions here — optimistic update + realtime payload handler keeps state correct
   }, [updateSession, logEvent]);
 
   const castVote = useCallback(async (motionId: string, applicationId: string, choice: VoteChoice) => {
-    await (supabase.from('votes') as any)
+    saved(await (supabase.from('votes') as any)
       .upsert({
         motion_id: motionId,
         application_id: applicationId,
         vote: choice,
-      });
+      }));
     await loadVotes(motionId);
   }, [loadVotes]);
 
@@ -529,9 +536,9 @@ export function useMunCommand({ committeeId, isChair = false }: UseMunCommandOpt
       m.id === motionId ? { ...m, status: passed ? 'passed' as const : 'failed' as const } : m
     ));
 
-    await (supabase.from('motions') as any)
+    saved(await (supabase.from('motions') as any)
       .update({ status: passed ? 'passed' : 'failed' })
-      .eq('id', motionId);
+      .eq('id', motionId));
 
     if (passed && motion) {
       if (motion.motion_type === 'moderated_caucus') {
