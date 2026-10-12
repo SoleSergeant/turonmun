@@ -94,7 +94,7 @@ export default function Settings() {
   ];
 
   return (
-    <motion.div className="space-y-6" variants={containerVariants} initial="hidden" animate="visible">
+    <motion.div className="space-y-6" variants={containerVariants} animate="visible">
       <motion.div variants={itemVariants}>
         <h1 className="text-2xl md:text-3xl font-display font-bold text-white mb-1">Settings</h1>
         <p className="text-white/50">Manage your account</p>

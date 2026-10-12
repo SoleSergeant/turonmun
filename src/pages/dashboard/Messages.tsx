@@ -61,7 +61,6 @@ export default function Messages() {
     <motion.div
       className="space-y-6 pb-12"
       variants={containerVariants}
-      initial="hidden"
       animate="visible"
     >
       {/* Header */}

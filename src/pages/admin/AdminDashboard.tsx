@@ -34,18 +34,18 @@ interface Todo {
   path: string;
   icon: LucideIcon;
   roles: Role[];
-  tone: string;
 }
 
+// null = couldn't be counted (query failed or migration not applied); never shown as "all clear".
 interface Snapshot {
   pendingReview: number;
   decisionsUnsent: number | null;
   unpaid: number;
-  paidNoSeat: number;
+  paidNoSeat: number | null;
   seatsUnannounced: number | null;
   pendingChairs: number;
-  pendingVolunteers: number;
-  unansweredMessages: number;
+  pendingVolunteers: number | null;
+  unansweredMessages: number | null;
 }
 
 interface Stats {
@@ -56,6 +56,7 @@ interface Stats {
 }
 
 const ACADEMIC: Role[] = ['sg', 'academics'];
+const STATUS_LABEL: Record<string, string> = { pending: 'Pending', approved: 'Accepted', rejected: 'Rejected', waitlisted: 'Waitlisted' };
 
 const APP_COLUMNS = 'id, status, payment_status, payment_amount, assigned_committee_id, application_type, checked_in_at, created_at';
 
@@ -65,6 +66,7 @@ async function selectWithOptional(table: string, base: string, optional: string,
   const first = await run(`${base}, ${optional}`);
   if (!first.error) return { rows: (first.data || []) as any[], hasOptional: true };
   const second = await run(base);
+  if (second.error) throw second.error;
   return { rows: (second.data || []) as any[], hasOptional: false };
 }
 
@@ -85,7 +87,7 @@ const AdminDashboard = () => {
             const r = await (supabase.from('country_assignments') as any).select('application_id, notified_at');
             if (!r.error) return { rows: (r.data || []) as any[], hasOptional: true };
             const r2 = await (supabase.from('country_assignments') as any).select('application_id');
-            return { rows: (r2.data || []) as any[], hasOptional: false };
+            return { rows: (r2.data || []) as any[], hasOptional: false, failed: !!r2.error };
           })(),
           (supabase.from('contact_messages') as any).select('id, responded_at'),
           inSeason((supabase.from('volunteer_applications') as any).select('id, status, created_at'), season),
@@ -106,11 +108,11 @@ const AdminDashboard = () => {
             ? delegates.filter(a => (a.status === 'approved' || a.status === 'rejected') && !a.decision_emailed_at).length
             : null,
           unpaid: approved.filter(a => a.payment_status !== 'paid').length,
-          paidNoSeat: approved.filter(a => a.payment_status === 'paid' && !seatedIds.has(a.id)).length,
+          paidNoSeat: (seats as any).failed ? null : approved.filter(a => a.payment_status === 'paid' && !seatedIds.has(a.id)).length,
           seatsUnannounced: seats.hasOptional ? seats.rows.filter(s => !s.notified_at).length : null,
           pendingChairs: chairs.filter(a => !a.status || a.status === 'pending').length,
-          pendingVolunteers: ((volunteers.data || []) as any[]).filter(v => v.status === 'pending').length,
-          unansweredMessages: ((messages.data || []) as any[]).filter(m => !m.responded_at).length,
+          pendingVolunteers: volunteers.error ? null : ((volunteers.data || []) as any[]).filter(v => v.status === 'pending').length,
+          unansweredMessages: messages.error ? null : ((messages.data || []) as any[]).filter(m => !m.responded_at).length,
         });
         setRecent((recentApps.data || []) as any[]);
         setStats({
@@ -119,7 +121,7 @@ const AdminDashboard = () => {
             seated: seatedIds.has(a.id), checked_in: !!a.checked_in_at,
           })),
           chairs: chairs.map(a => ({ created_at: a.created_at, status: a.status })),
-          volunteers: (volunteers.data || []) as StatRow[],
+          volunteers: volunteers.error ? [] : (volunteers.data || []) as StatRow[],
           debaters: debate.error ? null : ((debate.data || []) as StatRow[]),
         });
       } catch (err: any) {
@@ -129,19 +131,21 @@ const AdminDashboard = () => {
   }, []);
 
   const todos: Todo[] = snap ? [
-    { key: 'review', count: snap.pendingReview, title: 'Applications to review', hint: 'Delegate applications waiting for a decision', path: '/delegates?stage=review', icon: UserCheck, roles: ACADEMIC, tone: 'text-purple-600 bg-purple-50' },
-    { key: 'decisions', count: snap.decisionsUnsent, title: 'Decision emails not sent', hint: 'Accepted or rejected, but not told yet', path: '/delegates', icon: Send, roles: ACADEMIC, tone: 'text-blue-600 bg-blue-50' },
-    { key: 'unpaid', count: snap.unpaid, title: 'Accepted but unpaid', hint: 'Send a payment reminder from Delegates', path: '/delegates?stage=unpaid', icon: CreditCard, roles: ACADEMIC, tone: 'text-amber-600 bg-amber-50' },
-    { key: 'seat', count: snap.paidNoSeat, title: 'Paid, no seat yet', hint: 'Ready to allocate', path: '/allocation', icon: MapPin, roles: ACADEMIC, tone: 'text-teal-600 bg-teal-50' },
-    { key: 'announce', count: snap.seatsUnannounced, title: 'Seats not announced', hint: 'Seated delegates who haven’t been emailed', path: '/allocation', icon: Mail, roles: ACADEMIC, tone: 'text-indigo-600 bg-indigo-50' },
-    { key: 'chairs', count: snap.pendingChairs, title: 'Chair applications', hint: 'Waiting for a decision', path: '/chairs', icon: Shield, roles: ACADEMIC, tone: 'text-orange-600 bg-orange-50' },
-    { key: 'volunteers', count: snap.pendingVolunteers, title: 'Volunteer applications', hint: 'Waiting for a decision', path: '/volunteers', icon: Heart, roles: ['sg', 'logistics'], tone: 'text-rose-600 bg-rose-50' },
-    { key: 'messages', count: snap.unansweredMessages, title: 'Unanswered messages', hint: 'Contact form messages without a reply', path: '/messages', icon: MessageSquare, roles: ['sg'], tone: 'text-red-600 bg-red-50' },
+    { key: 'review', count: snap.pendingReview, title: 'Applications to review', hint: 'Delegate applications waiting for a decision', path: '/delegates?stage=review', icon: UserCheck, roles: ACADEMIC },
+    { key: 'decisions', count: snap.decisionsUnsent, title: 'Decision emails not sent', hint: 'Accepted or rejected, but not told yet', path: '/delegates', icon: Send, roles: ACADEMIC },
+    { key: 'unpaid', count: snap.unpaid, title: 'Accepted but unpaid', hint: 'Send a payment reminder from Delegates', path: '/delegates?stage=unpaid', icon: CreditCard, roles: ACADEMIC },
+    { key: 'seat', count: snap.paidNoSeat, title: 'Paid, no seat yet', hint: 'Ready to allocate', path: '/allocation', icon: MapPin, roles: ACADEMIC },
+    { key: 'announce', count: snap.seatsUnannounced, title: 'Seats not announced', hint: 'Seated delegates who haven’t been emailed', path: '/allocation', icon: Mail, roles: ACADEMIC },
+    { key: 'chairs', count: snap.pendingChairs, title: 'Chair applications', hint: 'Waiting for a decision', path: '/chairs', icon: Shield, roles: ACADEMIC },
+    { key: 'volunteers', count: snap.pendingVolunteers, title: 'Volunteer applications', hint: 'Waiting for a decision', path: '/volunteers', icon: Heart, roles: ['sg', 'logistics'] },
+    { key: 'messages', count: snap.unansweredMessages, title: 'Unanswered messages', hint: 'Contact form messages without a reply', path: '/messages', icon: MessageSquare, roles: ['sg'] },
   ] : [];
 
-  const visible = role ? todos.filter(t => t.roles.includes(role) && t.count !== null) : [];
-  const open = visible.filter(t => (t.count ?? 0) > 0);
-  const done = visible.filter(t => t.count === 0);
+  const mine = role ? todos.filter(t => t.roles.includes(role)) : [];
+  const open = mine.filter(t => (t.count ?? 0) > 0);
+  const done = mine.filter(t => t.count === 0);
+  // Decision/announce counts are null by design until their migrations run; only flag real failures.
+  const unknown = mine.filter(t => t.count === null && t.key !== 'decisions' && t.key !== 'announce');
   const canSeeDelegates = !!role && ACADEMIC.includes(role);
 
   return (
@@ -162,36 +166,40 @@ const AdminDashboard = () => {
             </p>
           </div>
 
-          {open.length > 0 && (
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-              {open.map(t => (
-                <Link
-                  key={t.key}
-                  to={adminPath(t.path)}
-                  className="group flex items-center gap-4 rounded-xl border bg-white p-5 shadow-sm transition hover:border-diplomatic-200 hover:shadow-md"
-                >
-                  <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${t.tone}`}>
-                    <t.icon className="h-6 w-6" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <p className="text-2xl font-bold text-gray-900">{t.count}</p>
-                    <p className="font-medium text-gray-900">{t.title}</p>
-                    <p className="truncate text-xs text-gray-500">{t.hint}</p>
-                  </div>
-                  <ChevronRight className="h-5 w-5 text-gray-300 transition group-hover:translate-x-1 group-hover:text-diplomatic-500" />
-                </Link>
-              ))}
-            </div>
+          {(open.length > 0 || done.length > 0) && (
+            <section aria-labelledby="todo-title" className="rounded-xl border bg-white shadow-sm">
+              <h3 id="todo-title" className="border-b px-5 py-3 font-semibold text-gray-900">To do</h3>
+              {open.length > 0 && (
+                <ul className="divide-y divide-gray-100">
+                  {open.map(t => (
+                    <li key={t.key}>
+                      <Link to={adminPath(t.path)} className="group flex items-center gap-4 px-5 py-3 hover:bg-gray-50 focus-visible:bg-gray-50 focus-visible:outline-none">
+                        <span className="w-10 shrink-0 text-right text-xl font-semibold tabular-nums text-gray-900">{t.count}</span>
+                        <t.icon className="h-4 w-4 shrink-0 text-gray-400" aria-hidden />
+                        <span className="min-w-0 flex-1">
+                          <span className="block font-medium text-gray-900">{t.title}</span>
+                          <span className="block text-sm text-gray-500">{t.hint}</span>
+                        </span>
+                        <ChevronRight className="h-4 w-4 shrink-0 text-gray-300 group-hover:text-diplomatic-600" aria-hidden />
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {done.length > 0 && (
+                <p className={`flex items-start gap-2 px-5 py-3 text-sm text-gray-500 ${open.length ? 'border-t' : ''}`}>
+                  <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-green-600" aria-hidden />
+                  <span><span className="font-medium text-gray-700">All clear:</span> {done.map(t => t.title.toLowerCase()).join(', ')}.</span>
+                </p>
+              )}
+            </section>
           )}
 
-          {done.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {done.map(t => (
-                <span key={t.key} className="inline-flex items-center gap-1 rounded-full bg-green-50 px-3 py-1 text-xs text-green-700">
-                  <CheckCircle2 className="h-3.5 w-3.5" /> {t.title}: all clear
-                </span>
-              ))}
-            </div>
+          {unknown.length > 0 && (
+            <p className="flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-4 py-2.5 text-sm text-amber-800">
+              <AlertCircle className="h-4 w-4 shrink-0" aria-hidden />
+              Couldn't count: {unknown.map(t => t.title.toLowerCase()).join(', ')}. Reload the page to try again.
+            </p>
           )}
 
           {canSeeDelegates && stats && <DashboardStats {...stats} />}
@@ -204,7 +212,11 @@ const AdminDashboard = () => {
               </div>
               <ul className="divide-y divide-gray-100">
                 {recent.map(a => (
-                  <li key={a.id} className="flex items-center justify-between gap-4 px-5 py-3 text-sm">
+                  <li key={a.id}>
+                    <Link
+                      to={adminPath(isChairApplication(a) ? '/chairs' : `/delegates?open=${a.id}`)}
+                      className="flex items-center justify-between gap-4 px-5 py-3 text-sm hover:bg-gray-50 focus-visible:bg-gray-50 focus-visible:outline-none"
+                    >
                     <div className="min-w-0">
                       <p className="truncate font-medium text-gray-900">
                         {a.full_name}
@@ -213,14 +225,15 @@ const AdminDashboard = () => {
                       <p className="truncate text-xs text-gray-500">{a.institution}</p>
                     </div>
                     <div className="flex shrink-0 items-center gap-3 text-xs text-gray-500">
-                      <span className="inline-flex items-center gap-1"><Clock className="h-3 w-3" />{new Date(a.created_at).toLocaleDateString()}</span>
+                      <span className="inline-flex items-center gap-1"><Clock className="h-3 w-3" aria-hidden />{new Date(a.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}</span>
                       <span className={`rounded-full px-2 py-0.5 font-semibold ${
                         a.status === 'approved' ? 'bg-green-100 text-green-700'
                         : a.status === 'rejected' ? 'bg-red-100 text-red-700'
                         : a.status === 'waitlisted' ? 'bg-orange-100 text-orange-700'
                         : 'bg-yellow-100 text-yellow-700'
-                      }`}>{a.status || 'pending'}</span>
+                      }`}>{STATUS_LABEL[a.status || 'pending'] ?? a.status}</span>
                     </div>
+                    </Link>
                   </li>
                 ))}
               </ul>

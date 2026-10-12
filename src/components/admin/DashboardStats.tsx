@@ -47,7 +47,7 @@ function TypeTile({ icon: Icon, label, total, week, to }: { icon: LucideIcon; la
       </div>
       <p className="mt-1 text-3xl font-semibold tabular-nums text-gray-900">{total}</p>
       <p className={`text-xs ${week > 0 ? 'text-green-700' : 'text-gray-400'}`}>
-        {week > 0 ? `+${week} this week` : 'none this week'}
+        {week > 0 ? `+${week} in the last 7 days` : 'none in the last 7 days'}
       </p>
     </Link>
   );

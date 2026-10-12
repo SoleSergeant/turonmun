@@ -1,46 +1,15 @@
 import React, { useEffect, useState } from 'react';
-import { motion } from 'framer-motion';
-import {
-  FileText,
-  Upload,
-  Download,
-  CheckCircle,
-  AlertCircle,
-  Clock,
-  Edit3,
-  Save,
-  X,
-  Eye,
-  Calendar,
-  CreditCard,
-  User,
-  Mail,
-  School,
-  MapPin,
-  Users,
-  Send,
-  Loader2
-} from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Edit3, Save, X, Loader2 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import type { Tables } from '@/integrations/supabase/types';
 import { useContent } from '@/content/store';
+import DelegateStatusCard from '@/components/dashboard/DelegateStatusCard';
+import { delegateStatus } from '@/lib/delegateStatus';
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: {
-    opacity: 1,
-    transition: {
-      staggerChildren: 0.1
-    }
-  }
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0 }
-};
+const card = 'rounded-xl border border-white/10 bg-white/[0.04] p-5 sm:p-6';
 
 export default function MyApplication() {
   const general = useContent('general');
@@ -85,10 +54,6 @@ export default function MyApplication() {
     }
   };
 
-  const documents = [
-    { name: 'Application Form', status: 'uploaded', uploadDate: application?.created_at || 'N/A', size: '—', type: 'Record' },
-  ];
-
   useEffect(() => {
     const loadApplication = async () => {
       // Wait for auth to finish initialising before doing anything
@@ -100,7 +65,6 @@ export default function MyApplication() {
       }
 
       try {
-        console.log('Querying applications for user_id:', user.id);
         const { data, error } = await supabase
           .from('applications')
           .select('*')
@@ -109,7 +73,6 @@ export default function MyApplication() {
           .limit(1)
           .single();
 
-        console.log('Supabase response:', { data, error });
         if (!error && data) {
           setApplication(data);
         } else {
@@ -123,56 +86,6 @@ export default function MyApplication() {
     loadApplication();
   }, [user, authLoading]);
 
-  const isAllocated = !!application?.assigned_committee_id;
-  const isApproved = application?.status === 'approved' || isAllocated;
-  const isPaid = application?.payment_status === 'paid';
-  const isReviewed = !!application?.reviewed_at || isApproved || isPaid;
-
-  const applicationStatus = {
-    current: isAllocated ? 'completed' : isPaid ? 'allocated' : isApproved ? 'payment' : isReviewed ? 'confirmed' : 'review',
-    steps: [
-      {
-        name: 'Application Submitted',
-        status: 'completed' as "completed" | "current" | "pending",
-        date: application?.created_at || null,
-        description: 'Your application has been received'
-      },
-      {
-        name: 'Reviewed',
-        status: (isReviewed ? 'completed' : 'current') as "completed" | "current" | "pending",
-        date: application?.reviewed_at || null,
-        description: 'Application reviewed by the team'
-      },
-      {
-        name: 'Confirmation',
-        status: (isApproved ? 'completed' : isReviewed ? 'current' : 'pending') as "completed" | "current" | "pending",
-        date: null,
-        description: 'Application confirmed by the team'
-      },
-      {
-        name: 'Payment',
-        status: (isPaid ? 'completed' : isApproved ? 'current' : 'pending') as "completed" | "current" | "pending",
-        date: null,
-        description: 'Conference fee payment'
-      },
-      {
-        name: 'Committee Allocation',
-        status: (isAllocated ? 'completed' : isPaid ? 'current' : 'pending') as "completed" | "current" | "pending",
-        date: null,
-        description: 'Committee and country assignment'
-      },
-    ]
-  };
-
-  const paymentInfo = {
-    amount: application?.payment_amount || 0,
-    currency: 'UZS',
-    status: application?.payment_status || 'unpaid',
-    transactionId: application?.payment_reference || 'Not available',
-    paymentDate: application?.updated_at || 'Not available',
-    method: 'Telegram',
-  };
-
   if (loading || authLoading) {
     return (
       <div className="flex items-center justify-center min-h-64">
@@ -183,190 +96,46 @@ export default function MyApplication() {
 
   if (notFound || !application) {
     return (
-      <motion.div
-        className="space-y-6"
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-      >
-        <motion.div variants={itemVariants}>
-          <h1 className="text-2xl md:text-3xl font-display font-bold text-white mb-2">
-            My Application
-          </h1>
-          <p className="text-white/70">
-            Manage your conference application and track progress
+      <div className="space-y-6">
+        <h1 className="text-2xl font-semibold text-white md:text-3xl">My application</h1>
+        <section className={card}>
+          <h2 className="text-xl font-semibold text-white">No application yet</h2>
+          <p className="mt-1 max-w-xl text-white/70">
+            We couldn't find an application for this account. If you already applied, check that you're signed in with the same email you used on the form.
           </p>
-        </motion.div>
-
-        <motion.div variants={itemVariants} className="glass-card p-8 text-center">
-          <div className="w-16 h-16 bg-white/10 rounded-full flex items-center justify-center mx-auto mb-4">
-            <AlertCircle className="h-8 w-8 text-gold-400" />
-          </div>
-          <h3 className="text-xl font-semibold text-white mb-2">No Application Found</h3>
-          <p className="text-white/70 mb-6 max-w-md mx-auto">
-            We couldn’t find an application associated with your account. Make sure you submitted the registration form with the same email you’re using to log in.
-          </p>
-          <motion.button
-            className="bg-gold-500 hover:bg-gold-600 px-6 py-3 text-white transition-colors rounded-lg font-medium"
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={() => window.location.href = '/register'}
-          >
-            Go to Registration
-          </motion.button>
-        </motion.div>
-      </motion.div>
+          <Link to="/register" className="mt-4 inline-block rounded-lg bg-gold-400 px-4 py-2.5 text-sm font-semibold text-diplomatic-950 hover:bg-gold-300">Apply now</Link>
+        </section>
+      </div>
     );
   }
 
+  const status = delegateStatus(application as any);
+
   return (
-    <motion.div
-      className="space-y-6"
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-    >
-      {/* Header */}
-      <motion.div variants={itemVariants} className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-        <div>
-          <h1 className="text-2xl md:text-4xl font-display font-bold text-white mb-2 tracking-tight">
-            My Application
-          </h1>
-          <p className="text-white/50 text-sm md:text-base font-medium">
-            Manage your conference application and track progress
-          </p>
-        </div>
-        <div className="flex items-center space-x-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10 text-white/40 text-[10px] font-bold uppercase tracking-widest">
-          <Clock size={12} className="text-gold-400" />
-          <span>Last Sync: {new Date().toLocaleDateString()}</span>
-        </div>
-      </motion.div>
+    <div className="space-y-6 pb-12">
+      <h1 className="text-2xl font-semibold text-white md:text-3xl">My application</h1>
 
-      {/* Payment instructions banner — shown once accepted */}
-      {isApproved && !isPaid && (
-        <motion.div
-          variants={itemVariants}
-          className="glass-card p-5 border border-gold-400/30 bg-gradient-to-r from-gold-400/10 to-transparent flex flex-col md:flex-row md:items-center gap-4"
-        >
-          <div className="w-10 h-10 rounded-xl bg-gold-400/20 border border-gold-400/30 flex items-center justify-center shrink-0">
-            <Send className="h-5 w-5 text-gold-400" />
-          </div>
-          <div className="flex-1">
-            <p className="text-gold-300 font-bold text-sm mb-1">Payment required to confirm your place</p>
-            <p className="text-white/60 text-xs leading-relaxed">
-              Your application has been accepted. Our team will contact you via Telegram to arrange payment of{' '}
-              <span className="text-gold-400 font-bold">{(application?.payment_amount || 0).toLocaleString()} UZS</span>.
-              Please ensure your Telegram is reachable. Questions? Message us at{' '}
-              <a href={general.telegram_url} target="_blank" rel="noreferrer" className="text-gold-400 hover:underline">@TuronMUN</a>.
-            </p>
-          </div>
-          <a
-            href={general.telegram_url}
-            target="_blank"
-            rel="noreferrer"
-            className="shrink-0 flex items-center gap-2 px-4 py-2 bg-gold-400 text-diplomatic-900 rounded-lg text-xs font-bold hover:bg-gold-300 transition-colors"
-          >
-            <Send className="h-3.5 w-3.5" />
-            Contact Us
-          </a>
-        </motion.div>
-      )}
+      <DelegateStatusCard status={status} telegramUrl={general.telegram_url} />
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left Column - Application Status */}
-        <motion.div variants={itemVariants} className="lg:col-span-5 space-y-6 flex flex-col h-full">
-           <div className="glass-card p-6 border-white/10 flex-1">
-            <div className="flex items-center space-x-4 mb-10">
-              <div className="w-12 h-12 bg-gradient-to-br from-blue-400/20 to-blue-500/30 rounded-xl flex items-center justify-center border border-white/10 shadow-inner">
-                <FileText className="h-6 w-6 text-blue-400" />
-              </div>
-              <div>
-                <h3 className="text-lg font-bold tracking-tight text-white">Application Journey</h3>
-                <p className="text-white/40 text-[10px] uppercase tracking-widest font-bold">Process Tracking</p>
-              </div>
-            </div>
-
-            <div className="relative pl-10 space-y-10 group/journey">
-              {/* Timeline line */}
-              <div className="absolute left-[19px] top-2 bottom-2 w-0.5 bg-gradient-to-b from-emerald-500/50 via-white/10 to-white/5" />
-              
-              {applicationStatus.steps.map((step, index) => (
-                <div key={step.name} className="relative flex items-start group/step">
-                  {/* Status indicator */}
-                  <div className={`absolute -left-[31px] w-6 h-6 rounded-full border-4 border-diplomatic-900 z-10 transition-all duration-500 flex items-center justify-center ${
-                    step.status === 'completed'
-                      ? 'bg-emerald-500 shadow-[0_0_12px_rgba(16,185,129,0.4)]'
-                      : step.status === 'current'
-                        ? 'bg-gold-500 shadow-[0_0_15px_rgba(247,163,28,0.5)] animate-pulse'
-                        : 'bg-white/10 border-white/5'
-                  }`}>
-                    {step.status === 'completed' && <CheckCircle size={10} className="text-diplomatic-900" />}
-                  </div>
-
-                  <div className={`flex-1 transition-all duration-300 ${
-                    step.status === 'completed' || step.status === 'current' ? 'opacity-100' : 'opacity-40'
-                  }`}>
-                    <div className={`flex items-center justify-between gap-4 mb-1`}>
-                      <p className={`text-sm font-bold tracking-tight ${
-                        step.status === 'current' ? 'text-gold-400' : 'text-white'
-                      }`}>
-                        {step.name}
-                      </p>
-                      {step.date && (
-                        <span className="text-[10px] font-mono text-white/30 bg-white/5 px-1.5 py-0.5 rounded border border-white/5">
-                          {new Date(step.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-                        </span>
-                      )}
-                    </div>
-                    
-                    <p className="text-[10px] text-white/60 font-medium leading-relaxed">{step.description}</p>
-                    
-                    {step.status === 'current' && (
-                      <motion.div 
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        className="inline-flex items-center gap-1.5 px-2 py-1 rounded bg-gold-400/10 border border-gold-400/20 mt-2"
-                      >
-                        <AlertCircle size={10} className="text-gold-400" />
-                        <span className="text-[9px] text-gold-400 font-bold uppercase tracking-wider">In Progress</span>
-                      </motion.div>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Right Column - Data Cards */}
-        <div className="lg:col-span-7 space-y-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
+        <div className="space-y-6 lg:col-span-12">
           {/* Personal Information */}
-          <motion.div variants={itemVariants} className="glass-card hover:border-white/20 transition-colors p-6 flex flex-col group">
-            <div className="flex items-center justify-between mb-8">
-              <div className="flex items-center space-x-4">
-                <div className="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center border border-white/10 group-hover:border-white/20 transition-colors">
-                  <User className="w-5 h-5 text-white/60 group-hover:text-white transition-colors" />
-                </div>
-                <h3 className="text-lg font-bold tracking-tight text-white">Delegates details</h3>
-              </div>
-              <div className="px-3 py-1 rounded-full bg-white/5 border border-white/10">
-                <span className="text-[10px] font-mono text-white/40 uppercase tracking-widest">Profile</span>
-              </div>
-            </div>
+          <section className={card}>
+            <h2 className="mb-5 text-base font-semibold text-white">Your details</h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-y-6 gap-x-8">
               {[
-                { label: 'Full Name', value: application?.full_name, icon: User, editable: true },
-                { label: 'Email Address', value: application?.email, icon: Mail },
-                { label: 'Mobile Number', value: application?.phone, icon: Clock },
-                { label: 'Institution', value: application?.institution, icon: School },
-                { label: 'Experience Level', value: application?.experience, icon: FileText, capitalize: true },
-                { label: 'Country & City', value: application?.country, icon: MapPin },
+                { label: 'Full name (used on certificates)', value: application?.full_name, editable: true },
+                { label: 'Email', value: application?.email },
+                { label: 'Phone', value: application?.phone },
+                { label: 'School or university', value: application?.institution },
+                { label: 'MUN experience', value: application?.experience, capitalize: true },
+                { label: 'Country and city', value: application?.country },
               ].map((field, idx) => {
                 const f = field as any;
                 return (
                 <div key={idx} className="flex flex-col border-b border-white/5 pb-4 last:border-0 md:last:border-b">
-                  <span className="text-white/30 text-[9px] font-bold uppercase tracking-[0.2em] mb-2">{field.label}</span>
+                  <span className="mb-1 text-xs text-white/50">{field.label}</span>
                   {f.editable && editingName ? (
                     <div className="flex items-center gap-2">
                       <input
@@ -398,13 +167,14 @@ export default function MyApplication() {
                     </div>
                   ) : (
                     <div className="flex items-center space-x-2">
-                      <span className={`text-sm font-semibold text-white/90 ${f.capitalize ? 'capitalize' : ''}`}>
+                      <span className={`text-sm font-semibold text-white/90 ${f.capitalize && field.value ? 'capitalize' : ''}`}>
                         {field.value || 'Not provided'}
                       </span>
                       {f.editable && (
                         <button
                           onClick={() => { setNameDraft(application?.full_name || ''); setEditingName(true); }}
                           title="Edit your name (used for certificates)"
+                          aria-label="Edit your name"
                           className="text-white/40 hover:text-gold-400 transition-colors"
                         >
                           <Edit3 className="w-3.5 h-3.5" />
@@ -416,35 +186,19 @@ export default function MyApplication() {
                 );
               })}
             </div>
-          </motion.div>
+          </section>
 
-          {/* Committee Preferences */}
-          <motion.div variants={itemVariants} className="glass-card hover:border-white/20 transition-colors p-6 flex flex-col group">
-             <div className="flex items-center justify-between mb-8">
-              <div className="flex items-center space-x-4">
-                <div className="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center border border-white/10 group-hover:border-white/20 transition-colors">
-                  <Users className="w-5 h-5 text-purple-400/80 group-hover:text-purple-400 transition-colors" />
-                </div>
-                <h3 className="text-lg font-bold tracking-tight text-white">Academic Preferences</h3>
-              </div>
-               <div className="px-3 py-1 rounded-full bg-purple-400/10 border border-purple-400/20">
-                <span className="text-[10px] font-mono text-purple-400 uppercase tracking-widest">Allocation</span>
-              </div>
-            </div>
+          <section className={card}>
+            <h2 className="mb-5 text-base font-semibold text-white">Committee preferences</h2>
 
             <div className="space-y-4">
               {[
-                { label: 'Priority 1', value: application?.committee_preference1, color: 'text-gold-400', weight: 'font-bold' },
-                { label: 'Priority 2', value: application?.committee_preference2, color: 'text-white/80', weight: 'font-medium' },
-                { label: 'Priority 3', value: application?.committee_preference3, color: 'text-white/80', weight: 'font-medium' },
+                { label: 'First choice', value: application?.committee_preference1, color: 'text-white', weight: 'font-semibold' },
+                { label: 'Second choice', value: application?.committee_preference2, color: 'text-white/80', weight: 'font-medium' },
+                { label: 'Third choice', value: application?.committee_preference3, color: 'text-white/80', weight: 'font-medium' },
               ].map((pref, idx) => (
-                <div key={idx} className="flex items-center justify-between bg-white/5 p-4 rounded-xl border border-white/5 group-hover:border-white/10 transition-colors">
-                  <div className="flex items-center space-x-3">
-                    <div className="w-6 h-6 bg-white/5 rounded-md flex items-center justify-center text-[10px] font-bold text-white/40 border border-white/10">
-                      {idx + 1}
-                    </div>
-                    <span className="text-[10px] text-white/40 font-bold uppercase tracking-wider">{pref.label}</span>
-                  </div>
+                <div key={idx} className="flex items-center justify-between gap-4 border-b border-white/10 pb-3 last:border-0">
+                  <span className="text-sm text-white/50">{pref.label}</span>
                   <span className={`text-sm ${pref.weight} ${pref.color} tracking-tight`}>
                     {pref.value || 'No selection'}
                   </span>
@@ -452,17 +206,12 @@ export default function MyApplication() {
               ))}
             </div>
 
-            <div className="mt-6 p-4 rounded-xl bg-blue-400/5 border border-blue-400/10">
-              <div className="flex items-start space-x-3">
-                <AlertCircle size={16} className="text-blue-400 flex-shrink-0 mt-0.5" />
-                <p className="text-[10px] text-white/40 leading-relaxed italic">
-                  Note: Preferences are taken into account but final allocation depends on country availability and delegate background.
-                </p>
-              </div>
-            </div>
-          </motion.div>
+            <p className="mt-4 text-sm text-white/50">
+              We use your choices when assigning seats, but the final committee also depends on which countries are still free.
+            </p>
+          </section>
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }

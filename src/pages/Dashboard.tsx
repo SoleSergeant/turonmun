@@ -1,16 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { Outlet, useLocation, Link, useNavigate } from 'react-router-dom';
+import { Outlet, useNavigate } from 'react-router-dom';
 import DashboardSidebar from '@/components/dashboard/DashboardSidebar';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import ChairApplicantDashboard from './ChairApplicantDashboard';
-import { useContent, useFill, rich } from '@/content/store';
 
 export default function Dashboard() {
-  const general = useContent('general');
-  const location = useLocation();
   const navigate = useNavigate();
   const { user, loading } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -33,7 +29,7 @@ export default function Dashboard() {
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })
         .limit(1)
-        .single();
+        .maybeSingle();
       const t = (data as any)?.application_type;
       setAppType(t === 'chair' ? 'chair' : 'delegate');
       setAppChecking(false);
@@ -42,7 +38,7 @@ export default function Dashboard() {
 
   if (loading || !user || appChecking) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-diplomatic-900 via-diplomatic-800 to-diplomatic-700">
+      <div className="min-h-screen flex items-center justify-center bg-diplomatic-950">
         <div className="text-white/70 text-sm">Loading your dashboard...</div>
       </div>
     );
@@ -62,80 +58,20 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-diplomatic-900 via-diplomatic-800 to-diplomatic-700">
-      {/* Background Effects */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-40 -right-20 w-72 h-72 bg-gold-300/10 blur-3xl rounded-full animate-pulse" />
-        <div className="absolute -bottom-40 -left-20 w-80 h-80 bg-diplomatic-300/10 blur-3xl rounded-full animate-pulse" />
-        <div className="absolute top-1/2 left-1/4 w-32 h-32 bg-gold-200/5 blur-2xl rounded-full" />
-      </div>
+    <div className="flex h-[100dvh] bg-diplomatic-950">
+      <DashboardSidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-      {/* Top back-to-site bar */}
-      <div className="relative z-20 flex justify-center px-4 pt-3">
-        <div className="w-full max-w-7xl h-14 flex justify-between items-center glass-panel px-6 rounded-full border border-white/15 bg-diplomatic-900/70 backdrop-blur-xl shadow-2xl">
-          <div className="flex items-center gap-3">
-            <div className="relative group flex items-center">
-              <div className="absolute -inset-1 bg-gradient-to-r from-gold-400 to-diplomatic-400 rounded-xl blur opacity-25 group-hover:opacity-40 transition duration-200"></div>
-              <div className="relative w-9 h-9 bg-gradient-to-br from-white/20 to-white/5 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/10 shadow-inner">
-                <img
-                  src={general.logo_url}
-                  alt="TuronMUN Logo"
-                  className="w-6 h-6 object-contain drop-shadow-md"
-                />
-              </div>
-            </div>
-            <div className="flex flex-col justify-center">
-              <span className="text-sm font-bold text-white tracking-tight leading-none mb-1">{general.site_name} {general.season_label}</span>
-              <span className="text-[10px] text-white/60 font-medium tracking-wider uppercase leading-none">Delegate Dashboard</span>
-            </div>
+      <div className="flex min-w-0 flex-1 flex-col">
+        <DashboardHeader onMenuClick={() => setSidebarOpen(true)} user={dashboardUser} />
+        <main className="flex-1 overflow-y-auto p-4 md:p-6">
+          <div className="mx-auto max-w-6xl">
+            <Outlet />
           </div>
-          <Link
-            to="/"
-            className="text-xs sm:text-sm h-9 px-5 rounded-full bg-gradient-to-r from-white/10 to-white/5 hover:from-white/20 hover:to-white/10 text-white border border-white/20 transition-all duration-200 font-medium shadow-lg hover:shadow-xl flex items-center"
-          >
-            ← Back to Site
-          </Link>
-        </div>
+        </main>
       </div>
 
-      <div className="relative z-10 flex h-[calc(100vh-3.75rem)] mt-2">
-        {/* Sidebar */}
-        <DashboardSidebar
-          isOpen={sidebarOpen}
-          onClose={() => setSidebarOpen(false)}
-        />
-
-        {/* Main Content */}
-        <div className="flex-1 flex flex-col overflow-hidden">
-          {/* Header */}
-          <DashboardHeader
-            onMenuClick={() => setSidebarOpen(true)}
-            user={dashboardUser}
-          />
-
-          {/* Page Content */}
-          <main className="flex-1 overflow-y-auto p-4 md:p-6">
-            <motion.div
-              key={location.pathname}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-              className="max-w-7xl mx-auto"
-            >
-              <Outlet />
-            </motion.div>
-          </main>
-        </div>
-      </div>
-
-      {/* Mobile Sidebar Overlay */}
       {sidebarOpen && (
-        <motion.div
-          className="fixed inset-0 bg-black/50 z-40 lg:hidden"
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          onClick={() => setSidebarOpen(false)}
-        />
+        <div className="fixed inset-0 z-40 bg-black/50 lg:hidden" onClick={() => setSidebarOpen(false)} aria-hidden />
       )}
     </div>
   );

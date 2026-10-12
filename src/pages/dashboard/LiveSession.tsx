@@ -131,7 +131,6 @@ function LiveSessionContent({
     <motion.div
       className="space-y-5 pb-12"
       variants={containerVariants}
-      initial="hidden"
       animate="visible"
     >
       {/* Status bar */}

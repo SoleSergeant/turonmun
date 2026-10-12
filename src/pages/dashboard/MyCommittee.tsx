@@ -212,7 +212,6 @@ function MyCommittee() {
     <motion.div
       className="space-y-8 pb-12"
       variants={containerVariants}
-      initial="hidden"
       animate="visible"
     >
       {/* Premium Header */}
@@ -302,7 +301,6 @@ function MyCommittee() {
             <div className="mt-6 space-y-3">
               <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
                 <motion.div
-                  initial={{ width: 0 }}
                   animate={{ width: `${progressPercentage}%` }}
                   className="h-full bg-gradient-to-r from-gold-600 to-gold-400"
                 />
@@ -341,7 +339,6 @@ function MyCommittee() {
       {/* Tab Content */}
       <motion.div
         key={activeTab}
-        initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3 }}
       >
@@ -649,7 +646,6 @@ function MyCommittee() {
                   {scheduleEvents.map((session, idx) => (
                     <motion.div
                       key={session.id}
-                      initial={{ opacity: 0, x: -20 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: idx * 0.05 }}
                       className="glass-panel p-6 rounded-2xl border-white/5 bg-white/5 hover:bg-white/10 transition-all group flex flex-col md:flex-row md:items-center gap-6"

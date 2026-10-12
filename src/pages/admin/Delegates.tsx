@@ -69,7 +69,7 @@ const Delegates = () => {
   const [search, setSearch] = useState('');
   const [committeeFilter, setCommitteeFilter] = useState('all');
   const [selected, setSelected] = useState<Set<string>>(new Set());
-  const [openId, setOpenId] = useState<string | null>(null);
+  const [openId, setOpenId] = useState<string | null>(params.get('open'));
   const [busy, setBusy] = useState(false);
   const [emailTo, setEmailTo] = useState<Row[] | null>(null);
   const [exportOpen, setExportOpen] = useState(false);
@@ -468,7 +468,7 @@ const Delegates = () => {
       {open && (
         <ApplicationManagementModal
           application={open as any}
-          onClose={() => setOpenId(null)}
+          onClose={() => { setOpenId(null); if (params.has('open')) { const next = new URLSearchParams(params); next.delete('open'); setParams(next, { replace: true }); } }}
           onUpdateStatus={(id, status) => setStatus([id], status)}
           onDelete={canDelete ? remove : undefined}
           adminPanel={
