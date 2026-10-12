@@ -20,12 +20,14 @@ export const seasonsData = [
     patternStyle: "radial",
     statistics: {
       participants: 80,
+      committees: 4,
       location: "Fergana Presidential school"
     },
     experience: "Our inaugural season unfolded like a beautiful symphony of nervous energy and raw determination, where every stumbled word and uncertain pause became part of our authentic learning journey. The conference room buzzed with palpable tension as both wide-eyed organizers and hesitant delegates navigated uncharted territory together, our hearts racing with each procedural question and our voices trembling with the weight of pioneering something extraordinary in our region.",
     milestone: "From bold vision to breathtaking reality, TuronMUN was born through the unwavering determination of ambitious students who dared to dream big. Without established blueprints to follow, we fearlessly carved our own revolutionary path, developing distinctive standards and innovative approaches that would define our unique identity in the MUN landscape.",
     highlights: [
       "80 delegates participated from across Uzbekistan",
+      "4 committees",
       "First MUN conference in the region",
       "Established foundation for future seasons",
       "Created lasting diplomatic connections"
@@ -61,17 +63,15 @@ export const seasonsData = [
     secondaryTextColor: "text-diplomatic-600",
     patternStyle: "linear",
     statistics: {
+      participants: 50,
       committees: 2,
       fee: "69,000 UZS",
-
       location: "Fergana Presidential school"
-
-      
-
     },
     experience: "This magical season transformed our conference into a vibrant tapestry of genuine friendships woven through late-night Mafia games, intense chess battles, and spirited Monopoly negotiations that echoed long after committee sessions ended. The dormitory corridors came alive with laughter as delegates bonded over heated football matches under the afternoon sun, while others discovered kindred spirits through epic eFootball tournaments that sparked fierce but friendly rivalries—culminating in our proudest moment when MyMUN recognized our excellence with three prestigious awards: Best Small Conference, Best Logistics Conference, and Best Socials Conference of 2025.",
     milestone: "We transformed the delegate experience by introducing dormitory services, ensuring every participant enjoys comfort and convenience during our intensive sessions. This season marked our confident transition to a monetized model, reflecting our absolute belief in delivering exceptional value while pioneering our groundbreaking academic discount system that rewards scholarly excellence.",
     highlights: [
+      "50 delegates",
       "2 specialized committees",
       "Introduced dormitory services",
       "Launched academic discount program",
@@ -111,11 +111,7 @@ export const seasonsData = [
       participants: 105,
       committees: 5,
       fee: "69,000 UZS",
-
       location: "Fergana Presidential school"
-
-      
-
     },
     experience: "The sheer magnitude of over 100 passionate delegates flooding our conference created an intoxicating whirlwind of energy that left our entire team breathless yet exhilarated by the end of three intense days. Despite our initial doubts about hosting an event so close to New Year's celebrations, the overwhelming response of nearly 500 applications vindicated our bold decision, creating an atmosphere so electric and engaging that we confidently anticipate recognition as the year's premier medium-sized conference.",
     milestone: "TuronMUN achieved unprecedented success as over 100 passionate delegates converged for our most spectacular conference yet, creating an atmosphere of unparalleled energy and intellectual fervor. We proudly launched our exclusive UZB Committee, breaking down barriers and making the transformative MUN experience accessible to an even broader community of future leaders.",
@@ -155,14 +151,14 @@ export const seasonsData = [
     secondaryTextColor: "text-diplomatic-700",
     patternStyle: "grid",
     statistics: {
-      participants: 130,
+      participants: 80,
       committees: 4,
       location: "Rahimov School, Fergana branch"
     },
     experience: "This season became our most thrilling high-wire act as the unpredictable timing of Eid festivities sent shockwaves through academic calendars, forcing us into a heart-pounding dance of rapid-fire decision-making and strategic pivots. Despite the challenges, we delivered an absolutely magnificent conference experience that exceeded every expectation.",
     milestone: "Our fourth season earned the highest ratings in TuronMUN history, a testament to our relentless pursuit of excellence and innovative conference design. We boldly expanded our horizons by hosting our first off-campus conference, gaining unprecedented freedom and flexibility that opened infinite possibilities for our future growth.",
     highlights: [
-      "130 delegates from across the region",
+      "80 delegates from across the region",
       "4 specialized committees",
       "First off-campus venue at Rahimov School",
       "Enhanced delegate experience"
@@ -198,7 +194,7 @@ export const seasonsData = [
     secondaryTextColor: "text-diplomatic-700",
     patternStyle: "radial",
     statistics: {
-      participants: "120+",
+      participants: 120,
       committees: 6,
       countries: "Multiple",
       location: "Central Asian Medical University"
@@ -206,7 +202,7 @@ export const seasonsData = [
     experience: "Marking our anniversary, this season stood as a testament to growth and ambition. With our largest conference yet, a groundbreaking partnership with a medical university, and trilingual debates, it became a true celebration of how far we've come.",
     milestone: "This historic partnership with Central Asian Medical University marked our most ambitious collaboration yet, expanding our academic reach and strengthening the role of youth diplomacy in the region through unprecedented scale and diversity.",
     highlights: [
-      "120+ delegates from across the country",
+      "120 delegates from across the country",
       "First collaboration with Central Asian Medical Universities",
       "6 dynamic committees",
       "Trilingual debates (English, Russian, Uzbek)"
@@ -243,7 +239,7 @@ export const seasonsData = [
     patternStyle: "dots",
     statistics: {
       committees: 5,
-      participants: "100+",
+      participants: 100,
       location: "Registan Private School, Fergana",
       languages: "Russian and English"
     },
@@ -316,10 +312,10 @@ export const seasonsData = [
     title: "Season Seven",
     date: "July 28, 2026",
     endDate: "July 28, 2026",
-    location: "Central Asian Medical University, Fergana",
+    location: "Presidential School in Fergana",
     route: "/seasons/7",
     theme: "Two-Year Anniversary",
-    description: "TuronMUN turned two. Our anniversary season returned to Central Asian Medical University with six committees in three languages.",
+    description: "TuronMUN turned two. Our anniversary season brought us back to the Presidential School in Fergana, where it all began.",
     color: "from-diplomatic-800 to-diplomatic-950",
     accentColor: "bg-diplomatic-800",
     lightBg: "bg-diplomatic-50",
@@ -332,16 +328,15 @@ export const seasonsData = [
       committees: 6,
       participants: 120,
       languages: "English, Uzbek, Russian",
-      location: "Central Asian Medical University, Fergana",
+      location: "Presidential School in Fergana",
     },
-    experience: "Season 7 marked two years of TuronMUN: a one-day conference at Central Asian Medical University bringing together delegates from across Uzbekistan in six committees, from a Historical Security Council to a FIFA Post-World Cup 2026 Review Summit.",
-    milestone: "Celebrated TuronMUN's two-year anniversary with committees in English, Uzbek and Russian, including the first FIFA Post-World Cup Review Summit.",
+    experience: "Season 7 marked two years of TuronMUN: a one-day conference at the Presidential School in Fergana, where our first season was held, bringing together delegates from across Uzbekistan.",
+    milestone: "Celebrated TuronMUN's two-year anniversary exactly two years after our first conference, back where it all started.",
     highlights: [
       "Two-year anniversary of TuronMUN",
-      "6 committees in 3 languages",
-      "Historical Security Council, DISEC and a Crisis Committee",
-      "ECOSOC in Uzbek and IAEA in Russian",
-      "FIFA Post-World Cup 2026 Review Summit"
+      "120 delegates from across Uzbekistan",
+      "Back at the Presidential School in Fergana, home of Season 1",
+      "Debates in English, Uzbek and Russian"
     ],
     organizers: [],
     photos: [
