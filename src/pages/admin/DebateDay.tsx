@@ -162,7 +162,6 @@ export default function DebateDay() {
       <div className="space-y-6">
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
           <div>
-            <h2 className="text-2xl font-semibold text-gray-900">Debate day</h2>
             <p className="text-gray-600">Teams, one-on-one pairings and live results for {debate.name}. Accepted debaters only.</p>
           </div>
           <Link to={adminPath('/judging')} className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">

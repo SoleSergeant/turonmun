@@ -175,6 +175,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
           </div>
           <button
             onClick={() => setSidebarOpen(false)}
+            aria-label="Close menu"
             className="lg:hidden text-white/70 hover:text-white transition-colors"
           >
             <X size={20} />
@@ -265,18 +266,19 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
       </aside>
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         {/* Header */}
         <header className="bg-white border-b shadow-sm z-10">
           <div className="flex items-center justify-between p-4">
             <div className="flex items-center">
               <button
                 onClick={() => setSidebarOpen(true)}
+                aria-label="Open menu"
                 className="lg:hidden text-gray-700 hover:text-diplomatic-600 mr-4"
               >
                 <Menu size={24} />
               </button>
-              <h1 className="text-lg font-medium">{title}</h1>
+              <h1 className="text-xl font-semibold text-gray-900">{title}</h1>
             </div>
           </div>
         </header>

@@ -187,7 +187,7 @@ const AdminSchedule = () => {
     : null;
 
   return (
-    <AdminLayout title="Schedule Management">
+    <AdminLayout title="Schedule">
       {loading && !editingEvent ? (
         <div className="flex items-center justify-center h-64">
           <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
@@ -328,6 +328,7 @@ const AdminSchedule = () => {
             <div className="flex items-center gap-3 flex-1">
               <input
                 type="date"
+                aria-label="Conference date"
                 value={conferenceDate}
                 onChange={e => handleConferenceDateChange(e.target.value)}
                 className="px-3 py-1.5 border border-gray-300 rounded-md text-sm"

@@ -113,7 +113,6 @@ const Seasons = () => {
     <AdminLayout title="Seasons">
       <div className="space-y-6">
         <div>
-          <h2 className="text-2xl font-semibold text-gray-900">Seasons</h2>
           <p className="text-gray-600">The admin panel shows the current season. Past seasons are kept, never deleted.</p>
         </div>
 

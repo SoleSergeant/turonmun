@@ -188,6 +188,7 @@ const ByCommitteeView = () => {
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
+            aria-label="Search committees"
             placeholder="Search committees..."
             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
           />
@@ -277,6 +278,7 @@ const ByCommitteeView = () => {
                             : <MapPin className="h-4 w-4 text-gray-400 shrink-0" />}
                           <span className="w-32 text-sm font-medium text-gray-700 truncate" title={country}>{country}</span>
                           <select
+                            aria-label={`Assign a delegate to ${country}`}
                             value=""
                             onChange={(e) => {
                               if (e.target.value) assignDelegate(committee.id, country, e.target.value);
@@ -304,6 +306,7 @@ const ByCommitteeView = () => {
                         <div key={a.id} className="flex items-center gap-2 px-3 py-2 bg-purple-50 border border-purple-200 rounded-lg">
                           <Flag className="h-4 w-4 text-purple-500 shrink-0" />
                           <select
+                            aria-label="Country"
                             value={known ? (a.country || '') : ''}
                             onChange={(e) => updateAssignmentCountry(committee, a, e.target.value)}
                             className="w-32 bg-white text-sm font-medium text-purple-900 border border-purple-200 rounded px-1.5 py-1 focus:ring-1 focus:ring-purple-400 focus:outline-none"
@@ -333,6 +336,7 @@ const ByCommitteeView = () => {
                         <div key={key} className="flex items-center gap-2 px-3 py-2 bg-gray-50 border border-dashed border-gray-300 rounded-lg">
                           <MapPin className="h-4 w-4 text-gray-400 shrink-0" />
                           <select
+                            aria-label="Country"
                             value={draftVal}
                             onChange={(e) => setDrafts(prev => ({ ...prev, [key]: e.target.value }))}
                             className="w-32 text-sm border border-gray-300 rounded px-1.5 py-1 bg-white focus:ring-1 focus:ring-blue-400 focus:outline-none"
@@ -341,6 +345,7 @@ const ByCommitteeView = () => {
                             {options.map(c => <option key={c} value={c}>{c}</option>)}
                           </select>
                           <select
+                            aria-label="Delegate"
                             value=""
                             onChange={(e) => {
                               if (e.target.value) {

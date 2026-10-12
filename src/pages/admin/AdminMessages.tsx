@@ -140,10 +140,10 @@ const AdminMessages = () => {
   ];
 
   return (
-    <AdminLayout title="Contact Messages">
-      <div className="container mx-auto py-6">
+    <AdminLayout title="Messages">
+      <div>
         <div className="flex flex-wrap justify-between items-center gap-4 mb-6">
-          <h1 className="text-3xl font-bold">Contact Messages</h1>
+          <p className="text-gray-600">Messages sent through the contact form.</p>
           <div className="flex items-center gap-3">
             <div className="inline-flex rounded-lg border border-gray-200 bg-white p-1">
               {FILTERS.map(f => (

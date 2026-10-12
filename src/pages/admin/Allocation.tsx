@@ -30,7 +30,6 @@ const Allocation = () => {
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div>
-            <h2 className="text-2xl font-semibold text-gray-900">Allocation</h2>
             <p className="text-gray-600">Seat paid delegates in committees and countries.</p>
           </div>
           <div className="flex flex-wrap items-center gap-3">

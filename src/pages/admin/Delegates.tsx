@@ -289,7 +289,6 @@ const Delegates = () => {
         <div className="space-y-5">
           <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
             <div>
-              <h2 className="text-2xl font-semibold text-gray-900">Delegates</h2>
               <p className="text-gray-600">Every delegate from application to check-in. Chair applications are in Chairs.</p>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -336,7 +335,7 @@ const Delegates = () => {
           <div className="flex flex-col gap-3 sm:flex-row">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-              <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search name, email, school, phone, country…" className="w-full rounded-lg border border-gray-300 py-2 pl-10 pr-4" />
+              <input aria-label="Search delegates" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search name, email, school, phone, country…" className="w-full rounded-lg border border-gray-300 py-2 pl-10 pr-4" />
             </div>
             <select value={committeeFilter} onChange={e => setCommitteeFilter(e.target.value)} className="rounded-lg border border-gray-300 px-3 py-2 text-sm" aria-label="Committee">
               <option value="all">All committees</option>

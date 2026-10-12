@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
+import StatTiles from '@/components/admin/StatTiles';
 import { supabase } from '@/integrations/supabase/client';
 import { isChairApplication } from '@/lib/applications';
 import { getCurrentSeason, inSeason } from '@/lib/season';
@@ -542,13 +543,12 @@ const ChairManagement = () => {
   };
 
   return (
-    <AdminLayout title="Chair Management">
+    <AdminLayout title="Chairs">
       <div className="space-y-6">
 
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h2 className="text-2xl font-semibold text-gray-900">Chair Management</h2>
             <p className="text-gray-600">Manage committee chairs and their permissions</p>
           </div>
           <button
@@ -567,51 +567,12 @@ const ChairManagement = () => {
           </button>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <div className="bg-white rounded-lg shadow-sm p-4 border">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Total Chairs</p>
-                <p className="text-2xl font-semibold text-gray-900">{chairs.length}</p>
-              </div>
-              <Users className="h-8 w-8 text-blue-500" />
-            </div>
-          </div>
-          <div className="bg-white rounded-lg shadow-sm p-4 border">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Active</p>
-                <p className="text-2xl font-semibold text-green-600">
-                  {chairs.filter(c => c.is_active).length}
-                </p>
-              </div>
-              <Check className="h-4 w-4 text-green-500" strokeWidth={2} />
-            </div>
-          </div>
-          <div className="bg-white rounded-lg shadow-sm p-4 border">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Assigned</p>
-                <p className="text-2xl font-semibold text-purple-600">
-                  {chairs.filter(c => c.committee_id).length}
-                </p>
-              </div>
-              <Globe className="h-8 w-8 text-purple-500" />
-            </div>
-          </div>
-          <div className="bg-white rounded-lg shadow-sm p-4 border">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-gray-600">Unassigned</p>
-                <p className="text-2xl font-semibold text-yellow-600">
-                  {chairs.filter(c => !c.committee_id).length}
-                </p>
-              </div>
-              <XCircle className="h-8 w-8 text-yellow-500" />
-            </div>
-          </div>
-        </div>
+        <StatTiles items={[
+          { label: 'Chairs', value: chairs.length },
+          { label: 'Active', value: chairs.filter(c => c.is_active).length },
+          { label: 'With a committee', value: chairs.filter(c => c.committee_id).length },
+          { label: 'Without a committee', value: chairs.filter(c => !c.committee_id).length },
+        ]} />
 
         {/* ── Chair Applications ─────────────────────────────────────── */}
         <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
@@ -673,7 +634,7 @@ const ChairManagement = () => {
                         <div className="text-sm font-medium text-gray-900">{app.full_name}</div>
                         <div className="text-xs text-gray-500">{app.email}</div>
                         {app.telegram_username && (
-                          <div className="text-xs text-gray-400">@{app.telegram_username}</div>
+                          <div className="text-xs text-gray-400">@{String(app.telegram_username).replace(/^@+/, '')}</div>
                         )}
                       </td>
                       <td className="px-4 py-4">

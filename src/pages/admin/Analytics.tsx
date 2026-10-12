@@ -281,7 +281,6 @@ const Analytics = () => {
       <div className="space-y-6">
         {/* Header */}
         <div>
-          <h2 className="text-2xl font-semibold text-gray-900">Analytics</h2>
           <p className="text-gray-600">Real-time registration trends and insights</p>
         </div>
 

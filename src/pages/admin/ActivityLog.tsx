@@ -82,10 +82,9 @@ const ActivityLog = () => {
   }, [entries, search]);
 
   return (
-    <AdminLayout title="Activity Log">
+    <AdminLayout title="Activity log">
       <div className="space-y-6">
         <div>
-          <h2 className="text-2xl font-semibold text-gray-900">Activity log</h2>
           <p className="text-gray-600">Status, payment, seat, account and email changes, and who made them.</p>
         </div>
 
@@ -98,14 +97,14 @@ const ActivityLog = () => {
             <div className="flex flex-col sm:flex-row gap-3">
               <div className="relative flex-1 max-w-md">
                 <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-                <input
+                <input aria-label="Search activity"
                   value={search}
                   onChange={e => setSearch(e.target.value)}
                   placeholder="Search names or changes…"
                   className="w-full rounded-lg border border-gray-300 py-2 pl-10 pr-4"
                 />
               </div>
-              <select value={area} onChange={e => setArea(e.target.value)} className="rounded-lg border border-gray-300 px-3 py-2 text-sm">
+              <select aria-label="Filter by area" value={area} onChange={e => setArea(e.target.value)} className="rounded-lg border border-gray-300 px-3 py-2 text-sm">
                 {AREAS.map(a => <option key={a.key} value={a.key}>{a.label}</option>)}
               </select>
             </div>

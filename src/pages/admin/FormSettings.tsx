@@ -596,7 +596,7 @@ const FormSettingsPage = () => {
   // ── Render ─────────────────────────────────────────────────────────────────
   if (loading) {
     return (
-      <AdminLayout title="Forms Management">
+      <AdminLayout title="Forms">
         <div className="flex items-center justify-center h-64">
           <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
         </div>
@@ -614,7 +614,7 @@ const FormSettingsPage = () => {
           onClose={() => setPreviewOpen(false)}
         />
       )}
-    <AdminLayout title="Forms Management">
+    <AdminLayout title="Forms">
       <div className="space-y-6 max-w-4xl">
 
         {/* Tabs */}

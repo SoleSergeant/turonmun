@@ -493,6 +493,7 @@ const MatrixView = () => {
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                 <input
                   type="text"
+                  aria-label="Search countries"
                   placeholder="Search countries..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
@@ -504,6 +505,7 @@ const MatrixView = () => {
               <div className="flex items-center gap-2">
                 <Filter className="h-4 w-4 text-gray-500" />
                 <select
+                  aria-label="Show"
                   value={filterAssigned}
                   onChange={(e) => setFilterAssigned(e.target.value)}
                   className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
@@ -524,6 +526,7 @@ const MatrixView = () => {
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Add Custom Country</h3>
               <input
                 type="text"
+                aria-label="New country"
                 value={newCountry}
                 onChange={(e) => setNewCountry(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && addCustomCountry()}
@@ -641,6 +644,7 @@ const MatrixView = () => {
                               ) : (
                                 <div className="w-full">
                                   <select
+                                    aria-label={`Assign ${country.country}`}
                                     onChange={(e) => {
                                       if (e.target.value) {
                                         assignCountry(country.country, committee.id, e.target.value);

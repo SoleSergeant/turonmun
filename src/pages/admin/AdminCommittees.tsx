@@ -48,7 +48,7 @@ const AdminCommittees = () => {
   // Display authentication loading state
   if (authLoading) {
     return (
-      <AdminLayout title="Committees Management">
+      <AdminLayout title="Committees">
         <div className="flex items-center justify-center h-64">
           <div className="loader w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
           <p className="ml-3 text-gray-600">Authenticating...</p>
@@ -58,7 +58,7 @@ const AdminCommittees = () => {
   }
 
   return (
-    <AdminLayout title="Committees Management">
+    <AdminLayout title="Committees">
       {!isAuthenticated && (
         <div className="bg-amber-50 border border-amber-200 p-4 mb-6 rounded-lg">
           <p className="text-amber-800">

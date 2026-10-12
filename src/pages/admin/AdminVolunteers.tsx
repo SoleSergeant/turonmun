@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
+import StatTiles from '@/components/admin/StatTiles';
 import VolunteerApplicationModal, { VolunteerApplication } from '@/components/admin/VolunteerApplicationModal';
 import { supabase } from '@/integrations/supabase/client';
 import { downloadCsv, datedFilename } from '@/lib/csv';
@@ -130,32 +131,21 @@ const AdminVolunteers: React.FC = () => {
   };
 
   return (
-    <AdminLayout title="Volunteer Applications">
+    <AdminLayout title="Volunteers">
       <div className="space-y-5 max-w-6xl">
-        {/* Stat cards */}
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
-          {[
-            { label: 'Total',      value: counts.total ?? 0,      color: 'text-rose-700 bg-rose-50 border-rose-200', icon: Heart },
-            { label: 'Pending',    value: counts.pending ?? 0,    color: 'text-yellow-700 bg-yellow-50 border-yellow-200', icon: Clock },
-            { label: 'Approved',   value: counts.approved ?? 0,   color: 'text-green-700 bg-green-50 border-green-200', icon: CheckCircle },
-            { label: 'Rejected',   value: counts.rejected ?? 0,   color: 'text-red-700 bg-red-50 border-red-200', icon: XCircle },
-            { label: 'Contacted',  value: counts.contacted ?? 0,  color: 'text-sky-700 bg-sky-50 border-sky-200', icon: MessageSquare },
-          ].map(c => (
-            <div key={c.label} className={`rounded-xl border p-3 ${c.color}`}>
-              <div className="flex items-center justify-between">
-                <span className="text-[11px] font-bold uppercase tracking-wide">{c.label}</span>
-                <c.icon size={14} />
-              </div>
-              <div className="text-2xl font-bold mt-1">{c.value}</div>
-            </div>
-          ))}
-        </div>
+        <StatTiles items={[
+          { label: 'Total', value: counts.total ?? 0 },
+          { label: 'Pending', value: counts.pending ?? 0 },
+          { label: 'Approved', value: counts.approved ?? 0 },
+          { label: 'Rejected', value: counts.rejected ?? 0 },
+          { label: 'Contacted', value: counts.contacted ?? 0 },
+        ]} />
 
         {/* Controls */}
         <div className="bg-white border border-gray-200 rounded-xl p-4 flex flex-wrap items-center gap-3">
           <div className="relative flex-1 min-w-[200px]">
             <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-            <input
+            <input aria-label="Search volunteers"
               type="text" placeholder="Search name, email, location, school…"
               value={search} onChange={e => setSearch(e.target.value)}
               className="w-full pl-9 pr-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-rose-400"

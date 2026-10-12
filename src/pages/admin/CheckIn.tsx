@@ -6,7 +6,7 @@ import { getCurrentSeason, inSeason } from '@/lib/season';
 import { useToast } from '@/hooks/use-toast';
 import {
   Search, CheckCircle2, AlertTriangle, Undo2,
-  Users, Download, Loader2, Sparkles, X, Shield, QrCode,
+  Users, Download, Loader2, X, Shield, QrCode,
 } from 'lucide-react';
 import { confirmAction } from '@/components/admin/ConfirmDialog';
 import QrScanDialog from '@/components/admin/QrScanDialog';
@@ -241,9 +241,6 @@ const CheckIn = () => {
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
-            <h2 className="text-2xl font-semibold text-gray-900 flex items-center gap-2">
-              <Sparkles className="h-6 w-6 text-amber-500" /> Event Check-in
-            </h2>
             <p className="text-gray-600 text-sm">Scan their QR code or search by name, then confirm to hand out their badge.</p>
           </div>
           <div className="flex items-center gap-2">
@@ -262,24 +259,14 @@ const CheckIn = () => {
           </div>
         </div>
 
-        {/* Stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="bg-white border rounded-lg p-4">
-            <p className="text-sm text-gray-500">Arrived</p>
-            <p className="text-2xl font-semibold text-green-600">{arrivedCount} <span className="text-base text-gray-400">/ {totalCount}</span></p>
+        {/* Progress: one compact line so search stays near the top on a phone */}
+        <div className="rounded-lg border bg-white px-4 py-3">
+          <div className="flex items-baseline justify-between gap-3 text-sm">
+            <span><span className="text-xl font-semibold tabular-nums text-gray-900">{arrivedCount}</span> <span className="text-gray-500">of {totalCount} arrived</span></span>
+            <span className="text-gray-500">{totalCount - arrivedCount} to come</span>
           </div>
-          <div className="bg-white border rounded-lg p-4">
-            <p className="text-sm text-gray-500">Awaiting</p>
-            <p className="text-2xl font-semibold text-amber-600">{totalCount - arrivedCount}</p>
-          </div>
-          <div className="bg-white border rounded-lg p-4">
-            <p className="text-sm text-gray-500">Progress</p>
-            <div className="h-3 bg-gray-100 rounded-full mt-3 overflow-hidden">
-              <div
-                className="h-full bg-green-500 transition-all"
-                style={{ width: totalCount ? `${(arrivedCount / totalCount) * 100}%` : '0%' }}
-              />
-            </div>
+          <div className="mt-2 h-2 overflow-hidden rounded-full bg-gray-100" role="img" aria-label={`${arrivedCount} of ${totalCount} arrived`}>
+            <div className="h-full bg-green-500 transition-all" style={{ width: totalCount ? `${(arrivedCount / totalCount) * 100}%` : '0%' }} />
           </div>
         </div>
 
@@ -305,7 +292,7 @@ const CheckIn = () => {
         <div className="flex flex-col md:flex-row gap-3">
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-            <input
+            <input aria-label="Search people to check in"
               autoFocus
               value={search}
               onChange={(e) => setSearch(e.target.value)}

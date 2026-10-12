@@ -161,11 +161,11 @@ export default function Judging() {
           <div className="flex justify-center py-16"><Loader2 className="h-6 w-6 animate-spin text-gray-400" /></div>
         ) : (
           <>
-            <div className="flex gap-1 overflow-x-auto border-b" role="tablist">
+            <div className="grid grid-cols-3 border-b sm:flex sm:gap-1" role="tablist">
               {tabs.map(t => (
                 <button key={t.key} role="tab" aria-selected={tab === t.key} onClick={() => { setTab(t.key); load(); }}
-                  className={`-mb-px inline-flex shrink-0 items-center gap-2 border-b-2 px-4 py-2.5 text-sm font-medium ${tab === t.key ? 'border-debate-blue text-debate-blue' : 'border-transparent text-gray-600 hover:text-gray-900'}`}>
-                  <t.icon className="h-4 w-4" /> {t.label}
+                  className={`-mb-px flex flex-col items-center justify-center gap-0.5 whitespace-nowrap border-b-2 px-1 py-2 text-sm font-medium sm:flex-row sm:justify-start sm:gap-2 sm:px-4 sm:py-2.5 ${tab === t.key ? 'border-debate-blue text-debate-blue' : 'border-transparent text-gray-600 hover:text-gray-900'}`}>
+                  <t.icon className="hidden h-4 w-4 sm:block" aria-hidden /> {t.label}
                   {t.key === 'scores' && <span className="text-xs text-gray-400">{scored}/{data.teams.length}</span>}
                   {t.key === 'pairs' && <span className="text-xs text-gray-400">{voted}/{data.pairings.length}</span>}
                 </button>

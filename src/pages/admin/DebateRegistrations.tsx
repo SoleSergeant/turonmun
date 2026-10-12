@@ -185,11 +185,10 @@ const DebateRegistrations = () => {
   const debateSiteUrl = DEBATE_SITE_URL;
 
   return (
-    <AdminLayout title="Turon Debate">
+    <AdminLayout title="Turon Debate registrations">
       <div className="space-y-6">
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
           <div>
-            <h2 className="text-2xl font-semibold text-gray-900">Turon Debate</h2>
             <p className="text-gray-600">Registrations from {debateSiteUrl.replace('https://', '')}. Edit the site itself in Site content → Turon Debate.</p>
           </div>
           <div className="flex flex-wrap gap-2">
@@ -271,7 +270,7 @@ const DebateRegistrations = () => {
 
             <div className="relative max-w-md">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-              <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search name, email, school, city…" className="w-full rounded-lg border border-gray-300 py-2 pl-10 pr-4" />
+              <input aria-label="Search registrations" value={search} onChange={e => setSearch(e.target.value)} placeholder="Search name, email, school, city…" className="w-full rounded-lg border border-gray-300 py-2 pl-10 pr-4" />
             </div>
 
             {selected.size > 0 && (
@@ -331,6 +330,7 @@ const DebateRegistrations = () => {
                             <td className="hidden px-4 py-3 text-gray-500 lg:table-cell">{new Date(r.created_at).toLocaleDateString()}</td>
                             <td className="px-4 py-3">
                               <select
+                                aria-label={`Status for ${r.full_name}`}
                                 value={r.status}
                                 onChange={e => setStatus([r.id], e.target.value as Status)}
                                 className={`rounded-full border-0 px-2 py-1 text-xs font-semibold ${toneFor(r.status)}`}

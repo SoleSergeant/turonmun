@@ -148,12 +148,14 @@ const CommitteeList = ({ committees, onEdit, loading, fetchCommittees }: Committ
                 <td className="px-6 py-4 text-right text-sm font-medium whitespace-nowrap">
                   <button
                     onClick={() => onEdit(committee)}
+                    aria-label={`Edit ${committee.name}`}
                     className="text-diplomatic-600 hover:text-diplomatic-900 mr-3"
                   >
                     <Edit size={18} />
                   </button>
                   <button
                     onClick={() => handleDelete(committee.id)}
+                    aria-label={`Delete ${committee.name}`}
                     className="text-red-600 hover:text-red-900"
                   >
                     <Trash2 size={18} />

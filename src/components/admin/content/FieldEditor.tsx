@@ -58,7 +58,7 @@ function ImageInput({ value, onChange }: { value: string; onChange: (v: string) 
         {value ? <img src={value} alt="" className="h-full w-full object-contain" /> : null}
       </div>
       <div className="flex-1 space-y-2">
-        <input value={value || ''} onChange={e => onChange(e.target.value)} placeholder="Image URL or /path" className={inputCls} />
+        <input aria-label="Image address" value={value || ''} onChange={e => onChange(e.target.value)} placeholder="Image URL or /path" className={inputCls} />
         <label className="inline-flex cursor-pointer items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50">
           {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Upload className="h-3.5 w-3.5" />}
           Upload image
@@ -158,9 +158,9 @@ function GroupEditor({ field, value, onChange }: { field: Extract<Field, { type:
 function FieldInput({ field, value, onChange }: { field: Field; value: any; onChange: (v: any) => void }) {
   switch (field.type) {
     case 'textarea':
-      return <textarea value={value ?? ''} onChange={e => onChange(e.target.value)} rows={3} className={inputCls} />;
+      return <textarea value={value ?? ''} onChange={e => onChange(e.target.value)} rows={3} aria-label={field.label} className={inputCls} />;
     case 'number':
-      return <input type="number" value={value ?? ''} onChange={e => onChange(e.target.value === '' ? '' : Number(e.target.value))} className={`${inputCls} max-w-[12rem]`} />;
+      return <input type="number" value={value ?? ''} onChange={e => onChange(e.target.value === '' ? '' : Number(e.target.value))} aria-label={field.label} className={`${inputCls} max-w-[12rem]`} />;
     case 'boolean':
       return (
         <label className="inline-flex cursor-pointer items-center gap-2 text-sm text-gray-700">
@@ -175,7 +175,7 @@ function FieldInput({ field, value, onChange }: { field: Field; value: any; onCh
             type="datetime-local"
             value={toLocalInput(value)}
             onChange={e => onChange(e.target.value ? new Date(e.target.value).toISOString() : '')}
-            className={`${inputCls} max-w-xs`}
+            aria-label={field.label} className={`${inputCls} max-w-xs`}
           />
           {value && <button type="button" onClick={() => onChange('')} className="text-xs text-gray-500 hover:text-gray-800">Clear</button>}
         </div>
@@ -187,7 +187,7 @@ function FieldInput({ field, value, onChange }: { field: Field; value: any; onCh
           onChange={e => onChange(e.target.value.split('\n'))}
           onBlur={e => onChange(e.target.value.split('\n').map(s => s.trim()).filter(Boolean))}
           rows={Math.max(3, Array.isArray(value) ? value.length + 1 : 3)}
-          className={inputCls}
+          aria-label={field.label} className={inputCls}
           placeholder="One per line"
         />
       );
@@ -198,7 +198,7 @@ function FieldInput({ field, value, onChange }: { field: Field; value: any; onCh
     case 'group':
       return <GroupEditor field={field} value={value} onChange={onChange} />;
     default:
-      return <input value={value ?? ''} onChange={e => onChange(e.target.value)} className={inputCls} />;
+      return <input value={value ?? ''} onChange={e => onChange(e.target.value)} aria-label={field.label} className={inputCls} />;
   }
 }
 

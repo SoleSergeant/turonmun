@@ -126,11 +126,10 @@ const AdminAccounts = () => {
   const sgCount = accounts.filter(a => a.is_active && ['sg', 'admin', 'superadmin'].includes(a.role)).length;
 
   return (
-    <AdminLayout title="Admin Accounts">
+    <AdminLayout title="Admin accounts">
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row justify-between sm:items-end gap-4">
           <div>
-            <h2 className="text-2xl font-semibold text-gray-900">Admin accounts</h2>
             <p className="text-gray-600">Who can use the admin panel, and what they can do. Chairs are managed on the Chairs page.</p>
           </div>
           <button
@@ -154,7 +153,7 @@ const AdminAccounts = () => {
               </label>
               <label className="text-sm">
                 <span className="mb-1 block font-medium text-gray-700">Role</span>
-                <select value={form.role} onChange={e => setForm({ ...form, role: e.target.value as StaffRole })} className="w-full rounded-lg border border-gray-300 px-3 py-2">
+                <select aria-label="Role" value={form.role} onChange={e => setForm({ ...form, role: e.target.value as StaffRole })} className="w-full rounded-lg border border-gray-300 px-3 py-2">
                   {STAFF_ROLES.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
                 </select>
                 <span className="mt-1 block text-xs text-gray-500">{STAFF_ROLES.find(r => r.value === form.role)?.hint}</span>
@@ -199,6 +198,7 @@ const AdminAccounts = () => {
                       </td>
                       <td className="px-4 py-3">
                         <select
+                          aria-label={`Role for ${a.full_name || a.email}`}
                           value={['admin', 'superadmin'].includes(a.role) ? 'sg' : a.role}
                           disabled={isMe || lastSg}
                           onChange={e => update(a, { role: e.target.value }, 'Role updated')}
