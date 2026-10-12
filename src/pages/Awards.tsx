@@ -55,7 +55,7 @@ const Awards = () => {
       <Navbar />
       <main className="flex-grow pt-24 pb-16">
         <div className="container mx-auto px-4">
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-12">
+          <motion.div animate={{ opacity: 1, y: 0 }} className="text-center mb-12">
             <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gold-100 text-gold-600 mb-4">
               <Trophy className="h-8 w-8" />
             </div>
@@ -86,7 +86,7 @@ const Awards = () => {
                         <div key={d.key} className="bg-white rounded-2xl border border-neutral-200 shadow-sm overflow-hidden">
                           <div className="aspect-square bg-neutral-100 flex items-center justify-center overflow-hidden">
                             {a.photo_url ? (
-                              <img src={a.photo_url} alt={a.winner_name} className="w-full h-full object-cover" />
+                              <img loading="lazy" decoding="async" src={a.photo_url} alt={a.winner_name} className="w-full h-full object-cover" />
                             ) : (
                               <Trophy className="h-12 w-12 text-neutral-300" />
                             )}

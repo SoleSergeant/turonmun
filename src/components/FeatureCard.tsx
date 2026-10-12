@@ -46,7 +46,6 @@ export default function FeatureCard({
         y: -5, 
         boxShadow: "0 15px 30px -10px rgba(0, 0, 0, 0.1)"
       }}
-      initial={{ opacity: 0, y: 10 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-50px" }}
       transition={{ duration: 0.3, type: "tween" }}

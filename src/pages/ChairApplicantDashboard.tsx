@@ -110,7 +110,6 @@ const ChairApplicantDashboard: React.FC<Props> = ({ userEmail }) => {
         </div>
 
         <motion.div
-          initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           className="glass-card p-8 border border-white/15 text-center"
         >

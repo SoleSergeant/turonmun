@@ -40,7 +40,6 @@ const EventUpdates = () => {
 
       <div className="container mx-auto px-4 py-16 md:py-24">
         <motion.div
-          initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
           className="text-center mb-16"
@@ -55,7 +54,6 @@ const EventUpdates = () => {
 
         <motion.div
           variants={containerVariants}
-          initial="hidden"
           animate="visible"
           className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-5xl mx-auto"
         >
@@ -67,7 +65,7 @@ const EventUpdates = () => {
             <div className="h-48 bg-diplomatic-700 relative overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-r from-diplomatic-800 to-diplomatic-600 opacity-90"></div>
               <div className="absolute inset-0 flex items-center justify-center">
-                <img 
+                <img loading="lazy" decoding="async" 
                   src="/images/committees/unga.png" 
                   alt="Committees" 
                   className="w-24 h-24 object-contain"

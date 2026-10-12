@@ -51,7 +51,6 @@ export default function Season5() {
     <PageLayout>
       <motion.div
         key="season-5"
-        initial="initial"
         animate="animate"
         exit="exit"
         variants={pageVariants}
@@ -69,7 +68,6 @@ export default function Season5() {
           
           <div className="container mx-auto px-4 relative z-10">
             <motion.div
-              initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
               className="mb-12"
@@ -84,8 +82,7 @@ export default function Season5() {
             </motion.div>
 
             <div className="max-w-4xl mx-auto text-center">
-              <motion.div 
-                initial={{ opacity: 0, scale: 0.9 }}
+              <motion.div
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.5 }}
                 className="inline-block p-3 bg-white/10 backdrop-blur-sm rounded-full mb-6"
@@ -95,7 +92,6 @@ export default function Season5() {
               
               <motion.h1 
                 className="text-4xl md:text-6xl font-bold mb-2 text-white"
-                initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.1 }}
               >
@@ -103,7 +99,6 @@ export default function Season5() {
               </motion.h1>
               <motion.p 
                 className="text-lg md:text-xl text-diplomatic-100 mb-4"
-                initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.2 }}
               >
@@ -112,14 +107,12 @@ export default function Season5() {
               
               <motion.div 
                 className="w-24 h-1 mx-auto my-6 rounded-full bg-white"
-                initial={{ width: 0 }}
                 animate={{ width: 96 }}
                 transition={{ duration: 0.8, delay: 0.3 }}
               />
               
               <motion.h2 
                 className="text-xl md:text-2xl font-medium text-white opacity-90 max-w-2xl mx-auto"
-                initial={{ opacity: 0 }}
                 animate={{ opacity: 0.9 }}
                 transition={{ duration: 0.6, delay: 0.4 }}
               >
@@ -139,7 +132,6 @@ export default function Season5() {
           <div className="container mx-auto px-4">
             <div className="max-w-4xl mx-auto">
               <motion.div
-                initial="hidden"
                 whileInView="visible"
                 viewport={{ once: true }}
                 variants={{
@@ -226,7 +218,6 @@ export default function Season5() {
           <div className="container mx-auto px-4 relative z-10">
             <div className="max-w-4xl mx-auto">
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6 }}
@@ -247,7 +238,6 @@ export default function Season5() {
         <section className="py-16 bg-white">
           <div className="container mx-auto px-4">
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
@@ -255,14 +245,13 @@ export default function Season5() {
             >
               <h2 className="text-3xl md:text-4xl font-bold text-diplomatic-800 mb-4">Conference Highlights</h2>
               <div className="w-20 h-1 bg-diplomatic-600 mx-auto mb-6"></div>
-              <p className="text-diplomatic-600 max-w-2xl mx-auto">Relive the memorable moments from our {seasonData.title} conference</p>
+              <p className="text-diplomatic-600 max-w-2xl mx-auto">Photos from {seasonData.title}.</p>
             </motion.div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {seasonData.photos.map((_, i) => i + 1).map((num) => (
                 <motion.div
                   key={num}
-                  initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
                   transition={{ 

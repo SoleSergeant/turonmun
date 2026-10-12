@@ -21,7 +21,6 @@ export default function FAQSection() {
     <section className="section bg-white">
       <div className="container max-w-4xl">
         <div className="text-center mb-12">
-          <span className="chip mb-2">{text.faq_eyebrow}</span>
           <h2 className="text-3xl md:text-4xl font-bold mb-4">{text.faq_title}</h2>
           <p className="text-neutral-600">
             {text.faq_intro}

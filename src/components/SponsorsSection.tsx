@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Sparkles, ArrowRight, Handshake } from 'lucide-react';
+import { ArrowRight, Handshake } from 'lucide-react';
 import { CustomButton } from './ui/custom-button';
 import { useContent, useFill, rich } from '@/content/store';
 
@@ -26,20 +26,8 @@ const SponsorsSection = () => {
 
       <div className="container relative z-10 px-4 sm:px-6 lg:px-8">
         <div className="max-w-3xl mx-auto text-center">
-          <motion.div 
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 text-gold-300 text-sm font-semibold uppercase tracking-wide mb-6"
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.4 }}
-          >
-            <Sparkles size={16} />
-            {text.badge}
-          </motion.div>
-
           <motion.h2 
             className="text-3xl sm:text-4xl lg:text-5xl font-display font-bold text-white mb-6"
-            initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.4, delay: 0.1 }}
@@ -49,7 +37,6 @@ const SponsorsSection = () => {
 
           <motion.p 
             className="text-white/75 text-base sm:text-lg leading-relaxed mb-10"
-            initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.4, delay: 0.15 }}
@@ -77,7 +64,6 @@ const SponsorsSection = () => {
                       target={logo.url ? '_blank' : undefined}
                       rel={logo.url ? 'noreferrer' : undefined}
                       className="group block"
-                      initial={{ opacity: 0, y: 15 }}
                       whileInView={{ opacity: 1, y: 0 }}
                       viewport={{ once: true }}
                       transition={{ duration: 0.35 }}
@@ -106,7 +92,6 @@ const SponsorsSection = () => {
           /* No sponsors yet — show a tasteful placeholder */
           <motion.div
             className="max-w-xl mx-auto text-center py-10"
-            initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.4 }}
@@ -122,7 +107,6 @@ const SponsorsSection = () => {
 
         <motion.div
           className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-4 text-white/80"
-          initial={{ opacity: 0, y: 10 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.4, delay: 0.2 }}

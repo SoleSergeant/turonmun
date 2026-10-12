@@ -82,7 +82,7 @@ const RegistrationContent: React.FC<RegistrationContentProps> = ({
           Join the Global Dialogue
         </h1>
         <p className="text-lg text-neutral-600 max-w-2xl mx-auto mb-6">
-          Begin your journey as a delegate in our prestigious Model United Nations conference. Complete the form below to secure your place.
+          Fill in the form below to apply as a delegate.
         </p>
       </motion.div>
 

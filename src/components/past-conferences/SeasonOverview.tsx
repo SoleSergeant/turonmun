@@ -49,7 +49,6 @@ const SeasonOverview: React.FC<SeasonOverviewProps> = ({ season }) => {
   return (
     <motion.div
       variants={containerVariants}
-      initial="hidden"
       animate="visible"
       className="mb-20"
     >

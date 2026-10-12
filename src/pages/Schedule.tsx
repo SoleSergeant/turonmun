@@ -39,7 +39,7 @@ const Schedule = () => {
         <div className="relative bg-gradient-to-b from-diplomatic-700 to-diplomatic-800 text-white py-20">
           <div className="absolute inset-0 bg-hero-pattern opacity-10" />
           <div className="container relative z-10">
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+            <motion.div animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
               <h1 className="text-4xl md:text-5xl font-bold mb-4">{text.schedule_title}</h1>
               {day && (
                 <div className="flex items-center gap-2 text-diplomatic-200 text-lg mb-4">
@@ -113,7 +113,6 @@ const Schedule = () => {
               </div>
             ) : (
               <motion.div
-                initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ staggerChildren: 0.05 }}
               >
@@ -148,7 +147,6 @@ const Schedule = () => {
                         return (
                           <motion.div
                             key={id}
-                            initial={{ opacity: 0, x: -10 }}
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ delay: idx * 0.04 }}
                             className="flex gap-4"

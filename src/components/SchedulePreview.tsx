@@ -66,7 +66,6 @@ export default function SchedulePreview() {
     <section className="section bg-white">
       <div className="container">
         <div className="text-center mb-12">
-          <span className="chip mb-2">{text.schedule_eyebrow}</span>
           <h2 className="text-3xl md:text-4xl font-bold mb-4">{text.schedule_title}</h2>
           <p className="text-neutral-600 max-w-2xl mx-auto">
             {text.schedule_intro}

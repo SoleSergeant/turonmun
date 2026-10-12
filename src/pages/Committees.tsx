@@ -26,8 +26,7 @@ const Committees = () => {
           <div className="absolute -bottom-32 -left-32 w-96 h-96 bg-gold-100 rounded-full opacity-20 blur-3xl"></div>
           
           <div className="container">
-            <motion.div 
-              initial={{ opacity: 0, y: 10 }}
+            <motion.div
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
               className="mb-12 text-center"
@@ -60,7 +59,6 @@ const Committees = () => {
                 return (
                   <motion.div
                     key={committee.id}
-                    initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.3, delay: index * 0.05 }}
                     className={`committee-detail-card h-full ${isLastOdd ? 'md:col-span-2 md:justify-self-center md:w-1/2' : ''}`}
@@ -80,7 +78,6 @@ const Committees = () => {
             </div>
             
             <motion.div
-              initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.3, delay: 0.2 }}
               className="glass-panel p-8 text-center max-w-3xl mx-auto"

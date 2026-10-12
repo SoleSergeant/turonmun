@@ -100,7 +100,6 @@ const ResetPasswordChange = () => {
         <div className="container mx-auto px-4">
           <motion.div
             variants={containerVariants}
-            initial="hidden"
             animate="visible"
             className="max-w-md mx-auto"
           >

@@ -9,7 +9,7 @@ export const seasonsData = [
     location: "Presidential School in Fergana",
     route: "/seasons/1",
     theme: "The Trembling Dawn",
-    description: "Our first season brought together young diplomats from across Uzbekistan for an unforgettable MUN experience.",
+    description: "The first TuronMUN, then called FerganaPSMUN: 80 delegates and 4 committees at the Presidential School in Fergana.",
     color: "from-diplomatic-600 to-diplomatic-800",
     accentColor: "bg-diplomatic-600",
     lightBg: "bg-diplomatic-50",
@@ -23,20 +23,14 @@ export const seasonsData = [
       committees: 4,
       location: "Fergana Presidential school"
     },
-    experience: "Our inaugural season unfolded like a beautiful symphony of nervous energy and raw determination, where every stumbled word and uncertain pause became part of our authentic learning journey. The conference room buzzed with palpable tension as both wide-eyed organizers and hesitant delegates navigated uncharted territory together, our hearts racing with each procedural question and our voices trembling with the weight of pioneering something extraordinary in our region.",
-    milestone: "From bold vision to breathtaking reality, TuronMUN was born through the unwavering determination of ambitious students who dared to dream big. Without established blueprints to follow, we fearlessly carved our own revolutionary path, developing distinctive standards and innovative approaches that would define our unique identity in the MUN landscape.",
+    experience: "None of us had organised a conference before, and it showed: opening speeches were nervous, procedure questions came up constantly, and the organisers were learning as fast as the delegates. It worked anyway, and it gave us the rules and habits that later seasons were built on.",
+    milestone: "The first season. With nothing to copy, we wrote our own rules of procedure, award criteria and delegate guide.",
     highlights: [
-      "80 delegates participated from across Uzbekistan",
+      "80 delegates from across Uzbekistan",
       "4 committees",
-      "First MUN conference in the region",
-      "Established foundation for future seasons",
-      "Created lasting diplomatic connections"
+      "Held at the Presidential School in Fergana"
     ],
-    organizers: [
-      { name: "Aziz Karimov", role: "Founder & Secretary-General", image: "https://randomuser.me/api/portraits/men/22.jpg" },
-      { name: "Dilfuza Ismoilova", role: "Deputy Secretary-General", image: "https://randomuser.me/api/portraits/women/32.jpg" },
-      { name: "Rustam Abdullayev", role: "Chief of Staff", image: "https://randomuser.me/api/portraits/men/44.jpg" }
-    ],
+    organizers: [],
     photos: [
       { url: "seasons/season 1/1.jpg", caption: "Inaugural Ceremony" },
       { url: "seasons/season 1/2.jpg", caption: "Committee Session" },
@@ -52,8 +46,8 @@ export const seasonsData = [
     endDate: "November 5, 2023",
     location: "Presidential School in Fergana",
     route: "/seasons/2",
-    theme: "A focused season with smaller committees, laying the groundwork for our expansion",
-    description: "Expanding our reach with more committees and participants in our second season.",
+    theme: "Small and focused",
+    description: "A smaller second season with two committees, and the first with dormitory places for delegates.",
     color: "from-diplomatic-500 to-diplomatic-700",
     accentColor: "bg-diplomatic-500",
     lightBg: "bg-diplomatic-50",
@@ -68,20 +62,16 @@ export const seasonsData = [
       fee: "69,000 UZS",
       location: "Fergana Presidential school"
     },
-    experience: "This magical season transformed our conference into a vibrant tapestry of genuine friendships woven through late-night Mafia games, intense chess battles, and spirited Monopoly negotiations that echoed long after committee sessions ended. The dormitory corridors came alive with laughter as delegates bonded over heated football matches under the afternoon sun, while others discovered kindred spirits through epic eFootball tournaments that sparked fierce but friendly rivalries—culminating in our proudest moment when MyMUN recognized our excellence with three prestigious awards: Best Small Conference, Best Logistics Conference, and Best Socials Conference of 2025.",
-    milestone: "We transformed the delegate experience by introducing dormitory services, ensuring every participant enjoys comfort and convenience during our intensive sessions. This season marked our confident transition to a monetized model, reflecting our absolute belief in delivering exceptional value while pioneering our groundbreaking academic discount system that rewards scholarly excellence.",
+    experience: "Delegates stayed in the school dormitory, so the conference carried on after sessions: Mafia and chess in the evenings, Monopoly, football in the afternoons and an eFootball tournament. MyMUN later gave FerganaPSMUN three awards: Best Small Conference, Best Logistics and Best Socials.",
+    milestone: "The first season with dormitory places and a participation fee, along with a discount for strong academic results.",
     highlights: [
       "50 delegates",
-      "2 specialized committees",
-      "Introduced dormitory services",
-      "Launched academic discount program",
-      "Won 3 MyMUN awards"
+      "2 committees",
+      "Dormitory places for delegates",
+      "Academic discount introduced",
+      "3 MyMUN awards"
     ],
-    organizers: [
-      { name: "Shahnoza Tursunova", role: "Secretary-General", image: "https://randomuser.me/api/portraits/women/45.jpg" },
-      { name: "Javlon Karimov", role: "Deputy Secretary-General", image: "https://randomuser.me/api/portraits/men/35.jpg" },
-      { name: "Madina Khamidova", role: "Chief of Staff", image: "https://randomuser.me/api/portraits/women/25.jpg" }
-    ],
+    organizers: [],
     photos: [
       { url: "seasons/season 2/3.jpg", caption: "Cover" },
       { url: "seasons/season 2/1.jpg", caption: "Opening Plenary" },
@@ -98,7 +88,7 @@ export const seasonsData = [
     location: "Presidential School in Fergana",
     route: "/seasons/3",
     theme: "The Overwhelming Triumph",
-    description: "Our biggest event yet with expanded committees and delegate participation.",
+    description: "Three days, 105 delegates and 5 committees, held just after New Year.",
     color: "from-diplomatic-600 to-diplomatic-800",
     accentColor: "bg-diplomatic-600",
     lightBg: "bg-diplomatic-50",
@@ -113,19 +103,15 @@ export const seasonsData = [
       fee: "69,000 UZS",
       location: "Fergana Presidential school"
     },
-    experience: "The sheer magnitude of over 100 passionate delegates flooding our conference created an intoxicating whirlwind of energy that left our entire team breathless yet exhilarated by the end of three intense days. Despite our initial doubts about hosting an event so close to New Year's celebrations, the overwhelming response of nearly 500 applications vindicated our bold decision, creating an atmosphere so electric and engaging that we confidently anticipate recognition as the year's premier medium-sized conference.",
-    milestone: "TuronMUN achieved unprecedented success as over 100 passionate delegates converged for our most spectacular conference yet, creating an atmosphere of unparalleled energy and intellectual fervor. We proudly launched our exclusive UZB Committee, breaking down barriers and making the transformative MUN experience accessible to an even broader community of future leaders.",
+    experience: "We weren't sure students would come to a conference straight after the New Year holidays. Nearly 500 applied, and we took 105 of them across five committees over three days.",
+    milestone: "The first season with an Uzbek-language committee, so students who don't debate in English could take part.",
     highlights: [
-      "105 delegates from diverse backgrounds",
-      "5 specialized committees including UZB Committee",
-      "Record 500+ applications received",
-      "Held right after New Year celebrations"
+      "105 delegates",
+      "5 committees, including an Uzbek-language committee",
+      "Nearly 500 applications",
+      "Three days, right after New Year"
     ],
-    organizers: [
-      { name: "Alisher Nazarov", role: "Secretary-General", image: "https://randomuser.me/api/portraits/men/68.jpg" },
-      { name: "Dilnoza Khamidova", role: "Deputy Secretary-General", image: "https://randomuser.me/api/portraits/women/62.jpg" },
-      { name: "Jasur Rakhimov", role: "Chief of Staff", image: "https://randomuser.me/api/portraits/men/52.jpg" }
-    ],
+    organizers: [],
     photos: [
       { url: "seasons/season 3/2.jpg", caption: "Cover" },
       { url: "seasons/season 3/1.jpg", caption: "Opening Ceremony" },
@@ -141,7 +127,7 @@ export const seasonsData = [
     location: "Rahimov School, Fergana branch",
     route: "/seasons/4",
     theme: "The Tightrope Masterpiece",
-    description: "A season that challenged us with timing and logistics but delivered exceptional diplomatic experiences.",
+    description: "Our first season away from the Presidential School, at the Fergana branch of Rahimov School.",
     color: "from-diplomatic-700 to-diplomatic-900",
     accentColor: "bg-diplomatic-700",
     lightBg: "bg-diplomatic-50",
@@ -155,19 +141,15 @@ export const seasonsData = [
       committees: 4,
       location: "Rahimov School, Fergana branch"
     },
-    experience: "This season became our most thrilling high-wire act as the unpredictable timing of Eid festivities sent shockwaves through academic calendars, forcing us into a heart-pounding dance of rapid-fire decision-making and strategic pivots. Despite the challenges, we delivered an absolutely magnificent conference experience that exceeded every expectation.",
-    milestone: "Our fourth season earned the highest ratings in TuronMUN history, a testament to our relentless pursuit of excellence and innovative conference design. We boldly expanded our horizons by hosting our first off-campus conference, gaining unprecedented freedom and flexibility that opened infinite possibilities for our future growth.",
+    experience: "Eid fell close to our dates and moved several school calendars, so the schedule changed more than once in the final weeks. The conference still ran on time, and delegates rated it higher than any season before.",
+    milestone: "Our first conference at an outside venue, and the highest delegate ratings we had received so far.",
     highlights: [
-      "80 delegates from across the region",
-      "4 specialized committees",
-      "First off-campus venue at Rahimov School",
-      "Enhanced delegate experience"
+      "80 delegates",
+      "4 committees",
+      "First conference at an outside venue",
+      "Highest delegate ratings to date"
     ],
-    organizers: [
-      { name: "Farrukh Abdullaev", role: "Secretary-General", image: "https://randomuser.me/api/portraits/men/75.jpg" },
-      { name: "Nilufar Karimova", role: "Deputy Secretary-General", image: "https://randomuser.me/api/portraits/women/55.jpg" },
-      { name: "Bekzod Rakhmonov", role: "Chief of Staff", image: "https://randomuser.me/api/portraits/men/65.jpg" }
-    ],
+    organizers: [],
     photos: [
       { url: "seasons/Season 4/1.jpg", caption: "Opening Ceremony" },
       { url: "seasons/Season 4/2.jpg", caption: "Committee Work" },
@@ -184,7 +166,7 @@ export const seasonsData = [
     location: "Central Asian Medical University",
     route: "/seasons/camu",
     theme: "The Boundless Convergence",
-    description: "A season that broke boundaries with scale, diversity, and collaboration—uniting voices across disciplines and languages for our most ambitious diplomatic experience yet.",
+    description: "Our first anniversary, held with Central Asian Medical University: 120 delegates in six committees across three languages.",
     color: "from-diplomatic-700 to-diplomatic-900",
     accentColor: "bg-diplomatic-700",
     lightBg: "bg-diplomatic-50",
@@ -199,19 +181,15 @@ export const seasonsData = [
       countries: "Multiple",
       location: "Central Asian Medical University"
     },
-    experience: "Marking our anniversary, this season stood as a testament to growth and ambition. With our largest conference yet, a groundbreaking partnership with a medical university, and trilingual debates, it became a true celebration of how far we've come.",
-    milestone: "This historic partnership with Central Asian Medical University marked our most ambitious collaboration yet, expanding our academic reach and strengthening the role of youth diplomacy in the region through unprecedented scale and diversity.",
+    experience: "For our first anniversary we partnered with Central Asian Medical University. It was the largest conference we had run, with committees in English, Russian and Uzbek.",
+    milestone: "Our first conference with a university partner.",
     highlights: [
-      "120 delegates from across the country",
-      "First collaboration with Central Asian Medical Universities",
-      "6 dynamic committees",
-      "Trilingual debates (English, Russian, Uzbek)"
+      "120 delegates",
+      "6 committees",
+      "Partnership with Central Asian Medical University",
+      "Committees in English, Russian and Uzbek"
     ],
-    organizers: [
-      { name: "To be announced", role: "Secretary-General", image: "https://randomuser.me/api/portraits/lego/1.jpg" },
-      { name: "To be announced", role: "Deputy Secretary-General", image: "https://randomuser.me/api/portraits/lego/2.jpg" },
-      { name: "To be announced", role: "Chief of Staff", image: "https://randomuser.me/api/portraits/lego/3.jpg" }
-    ],
+    organizers: [],
     photos: [
       { url: "seasons/Turonxcamu/3.jpg", caption: "Cover" },
       { url: "seasons/Turonxcamu/1.jpg", caption: "Opening Ceremony" },
@@ -228,7 +206,7 @@ export const seasonsData = [
     location: "Registan Private School, Fergana",
     route: "/seasons/5",
     theme: "The Rising Labyrinth",
-    description: "Season 5, under new leadership, was all about fresh beginnings. With 100 delegates across 5 committees, we faced challenges, but together we turned them into an exciting, unforgettable experience where every voice was heard.",
+    description: "The first season under a new Secretary-General: 100 delegates in 5 committees at Registan Private School.",
     color: "from-diplomatic-700 to-diplomatic-900",
     accentColor: "bg-diplomatic-700",
     lightBg: "bg-diplomatic-50",
@@ -243,19 +221,15 @@ export const seasonsData = [
       location: "Registan Private School, Fergana",
       languages: "Russian and English"
     },
-    experience: "Season 5, under new leadership, was all about fresh beginnings. With 100 delegates across 5 committees, we faced challenges, but together we turned them into an exciting, unforgettable experience where every voice was heard.",
-    milestone: "Our first partnership with Fergana Regional Department Youth Affairs Agency marked a significant milestone, bringing new energy and fresh perspectives to the TuronMUN experience.",
+    experience: "A new team ran this season, and not everything went to plan. With 100 delegates and five committees in English and Russian it was a full day, and it shaped how the new team runs conferences.",
+    milestone: "Our first partnership with the Fergana regional department of the Youth Affairs Agency.",
     highlights: [
-      "100 delegates from across the country",
-      "5 dynamic committees",
-      "First partnership with Fergana Regional Department Youth Affairs Agency",
-      "2 languages (Russian and English)"
+      "100 delegates",
+      "5 committees",
+      "Partnership with the Fergana Youth Affairs Agency",
+      "Committees in English and Russian"
     ],
-    organizers: [
-      { name: "To be announced", role: "Secretary-General", image: "https://randomuser.me/api/portraits/lego/1.jpg" },
-      { name: "To be announced", role: "Deputy Secretary-General", image: "https://randomuser.me/api/portraits/lego/2.jpg" },
-      { name: "To be announced", role: "Chief of Staff", image: "https://randomuser.me/api/portraits/lego/3.jpg" }
-    ],
+    organizers: [],
     photos: [
       { url: "seasons/Season 5/4.jpg", caption: "Cover" },
       { url: "seasons/Season 5/1.jpg", caption: "Opening Ceremony" },
@@ -272,7 +246,7 @@ export const seasonsData = [
     location: "Registan Private School, Fergana",
     route: "/seasons/6",
     theme: "The Rising Labyrinth II",
-    description: "A season of growth and new milestones, expanding our impact and bringing together future leaders for one of our most ambitious conferences yet.",
+    description: "80 delegates and 4 committees at Registan Private School, with SATashkent as a partner.",
     color: "from-diplomatic-700 to-diplomatic-900",
     accentColor: "bg-diplomatic-700",
     lightBg: "bg-diplomatic-50",
@@ -286,19 +260,15 @@ export const seasonsData = [
       participants: 80,
       location: "Registan Private School, Fergana",
     },
-    experience: "Season 6 continued TuronMUN's legacy of excellence, bringing together 80 elite delegates from across Uzbekistan for an intensive and inspiring diplomatic experience.",
-    milestone: "Continued partnership with SATashkent and introduced new awarding strategies, raising the bar for delegate recognition and academic excellence.",
+    experience: "Season 6 brought 80 delegates from across Uzbekistan to Registan Private School for four committees, and introduced new award categories.",
+    milestone: "Our second season with SATashkent, and new award categories for delegates.",
     highlights: [
-      "80 delegates from across Uzbekistan",
-      "4 specialized committees",
-      "Continued partnership with SATashkent",
-      "New awarding strategies introduced"
+      "80 delegates",
+      "4 committees",
+      "Partnership with SATashkent",
+      "New award categories"
     ],
-    organizers: [
-      { name: "To be announced", role: "Secretary-General", image: "https://randomuser.me/api/portraits/lego/1.jpg" },
-      { name: "To be announced", role: "Deputy Secretary-General", image: "https://randomuser.me/api/portraits/lego/2.jpg" },
-      { name: "To be announced", role: "Chief of Staff", image: "https://randomuser.me/api/portraits/lego/3.jpg" }
-    ],
+    organizers: [],
     photos: [
       { url: "seasons/season 6/1.JPG", caption: "Opening Ceremony" },
       { url: "seasons/season 6/2.JPG", caption: "Committee Sessions" },

@@ -38,7 +38,6 @@ const RegistrationSelection = () => {
           <div className="relative container mx-auto px-4 h-full flex items-center justify-center">
             <div className="w-full max-w-4xl">
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6 }}
                 className="text-center mb-10"
@@ -62,7 +61,6 @@ const RegistrationSelection = () => {
               {/* Open/Close countdown */}
               {!loading && countdown && (
                 <motion.div
-                  initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: 0.05 }}
                   className="flex justify-center mb-10"
@@ -75,7 +73,6 @@ const RegistrationSelection = () => {
               <div className={`grid grid-cols-1 ${text.observer_enabled ? 'md:grid-cols-3' : 'md:grid-cols-2'} gap-6 max-w-4xl mx-auto mb-10`}>
                 {/* Delegate */}
                 <motion.div
-                  initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: 0.1 }}
                   className={`relative backdrop-blur-lg bg-white/5 border rounded-3xl p-8 transition-all ${
@@ -118,7 +115,6 @@ const RegistrationSelection = () => {
 
                 {/* Chair */}
                 <motion.div
-                  initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: 0.2 }}
                   className={`relative backdrop-blur-lg bg-white/5 border rounded-3xl p-8 transition-all ${
@@ -162,7 +158,6 @@ const RegistrationSelection = () => {
                 {/* Observer — external form, set in Site content → Registration */}
                 {text.observer_enabled && (
                 <motion.div
-                  initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: 0.4 }}
                   className="relative backdrop-blur-lg bg-white/5 border border-white/30 hover:bg-white/10 hover:border-white/40 rounded-3xl p-8 transition-all"
@@ -188,7 +183,6 @@ const RegistrationSelection = () => {
 
               {/* Action row */}
               <motion.div
-                initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.35 }}
                 className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8"
@@ -212,7 +206,6 @@ const RegistrationSelection = () => {
               </motion.div>
 
               <motion.div
-                initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.6, delay: 0.5 }}
                 className="text-center"

@@ -32,7 +32,6 @@ export default function CommitteeCard({
   return (
     <motion.div
       className="committee-card group flex h-full flex-col overflow-hidden rounded-xl border border-neutral-100 bg-white shadow-elegant transition-shadow hover:shadow-lg"
-      initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
       transition={{ duration: 0.4 }}

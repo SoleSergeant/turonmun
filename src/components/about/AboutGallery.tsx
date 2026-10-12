@@ -21,7 +21,7 @@ export default function AboutGallery() {
           {galleryImages.map((image, index) => (
             <Card key={index} className="overflow-hidden border-none shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
               <div className="aspect-video overflow-hidden">
-                <img
+                <img loading="lazy" decoding="async"
                   src={image.src}
                   alt={image.alt}
                   className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"

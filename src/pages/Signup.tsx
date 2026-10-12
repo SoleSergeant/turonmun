@@ -107,7 +107,6 @@ const Signup = () => {
         <div className="container mx-auto px-4">
           <motion.div
             variants={containerVariants}
-            initial="hidden"
             animate="visible"
             className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center max-w-5xl mx-auto"
           >

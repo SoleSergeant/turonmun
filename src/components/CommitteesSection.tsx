@@ -7,6 +7,7 @@ import { CustomButton } from './ui/custom-button';
 import { useCommittees } from '../hooks/useCommittees';
 import { useContent, useFill, rich } from '@/content/store';
 
+
 export default function CommitteesSection() {
   const text = useContent('home_sections');
   const { committees } = useCommittees();
@@ -32,71 +33,15 @@ export default function CommitteesSection() {
 
   return (
     <section className="section bg-white relative overflow-hidden">
-      {/* Animated background elements */}
-      <div className="absolute inset-0 bg-hero-pattern opacity-5" />
-      <div className="absolute -top-40 left-0 w-72 h-72 bg-diplomatic-200/40 blur-3xl rounded-full pointer-events-none" />
-      <div className="absolute -bottom-40 right-0 w-64 h-64 bg-gold-200/50 blur-3xl rounded-full pointer-events-none" />
-      
-      {/* Reduce number of animated dots for better performance */}
-      {Array.from({ length: 8 }).map((_, i) => (
-        <motion.div
-          key={i}
-          className="absolute rounded-full bg-diplomatic-300"
-          style={{
-            width: Math.random() * 4 + 2,
-            height: Math.random() * 4 + 2,
-            left: `${Math.random() * 100}%`,
-            top: `${Math.random() * 100}%`,
-          }}
-          initial={{ opacity: 0 }}
-          animate={{ 
-            opacity: [0, 0.2, 0],
-          }}
-          transition={{
-            duration: Math.random() * 4 + 6,
-            repeat: Infinity,
-            delay: Math.random() * 3,
-            ease: "easeInOut"
-          }}
-        />
-      ))}
-      
-      {/* Simplify floating curved lines */}
-      <motion.div
-        className="absolute w-64 h-64 border-2 border-diplomatic-200/10 rounded-full"
-        style={{ top: '10%', right: '5%' }}
-        animate={{ 
-          rotate: 360,
-        }}
-        transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
-      />
-      
       <div className="container relative z-10">
         <motion.div 
           className="text-center mb-12"
-          initial={{ opacity: 0, y: 10 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-50px" }}
           transition={{ duration: 0.4 }}
         >
-          <motion.div
-            whileHover={{ scale: 1.05, y: -2 }}
-            transition={{ type: "spring", stiffness: 400, damping: 10 }}
-          >
-            <motion.span 
-              className="glass-panel px-4 py-2 text-sm font-medium text-diplomatic-700 border border-diplomatic-300/50 shadow-subtle mb-3 inline-block rounded-full"
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.3 }}
-            >
-              {text.committees_eyebrow}
-            </motion.span>
-          </motion.div>
-          
           <motion.h2 
             className="text-3xl md:text-4xl font-display font-bold mb-4"
-            initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.4 }}
@@ -108,7 +53,6 @@ export default function CommitteesSection() {
           
           <motion.p 
             className="text-neutral-600 max-w-2xl mx-auto"
-            initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             transition={{ duration: 0.4 }}
@@ -145,7 +89,6 @@ export default function CommitteesSection() {
         
         <motion.div 
           className="text-center mt-10"
-          initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.4 }}

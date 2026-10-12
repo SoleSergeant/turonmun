@@ -117,7 +117,6 @@ export default function Dashboard() {
           <main className="flex-1 overflow-y-auto p-4 md:p-6">
             <motion.div
               key={location.pathname}
-              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
@@ -133,7 +132,6 @@ export default function Dashboard() {
       {sidebarOpen && (
         <motion.div
           className="fixed inset-0 bg-black/50 z-40 lg:hidden"
-          initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={() => setSidebarOpen(false)}

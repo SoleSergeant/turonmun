@@ -46,7 +46,6 @@ export default function PastConferences() {
           <div className="max-w-4xl mx-auto text-center">
             <motion.h1 
               className="text-4xl md:text-6xl font-bold mb-4 text-diplomatic-800"
-              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6 }}
             >
@@ -55,14 +54,12 @@ export default function PastConferences() {
             
             <motion.div 
               className="w-24 h-1 mx-auto my-6 rounded-full bg-gradient-to-r from-diplomatic-400 to-diplomatic-600"
-              initial={{ width: 0 }}
               animate={{ width: 96 }}
               transition={{ duration: 0.8, delay: 0.2 }}
             />
             
             <motion.p 
               className="text-xl text-neutral-700 max-w-2xl mx-auto"
-              initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.6, delay: 0.3 }}
             >
@@ -77,7 +74,6 @@ export default function PastConferences() {
         <div className="container mx-auto px-4">
           <motion.div
             variants={containerVariants}
-            initial="hidden"
             animate="visible"
             className="grid grid-cols-1 gap-10"
           >

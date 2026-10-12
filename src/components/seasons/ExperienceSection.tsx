@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { ReactNode, useState, useEffect } from 'react';
+import { ReactNode } from 'react';
 
 interface ExperienceSectionProps {
   title: string;
@@ -28,25 +28,6 @@ export default function ExperienceSection({
   children,
   themeColor = 'dark'
 }: ExperienceSectionProps) {
-  const [isVisible, setIsVisible] = useState(false);
-  
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          setIsVisible(true);
-        }
-      },
-      { threshold: 0.1 }
-    );
-    
-    const element = document.getElementById('experience-section');
-    if (element) observer.observe(element);
-    
-    return () => {
-      if (element) observer.unobserve(element);
-    };
-  }, []);
 
   const bgColor = themeColor === 'dark' 
     ? 'bg-diplomatic-900' 
@@ -81,8 +62,7 @@ export default function ExperienceSection({
       <div className="container mx-auto px-4 relative z-10">
         <AnimatePresence>
           <motion.div
-            initial="hidden"
-            animate={isVisible ? "visible" : "hidden"}
+            animate="visible"
             variants={{
               visible: {
                 transition: {
@@ -109,7 +89,6 @@ export default function ExperienceSection({
               </motion.h2>
               <motion.div 
                 className={`w-20 h-1 mx-auto mb-8 rounded-full ${accentColor}`}
-                initial={{ scaleX: 0 }}
                 animate={{ scaleX: 1 }}
                 transition={{ delay: 0.4, duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
               />

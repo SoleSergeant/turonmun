@@ -1,4 +1,5 @@
 import { Toaster } from "@/components/ui/toaster";
+import { MotionConfig } from "framer-motion";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -297,6 +298,7 @@ const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
       <HelmetProvider>
+        <MotionConfig reducedMotion="user">
         <TooltipProvider>
           <Toaster />
           <Sonner />
@@ -315,6 +317,7 @@ const App = () => {
             <SpeedInsights />
           </BrowserRouter>
         </TooltipProvider>
+        </MotionConfig>
       </HelmetProvider>
     </QueryClientProvider>
   );

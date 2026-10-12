@@ -75,7 +75,6 @@ const Index = () => {
   return (
     <motion.div
       className="page-transition-container min-h-screen flex flex-col"
-      initial={{ opacity: 0, y: 24 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -24 }}
       transition={{ duration: 0.6, ease: 'easeOut' }}
@@ -93,7 +92,6 @@ const Index = () => {
       <Navbar />
       <motion.main
         variants={containerVariants}
-        initial="hidden"
         animate="visible"
       >
         <Hero />
@@ -130,7 +128,6 @@ const Index = () => {
       </motion.main>
       
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.3 }}
       >
