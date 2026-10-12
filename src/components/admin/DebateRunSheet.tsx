@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { Play, Pause, RotateCcw, Shuffle } from 'lucide-react';
-import { type EventData, shuffle, TEAM_TONES } from '@/lib/debateEvent';
+import { Play, Pause, RotateCcw, Shuffle, Loader2 } from 'lucide-react';
+import { type EventData, shuffle, seatLabel, TEAM_TONES } from '@/lib/debateEvent';
 
 const ROUNDS = [
   { title: 'Team presentations', what: 'Teams prepare, then each presents its position.', seconds: 180, per: 'per team' },
@@ -51,7 +51,7 @@ function RoundTimer({ seconds }: { seconds: number }) {
 }
 
 /** Debate day → Rounds: the five rounds with a timer, the rebuttal order and the final speakers. */
-export default function DebateRunSheet({ data }: { data: EventData }) {
+export default function DebateRunSheet({ data, onGeneratePairings, generating }: { data: EventData; onGeneratePairings: () => void; generating: boolean }) {
   const [saved, setSaved] = useState<Saved>(read);
   const update = (patch: Partial<Saved>) => setSaved(s => {
     const next = { ...s, ...patch };
@@ -82,6 +82,38 @@ export default function DebateRunSheet({ data }: { data: EventData }) {
         <p className="mb-4 text-sm text-gray-600">{current.what} Suggested time: {clock(current.seconds)} {current.per}.</p>
         <RoundTimer seconds={current.seconds} />
       </section>
+
+      {saved.round === 1 && (
+        <section className="rounded-xl border bg-white p-5 shadow-sm">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+            <h3 className="font-semibold text-gray-900">Pairs, in speaking order</h3>
+            <button onClick={onGeneratePairings} disabled={generating}
+              className="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm hover:bg-gray-50 disabled:opacity-50">
+              {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Shuffle className="h-4 w-4" />} {data.pairings.length ? 'Re-generate' : 'Generate pairings'}
+            </button>
+          </div>
+          {data.pairings.length === 0 ? (
+            <p className="text-sm text-gray-500">Generate random pairs. Teammates are never paired; edit pairs in the One-on-one tab.</p>
+          ) : (
+            <ol className="space-y-2 text-sm">
+              {data.pairings.map((p, i) => {
+                const who = (id: string) => data.roster.find(d => d.id === id);
+                return (
+                  <li key={p.id} className="flex flex-wrap items-center gap-2">
+                    <span className="w-6 text-right font-semibold text-gray-400">{i + 1}.</span>
+                    {[p.a_id, p.b_id].map((id, k) => (
+                      <React.Fragment key={id}>
+                        {k === 1 && <span className="text-xs font-semibold uppercase text-gray-400">vs</span>}
+                        <span><span className="mr-1 font-mono text-xs text-gray-500">{seatLabel(who(id), data.teams)}</span>{who(id)?.full_name ?? '—'}</span>
+                      </React.Fragment>
+                    ))}
+                  </li>
+                );
+              })}
+            </ol>
+          )}
+        </section>
+      )}
 
       {saved.round === 2 && (
         <section className="rounded-xl border bg-white p-5 shadow-sm">

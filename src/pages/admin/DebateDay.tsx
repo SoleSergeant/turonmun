@@ -107,7 +107,7 @@ export default function DebateDay() {
     if (data.pairings.length && !(await confirmAction('Replace the current pairings? Judges\' one-on-one votes for them are deleted too.', { title: 'New pairings', confirmLabel: 'Replace', danger: true }))) return;
     setBusy(true);
     try {
-      const { pairs, bye } = generatePairings(seated);
+      const { pairs, byes } = generatePairings(seated);
       if (data.pairings.length) {
         const { error } = await table('debate_pairings').delete().in('id', data.pairings.map(p => p.id));
         if (error) throw error;
@@ -115,7 +115,7 @@ export default function DebateDay() {
       const { error } = await table('debate_pairings').insert(pairs.map(([a, b], i) => ({ round: 1, position: i, a_id: a.id, b_id: b.id })));
       if (error) throw error;
       await load();
-      toast({ title: `${pairs.length} pairs created`, description: bye ? `${bye.full_name} sits this round out (odd number).` : undefined });
+      toast({ title: `${pairs.length} pairs created`, description: byes.length ? `Sitting this round out: ${byes.map(b => b.full_name).join(', ')}.` : undefined });
     } catch (err) {
       fail('Could not create pairings', err);
     } finally {
@@ -129,9 +129,13 @@ export default function DebateDay() {
     load();
   };
 
+  const teamOf = (id: string) => data?.roster.find(d => d.id === id)?.team_id;
+
   const addPair = async () => {
-    if (!data || seated.length < 2) return;
-    const { error } = await table('debate_pairings').insert({ round: 1, position: data.pairings.length, a_id: seated[0].id, b_id: seated[1].id });
+    if (!data) return;
+    const b = seated.find(d => d.team_id !== seated[0]?.team_id);
+    if (!b) { toast({ title: 'Put debaters in at least two teams first' }); return; }
+    const { error } = await table('debate_pairings').insert({ round: 1, position: data.pairings.length, a_id: seated[0].id, b_id: b.id });
     if (error) return fail('Could not add pair', error);
     load();
   };
@@ -258,7 +262,7 @@ export default function DebateDay() {
             {tab === 'pairings' && (
               <div className="space-y-4">
                 <div className="flex flex-wrap items-center justify-between gap-3">
-                  <p className="text-sm text-gray-600">Pairs are made across teams. Change anyone with the drop-downs.</p>
+                  <p className="text-sm text-gray-600">Teammates are never paired. Change anyone with the drop-downs.</p>
                   <div className="flex gap-2">
                     <button onClick={addPair} disabled={seated.length < 2} className="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm hover:bg-gray-50 disabled:opacity-50"><Plus className="h-4 w-4" /> Add pair</button>
                     <button onClick={generate} disabled={busy} className="inline-flex items-center gap-1.5 rounded-lg bg-debate-blue px-3 py-2 text-sm font-medium text-white hover:bg-debate-blue-700 disabled:opacity-50">
@@ -277,7 +281,7 @@ export default function DebateDay() {
                           <React.Fragment key={side}>
                             {k === 1 && <span className="text-center text-xs font-semibold uppercase text-gray-400">vs</span>}
                             <select value={p[side]} onChange={e => editPair(p.id, side, e.target.value)} className="flex-1 rounded-md border border-gray-300 px-2 py-1.5 text-sm">
-                              {seated.map(d => <option key={d.id} value={d.id}>{seatLabel(d, data.teams)} · {d.full_name}</option>)}
+                              {seated.filter(d => d.id === p[side] || d.team_id !== teamOf(p[side === 'a_id' ? 'b_id' : 'a_id'])).map(d => <option key={d.id} value={d.id}>{seatLabel(d, data.teams)} · {d.full_name}</option>)}
                             </select>
                           </React.Fragment>
                         ))}
@@ -292,7 +296,7 @@ export default function DebateDay() {
               </div>
             )}
 
-            {tab === 'rounds' && <DebateRunSheet data={data} />}
+            {tab === 'rounds' && <DebateRunSheet data={data} onGeneratePairings={generate} generating={busy} />}
 
             {tab === 'results' && <DebateResults data={data} criteria={debate.judging_criteria} />}
           </>

@@ -103,27 +103,22 @@ export function teamRankings(data: EventData, criteria: Criterion[]): TeamRankin
 }
 
 /**
- * Pairs debaters from different teams at random. With an odd number, one
- * person sits out (returned as `bye`). Falls back to allowing a same-team
- * pair only if no all-cross-team arrangement is found.
+ * Pairs debaters from different teams at random; teammates are never paired.
+ * Always takes one person from each of the two biggest remaining teams, which
+ * pairs as many people as possible. Whoever can't get a partner from another
+ * team sits the round out (`byes`).
  */
-export function generatePairings(people: Debater[]): { pairs: [Debater, Debater][]; bye: Debater | null } {
-  for (let attempt = 0; attempt < 300; attempt++) {
-    const pool = shuffle(people);
-    const pairs: [Debater, Debater][] = [];
-    let ok = true;
-    while (pool.length > 1) {
-      const a = pool.shift()!;
-      const idx = pool.findIndex(p => p.team_id !== a.team_id);
-      if (idx < 0) { ok = false; break; }
-      pairs.push([a, pool.splice(idx, 1)[0]]);
-    }
-    if (ok) return { pairs, bye: pool[0] ?? null };
-  }
-  const pool = shuffle(people);
+export function generatePairings(people: Debater[]): { pairs: [Debater, Debater][]; byes: Debater[] } {
+  const groups = new Map<string, Debater[]>();
+  shuffle(people).forEach(p => groups.set(p.team_id ?? p.id, [...(groups.get(p.team_id ?? p.id) || []), p]));
+  const teams = [...groups.values()];
   const pairs: [Debater, Debater][] = [];
-  while (pool.length > 1) pairs.push([pool.shift()!, pool.shift()!]);
-  return { pairs, bye: pool[0] ?? null };
+  for (;;) {
+    const open = shuffle(teams.filter(t => t.length)).sort((x, y) => y.length - x.length);
+    if (open.length < 2) break;
+    pairs.push([open[0].pop()!, open[1].pop()!]);
+  }
+  return { pairs: shuffle(pairs), byes: teams.flat() };
 }
 
 export function shuffle<T>(arr: T[]): T[] {
