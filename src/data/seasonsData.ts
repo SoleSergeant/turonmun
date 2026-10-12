@@ -345,8 +345,10 @@ export const seasonsData = [
     ],
     organizers: [],
     photos: [
-      // shortcut: venue photo until Season 7 event photos are added (public/seasons/season 7/)
-      { url: "images/camu-venue.jpg", caption: "Central Asian Medical University, Fergana" }
+      { url: "seasons/season 7/1.jpg", caption: "Second anniversary wall" },
+      { url: "seasons/season 7/2.jpg", caption: "Committee Sessions" },
+      { url: "seasons/season 7/3.jpg", caption: "Best Delegate" },
+      { url: "seasons/season 7/4.jpg", caption: "Anniversary Cake" }
     ]
   }
 ];
