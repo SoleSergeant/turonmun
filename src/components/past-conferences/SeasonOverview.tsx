@@ -85,7 +85,7 @@ const SeasonOverview: React.FC<SeasonOverviewProps> = ({ season }) => {
             <div className="flex flex-wrap gap-4 mb-6">
               <div className="flex items-center gap-2 bg-white/70 dark:bg-neutral-800/70 px-4 py-2 rounded-full">
                 <Users className="text-diplomatic-600" size={18} />
-                <span className="text-sm font-medium">{season.statistics.participants} Participants</span>
+                <span className="text-sm font-medium">{season.statistics.participants} Delegates</span>
               </div>
               <div className="flex items-center gap-2 bg-white/70 dark:bg-neutral-800/70 px-4 py-2 rounded-full">
                 <Globe2 className="text-diplomatic-600" size={18} />

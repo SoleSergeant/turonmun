@@ -236,7 +236,7 @@ const seasonFields: Field[] = [
   { key: 'highlights', label: 'Highlights', type: 'strings' },
   {
     key: 'statistics', label: 'Statistics', type: 'group', fields: [
-      { key: 'participants', label: 'Participants', type: 'text' },
+      { key: 'participants', label: 'Delegates', type: 'text' },
       { key: 'committees', label: 'Committees', type: 'number' },
       { key: 'location', label: 'Venue', type: 'text' },
       { key: 'languages', label: 'Languages', type: 'text' },

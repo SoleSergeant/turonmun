@@ -119,7 +119,7 @@ export default function PastConferences() {
                     <div className="flex flex-wrap gap-4 mb-8">
                       {season.statistics?.participants && (
                         <div className={`${season.lightBg} px-3 py-1 rounded-full text-sm font-medium ${season.textColor}`}>
-                          {season.statistics.participants} Participants
+                          {season.statistics.participants} Delegates
                         </div>
                       )}
                       {season.statistics?.countries && (
