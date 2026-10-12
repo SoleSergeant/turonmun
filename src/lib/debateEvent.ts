@@ -108,11 +108,6 @@ export function teamRankings(data: EventData, criteria: Criterion[]): TeamRankin
  * pair only if no all-cross-team arrangement is found.
  */
 export function generatePairings(people: Debater[]): { pairs: [Debater, Debater][]; bye: Debater | null } {
-  const shuffle = <T,>(arr: T[]) => {
-    const a = [...arr];
-    for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
-    return a;
-  };
   for (let attempt = 0; attempt < 300; attempt++) {
     const pool = shuffle(people);
     const pairs: [Debater, Debater][] = [];
@@ -129,6 +124,17 @@ export function generatePairings(people: Debater[]): { pairs: [Debater, Debater]
   const pairs: [Debater, Debater][] = [];
   while (pool.length > 1) pairs.push([pool.shift()!, pool.shift()!]);
   return { pairs, bye: pool[0] ?? null };
+}
+
+export function shuffle<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+
+/** Deals people at random into the teams as evenly as possible, seats numbered 1, 2, 3 … per team. */
+export function splitIntoTeams(people: Debater[], teamIds: string[]): { id: string; team_id: string; slot: number }[] {
+  return shuffle(people).map((p, i) => ({ id: p.id, team_id: teamIds[i % teamIds.length], slot: Math.floor(i / teamIds.length) + 1 }));
 }
 
 /** Next free seat number in a team (1, 2, 3 …). */

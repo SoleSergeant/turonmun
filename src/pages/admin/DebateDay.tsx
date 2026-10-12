@@ -1,19 +1,20 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Trash2, Shuffle, Loader2, Users, Swords, Trophy, Gavel } from 'lucide-react';
+import { Plus, Trash2, Shuffle, Loader2, Users, Swords, Trophy, Gavel, Timer } from 'lucide-react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import DebateResults from '@/components/admin/DebateResults';
+import DebateRunSheet from '@/components/admin/DebateRunSheet';
 import { confirmAction } from '@/components/admin/ConfirmDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useContent } from '@/content/store';
 import { adminPath } from '@/lib/adminPath';
 import {
-  type EventData, type Debater, loadEvent, generatePairings, nextSlot, seatLabel, TEAM_TONES,
+  type EventData, type Debater, loadEvent, generatePairings, splitIntoTeams, nextSlot, seatLabel, TEAM_TONES,
 } from '@/lib/debateEvent';
 
 const table = (name: string) => supabase.from(name as any) as any;
-type Tab = 'teams' | 'pairings' | 'results';
+type Tab = 'teams' | 'pairings' | 'rounds' | 'results';
 
 /** Admin → Debate day: teams, one-on-one pairings and live results (SG + Academics). */
 export default function DebateDay() {
@@ -75,6 +76,28 @@ export default function DebateDay() {
     setData(d => d && { ...d, roster: d.roster.map(r => (r.id === person.id ? { ...r, ...fields } : r)) });
   };
 
+  const shuffleTeams = async () => {
+    if (!data || !data.teams.length || !data.roster.length) return;
+    const n = data.teams.length;
+    if (!(await confirmAction(
+      `Deal all ${data.roster.length} accepted debaters at random into ${n} team${n === 1 ? '' : 's'}? Everyone's current team and seat is replaced.`,
+      { title: 'Shuffle into teams', confirmLabel: 'Shuffle' },
+    ))) return;
+    setBusy(true);
+    try {
+      const rows = splitIntoTeams(data.roster, data.teams.map(t => t.id));
+      const results = await Promise.all(rows.map(({ id, ...fields }) => table('debate_registrations').update(fields).eq('id', id)));
+      const failed = results.find((r: any) => r.error);
+      if (failed) throw failed.error;
+      toast({ title: `${rows.length} debaters dealt into ${n} teams` });
+    } catch (err) {
+      fail('Could not shuffle teams', err);
+    } finally {
+      await load();
+      setBusy(false);
+    }
+  };
+
   // ── Pairings ────────────────────────────────────────────────────────
   const seated = useMemo(() => (data?.roster || []).filter(d => d.team_id), [data]);
 
@@ -124,6 +147,7 @@ export default function DebateDay() {
   const tabs: { key: Tab; label: string; icon: typeof Users }[] = [
     { key: 'teams', label: 'Teams', icon: Users },
     { key: 'pairings', label: 'One-on-one', icon: Swords },
+    { key: 'rounds', label: 'Rounds', icon: Timer },
     { key: 'results', label: 'Results', icon: Trophy },
   ];
   const input = 'w-full rounded-md border border-gray-300 px-2.5 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-debate-blue/30';
@@ -150,7 +174,7 @@ export default function DebateDay() {
           <div className="flex justify-center py-16"><Loader2 className="h-6 w-6 animate-spin text-gray-400" /></div>
         ) : (
           <>
-            <div className="flex gap-2 border-b" role="tablist">
+            <div className="flex gap-2 overflow-x-auto border-b" role="tablist">
               {tabs.map(t => (
                 <button key={t.key} role="tab" aria-selected={tab === t.key} onClick={() => { setTab(t.key); if (t.key === 'results') load(); }}
                   className={`-mb-px inline-flex items-center gap-2 border-b-2 px-4 py-2.5 text-sm font-medium ${tab === t.key ? 'border-debate-blue text-debate-blue' : 'border-transparent text-gray-600 hover:text-gray-900'}`}>
@@ -167,9 +191,14 @@ export default function DebateDay() {
                     Debaters see their team only when <Link to={adminPath('/content')} className="text-debate-blue hover:underline">Site content → Turon Debate → Show teams to debaters</Link> is on
                     {debate.reveal_teams ? ' (it is).' : ' (it is off).'}
                   </p>
-                  <button onClick={addTeam} className="inline-flex items-center gap-1.5 rounded-lg bg-debate-blue px-3 py-2 text-sm font-medium text-white hover:bg-debate-blue-700">
-                    <Plus className="h-4 w-4" /> Add team
-                  </button>
+                  <div className="flex gap-2">
+                    <button onClick={shuffleTeams} disabled={busy || !data.teams.length || !data.roster.length} title={data.teams.length ? undefined : 'Add teams first'} className="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm hover:bg-gray-50 disabled:opacity-50">
+                      {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Shuffle className="h-4 w-4" />} Shuffle into teams
+                    </button>
+                    <button onClick={addTeam} className="inline-flex items-center gap-1.5 rounded-lg bg-debate-blue px-3 py-2 text-sm font-medium text-white hover:bg-debate-blue-700">
+                      <Plus className="h-4 w-4" /> Add team
+                    </button>
+                  </div>
                 </div>
 
                 <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -262,6 +291,8 @@ export default function DebateDay() {
                 )}
               </div>
             )}
+
+            {tab === 'rounds' && <DebateRunSheet data={data} />}
 
             {tab === 'results' && <DebateResults data={data} criteria={debate.judging_criteria} />}
           </>
