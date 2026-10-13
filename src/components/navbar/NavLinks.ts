@@ -16,7 +16,6 @@ export const navLinks = [
   },
   // Season entries are filled in by useNavLinks() from Site content → Seasons.
   { name: 'Past Conferences', path: '/past-conferences', hasDropdown: true, dropdownItems: [] as { name: string; path: string }[] },
-  { name: 'Turon Debate', path: '/debat' },
   { name: 'Contact', path: '/contact' },
 ];
 
