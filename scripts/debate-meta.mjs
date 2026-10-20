@@ -19,7 +19,7 @@ set(/<title>[\s\S]*?<\/title>/, `<title>${TITLE}</title>`);
 set(/<meta name="description" content="[^"]*"/, `<meta name="description" content="${DESCRIPTION}"`);
 set(/<meta property="og:title" content="[^"]*"/, `<meta property="og:title" content="${TITLE}"`);
 set(/<meta property="og:description" content="[^"]*"/, `<meta property="og:description" content="${DESCRIPTION}"`);
-set(/<meta property="og:url" content="[^"]*"/, `<meta property="og:url" content="${SITE}/debat"`);
+set(/<meta property="og:url" content="[^"]*"/, `<meta property="og:url" content="https://debat.turonmun.com/"`);
 set(/<meta property="og:image" content="[^"]*"/, `<meta property="og:image" content="${IMAGE}"`);
 set(/<meta name="twitter:image" content="[^"]*"/, `<meta name="twitter:image" content="${IMAGE}"`);
 set(/<link rel="icon"[^>]*>/, '<link rel="icon" type="image/svg+xml" href="/debate/favicon.svg" />');
