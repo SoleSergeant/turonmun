@@ -1,7 +1,12 @@
 {
   "rewrites": [
     {
-      "source": "/(.*)",
+      "source": "/((?!assets/|debate/).*)",
+      "has": [{ "type": "host", "value": "(debat|debate)\\.turonmun\\.com" }],
+      "destination": "/debat/index.html"
+    },
+    {
+      "source": "/((?!assets/).*)",
       "destination": "/index.html"
     }
   ],
