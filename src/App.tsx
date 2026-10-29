@@ -46,6 +46,7 @@ const ChairApplication = lazy(() => import("./pages/ChairApplication"));
 const VolunteerApplication = lazy(() => import("./pages/VolunteerApplication"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const Awards = lazy(() => import("./pages/Awards"));
+const Team = lazy(() => import("./pages/Team"));
 
 // Admin pages — only ever loaded for the admin subdomain
 const AdminLogin = lazy(() => import("./pages/admin/AdminLogin"));
@@ -63,6 +64,7 @@ const AdminVolunteers = lazy(() => import("./pages/admin/AdminVolunteers"));
 const AdminAnalytics = lazy(() => import("./pages/admin/Analytics"));
 const AdminAwards = lazy(() => import("./pages/admin/AdminAwards"));
 const SiteContent = lazy(() => import("./pages/admin/SiteContent"));
+const AdminTeam = lazy(() => import("./pages/admin/AdminTeam"));
 const DebateRegistrations = lazy(() => import("./pages/admin/DebateRegistrations"));
 const CheckIn = lazy(() => import("./pages/admin/CheckIn"));
 const FormSettings = lazy(() => import("./pages/admin/FormSettings"));
@@ -192,6 +194,7 @@ const App = () => {
           <Route path="/awards" element={<AdminRoute allow={['sg','academics']}><AdminAwards /></AdminRoute>} />
           <Route path="/content" element={<AdminRoute allow={['sg']}><SiteContent /></AdminRoute>} />
           <Route path="/homepage" element={<Navigate to="/content" replace />} />
+          <Route path="/team" element={<AdminRoute allow={['sg']}><AdminTeam /></AdminRoute>} />
           <Route path="/check-in" element={<CheckInRoute><CheckIn /></CheckInRoute>} />
           <Route path="/reset-password-change" element={<ResetPasswordChange />} />
           <Route path="/forms" element={<AdminRoute allow={['sg']}><FormSettings /></AdminRoute>} />
@@ -260,6 +263,7 @@ const App = () => {
         <Route path="/contact" element={<Contact />} />
         <Route path="/past-conferences" element={<PastConferences />} />
         <Route path="/awards" element={<Awards />} />
+        <Route path="/team" element={<Team />} />
         <Route path="/seasons/Season5" element={<Navigate to="/seasons/5" replace />} />
         {/* Every past season (built-in and admin-added) — see Site content → Seasons */}
         <Route path="/seasons/:slug" element={<SeasonRoute />} />

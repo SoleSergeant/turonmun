@@ -96,6 +96,11 @@ export default function Footer() {
               </Link>
             </li>
             <li>
+              <Link to="/team" className="text-blue-200 hover:text-white transition-colors inline-flex items-center">
+                <ArrowRight size={14} className="mr-2 opacity-70" /> Our Team
+              </Link>
+            </li>
+            <li>
               <Link to="/#faq" className="text-blue-200 hover:text-white transition-colors inline-flex items-center">
                 <ArrowRight size={14} className="mr-2 opacity-70" /> FAQ
               </Link>

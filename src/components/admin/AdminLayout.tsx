@@ -32,6 +32,7 @@ import {
   Mic,
   Swords,
   Gavel,
+  UsersRound,
   LucideIcon,
 } from 'lucide-react';
 
@@ -81,6 +82,7 @@ const NAV: { group: string; items: NavItem[] }[] = [
     group: 'Site',
     items: [
       { path: '/content', label: 'Site content', icon: Home, roles: SG },
+      { path: '/team', label: 'Team', icon: UsersRound, roles: SG },
       { path: '/forms', label: 'Forms', icon: ClipboardList, roles: SG },
       { path: '/messages', label: 'Messages', icon: Mail, roles: SG },
     ],

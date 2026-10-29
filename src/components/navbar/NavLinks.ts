@@ -3,6 +3,7 @@ import { usePastSeasons } from '@/content/seasons';
 export const navLinks = [
   { name: 'Home', path: '/' },
   { name: 'About', path: '/about' },
+  { name: 'Team', path: '/team' },
   {
     name: 'Event Updates',
     path: '/event-updates',
