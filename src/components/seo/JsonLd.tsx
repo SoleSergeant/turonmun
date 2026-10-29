@@ -40,7 +40,7 @@ export const OrganizationJsonLd: React.FC<OrganizationJsonLdProps> = ({
   sameAs = [],
   contactPoint,
 }) => {
-  const data = {
+  const data: Record<string, unknown> = {
     '@type': 'Organization',
     name,
     url,

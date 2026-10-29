@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build --outDir dist",
+    "build": "tsc -p tsconfig.app.json --noEmit && vite build --outDir dist",
     "postbuild": "node scripts/debate-meta.mjs",
     "build:dev": "vite build --mode development",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",

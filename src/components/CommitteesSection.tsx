@@ -2,7 +2,7 @@ import React from 'react';
 import CommitteeCard from './CommitteeCard';
 import { ChevronRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, type Variants } from 'framer-motion';
 import { CustomButton } from './ui/custom-button';
 import { useCommittees } from '../hooks/useCommittees';
 import { useContent, useFill, rich } from '@/content/store';
@@ -11,7 +11,7 @@ import { useContent, useFill, rich } from '@/content/store';
 export default function CommitteesSection() {
   const text = useContent('home_sections');
   const { committees } = useCommittees();
-  const containerVariants = {
+  const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
@@ -22,7 +22,7 @@ export default function CommitteesSection() {
     }
   };
 
-  const itemVariants = {
+  const itemVariants: Variants = {
     hidden: { y: 10, opacity: 0 },
     visible: {
       y: 0,

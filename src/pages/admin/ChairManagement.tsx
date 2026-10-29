@@ -534,6 +534,7 @@ const ChairManagement = () => {
       password: '', // Don't load password
       role: chair.role,
       committee_id: chair.committee_id || '',
+      user_id: '',
     });
     setShowEditModal(true);
   };

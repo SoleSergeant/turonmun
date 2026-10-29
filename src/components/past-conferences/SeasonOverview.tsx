@@ -1,5 +1,5 @@
 import React from 'react';
-import { motion } from 'framer-motion';
+import { motion, type Variants } from 'framer-motion';
 import { ArrowRight, Calendar, Globe2, Users, Award, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { SeasonData } from '@/data/seasonsData';
@@ -9,7 +9,7 @@ interface SeasonOverviewProps {
 }
 
 const SeasonOverview: React.FC<SeasonOverviewProps> = ({ season }) => {
-  const containerVariants = {
+  const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
@@ -20,7 +20,7 @@ const SeasonOverview: React.FC<SeasonOverviewProps> = ({ season }) => {
     }
   };
 
-  const itemVariants = {
+  const itemVariants: Variants = {
     hidden: { opacity: 0, y: 20 },
     visible: {
       opacity: 1,
@@ -33,7 +33,7 @@ const SeasonOverview: React.FC<SeasonOverviewProps> = ({ season }) => {
     }
   };
 
-  const highlightVariants = {
+  const highlightVariants: Variants = {
     hidden: { opacity: 0, x: -20 },
     visible: {
       opacity: 1,

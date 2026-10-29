@@ -1,4 +1,4 @@
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, type Variants } from 'framer-motion';
 import { ReactNode } from 'react';
 
 interface ExperienceSectionProps {
@@ -9,7 +9,7 @@ interface ExperienceSectionProps {
   themeColor?: 'light' | 'dark';
 }
 
-const fadeInUp = {
+const fadeInUp: Variants = {
   hidden: { opacity: 0, y: 20 },
   visible: {
     opacity: 1,

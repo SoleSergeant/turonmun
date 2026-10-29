@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, type Variants } from 'framer-motion';
 import { usePastSeason, photoSrc } from '@/content/seasons';
 import PageLayout from '@/components/layout/PageLayout';
 import SeasonOverview from '@/components/past-conferences/SeasonOverview';
@@ -8,16 +8,11 @@ import { ArrowLeft, Cpu, Globe as GlobeIcon, Lightbulb } from 'lucide-react';
 import ExperienceSection from '@/components/seasons/ExperienceSection';
 import { Link } from 'react-router-dom';
 import { Seo } from '@/components/seo';
-import { useContent } from '@/content/store';
 
 export default function Season3() {
-  const siteUrl = useContent('seo').site_url.replace(/\/$/, '');
   // Get the season data for Season 3
   const seasonData = usePastSeason("season3");
   
-  // Format dates for SEO
-  const startDate = new Date(seasonData.date).toISOString();
-  const endDate = new Date(seasonData.endDate).toISOString();
   
   // Scroll to top when component mounts
   useEffect(() => {
@@ -25,7 +20,7 @@ export default function Season3() {
   }, []);
 
   // Animation variants for page transitions
-  const pageVariants = {
+  const pageVariants: Variants = {
     initial: { opacity: 0, y: 20 },
     animate: { 
       opacity: 1, 
@@ -47,7 +42,7 @@ export default function Season3() {
     }
   };
 
-  const itemVariants = {
+  const itemVariants: Variants = {
     hidden: { opacity: 0, y: 20 },
     visible: {
       opacity: 1,
@@ -61,61 +56,6 @@ export default function Season3() {
       <Seo
         title={`TuronMUN ${seasonData.year} | ${seasonData.theme}`}
         description={seasonData.description}
-        canonical={`${siteUrl}${seasonData.route}`}
-        openGraph={{
-          type: 'website',
-          url: `${siteUrl}${seasonData.route}`,
-          title: `TuronMUN ${seasonData.year} | ${seasonData.theme}`,
-          description: seasonData.description,
-          images: [
-            {
-              url: `${siteUrl}/${(seasonData.photos[0]?.url || 'images/og-image.jpg').replace(/^\//, '')}`,
-              width: 1200,
-              height: 630,
-              alt: `TuronMUN ${seasonData.year} - ${seasonData.theme}`,
-            },
-          ],
-          siteName: 'TuronMUN',
-        }}
-        twitter={{
-          cardType: 'summary_large_image',
-          site: '@turonmun',
-          handle: '@turonmun',
-        }}
-        additionalMetaTags={[
-          {
-            property: 'article:published_time',
-            content: new Date(seasonData.date).toISOString(),
-          },
-        ]}
-        structuredData={{
-          '@context': 'https://schema.org',
-          '@type': 'Event',
-          name: `TuronMUN ${seasonData.year} - ${seasonData.theme}`,
-          description: seasonData.description,
-          startDate: startDate,
-          endDate: endDate,
-          location: {
-            '@type': 'Place',
-            name: seasonData.location,
-            address: seasonData.location,
-          },
-          image: `${siteUrl}/${(seasonData.photos[0]?.url || 'images/og-image.jpg').replace(/^\//, '')}`,
-          organizer: {
-            '@type': 'Organization',
-            name: 'TuronMUN',
-            url: siteUrl,
-          },
-          offers: {
-            '@type': 'Offer',
-            url: `${siteUrl}${seasonData.route}`,
-            price: '0',
-            priceCurrency: 'UZS',
-            availability: 'https://schema.org/SoldOut',
-            validFrom: new Date(seasonData.date).toISOString(),
-          },
-          eventStatus: 'https://schema.org/EventScheduled',
-        }}
       />
       <PageLayout>
         <motion.div 

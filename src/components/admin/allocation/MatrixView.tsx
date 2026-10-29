@@ -22,7 +22,7 @@ import { COMMON_COUNTRIES } from '@/data/countries';
 interface Committee {
   id: string;
   name: string;
-  abbreviation: string;
+  abbreviation?: string;
   total_spots?: number | null;
   countries?: string[] | null;
 }

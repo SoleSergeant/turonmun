@@ -18,7 +18,7 @@ interface ScheduleEvent {
   committee_id: string | null;
   is_mandatory: boolean | null;
   created_at: string | null;
-  updated_at: string | null;
+  updated_at?: string | null;
 }
 
 const typeColors: Record<string, string> = {

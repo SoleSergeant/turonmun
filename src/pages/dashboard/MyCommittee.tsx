@@ -128,7 +128,7 @@ function MyCommittee() {
   }, [user]);
 
   const committeeName = committee?.name || 'Committee not assigned yet';
-  const committeeAbbr = committee?.abbreviation || '';
+  const committeeAbbr = (committee as { abbreviation?: string } | null)?.abbreviation || '';
   const committeeDescription = committee?.description || 'Once your committee is assigned, details will appear here.';
   const topics = committee?.topics || [];
   const chairName = committee?.chair || 'To be announced';

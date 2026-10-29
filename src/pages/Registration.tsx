@@ -187,8 +187,8 @@ const Registration = () => {
 
   const calculateFee = () => {
     const baseFee = formSettings?.fee_amount ?? Number(import.meta.env.VITE_APP_DELEGATE_FEE ?? 90000);
-    const ieltsDiscount = (formData.hasIELTS === 'yes' || formData.hasIELTS === true) ? (formSettings?.ielts_discount ?? 10000) : 0;
-    const satDiscount = (formData.hasSAT === 'yes' || formData.hasSAT === true) ? (formSettings?.sat_discount ?? 10000) : 0;
+    const ieltsDiscount = (formData.hasIELTS === 'yes') ? (formSettings?.ielts_discount ?? 10000) : 0;
+    const satDiscount = (formData.hasSAT === 'yes') ? (formSettings?.sat_discount ?? 10000) : 0;
     const discount = ieltsDiscount + satDiscount;
     return {
       originalFee: baseFee,

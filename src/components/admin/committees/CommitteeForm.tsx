@@ -188,11 +188,11 @@ const CommitteeForm = ({
           .filter((a: any) => isChairApplication(a))
           .map((a: any) => a.full_name)
           .filter(Boolean);
-        setChairCandidates(Array.from(new Set(names)).sort());
+        setChairCandidates(Array.from(new Set<string>(names)).sort());
       }));
   }, []);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };

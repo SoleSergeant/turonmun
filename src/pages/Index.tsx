@@ -1,6 +1,6 @@
 
 import React, { useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, type Variants } from 'framer-motion';
 import { Seo } from '../components/seo';
 import Navbar from '../components/Navbar';
 import Hero from '../components/Hero';
@@ -52,7 +52,7 @@ const Index = () => {
   }, []);
 
   // Animation variants for staggered reveals
-  const containerVariants = {
+  const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
@@ -63,7 +63,7 @@ const Index = () => {
     }
   };
 
-  const sectionVariants = {
+  const sectionVariants: Variants = {
     hidden: { opacity: 0, y: 20 },
     visible: { 
       opacity: 1, 

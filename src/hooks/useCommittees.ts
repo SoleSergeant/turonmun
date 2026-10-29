@@ -93,7 +93,7 @@ export const useCommittees = () => {
         }
         // On error / empty result: keep the static fallback already in state
       })
-      .catch(() => {
+      .then(undefined, () => {
         // Silently ignore — static fallback is already displayed
       });
 

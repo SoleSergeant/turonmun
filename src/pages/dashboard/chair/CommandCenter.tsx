@@ -839,7 +839,7 @@ export default function CommandCenter() {
                 <button onClick={() => setShowAddSpeaker(s => !s)} className="flex items-center gap-1.5 px-3 py-1.5 bg-gold-400/20 border border-gold-400/30 text-gold-400 rounded-lg text-[10px] font-bold uppercase tracking-widest hover:bg-gold-400/30 transition-all">
                   <UserPlus className="h-3.5 w-3.5" /> Add
                 </button>
-                <button onClick={nextSpeaker} disabled={waitingSpeakers.length === 0 && !currentSpeaker} className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 rounded-lg text-[10px] font-bold uppercase tracking-widest hover:bg-emerald-500/30 transition-all disabled:opacity-30">
+                <button onClick={() => nextSpeaker()} disabled={waitingSpeakers.length === 0 && !currentSpeaker} className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 rounded-lg text-[10px] font-bold uppercase tracking-widest hover:bg-emerald-500/30 transition-all disabled:opacity-30">
                   <SkipForward className="h-3.5 w-3.5" /> Next
                 </button>
               </div>

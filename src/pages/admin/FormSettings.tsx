@@ -43,7 +43,7 @@ const BLANK_FORM_DATA = {
   dietaryRestrictions: '', medicalConditions: '', emergencyContact: '',
   emergencyPhone: '', feeAgreement: '', discountEligibility: [] as string[],
   finalConfirmation: false, hasIELTS: 'no', hasSAT: 'no',
-  ieltsScore: '', satScore: '', agreeToTerms: false,
+  ieltsScore: '', satScore: '', agreeToTerms: false, photo: null as File | null,
 };
 
 // ── Custom Questions Live Editor Step ──────────────────────────────────────────

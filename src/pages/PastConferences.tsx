@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, type Variants } from 'framer-motion';
 import { usePastSeasons } from '@/content/seasons';
 import { ArrowRight } from 'lucide-react';
 import PageLayout from '@/components/layout/PageLayout';
@@ -10,7 +10,7 @@ export default function PastConferences() {
   const text = useContent('past_conferences');
   const seasonsData = usePastSeasons();
   // Animation variants
-  const containerVariants = {
+  const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
@@ -21,7 +21,7 @@ export default function PastConferences() {
     }
   };
 
-  const itemVariants = {
+  const itemVariants: Variants = {
     hidden: { opacity: 0, y: 20 },
     visible: {
       opacity: 1,

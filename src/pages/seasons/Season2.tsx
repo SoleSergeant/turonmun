@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, type Variants } from 'framer-motion';
 import { usePastSeason, photoSrc } from '@/content/seasons';
 import PageLayout from '@/components/layout/PageLayout';
 import SeasonOverview from '@/components/past-conferences/SeasonOverview';
@@ -18,7 +18,7 @@ export default function Season2() {
   }, []);
 
   // Animation variants for page transitions
-  const pageVariants = {
+  const pageVariants: Variants = {
     initial: { opacity: 0, y: 20 },
     animate: { 
       opacity: 1, 
@@ -40,7 +40,7 @@ export default function Season2() {
     }
   };
 
-  const itemVariants = {
+  const itemVariants: Variants = {
     hidden: { opacity: 0, y: 20 },
     visible: {
       opacity: 1,

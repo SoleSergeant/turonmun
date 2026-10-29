@@ -17,7 +17,7 @@ const listeners = new Set<(map: Record<string, string>) => void>();
 const norm = (name: string) => name.trim().toLowerCase();
 
 const fetchOverrides = async (): Promise<Record<string, string>> => {
-  const { data, error } = await (supabase.from('country_flag_overrides') as any)
+  const { data, error } = await (supabase as any).from('country_flag_overrides')
     .select('country_name, flag_url');
   if (error) {
     console.error('Failed to load flag overrides:', error.message);
@@ -111,7 +111,7 @@ export function useFlagOverrides() {
       const { data } = supabase.storage.from('applications').getPublicUrl(path);
       const publicUrl = data.publicUrl;
 
-      const { error: rowErr } = await (supabase.from('country_flag_overrides') as any)
+      const { error: rowErr } = await (supabase as any).from('country_flag_overrides')
         .upsert({ country_name: countryName.trim(), flag_url: publicUrl }, { onConflict: 'country_name' });
       if (rowErr) throw rowErr;
 
@@ -127,7 +127,7 @@ export function useFlagOverrides() {
   const reset = useCallback(async (countryName: string) => {
     setBusy(true);
     try {
-      const { error } = await (supabase.from('country_flag_overrides') as any)
+      const { error } = await (supabase as any).from('country_flag_overrides')
         .delete()
         .eq('country_name', countryName.trim());
       if (error) throw error;
