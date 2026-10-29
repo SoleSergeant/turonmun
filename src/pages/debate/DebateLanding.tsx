@@ -125,7 +125,7 @@ export default function DebateLanding() {
                   </div>
                 )}
               </div>
-              {d.video_caption && <figcaption className="mt-3 text-center text-sm text-slate-500">{d.video_caption}</figcaption>}
+              {videoId && d.video_caption && <figcaption className="mt-3 text-center text-sm text-slate-500">{d.video_caption}</figcaption>}
             </figure>
           </motion.div>
 
@@ -150,7 +150,8 @@ export default function DebateLanding() {
       {/* ── Key details ──────────────────────────────────────────────── */}
       {d.info.length > 0 && (
         <section aria-label="Key details" className="bg-debate-blue text-white">
-          <dl className="container mx-auto grid grid-cols-2 divide-white/15 px-4 md:grid-cols-4 md:divide-x">
+          {/* [display:grid], not .grid: mobile.css forces every .grid to one column on phones */}
+          <dl className="container mx-auto [display:grid] grid-cols-2 divide-white/15 px-4 md:grid-cols-4 md:divide-x">
             {d.info.map(item => (
               <div key={item.label} className="px-3 py-7 text-center sm:py-8">
                 <dt className="text-[11px] font-semibold uppercase tracking-[0.2em] text-white/70">{item.label}</dt>

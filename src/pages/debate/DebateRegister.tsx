@@ -312,7 +312,8 @@ export default function DebateRegister() {
               <div role="radiogroup" aria-labelledby="side-label" aria-describedby={d.side_hint ? 'side-hint' : undefined} aria-required="true">
                 <p id="side-label" className="text-sm text-slate-700">{d.side_label}<span className="text-debate-maroon"> *</span></p>
                 {d.side_hint && <p id="side-hint" className="mt-1 text-xs text-slate-500">{d.side_hint}</p>}
-                <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                {/* [display:grid], not .grid: mobile.css forces every .grid to one column below 768px */}
+                <div className="mt-3 [display:grid] gap-3 sm:grid-cols-2">
                   {sideStats.shares.map(({ side, percent }) => {
                     const checked = form.preferred_side === side;
                     return (
