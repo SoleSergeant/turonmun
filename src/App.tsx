@@ -22,6 +22,7 @@ import CheckInRoute from "./components/admin/CheckInRoute";
 import ChairRoute from "./components/chair/ChairRoute";
 
 import SplashScreen from "./components/ui/SplashScreen";
+import ErrorBoundary from "./components/ErrorBoundary";
 
 // ── Lazy-loaded pages ────────────────────────────────────────────────
 // Splits each page into its own chunk so the marketing-site visitor
@@ -121,6 +122,23 @@ const RouteFallback = () => {
     </div>
   );
 };
+
+// Shown instead of a blank page when something crashes. A reload fetches fresh
+// files, which fixes the usual cause (a stale copy after a deploy).
+const CrashScreen = () => (
+  <div className="min-h-screen flex items-center justify-center px-4">
+    <div className="max-w-sm w-full rounded-2xl bg-white p-8 text-center shadow-xl">
+      <h1 className="text-xl font-semibold text-diplomatic-900 mb-2">This page didn't load properly</h1>
+      <p className="text-sm text-neutral-600 mb-6">Reloading usually fixes it.</p>
+      <button
+        onClick={() => window.location.reload()}
+        className="w-full rounded-lg bg-diplomatic-700 px-4 py-2.5 font-semibold text-white hover:bg-diplomatic-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-400"
+      >
+        Reload page
+      </button>
+    </div>
+  </div>
+);
 
 // Scroll to top on route change
 const ScrollToTop = () => {
@@ -313,9 +331,12 @@ const App = () => {
             {/* Secret Message Easter Egg */}
             <SecretMessage isOpen={isOpen} onClose={closeMessage} />
 
-            <Suspense fallback={<RouteFallback />}>
-              {renderRoutes()}
-            </Suspense>
+            {/* Without this, any crash (e.g. a page file that won't load) leaves a blank page. */}
+            <ErrorBoundary fallback={<CrashScreen />}>
+              <Suspense fallback={<RouteFallback />}>
+                {renderRoutes()}
+              </Suspense>
+            </ErrorBoundary>
 
             <Analytics />
             <SpeedInsights />

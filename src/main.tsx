@@ -7,13 +7,15 @@ if (!rootElement) throw new Error("Root element not found");
 
 // A page file that fails to load (e.g. the browser cached a bad copy, or an
 // old tab after a deploy) leaves the page blank. Re-download every script the
-// page has fetched, bypassing the cache, then reload once per session.
+// page has fetched, bypassing the cache, then reload — at most once a minute,
+// so a broken file can't loop but a later deploy can still recover.
 const CHUNK_ERROR = /dynamically imported module|Importing a module script failed|error loading dynamically imported module/i;
 const recoverFromChunkError = async (reason: unknown) => {
   if (!CHUNK_ERROR.test(String((reason as any)?.message ?? reason))) return;
   try {
-    if (sessionStorage.getItem('turonmun:chunk-reload')) return;
-    sessionStorage.setItem('turonmun:chunk-reload', '1');
+    const last = Number(sessionStorage.getItem('turonmun:chunk-reload')) || 0;
+    if (Date.now() - last < 60_000) return;
+    sessionStorage.setItem('turonmun:chunk-reload', String(Date.now()));
   } catch { /* private mode: still try once */ }
   const scripts = performance.getEntriesByType('resource').map(r => r.name).filter(u => /\/assets\/[^?]+\.js/.test(u));
   await Promise.allSettled(scripts.map(u => fetch(u, { cache: 'reload' })));
