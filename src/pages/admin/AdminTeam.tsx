@@ -14,11 +14,12 @@ export type TeamMember = {
   link_url: string | null;
   sort_order: number;
   is_visible: boolean;
+  is_past: boolean;
 };
 
 const SUGGESTED_TEAMS = ['Secretariat', 'Academics', 'Logistics', 'Media', 'Contributors'];
 const blank = (team = 'Secretariat'): TeamMember =>
-  ({ name: '', role: '', team, photo_url: null, link_url: '', sort_order: 0, is_visible: true });
+  ({ name: '', role: '', team, photo_url: null, link_url: '', sort_order: 0, is_visible: true, is_past: false });
 
 /** Phone photos are several MB; shrink to 600px JPEG before upload so the public page stays light. */
 const shrink = (file: File): Promise<Blob> =>
@@ -87,6 +88,7 @@ const AdminTeam = () => {
       link_url: draft.link_url?.trim() || null,
       sort_order: Number(draft.sort_order) || 0,
       is_visible: draft.is_visible,
+      is_past: draft.is_past,
     };
     if (!row.name) { toast({ title: 'Name is required', variant: 'destructive' }); return; }
     if (row.link_url && !/^https?:\/\//i.test(row.link_url)) {
@@ -152,6 +154,10 @@ const AdminTeam = () => {
                 <input type="checkbox" checked={draft.is_visible} onChange={e => set({ is_visible: e.target.checked })} />
                 <span className="text-gray-700">Show on the public page</span>
               </label>
+              <label className="flex items-center gap-2 text-sm">
+                <input type="checkbox" checked={draft.is_past} onChange={e => set({ is_past: e.target.checked })} />
+                <span className="text-gray-700">Past member (listed under "Past Members" at the bottom)</span>
+              </label>
             </div>
             <div className="flex items-center gap-4">
               <div className="w-20 h-20 rounded-full bg-gray-100 overflow-hidden flex items-center justify-center shrink-0">
@@ -192,6 +198,7 @@ const AdminTeam = () => {
                     <div className="min-w-0 flex-1">
                       <p className="font-medium text-gray-900 truncate flex items-center gap-2">
                         {m.name}
+                        {m.is_past && <span className="text-[11px] font-semibold uppercase text-amber-700 bg-amber-50 rounded px-1.5">Past</span>}
                         {!m.is_visible && <EyeOff className="h-3.5 w-3.5 text-gray-400" aria-label="Hidden" />}
                         {m.link_url && <ExternalLink className="h-3.5 w-3.5 text-gray-400" aria-label="Has link" />}
                       </p>
