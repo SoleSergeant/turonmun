@@ -163,14 +163,16 @@ const Contact = () => {
               {/* Map & Info */}
               <div className="order-1 lg:order-2">
                 <div className="bg-white rounded-2xl shadow-elegant border border-neutral-100 overflow-hidden">
-                  {/* Conference photo */}
-                  <div className="aspect-video bg-neutral-100 overflow-hidden">
-                    <img
-                      src={text.venue_image}
-                      alt={text.venue_name}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
+                  {/* Conference photo (none until the venue is announced) */}
+                  {text.venue_image && (
+                    <div className="aspect-video bg-neutral-100 overflow-hidden">
+                      <img
+                        src={text.venue_image}
+                        alt={text.venue_name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  )}
 
                   <div className="p-6">
                     <h3 className="text-xl font-display font-semibold mb-1">Conference Venue</h3>
@@ -180,10 +182,12 @@ const Contact = () => {
                     <p className="text-neutral-600 mb-5">
                       {fill(text.venue_text)}
                     </p>
-                    <div className="flex items-center mb-3">
-                      <MapPin size={18} className="text-diplomatic-600 mr-2 flex-shrink-0" />
-                      <p className="text-neutral-500 text-sm">{text.venue_address}</p>
-                    </div>
+                    {text.venue_address && (
+                      <div className="flex items-center mb-3">
+                        <MapPin size={18} className="text-diplomatic-600 mr-2 flex-shrink-0" />
+                        <p className="text-neutral-500 text-sm">{text.venue_address}</p>
+                      </div>
+                    )}
                     <div className="flex items-center mb-2">
                       <Mail size={18} className="text-diplomatic-600 mr-2 flex-shrink-0" />
                       <p className="text-neutral-700">{general.contact_email}</p>
