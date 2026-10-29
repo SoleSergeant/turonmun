@@ -57,9 +57,13 @@ const PastCard = ({ m }: { m: TeamMember }) => (
   </li>
 );
 
-/** Groups by team; teams appear in the order of their first (lowest sort_order) member. */
+const isSecretariat = (t: string) => t.trim().toLowerCase() === 'secretariat';
+
+/** Groups by team: Secretariat first, then teams in the order of their first (lowest sort_order) member. */
 const byTeam = (list: TeamMember[]) =>
-  Array.from(new Set(list.map(m => m.team))).map(t => [t, list.filter(m => m.team === t)] as const);
+  Array.from(new Set(list.map(m => m.team)))
+    .sort((a, b) => Number(isSecretariat(b)) - Number(isSecretariat(a)))
+    .map(t => [t, list.filter(m => m.team === t)] as const);
 
 const Team = () => {
   const text = useContent('pages');

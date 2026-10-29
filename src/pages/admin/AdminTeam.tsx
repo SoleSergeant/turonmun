@@ -60,7 +60,9 @@ const AdminTeam = () => {
   };
   useEffect(() => { fetchAll(); }, []);
 
-  const teams = Array.from(new Set(members.map(m => m.team)));
+  // Secretariat first, matching the public page.
+  const teams = Array.from(new Set(members.map(m => m.team)))
+    .sort((a, b) => Number(b.trim().toLowerCase() === 'secretariat') - Number(a.trim().toLowerCase() === 'secretariat'));
   const set = (patch: Partial<TeamMember>) => setDraft(d => (d ? { ...d, ...patch } : d));
 
   const uploadPhoto = async (file: File | undefined) => {
