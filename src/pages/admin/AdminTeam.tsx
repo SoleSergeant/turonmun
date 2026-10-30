@@ -3,23 +3,70 @@ import AdminLayout from '@/components/admin/AdminLayout';
 import { confirmAction } from '@/components/admin/ConfirmDialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { UsersRound, Plus, Pencil, Trash2, EyeOff, Upload, Loader2, ExternalLink } from 'lucide-react';
-
-export type TeamMember = {
-  id?: string;
-  name: string;
-  role: string | null;
-  team: string;
-  photo_url: string | null;
-  link_url: string | null;
-  sort_order: number;
-  is_visible: boolean;
-  is_past: boolean;
-};
+import { UsersRound, Plus, Pencil, Trash2, EyeOff, Upload, Loader2, ExternalLink, RotateCcw } from 'lucide-react';
+import { photoStyle, type TeamMember } from '@/lib/teamPhoto';
 
 const SUGGESTED_TEAMS = ['Secretariat', 'Academics', 'Logistics', 'Media', 'Contributors'];
+const CENTRED = { photo_x: 50, photo_y: 50, photo_zoom: 1 };
 const blank = (team = 'Secretariat'): TeamMember =>
-  ({ name: '', role: '', team, photo_url: null, link_url: '', sort_order: 0, is_visible: true, is_past: false });
+  ({ name: '', role: '', team, photo_url: null, link_url: '', sort_order: 0, is_visible: true, is_past: false, ...CENTRED });
+
+const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
+const FRAME = 176; // px, size of the square preview
+
+/**
+ * Drag the photo to move it, slider to zoom, arrow keys as the keyboard
+ * alternative. Shows the big square card and the small circle (past members).
+ */
+function PhotoFramer({ m, onChange }: { m: TeamMember; onChange: (p: Partial<TeamMember>) => void }) {
+  const drag = React.useRef<{ x: number; y: number } | null>(null);
+  // Moving the pointer right should move the photo right, i.e. the focus point left.
+  const nudge = (dx: number, dy: number) => onChange({
+    photo_x: clamp(m.photo_x - (dx / FRAME) * 100 / m.photo_zoom, 0, 100),
+    photo_y: clamp(m.photo_y - (dy / FRAME) * 100 / m.photo_zoom, 0, 100),
+  });
+  const keys: Record<string, [number, number]> = { ArrowLeft: [-4, 0], ArrowRight: [4, 0], ArrowUp: [0, -4], ArrowDown: [0, 4] };
+
+  return (
+    <div className="flex flex-wrap items-end gap-5">
+      <div
+        role="img"
+        aria-label="Photo framing. Drag, or use the arrow keys, to move the photo."
+        tabIndex={0}
+        className="relative overflow-hidden rounded-xl bg-gray-100 cursor-grab active:cursor-grabbing touch-none select-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-500"
+        style={{ width: FRAME, height: FRAME }}
+        onPointerDown={e => { e.currentTarget.setPointerCapture(e.pointerId); drag.current = { x: e.clientX, y: e.clientY }; }}
+        onPointerMove={e => {
+          if (!drag.current) return;
+          nudge(e.clientX - drag.current.x, e.clientY - drag.current.y);
+          drag.current = { x: e.clientX, y: e.clientY };
+        }}
+        onPointerUp={() => { drag.current = null; }}
+        onPointerCancel={() => { drag.current = null; }}
+        onKeyDown={e => { const k = keys[e.key]; if (k) { e.preventDefault(); nudge(k[0], k[1]); } }}
+      >
+        <img src={m.photo_url!} alt="" draggable={false} className="w-full h-full object-cover pointer-events-none" style={photoStyle(m)} />
+      </div>
+      <div className="w-11 h-11 rounded-full bg-gray-100 overflow-hidden" title="As a past member">
+        <img src={m.photo_url!} alt="" className="w-full h-full object-cover" style={photoStyle(m)} />
+      </div>
+      <div className="space-y-2 text-sm min-w-[12rem] flex-1">
+        <label className="block">
+          <span className="font-medium text-gray-700">Zoom</span>
+          <input
+            type="range" min={1} max={3} step={0.05} value={m.photo_zoom}
+            onChange={e => onChange({ photo_zoom: Number(e.target.value) })}
+            className="block w-full accent-blue-600"
+          />
+        </label>
+        <p className="text-xs text-gray-500">Drag the photo (or use the arrow keys) to move it.</p>
+        <button type="button" onClick={() => onChange(CENTRED)} className="inline-flex items-center gap-1 text-xs text-gray-600 hover:text-blue-600">
+          <RotateCcw className="h-3.5 w-3.5" /> Reset framing
+        </button>
+      </div>
+    </div>
+  );
+}
 
 /** Phone photos are several MB; shrink to 600px JPEG before upload so the public page stays light. */
 const shrink = (file: File): Promise<Blob> =>
@@ -72,7 +119,7 @@ const AdminTeam = () => {
       const path = `team/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.jpg`;
       const { error } = await supabase.storage.from('resources').upload(path, await shrink(file), { contentType: 'image/jpeg' });
       if (error) throw error;
-      set({ photo_url: supabase.storage.from('resources').getPublicUrl(path).data.publicUrl });
+      set({ photo_url: supabase.storage.from('resources').getPublicUrl(path).data.publicUrl, ...CENTRED });
     } catch (e) {
       fail('Upload failed', e);
     } finally {
@@ -91,6 +138,9 @@ const AdminTeam = () => {
       sort_order: Number(draft.sort_order) || 0,
       is_visible: draft.is_visible,
       is_past: draft.is_past,
+      photo_x: draft.photo_x,
+      photo_y: draft.photo_y,
+      photo_zoom: draft.photo_zoom,
     };
     if (!row.name) { toast({ title: 'Name is required', variant: 'destructive' }); return; }
     if (row.link_url && !/^https?:\/\//i.test(row.link_url)) {
@@ -161,10 +211,13 @@ const AdminTeam = () => {
                 <span className="text-gray-700">Past member (listed under "Past Members" at the bottom)</span>
               </label>
             </div>
+            {draft.photo_url && <PhotoFramer m={draft} onChange={set} />}
             <div className="flex items-center gap-4">
-              <div className="w-20 h-20 rounded-full bg-gray-100 overflow-hidden flex items-center justify-center shrink-0">
-                {draft.photo_url ? <img src={draft.photo_url} alt="" className="w-full h-full object-cover" /> : <UsersRound className="h-8 w-8 text-gray-300" />}
-              </div>
+              {!draft.photo_url && (
+                <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center shrink-0">
+                  <UsersRound className="h-8 w-8 text-gray-300" />
+                </div>
+              )}
               <label className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm hover:bg-gray-50 cursor-pointer">
                 {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
                 {draft.photo_url ? 'Change photo' : 'Upload photo'}
@@ -195,7 +248,7 @@ const AdminTeam = () => {
                 {members.filter(m => m.team === t).map(m => (
                   <li key={m.id} className="flex items-center gap-3 p-3">
                     <div className="w-10 h-10 rounded-full bg-gray-100 overflow-hidden shrink-0">
-                      {m.photo_url && <img src={m.photo_url} alt="" className="w-full h-full object-cover" />}
+                      {m.photo_url && <img src={m.photo_url} alt="" className="w-full h-full object-cover" style={photoStyle(m)} />}
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="font-medium text-gray-900 truncate flex items-center gap-2">

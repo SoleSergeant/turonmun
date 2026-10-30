@@ -6,7 +6,7 @@ import Footer from '../components/Footer';
 import { Seo } from '../components/seo';
 import { supabase } from '@/integrations/supabase/client';
 import { useContent, useFill } from '@/content/store';
-import type { TeamMember } from './admin/AdminTeam';
+import { photoStyle, type TeamMember } from '@/lib/teamPhoto';
 
 const initials = (name: string) =>
   name.split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase();
@@ -23,7 +23,7 @@ const Card = ({ m }: { m: TeamMember }) => (
     <LinkWrap m={m}>
       <div className="aspect-square bg-diplomatic-100 flex items-center justify-center overflow-hidden">
         {m.photo_url ? (
-          <img loading="lazy" decoding="async" src={m.photo_url} alt={m.name} className="w-full h-full object-cover" />
+          <img loading="lazy" decoding="async" src={m.photo_url} alt={m.name} className="w-full h-full object-cover" style={photoStyle(m)} />
         ) : (
           <span className="text-3xl font-display font-bold text-diplomatic-400" aria-hidden="true">{initials(m.name)}</span>
         )}
@@ -43,7 +43,7 @@ const PastCard = ({ m }: { m: TeamMember }) => (
       <div className="flex items-center gap-3 bg-white rounded-xl border border-neutral-200 p-2.5">
         <div className="w-11 h-11 rounded-full bg-diplomatic-100 flex items-center justify-center overflow-hidden shrink-0">
           {m.photo_url ? (
-            <img loading="lazy" decoding="async" src={m.photo_url} alt={m.name} className="w-full h-full object-cover" />
+            <img loading="lazy" decoding="async" src={m.photo_url} alt={m.name} className="w-full h-full object-cover" style={photoStyle(m)} />
           ) : (
             <span className="text-sm font-bold text-diplomatic-400" aria-hidden="true">{initials(m.name)}</span>
           )}
@@ -73,7 +73,7 @@ const Team = () => {
     queryKey: ['team_members'],
     queryFn: async () => {
       const { data, error } = await (supabase.from('team_members' as any) as any)
-        .select('id, name, role, team, photo_url, link_url, sort_order, is_past')
+        .select('id, name, role, team, photo_url, link_url, sort_order, is_past, photo_x, photo_y, photo_zoom')
         .order('sort_order').order('name');
       if (error) throw error;
       return (data || []) as TeamMember[];
