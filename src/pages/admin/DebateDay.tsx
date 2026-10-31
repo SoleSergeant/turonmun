@@ -127,7 +127,7 @@ export default function DebateDay() {
 
   const editPair = async (id: string, side: 'a_id' | 'b_id', value: string) => {
     const cast = data?.votes.filter(v => v.pairing_id === id).length ?? 0;
-    if (cast && !(await confirmAction(`Judges have already voted on this pair. Changing it deletes those ${cast} vote${cast === 1 ? '' : 's'}.`, { title: 'Change pair', confirmLabel: 'Change', danger: true }))) return load();
+    if (cast && !(await confirmAction(`Judges have already voted on this pair. Changing it deletes ${cast === 1 ? 'that vote' : `those ${cast} votes`}.`, { title: 'Change pair', confirmLabel: 'Change', danger: true }))) return load();
     const { error } = await supabase.from('debate_pairings').update({ [side]: value }).eq('id', id);
     if (error) return fail('Could not change pair', error);
     // Votes were for the old pair; judges vote again.
@@ -162,7 +162,10 @@ export default function DebateDay() {
     { key: 'results', label: 'Results', icon: Trophy },
   ];
   const input = 'w-full rounded-md border border-gray-300 px-2.5 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-debate-blue/30';
-  const inPairs = new Set((data?.pairings || []).flatMap(p => [p.a_id, p.b_id]));
+  const paired = (data?.pairings || []).flatMap(p => [p.a_id, p.b_id]);
+  const inPairs = new Set(paired);
+  // Editing a pair by hand can put someone in two pairs; allowed, but worth seeing.
+  const twice = seated.filter(d => paired.filter(id => id === d.id).length > 1);
 
   return (
     <AdminLayout title="Debate day">
@@ -298,6 +301,9 @@ export default function DebateDay() {
                 )}
                 {data.pairings.length > 0 && seated.some(d => !inPairs.has(d.id)) && (
                   <p className="text-sm text-amber-700">Not paired: {seated.filter(d => !inPairs.has(d.id)).map(d => d.full_name).join(', ')}</p>
+                )}
+                {twice.length > 0 && (
+                  <p className="text-sm text-amber-700">In more than one pair: {twice.map(d => d.full_name).join(', ')}</p>
                 )}
               </div>
             )}
