@@ -59,7 +59,7 @@ const DecisionEmailPanel: React.FC<{ applications: DecisionApp[]; onSent: () => 
     const ids = list.filter(a => wasDelivered(result, a.email)).map(a => a.id);
     let recordError: string | null = null;
     if (ids.length) {
-      const { error } = await (supabase.from('applications') as any)
+      const { error } = await supabase.from('applications')
         .update({ decision_emailed_at: new Date().toISOString() })
         .in('id', ids);
       if (error) recordError = error.message;

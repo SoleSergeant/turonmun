@@ -35,7 +35,7 @@ export default function NewsletterForm({
 
     try {
       // 1. Primary: store in Supabase (upsert so duplicate emails don't error)
-      const { error: dbError } = await (supabase.from('newsletter_subscribers') as any)
+      const { error: dbError } = await supabase.from('newsletter_subscribers')
         .upsert(
           { email, source: window.location.pathname, subscribed_at: new Date().toISOString(), is_active: true },
           { onConflict: 'email' }

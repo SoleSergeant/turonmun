@@ -23,6 +23,7 @@ import ChairRoute from "./components/chair/ChairRoute";
 
 import SplashScreen from "./components/ui/SplashScreen";
 import ErrorBoundary from "./components/ErrorBoundary";
+import { Seo } from "./components/seo";
 
 // ── Lazy-loaded pages ────────────────────────────────────────────────
 // Splits each page into its own chunk so the marketing-site visitor
@@ -139,6 +140,25 @@ const CrashScreen = () => (
     </div>
   </div>
 );
+
+// Page titles for the public site. Pages that set their own <Seo> (home,
+// team, seasons) override this, since theirs mounts later.
+const PAGE_TITLES: Record<string, string> = {
+  '/about': 'About', '/event-updates': 'Event Updates', '/committees': 'Committees',
+  '/register': 'Register', '/register/delegate': 'Delegate application',
+  '/register/chair': 'Chair application', '/register/volunteer': 'Volunteer application',
+  '/login': 'Sign in', '/signup': 'Create an account', '/reset-password': 'Reset password',
+  '/schedule': 'Schedule', '/resources': 'Resources', '/contact': 'Contact',
+  '/past-conferences': 'Past Conferences', '/awards': 'Awards',
+  '/dashboard': 'My dashboard', '/chair-login': 'Chair sign in', '/chair-dashboard': 'Chair dashboard',
+};
+const PageTitle = () => {
+  const { pathname } = useLocation();
+  const path = pathname.replace(/\/+$/, '') || '/';
+  // Dashboards share one title across their sub-pages.
+  const title = PAGE_TITLES[path] ?? PAGE_TITLES[path.split('/').slice(0, 2).join('/')];
+  return title ? <Seo title={title} /> : null;
+};
 
 // Scroll to top on route change
 const ScrollToTop = () => {
@@ -327,6 +347,7 @@ const App = () => {
           {showSplash && subdomain === 'none' && !window.location.pathname.startsWith('/debat') && <SplashScreen onComplete={endSplash} />}
           <BrowserRouter>
             <ScrollToTop />
+            {subdomain === 'none' && <PageTitle />}
 
             {/* Secret Message Easter Egg */}
             <SecretMessage isOpen={isOpen} onClose={closeMessage} />

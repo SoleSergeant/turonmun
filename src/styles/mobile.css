@@ -58,11 +58,6 @@ body {
     padding-right: 1rem;
   }
 
-  /* Stack cards vertically on mobile */
-  .grid {
-    grid-template-columns: 1fr !important;
-  }
-
   /* Smaller text on mobile where appropriate */
   h1 {
     font-size: 1.75rem;

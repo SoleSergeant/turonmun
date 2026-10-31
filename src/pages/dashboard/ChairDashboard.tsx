@@ -60,7 +60,7 @@ export default function ChairDashboardLayout() {
           supabase.from('committees').select('*').eq('id', committeeId),
           supabase.from('applications').select(DELEGATE_COLUMNS).eq('status', 'approved').eq('assigned_committee_id', committeeId),
           supabase.from('position_papers').select('*').eq('committee_id', committeeId),
-          (supabase.from('country_assignments') as any).select('application_id, country, country_name').eq('committee_id', committeeId),
+          supabase.from('country_assignments').select('application_id, country, country_name').eq('committee_id', committeeId),
         ]);
         const failed = [c, apps, papers].find(r => r.error);
         if (failed) throw failed.error;

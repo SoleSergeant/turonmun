@@ -64,7 +64,7 @@ const ByCommitteeView = () => {
       setAssignments((asgs as any) || []);
 
       // Build the country suggestion list: shared matrix list + any custom-added ones
-      const { data: matrixCountries } = await (supabase.from('matrix_countries') as any).select('country_name');
+      const { data: matrixCountries } = await supabase.from('matrix_countries').select('country_name');
       const custom = (matrixCountries || []).map((m: any) => m.country_name).filter(Boolean);
       setCountryOptions(Array.from(new Set([...COMMON_COUNTRIES, ...custom])).sort());
     } catch (err: any) {

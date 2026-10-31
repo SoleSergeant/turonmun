@@ -99,7 +99,7 @@ const codeFor = (country: string) => (getCountryCode(country) || '').toUpperCase
 
 export async function assignSeat(applicationId: string, committeeId: string, country: string): Promise<SeatAssignment> {
   const label = country.trim();
-  const { data, error } = await (supabase.rpc as any)('assign_seat', {
+  const { data, error } = await supabase.rpc('assign_seat', {
     p_application_id: applicationId,
     p_committee_id: committeeId,
     p_country: label,
@@ -110,13 +110,13 @@ export async function assignSeat(applicationId: string, committeeId: string, cou
 }
 
 export async function unassignSeat(assignment: Pick<SeatAssignment, 'id' | 'application_id'>): Promise<void> {
-  const { error } = await (supabase.rpc as any)('unassign_seat', { p_assignment_id: assignment.id });
+  const { error } = await supabase.rpc('unassign_seat', { p_assignment_id: assignment.id });
   if (error) throw error;
 }
 
 export async function changeSeatCountry(assignmentId: string, country: string): Promise<void> {
   const label = country.trim();
-  const { error } = await (supabase.rpc as any)('change_seat_country', {
+  const { error } = await supabase.rpc('change_seat_country', {
     p_assignment_id: assignmentId,
     p_country: label,
     p_country_code: codeFor(label),

@@ -71,8 +71,7 @@ function MyCommittee() {
       }
 
       try {
-        const { data: app, error } = await (supabase
-          .from('applications') as any)
+        const { data: app, error } = await supabase.from('applications')
           .select('*')
           .eq('email', user.email)
           .order('created_at', { ascending: false })
@@ -85,8 +84,7 @@ function MyCommittee() {
 
           if (app.assigned_committee_id) {
 
-            const { data: comm, error: commError } = await (supabase
-              .from('committees') as any)
+            const { data: comm, error: commError } = await supabase.from('committees')
               .select('*')
               .eq('id', app.assigned_committee_id)
               .single();
@@ -102,8 +100,7 @@ function MyCommittee() {
               .order('start_time', { ascending: true });
             setScheduleEvents(events || []);
 
-            const { data: paper, error: paperError } = await (supabase
-              .from('position_papers') as any)
+            const { data: paper, error: paperError } = await supabase.from('position_papers')
               .select('*')
               .eq('application_id', app.id)
               .eq('committee_id', app.assigned_committee_id)
@@ -188,7 +185,7 @@ function MyCommittee() {
         status: 'submitted',
         submitted_at: new Date().toISOString(),
       };
-      const { data, error } = await (supabase.from('position_papers') as any)
+      const { data, error } = await supabase.from('position_papers')
         .upsert(payload).select('*').single();
       if (error) throw error;
       if (data) setPositionPaperRecord(data as PositionPaperRow);

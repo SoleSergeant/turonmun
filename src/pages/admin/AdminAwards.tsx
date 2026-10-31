@@ -25,8 +25,8 @@ const AdminAwards = () => {
     try {
       const [{ data: comms, error: commErr }, { data: aw }, { data: settings }] = await Promise.all([
         supabase.from('committees').select('id, name').order('name'),
-        (supabase.from('committee_awards' as any) as any).select('*'),
-        (supabase.from('award_settings' as any) as any).select('*').eq('id', 1).single(),
+        supabase.from('committee_awards').select('*'),
+        supabase.from('award_settings').select('*').eq('id', 1).single(),
       ]);
       if (commErr) toast({ title: 'Could not load committees', description: commErr.message, variant: 'destructive' });
       setCommittees(comms || []);
@@ -43,7 +43,7 @@ const AdminAwards = () => {
     awards.find(a => a.committee_id === committeeId && a.award_type === type);
 
   const updateSettings = async (patch: { locked?: boolean; published?: boolean }) => {
-    const { error } = await (supabase.from('award_settings' as any) as any)
+    const { error } = await supabase.from('award_settings')
       .update({ ...patch, updated_at: new Date().toISOString() }).eq('id', 1);
     if (error) { toast({ title: 'Something went wrong', description: error.message, variant: 'destructive' }); return; }
     if (patch.locked !== undefined) setLocked(patch.locked);
@@ -61,7 +61,7 @@ const AdminAwards = () => {
       if (upErr) throw upErr;
       const { data: { publicUrl } } = supabase.storage.from('applications').getPublicUrl(path);
       const bust = `${publicUrl}?t=${Date.now()}`;
-      const { error } = await (supabase.from('committee_awards' as any) as any)
+      const { error } = await supabase.from('committee_awards')
         .update({ photo_url: bust }).eq('id', award.id);
       if (error) throw error;
       setAwards(prev => prev.map(a => a.id === award.id ? { ...a, photo_url: bust } : a));

@@ -57,7 +57,7 @@ export default function VolunteerApplication() {
       ...prev,
       fullName: prev.fullName || user.user_metadata?.full_name || user.user_metadata?.name || '',
     }));
-    (supabase.from('volunteer_applications') as any)
+    supabase.from('volunteer_applications')
       .select('id')
       .eq('user_id', user.id)
       .limit(1)
@@ -157,7 +157,7 @@ export default function VolunteerApplication() {
         payment_status: 'pending',
       };
 
-      const { error } = await (supabase.from('volunteer_applications') as any).insert(payload);
+      const { error } = await supabase.from('volunteer_applications').insert(payload);
       if (error) throw error;
 
       clearDraft();

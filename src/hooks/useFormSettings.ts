@@ -74,18 +74,18 @@ export const useFormSettings = (formType: 'delegate' | 'chair' | 'volunteer') =>
     try {
       // This season's approved count for the form. Visitors can't read other
       // people's applications, so it comes from a counts-only RPC (043).
-      const approvedCountQuery = (supabase.rpc as any)('form_approved_count', { p_form_type: formType })
+      const approvedCountQuery = supabase.rpc('form_approved_count', { p_form_type: formType })
         .then(({ data }: { data: number | null }) => ({ count: data ?? 0 }));
 
       const [{ data: settingsData }, { count }] = await Promise.all([
-        (supabase.from('form_settings') as any)
+        supabase.from('form_settings')
           .select('*')
           .eq('form_type', formType)
           .single(),
         approvedCountQuery,
       ]);
 
-      if (settingsData) setSettings(settingsData as FormSettings);
+      if (settingsData) setSettings(settingsData as unknown as FormSettings); // JSON columns typed by hand
       setApprovedCount(count ?? 0);
     } catch {
       // Silently fall back — table may not exist yet

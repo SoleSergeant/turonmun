@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import { supabase } from '@/integrations/supabase/client';
+import type { Json } from '@/integrations/supabase/types';
 import { getCurrentSeason, inSeason } from '@/lib/season';
 import type { FormSettings, FormQuestion } from '@/hooks/useFormSettings';
 import { useToast } from '@/hooks/use-toast';
@@ -503,22 +504,22 @@ const FormSettingsPage = () => {
     try {
       const season = await getCurrentSeason();
       const [{ data: rows }, { count: delegateCount }, { count: chairCount }, { count: volunteerCount }] = await Promise.all([
-        (supabase.from('form_settings') as any).select('*'),
-        inSeason((supabase.from('applications') as any)
+        supabase.from('form_settings').select('*'),
+        inSeason(supabase.from('applications')
           .select('id', { count: 'exact', head: true }), season)
           .eq('status', 'approved')
           .neq('application_type', 'chair'),
-        inSeason((supabase.from('applications') as any)
+        inSeason(supabase.from('applications')
           .select('id', { count: 'exact', head: true }), season)
           .eq('status', 'approved')
           .eq('application_type', 'chair'),
-        inSeason((supabase.from('volunteer_applications') as any)
+        inSeason(supabase.from('volunteer_applications')
           .select('id', { count: 'exact', head: true }), season)
           .eq('status', 'approved'),
       ]);
 
       const map: Record<string, FormSettings> = {};
-      (rows || []).forEach((r: FormSettings) => { map[r.form_type] = r; });
+      (rows as unknown as FormSettings[] || []).forEach(r => { map[r.form_type] = r; }); // JSON columns typed by hand
       setSettings(map);
       setApprovedCounts({
         delegate: delegateCount ?? 0,
@@ -556,7 +557,7 @@ const FormSettingsPage = () => {
     if (!draft) return;
     setSaving(true);
     try {
-      const { error } = await (supabase.from('form_settings') as any)
+      const { error } = await supabase.from('form_settings')
         .update({
           is_open: draft.is_open,
           closed_message: draft.closed_message,
@@ -567,7 +568,7 @@ const FormSettingsPage = () => {
           ielts_discount: Number(draft.ielts_discount),
           sat_discount: Number(draft.sat_discount),
           step_labels: draft.step_labels,
-          form_questions: draft.form_questions ?? [],
+          form_questions: (draft.form_questions ?? []) as unknown as Json,
         })
         .eq('form_type', tab);
       if (error) throw error;

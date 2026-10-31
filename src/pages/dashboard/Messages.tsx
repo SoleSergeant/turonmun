@@ -35,8 +35,7 @@ export default function Messages() {
         .single();
 
       if (app?.assigned_committee_id) {
-        const { data } = await (supabase
-          .from('committee_announcements' as any) as any)
+        const { data } = await supabase.from('committee_announcements')
           .select('*')
           .eq('committee_id', app.assigned_committee_id)
           .order('created_at', { ascending: false });

@@ -1494,6 +1494,54 @@ export type Database = {
           },
         ]
       }
+      team_members: {
+        Row: {
+          created_at: string
+          id: string
+          is_past: boolean
+          is_visible: boolean
+          link_url: string | null
+          name: string
+          photo_url: string | null
+          photo_x: number
+          photo_y: number
+          photo_zoom: number
+          role: string | null
+          sort_order: number
+          team: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_past?: boolean
+          is_visible?: boolean
+          link_url?: string | null
+          name: string
+          photo_url?: string | null
+          photo_x?: number
+          photo_y?: number
+          photo_zoom?: number
+          role?: string | null
+          sort_order?: number
+          team?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_past?: boolean
+          is_visible?: boolean
+          link_url?: string | null
+          name?: string
+          photo_url?: string | null
+          photo_x?: number
+          photo_y?: number
+          photo_zoom?: number
+          role?: string | null
+          sort_order?: number
+          team?: string
+        }
+        Relationships: []
+      }
       users: {
         Row: {
           created_at: string | null

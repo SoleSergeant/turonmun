@@ -24,7 +24,7 @@ const NotifySeatsButton: React.FC = () => {
   const [available, setAvailable] = useState(true);
 
   const load = useCallback(async (): Promise<PendingSeat[]> => {
-    const { data, error } = await (supabase.from('country_assignments') as any)
+    const { data, error } = await supabase.from('country_assignments')
       .select('id, country, country_name, notified_at, committees(name), applications(full_name, email)')
       .is('notified_at', null);
     if (error) {
@@ -67,7 +67,7 @@ const NotifySeatsButton: React.FC = () => {
     // Record everyone who got it, even after a partial failure.
     const ids = fresh.filter(p => wasDelivered(result, p.email)).map(p => p.id);
     const { error } = ids.length
-      ? await (supabase.from('country_assignments') as any).update({ notified_at: new Date().toISOString() }).in('id', ids)
+      ? await supabase.from('country_assignments').update({ notified_at: new Date().toISOString() }).in('id', ids)
       : { error: null };
     const sentLine = `Sent ${ids.length} allocation email${ids.length === 1 ? '' : 's'}`;
     if (failure) toast({ title: 'Email stopped', description: `${failure}. ${sentLine.toLowerCase()}; try again for the rest.`, variant: 'destructive' });

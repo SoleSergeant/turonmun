@@ -41,7 +41,7 @@ const DebateRegistrations = () => {
 
   const load = async () => {
     setLoading(true);
-    const { data, error } = await (supabase.from('debate_registrations' as any) as any)
+    const { data, error } = await supabase.from('debate_registrations')
       .select('*')
       .order('created_at', { ascending: false });
     if (error) setMissing(true);
@@ -87,7 +87,7 @@ const DebateRegistrations = () => {
 
   const setStatus = async (ids: string[], status: Status) => {
     if (ids.length > 1 && !(await confirmAction(`Mark ${ids.length} registrations as ${STATUSES.find(s => s.value === status)?.label.toLowerCase()}?`, { title: 'Bulk update', confirmLabel: 'Apply' }))) return;
-    const { error } = await (supabase.from('debate_registrations' as any) as any)
+    const { error } = await supabase.from('debate_registrations')
       // A new decision hasn't been emailed yet.
       .update({ status, reviewed_at: new Date().toISOString(), decision_emailed_at: null })
       .in('id', ids);
@@ -99,7 +99,7 @@ const DebateRegistrations = () => {
 
   const saveNotes = async (r: DebateRegistration, admin_notes: string) => {
     if ((r.admin_notes || '') === admin_notes) return;
-    const { error } = await (supabase.from('debate_registrations' as any) as any).update({ admin_notes: admin_notes || null }).eq('id', r.id);
+    const { error } = await supabase.from('debate_registrations').update({ admin_notes: admin_notes || null }).eq('id', r.id);
     if (error) { toast({ title: 'Could not save note', description: error.message, variant: 'destructive' }); return; }
     patchLocal([r.id], { admin_notes });
     toast({ title: 'Note saved' });
@@ -107,7 +107,7 @@ const DebateRegistrations = () => {
 
   const remove = async (r: DebateRegistration) => {
     if (!(await confirmAction(`Delete ${r.full_name}'s registration? They will be able to register again.`, { title: 'Delete registration', danger: true }))) return;
-    const { error } = await (supabase.from('debate_registrations' as any) as any).delete().eq('id', r.id);
+    const { error } = await supabase.from('debate_registrations').delete().eq('id', r.id);
     if (error) { toast({ title: 'Delete failed', description: error.message, variant: 'destructive' }); return; }
     setRows(prev => prev.filter(x => x.id !== r.id));
   };
@@ -149,7 +149,7 @@ const DebateRegistrations = () => {
     const ids = untold.filter(r => wasDelivered(result, r.email)).map(r => r.id);
     const now = new Date().toISOString();
     if (ids.length) {
-      const { error } = await (supabase.from('debate_registrations' as any) as any).update({ decision_emailed_at: now }).in('id', ids);
+      const { error } = await supabase.from('debate_registrations').update({ decision_emailed_at: now }).in('id', ids);
       if (error) toast({ title: `Sent ${ids.length}, but couldn't record it`, description: `${error.message}. These people may be emailed again.`, variant: 'destructive' });
       else patchLocal(ids, { decision_emailed_at: now });
     }

@@ -23,13 +23,13 @@ const Awards = () => {
     window.scrollTo(0, 0);
     const load = async () => {
       try {
-        const { data: settings } = await (supabase.from('award_settings' as any) as any)
+        const { data: settings } = await supabase.from('award_settings')
           .select('published').eq('id', 1).single();
         const isPub = !!settings?.published;
         setPublished(isPub);
         if (isPub) {
           const [{ data: aw }, { data: comms }] = await Promise.all([
-            (supabase.from('committee_awards' as any) as any).select('*'),
+            supabase.from('committee_awards').select('*'),
             supabase.from('committees').select('id, name').order('name'),
           ]);
           setAwards(aw || []);

@@ -52,7 +52,7 @@ export default function ChairAnnouncements() {
     if (!committees?.length) { if (!ctxLoading) setLoadingAnn(false); return; }
     const ids = committees.map((c: any) => c.id);
     supabase
-      .from('committee_announcements' as any)
+      .from('committee_announcements')
       .select('*')
       .in('committee_id', ids)
       .order('created_at', { ascending: false })
@@ -82,8 +82,7 @@ export default function ChairAnnouncements() {
         .eq('email', (user?.email || '').toLowerCase())
         .single();
 
-      const { data, error } = await (supabase
-        .from('committee_announcements' as any) as any)
+      const { data, error } = await supabase.from('committee_announcements')
         .insert({
           committee_id: committeeId,
           title: announcementTitle.trim(),
@@ -110,7 +109,7 @@ export default function ChairAnnouncements() {
 
   const handleDelete = async (id: string) => {
     if (!confirm('Delete this announcement?')) return;
-    const { data, error } = await (supabase.from('committee_announcements' as any) as any).delete().eq('id', id).select('id');
+    const { data, error } = await supabase.from('committee_announcements').delete().eq('id', id).select('id');
     if (error || !data?.length) {
       toast({ title: "Couldn't delete the announcement", description: error?.message, variant: 'destructive' });
       return;

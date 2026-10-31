@@ -59,7 +59,7 @@ const AdminVolunteers: React.FC = () => {
     setError(null);
     try {
       const season = await getCurrentSeason();
-      const { data, error } = await inSeason((supabase.from('volunteer_applications') as any)
+      const { data, error } = await inSeason(supabase.from('volunteer_applications')
         .select('*'), season)
         .order('created_at', { ascending: false });
       if (error) throw error;
@@ -100,7 +100,7 @@ const AdminVolunteers: React.FC = () => {
   };
 
   const handleStatusChange = async (id: string, status: VolunteerApplication['status']) => {
-    const { error } = await (supabase.from('volunteer_applications') as any)
+    const { error } = await supabase.from('volunteer_applications')
       .update({ status }).eq('id', id);
     if (error) { toast({ title: 'Update failed', description: error.message, variant: 'destructive' }); return; }
     updateLocal(id, { status });
@@ -108,7 +108,7 @@ const AdminVolunteers: React.FC = () => {
   };
 
   const handlePaymentStatusChange = async (id: string, payment_status: VolunteerApplication['payment_status']) => {
-    const { error } = await (supabase.from('volunteer_applications') as any)
+    const { error } = await supabase.from('volunteer_applications')
       .update({ payment_status }).eq('id', id);
     if (error) { toast({ title: 'Update failed', description: error.message, variant: 'destructive' }); return; }
     updateLocal(id, { payment_status });
@@ -116,7 +116,7 @@ const AdminVolunteers: React.FC = () => {
   };
 
   const handleDelete = async (id: string) => {
-    const { data, error } = await (supabase.from('volunteer_applications') as any).delete().eq('id', id).select('id');
+    const { data, error } = await supabase.from('volunteer_applications').delete().eq('id', id).select('id');
     if (error || !data?.length) {
       toast({ title: 'Delete failed', description: error?.message || 'Only the Secretary-General can delete applications.', variant: 'destructive' });
       return;

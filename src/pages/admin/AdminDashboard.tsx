@@ -84,17 +84,17 @@ const AdminDashboard = () => {
         const [apps, seats, messages, volunteers, recentApps, debate] = await Promise.all([
           selectWithOptional('applications', APP_COLUMNS, 'decision_emailed_at', season),
           (async () => {
-            const r = await (supabase.from('country_assignments') as any).select('application_id, notified_at');
+            const r = await supabase.from('country_assignments').select('application_id, notified_at');
             if (!r.error) return { rows: (r.data || []) as any[], hasOptional: true };
-            const r2 = await (supabase.from('country_assignments') as any).select('application_id');
+            const r2 = await supabase.from('country_assignments').select('application_id');
             return { rows: (r2.data || []) as any[], hasOptional: false, failed: !!r2.error };
           })(),
-          (supabase.from('contact_messages') as any).select('id, responded_at'),
-          inSeason((supabase.from('volunteer_applications') as any).select('id, status, created_at'), season),
+          supabase.from('contact_messages').select('id, responded_at'),
+          inSeason(supabase.from('volunteer_applications').select('id, status, created_at'), season),
           inSeason(supabase.from('applications').select('id, full_name, institution, status, created_at, notes, application_type'), season)
             .order('created_at', { ascending: false })
             .limit(6),
-          (supabase.from('debate_registrations' as any) as any).select('status, created_at'),
+          supabase.from('debate_registrations').select('status, created_at'),
         ]);
 
         const delegates = apps.rows.filter(a => !isChairApplication(a));

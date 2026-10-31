@@ -23,7 +23,7 @@ export const getCurrentSeason = (): Promise<Season | null> => {
   if (!cached || Date.now() - cachedAt > TTL_MS) {
     cachedAt = Date.now();
     cached = (async () => {
-      const { data, error } = await (supabase.from('seasons' as any) as any)
+      const { data, error } = await supabase.from('seasons')
         .select('number, name')
         .eq('is_current', true)
         .maybeSingle();

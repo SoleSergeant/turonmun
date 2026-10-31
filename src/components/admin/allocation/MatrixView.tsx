@@ -102,8 +102,7 @@ const MatrixView = () => {
       setDelegates(delegatesData || []);
 
       // 3. Fetch custom managed countries from database
-      const { data: managedData, error: managedError } = await (supabase
-        .from('matrix_countries') as any)
+      const { data: managedData, error: managedError } = await supabase.from('matrix_countries')
         .select('country_name');
         
       if (managedError) {
@@ -269,8 +268,7 @@ const MatrixView = () => {
     
     // 1. Update database
     if (!COMMON_COUNTRIES.includes(countryToDelete)) {
-      const { error } = await (supabase
-        .from('matrix_countries') as any)
+      const { error } = await supabase.from('matrix_countries')
         .delete()
         .eq('country_name', countryToDelete);
       
@@ -313,8 +311,7 @@ const MatrixView = () => {
 
     // 1. Store in database
     if (!COMMON_COUNTRIES.includes(countryToAdd)) {
-      const { error } = await (supabase
-        .from('matrix_countries') as any)
+      const { error } = await supabase.from('matrix_countries')
         .insert({ country_name: countryToAdd });
       
       if (error && error.code !== '23505') {

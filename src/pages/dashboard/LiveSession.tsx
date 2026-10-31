@@ -43,8 +43,7 @@ export default function LiveSession() {
   useEffect(() => {
     const loadApp = async () => {
       if (!user?.id) return;
-      const { data } = await (supabase
-        .from('applications') as any)
+      const { data } = await supabase.from('applications')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: false })

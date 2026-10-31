@@ -49,7 +49,7 @@ export default function DelegateAdminPanel({ app, seat, onChange }: {
   const accepted = app.status === 'approved';
 
   const update = async (fields: Partial<DelegateFields>, label: string) => {
-    const { error } = await (supabase.from('applications') as any).update(fields).eq('id', app.id);
+    const { error } = await supabase.from('applications').update(fields).eq('id', app.id);
     if (error) { toast({ title: `Could not update ${label}`, description: error.message, variant: 'destructive' }); return; }
     onChange(fields);
     toast({ title: `${label[0].toUpperCase()}${label.slice(1)} updated` });

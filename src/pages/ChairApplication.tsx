@@ -69,7 +69,7 @@ export default function ChairApplication() {
       email: user.email ?? '',
       fullName: user.user_metadata?.full_name ?? user.user_metadata?.name ?? '',
     }));
-    (supabase.from('applications') as any)
+    supabase.from('applications')
       .select('id, application_type')
       .eq('user_id', user.id)
       .limit(20)
@@ -189,7 +189,7 @@ export default function ChairApplication() {
         })(),
       };
 
-      const { error } = await (supabase.from('applications') as any)
+      const { error } = await supabase.from('applications')
         .insert({ ...basePayload, application_type: 'chair' });
 
       if (error) throw error;

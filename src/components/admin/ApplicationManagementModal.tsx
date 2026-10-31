@@ -47,7 +47,7 @@ interface Application {
   committee_preference2: string;
   committee_preference3: string;
   motivation?: string;
-  fee_agreement?: string;
+  fee_agreement?: boolean | null;
   discount_eligibility?: string;
   final_confirmation?: boolean;
   has_ielts: boolean;
@@ -583,11 +583,11 @@ const ApplicationManagementModal: React.FC<ApplicationManagementModalProps> = ({
                   <DollarSign size={16} className="text-emerald-600" /> Fee & Payment
                 </h3>
                 <div className="divide-y divide-gray-100">
-                  {application.fee_agreement && (
+                  {application.fee_agreement != null && (
                     <DetailRow icon={CheckCircle} label="Fee Agreed" value={
                       <span className={`inline-block text-xs font-semibold px-2 py-0.5 rounded ${
-                        application.fee_agreement === 'Yes' ? 'bg-green-100 text-green-700'  : 'bg-red-100 text-red-700'
-                      }`}>{application.fee_agreement}</span>
+                        application.fee_agreement ? 'bg-green-100 text-green-700'  : 'bg-red-100 text-red-700'
+                      }`}>{application.fee_agreement ? 'Yes' : 'No'}</span>
                     } color="text-green-400" />
                   )}
 

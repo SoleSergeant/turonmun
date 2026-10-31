@@ -112,9 +112,9 @@ const Analytics = () => {
 
       // Fetch admin-defined merge aliases (collapse "Fergana"/"Farg'ona"/…)
       const { data: aliasRows } = await supabase
-        .from('demographic_aliases' as any)
+        .from('demographic_aliases')
         .select('id, field, raw_value, canonical_value');
-      const aliasList = (aliasRows as any as Alias[]) || [];
+      const aliasList = (aliasRows as Alias[]) || [];
       setAliases(aliasList);
 
       // Build case-insensitive lookup maps per field.

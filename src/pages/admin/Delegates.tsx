@@ -81,10 +81,10 @@ const Delegates = () => {
     try {
       const season = await getCurrentSeason();
       const [apps, asg, comms] = await Promise.all([
-        inSeason((supabase.from('applications') as any).select('*'), season)
+        inSeason(supabase.from('applications').select('*'), season)
           .neq('application_type', 'chair')
           .order('created_at', { ascending: false }),
-        (supabase.from('country_assignments') as any).select('application_id, committee_id, country, country_name, committees(name)'),
+        supabase.from('country_assignments').select('application_id, committee_id, country, country_name, committees(name)'),
         supabase.from('committees').select('id, name').eq('is_active', true).order('name'),
       ]);
       if (apps.error) throw apps.error;
@@ -171,7 +171,7 @@ const Delegates = () => {
   // ── Actions ─────────────────────────────────────────────────────────
   const setStatus = async (ids: string[], status: 'approved' | 'waitlisted' | 'rejected') => {
     if (ids.length > 1 && !(await confirmAction(`Mark ${ids.length} applications as ${STATUS_LABEL[status].toLowerCase()}?`, { title: 'Bulk update', confirmLabel: 'Apply' }))) return;
-    const { error } = await (supabase.from('applications') as any)
+    const { error } = await supabase.from('applications')
       .update({ status, reviewed_at: new Date().toISOString() })
       .in('id', ids);
     if (error) { toast({ title: 'Could not update status', description: error.message, variant: 'destructive' }); return; }
@@ -182,7 +182,7 @@ const Delegates = () => {
 
   const setPayment = async (ids: string[], payment_status: string) => {
     if (ids.length > 1 && !(await confirmAction(`Mark ${ids.length} delegates as ${payment_status}?`, { title: 'Update payment', confirmLabel: 'Apply' }))) return;
-    const { error } = await (supabase.from('applications') as any).update({ payment_status }).in('id', ids);
+    const { error } = await supabase.from('applications').update({ payment_status }).in('id', ids);
     if (error) { toast({ title: 'Could not update payment', description: error.message, variant: 'destructive' }); return; }
     patch(ids, { payment_status });
     setSelected(new Set());
@@ -213,7 +213,7 @@ const Delegates = () => {
     const ids = list.filter(r => wasDelivered(result, r.email)).map(r => r.id);
     const now = new Date().toISOString();
     if (ids.length) {
-      const { error } = await (supabase.from('applications') as any).update({ payment_reminded_at: now }).in('id', ids);
+      const { error } = await supabase.from('applications').update({ payment_reminded_at: now }).in('id', ids);
       if (!error) patch(ids, { payment_reminded_at: now });
     }
     const line = `Sent ${ids.length} payment reminder${ids.length === 1 ? '' : 's'}`;
@@ -239,7 +239,7 @@ const Delegates = () => {
   const remove = async (id: string) => {
     const r = rows.find(x => x.id === id);
     if (!(await confirmAction(`Delete ${r?.full_name ?? 'this'}'s application? This is permanent.`, { title: 'Delete application', danger: true }))) return;
-    const { data, error } = await (supabase.from('applications') as any).delete().eq('id', id).select('id');
+    const { data, error } = await supabase.from('applications').delete().eq('id', id).select('id');
     if (error || !data?.length) {
       toast({ title: 'Could not delete', description: error?.message || 'Only the Secretary-General can delete applications.', variant: 'destructive' });
       return;

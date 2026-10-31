@@ -22,7 +22,7 @@ interface Application {
   committee_preference2: string;
   committee_preference3: string;
   motivation?: string;
-  fee_agreement?: string;
+  fee_agreement?: boolean | null;
   discount_eligibility?: string;
   final_confirmation?: boolean;
   has_ielts: boolean;
@@ -99,7 +99,7 @@ export const exportApplicationsToExcel = (applications: Application[], fileName:
     app.committee_preference2 || '',
     app.committee_preference3 || '',
     app.motivation || '',
-    app.fee_agreement || '',
+    app.fee_agreement == null ? '' : app.fee_agreement ? 'Yes' : 'No',
     app.discount_eligibility || '',
     app.final_confirmation ? 'Yes' : 'No',
     app.has_ielts ? 'Yes' : 'No',

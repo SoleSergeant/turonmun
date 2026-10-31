@@ -91,14 +91,14 @@ export default function DebateRegister() {
   useEffect(() => {
     if (!user) return;
     (async () => {
-      const { data, error: loadErr } = await (supabase.from('debate_registrations' as any) as any)
+      const { data, error: loadErr } = await supabase.from('debate_registrations')
         .select('*')
         .eq('user_id', user.id)
         .maybeSingle();
       if (loadErr) setError('Registration is not available yet. Please try again later.');
       setExisting((data as DebateRegistration) || null);
       if ((data as DebateRegistration | null)?.status === 'approved') {
-        const { data: mine } = await (supabase.rpc as any)('my_debate_assignment');
+        const { data: mine } = await supabase.rpc('my_debate_assignment');
         setAssignment(Array.isArray(mine) && mine.length ? mine[0] : null);
       }
       setForm(data ? { ...emptyForm('', ''), ...(data as DebateRegistration) } : emptyForm(user.user_metadata?.full_name || '', user.email || ''));
@@ -134,7 +134,7 @@ export default function DebateRegister() {
       agreed_to_rules: true,
     };
     try {
-      const table = supabase.from('debate_registrations' as any) as any;
+      const table = supabase.from('debate_registrations');
       const { data, error: saveErr } = existing
         ? await table.update(payload).eq('id', existing.id).select().single()
         : await table.insert({ ...payload, user_id: user.id }).select().single();
@@ -312,8 +312,7 @@ export default function DebateRegister() {
               <div role="radiogroup" aria-labelledby="side-label" aria-describedby={d.side_hint ? 'side-hint' : undefined} aria-required="true">
                 <p id="side-label" className="text-sm text-slate-700">{d.side_label}<span className="text-debate-maroon"> *</span></p>
                 {d.side_hint && <p id="side-hint" className="mt-1 text-xs text-slate-500">{d.side_hint}</p>}
-                {/* [display:grid], not .grid: mobile.css forces every .grid to one column below 768px */}
-                <div className="mt-3 [display:grid] gap-3 sm:grid-cols-2">
+                <div className="mt-3 grid gap-3 sm:grid-cols-2">
                   {sideStats.shares.map(({ side, percent }) => {
                     const checked = form.preferred_side === side;
                     return (

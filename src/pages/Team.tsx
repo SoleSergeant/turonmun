@@ -72,7 +72,7 @@ const Team = () => {
   const { data: members = [], isLoading } = useQuery({
     queryKey: ['team_members'],
     queryFn: async () => {
-      const { data, error } = await (supabase.from('team_members' as any) as any)
+      const { data, error } = await supabase.from('team_members')
         .select('id, name, role, team, photo_url, link_url, sort_order, is_past, photo_x, photo_y, photo_zoom')
         .order('sort_order').order('name');
       if (error) throw error;
@@ -105,8 +105,7 @@ const Team = () => {
               {byTeam(current).map(([t, list]) => (
                 <section key={t}>
                   <h2 className="text-xl font-bold text-diplomatic-900 mb-5 border-b border-neutral-200 pb-2">{t}</h2>
-                  {/* [display:grid], not .grid: mobile.css forces every .grid to one column, too big for portraits */}
-                  <ul className="[display:grid] grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 md:gap-5">
+                  <ul className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 md:gap-5">
                     {list.map(m => <Card key={m.id} m={m} />)}
                   </ul>
                 </section>
@@ -120,7 +119,7 @@ const Team = () => {
                     {byTeam(past).map(([t, list]) => (
                       <div key={t}>
                         <h3 className="text-sm font-semibold uppercase tracking-wide text-neutral-500 mb-3">{t}</h3>
-                        <ul className="[display:grid] grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                        <ul className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
                           {list.map(m => <PastCard key={m.id} m={m} />)}
                         </ul>
                       </div>

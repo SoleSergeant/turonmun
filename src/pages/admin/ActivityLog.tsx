@@ -51,7 +51,7 @@ const ActivityLog = () => {
 
   const load = async (append = false) => {
     setLoading(true);
-    let q = (supabase.from('activity_log' as any) as any)
+    let q = supabase.from('activity_log')
       .select('id, created_at, actor_email, actor_name, action, entity, summary')
       .order('created_at', { ascending: false })
       .limit(PAGE);

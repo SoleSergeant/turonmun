@@ -79,7 +79,7 @@ const AdminAccounts = () => {
         authId = data?.user?.id;
       }
 
-      const { error } = await (supabase.from('admin_users') as any).insert({
+      const { error } = await supabase.from('admin_users').insert({
         ...(authId ? { id: authId } : {}),
         email,
         full_name: form.full_name.trim(),
@@ -103,7 +103,7 @@ const AdminAccounts = () => {
   };
 
   const update = async (account: Account, fields: Partial<Account>, label: string) => {
-    const { error } = await (supabase.from('admin_users') as any).update(fields).eq('id', account.id);
+    const { error } = await supabase.from('admin_users').update(fields).eq('id', account.id);
     if (error) {
       toast({ title: 'Update failed', description: error.message, variant: 'destructive' });
       return;

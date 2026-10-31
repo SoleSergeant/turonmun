@@ -36,12 +36,12 @@ export default function ChairAwards() {
         const { data: admin } = await supabase.from('admin_users').select('id').eq('email', (user?.email || '').toLowerCase()).single();
         setAdminId((admin as any)?.id ?? null);
 
-        const { data: settings } = await (supabase.from('award_settings' as any) as any).select('locked').eq('id', 1).single();
+        const { data: settings } = await supabase.from('award_settings').select('locked').eq('id', 1).single();
         setLocked(!!settings?.locked);
 
         const ids = committees.map((c: any) => c.id);
         if (ids.length) {
-          const { data: awards } = await (supabase.from('committee_awards' as any) as any).select('*').in('committee_id', ids);
+          const { data: awards } = await supabase.from('committee_awards').select('*').in('committee_id', ids);
           const p: Record<string, string> = {};
           (awards || []).forEach((a: any) => { p[`${a.committee_id}:${a.award_type}`] = a.application_id || ''; });
           setPicks(p);
@@ -77,7 +77,7 @@ export default function ChairAwards() {
         const appId = picks[key];
         if (appId) {
           const d = assignedDelegates.find((x: any) => x.id === appId);
-          const { error } = await (supabase.from('committee_awards' as any) as any).upsert({
+          const { error } = await supabase.from('committee_awards').upsert({
             committee_id: committeeId,
             award_type: def.key,
             application_id: appId,
@@ -88,7 +88,7 @@ export default function ChairAwards() {
           }, { onConflict: 'committee_id,award_type' });
           if (error) throw error;
         } else {
-          const { error } = await (supabase.from('committee_awards' as any) as any)
+          const { error } = await supabase.from('committee_awards')
             .delete().eq('committee_id', committeeId).eq('award_type', def.key);
           if (error) throw error;
         }

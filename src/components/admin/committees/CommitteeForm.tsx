@@ -174,13 +174,12 @@ const CommitteeForm = ({
   const { toast } = useToast();
 
   useEffect(() => {
-    (supabase.from('matrix_countries') as any).select('country_name').then(({ data }: any) => {
+    supabase.from('matrix_countries').select('country_name').then(({ data }: any) => {
       const custom = (data || []).map((m: any) => m.country_name).filter(Boolean);
       setCountryOptions(Array.from(new Set([...COMMON_COUNTRIES, ...custom])).sort());
     });
     // Pull names of this season's approved chair applicants
-    getCurrentSeason().then(season => inSeason((supabase
-      .from('applications') as any)
+    getCurrentSeason().then(season => inSeason(supabase.from('applications')
       .select('full_name, application_type, notes'), season)
       .eq('status', 'approved')
       .then(({ data }: any) => {

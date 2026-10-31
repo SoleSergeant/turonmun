@@ -40,7 +40,7 @@ const Seasons = () => {
 
   const load = async () => {
     setLoading(true);
-    const { data, error } = await (supabase.from('seasons' as any) as any)
+    const { data, error } = await supabase.from('seasons')
       .select('*')
       .order('number', { ascending: false });
     if (error) {
@@ -54,9 +54,9 @@ const Seasons = () => {
     const entries = await Promise.all(rows.map(async (s) => {
       const count = (q: any) => q.then((r: any) => r.count ?? 0);
       const [applications, approved, volunteers] = await Promise.all([
-        count((supabase.from('applications') as any).select('id', { count: 'exact', head: true }).eq('season', s.number)),
-        count((supabase.from('applications') as any).select('id', { count: 'exact', head: true }).eq('season', s.number).eq('status', 'approved')),
-        count((supabase.from('volunteer_applications') as any).select('id', { count: 'exact', head: true }).eq('season', s.number)),
+        count(supabase.from('applications').select('id', { count: 'exact', head: true }).eq('season', s.number)),
+        count(supabase.from('applications').select('id', { count: 'exact', head: true }).eq('season', s.number).eq('status', 'approved')),
+        count(supabase.from('volunteer_applications').select('id', { count: 'exact', head: true }).eq('season', s.number)),
       ]);
       return [s.number, { applications, approved, volunteers }] as const;
     }));
@@ -78,7 +78,7 @@ const Seasons = () => {
     if (!valid || confirmText !== confirmPhrase) return;
     setStarting(true);
     try {
-      const { error } = await (supabase.rpc as any)('start_new_season', { p_number: n, p_name: newName.trim() || null });
+      const { error } = await supabase.rpc('start_new_season', { p_number: n, p_name: newName.trim() || null });
       if (error) throw error;
       resetSeasonCache();
       toast({ title: `Season ${n} started`, description: 'The previous season has been archived.' });
@@ -95,13 +95,13 @@ const Seasons = () => {
   const exportSeason = async (season: SeasonRow) => {
     setExporting(season.number);
     try {
-      const { data, error } = await (supabase.from('applications') as any)
+      const { data, error } = await supabase.from('applications')
         .select('*')
         .eq('season', season.number)
         .order('created_at', { ascending: false });
       if (error) throw error;
       const { exportApplicationsToExcel } = await import('@/utils/excelExport');
-      exportApplicationsToExcel(data || [], `TuronMUN_${season.name.replace(/\s+/g, '_')}_Applications`);
+      exportApplicationsToExcel((data || []) as Parameters<typeof exportApplicationsToExcel>[0], `TuronMUN_${season.name.replace(/\s+/g, '_')}_Applications`);
     } catch (err: any) {
       toast({ title: 'Export failed', description: err.message, variant: 'destructive' });
     } finally {

@@ -29,7 +29,7 @@ const table = (name: string) => supabase.from(name as any) as any;
 export async function loadEvent(): Promise<EventData> {
   const [teams, roster, pairings, scores, votes] = await Promise.all([
     table('debate_teams').select('id, label, name, position').order('label'),
-    (supabase.rpc as any)('debate_roster'),
+    supabase.rpc('debate_roster'),
     table('debate_pairings').select('id, round, position, a_id, b_id').order('round').order('position'),
     table('debate_scores').select('*'),
     table('debate_pair_votes').select('*'),

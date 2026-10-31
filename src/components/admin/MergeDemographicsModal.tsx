@@ -76,10 +76,10 @@ const MergeDemographicsModal: React.FC<Props> = ({ field, buckets, aliases, onCl
       // insert the new mapping. Delete-then-insert keeps it race-free enough for
       // admin use and sidesteps upsert-on-expression-index quirks.
       for (const raw of rawValues) {
-        await supabase.from('demographic_aliases' as any).delete().eq('field', field).ilike('raw_value', raw);
+        await supabase.from('demographic_aliases').delete().eq('field', field).ilike('raw_value', raw);
       }
       const rows = rawValues.map(raw => ({ field, raw_value: raw, canonical_value: target }));
-      const { error } = await supabase.from('demographic_aliases' as any).insert(rows as any);
+      const { error } = await supabase.from('demographic_aliases').insert(rows as any);
       if (error) throw error;
 
       toast({ title: 'Merged', description: `${rawValues.length} value${rawValues.length > 1 ? 's' : ''} now counted as "${target}".` });
@@ -96,7 +96,7 @@ const MergeDemographicsModal: React.FC<Props> = ({ field, buckets, aliases, onCl
 
   const handleUnmerge = async (alias: Alias) => {
     try {
-      const { error } = await supabase.from('demographic_aliases' as any).delete().eq('id', alias.id);
+      const { error } = await supabase.from('demographic_aliases').delete().eq('id', alias.id);
       if (error) throw error;
       toast({ title: 'Unmerged', description: `"${alias.raw_value}" is counted on its own again.` });
       onChanged();

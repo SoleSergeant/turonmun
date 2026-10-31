@@ -155,7 +155,7 @@ const CheckIn = () => {
   // Goes through set_check_in() (migration 036) so the registration desk
   // doesn't need UPDATE rights on whole tables.
   const setCheckIn = async (p: Person, checked: boolean) => {
-    const { error } = await (supabase.rpc as any)('set_check_in', { p_kind: p.kind === 'delegate' ? 'delegate' : 'chair', p_id: p.id, p_checked: checked });
+    const { error } = await supabase.rpc('set_check_in', { p_kind: p.kind === 'delegate' ? 'delegate' : 'chair', p_id: p.id, p_checked: checked });
     if (error) throw error;
   };
 

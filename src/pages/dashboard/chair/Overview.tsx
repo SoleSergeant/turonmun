@@ -37,7 +37,7 @@ export default function ChairOverview() {
 
   useEffect(() => {
     if (!committee?.id) return;
-    (supabase.from('committee_awards' as any) as any)
+    supabase.from('committee_awards')
       .select('award_type', { count: 'exact', head: true })
       .eq('committee_id', committee.id)
       .then(({ count, error }: any) => setAwardsPicked(error ? null : count ?? 0));

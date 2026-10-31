@@ -27,10 +27,10 @@ const listeners = new Set<() => void>();
 const load = () => {
   if (!inflight) {
     inflight = (async () => {
-      const { data, error } = await (supabase.from('site_content' as any) as any).select('key, value');
+      const { data, error } = await supabase.from('site_content').select('key, value');
       if (error) return; // table missing (migration 040 not applied) → defaults
       const next: Overrides = {};
-      (data || []).forEach((row: { key: string; value: Record<string, unknown> }) => { next[row.key] = row.value; });
+      (data || []).forEach(row => { next[row.key] = row.value as Record<string, unknown>; });
       overrides = next;
       try { localStorage.setItem(CACHE_KEY, JSON.stringify(next)); } catch { /* private mode */ }
       listeners.forEach(l => l());

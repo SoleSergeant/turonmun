@@ -2,6 +2,7 @@ import React, { lazy } from 'react';
 import { useParams } from 'react-router-dom';
 import { usePastSeasons, seasonSlug } from '@/content/seasons';
 import SeasonTemplate from './SeasonTemplate';
+import { Seo } from '@/components/seo';
 
 const NotFound = lazy(() => import('../NotFound'));
 
@@ -22,5 +23,10 @@ export default function SeasonRoute() {
   const season = usePastSeasons().find(s => seasonSlug(s.route).toLowerCase() === slug.toLowerCase());
   if (!season) return <NotFound />;
   const Designed = DESIGNED[season.id];
-  return Designed ? <Designed /> : <SeasonTemplate seasonData={season} />;
+  return (
+    <>
+      <Seo title={season.title} description={season.description} />
+      {Designed ? <Designed /> : <SeasonTemplate seasonData={season} />}
+    </>
+  );
 }

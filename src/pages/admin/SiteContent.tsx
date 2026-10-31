@@ -3,6 +3,7 @@ import { Loader2, RotateCcw, Save, ExternalLink, FileText } from 'lucide-react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import { FieldList } from '@/components/admin/content/FieldEditor';
 import { supabase } from '@/integrations/supabase/client';
+import type { Json } from '@/integrations/supabase/types';
 import { useToast } from '@/hooks/use-toast';
 import { SECTION_LIST } from '@/content/sections';
 import { reloadContent, getSection } from '@/content/store';
@@ -44,7 +45,7 @@ const SiteContent = () => {
 
   const load = async () => {
     setLoading(true);
-    const { data, error } = await (supabase.from('site_content' as any) as any).select('*');
+    const { data, error } = await supabase.from('site_content').select('*');
     if (error) {
       setMissing(true);
     } else {
@@ -75,8 +76,8 @@ const SiteContent = () => {
   const save = async () => {
     setSaving(true);
     try {
-      const { data, error } = await (supabase.from('site_content' as any) as any)
-        .upsert({ key: activeKey, value: draft })
+      const { data, error } = await supabase.from('site_content')
+        .upsert({ key: activeKey, value: draft as Json })
         .select()
         .single();
       if (error) throw error;
@@ -92,7 +93,7 @@ const SiteContent = () => {
 
   const reset = async () => {
     if (!(await confirmAction(`Reset "${section.title}" to the original built-in text? Your edits to this section will be lost.`, { title: 'Reset section', confirmLabel: 'Reset', danger: true }))) return;
-    const { error } = await (supabase.from('site_content' as any) as any).delete().eq('key', activeKey);
+    const { error } = await supabase.from('site_content').delete().eq('key', activeKey);
     if (error) {
       toast({ title: 'Could not reset', description: error.message, variant: 'destructive' });
       return;

@@ -31,7 +31,7 @@ export function useSideStats() {
     enabled: sides.length > 0,
     staleTime: 60_000,
     queryFn: async () => {
-      const { data, error } = await (supabase.rpc as any)('debate_side_stats');
+      const { data, error } = await supabase.rpc('debate_side_stats');
       if (error) return {};
       const out: Record<string, number> = {};
       for (const row of (data || []) as { side: string; registrations: number }[]) out[row.side] = Number(row.registrations);

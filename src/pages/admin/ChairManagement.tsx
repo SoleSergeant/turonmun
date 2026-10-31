@@ -101,7 +101,7 @@ const ChairManagement = () => {
     setChairAppsLoading(true);
     try {
       const season = await getCurrentSeason();
-      const { data, error } = await inSeason((supabase.from('applications') as any)
+      const { data, error } = await inSeason(supabase.from('applications')
         .select('*'), season)
         .order('created_at', { ascending: false });
       if (error) throw error;
@@ -137,7 +137,7 @@ const ChairManagement = () => {
 
   const handleRejectApp = async (appId: string) => {
     if (!(await confirmAction('Reject this chair application?', { title: 'Reject chair application', confirmLabel: 'Reject', danger: true }))) return;
-    const { error } = await (supabase.from('applications') as any)
+    const { error } = await supabase.from('applications')
       .update({ status: 'rejected', reviewed_at: new Date().toISOString() })
       .eq('id', appId);
     if (error) {
@@ -154,7 +154,7 @@ const ChairManagement = () => {
   const handleRevertApp = async (app: ChairApp) => {
     if (!(await confirmAction(`Revert ${app.full_name}'s decision back to pending?`, { title: 'Revert decision', confirmLabel: 'Revert' }))) return;
     try {
-      const { error } = await (supabase.from('applications') as any)
+      const { error } = await supabase.from('applications')
         .update({ status: 'pending', reviewed_at: null })
         .eq('id', app.id);
       if (error) throw error;
@@ -162,7 +162,7 @@ const ChairManagement = () => {
       // If Accept & Assign made them a chair, undo that: deactivate the chair
       // account (never a staff account with the same email) and take their
       // name off the committee.
-      const { data: chairRows, error: findErr } = await (supabase.from('admin_users') as any)
+      const { data: chairRows, error: findErr } = await supabase.from('admin_users')
         .select('id, role, committee_id')
         .eq('email', app.email.trim().toLowerCase())
         .in('role', ['chair', 'co_chair']);
@@ -170,13 +170,13 @@ const ChairManagement = () => {
       for (const row of (chairRows || []) as { id: string; role: string; committee_id: string | null }[]) {
         if (row.committee_id) {
           const field = row.role === 'co_chair' ? 'co_chair' : 'chair';
-          const { error } = await (supabase.from('committees') as any)
+          const { error } = await supabase.from('committees')
             .update({ [field]: null })
             .eq('id', row.committee_id)
             .eq(field, app.full_name);
           if (error) throw error;
         }
-        const { error } = await (supabase.from('admin_users') as any)
+        const { error } = await supabase.from('admin_users')
           .update({ is_active: false, committee_id: null })
           .eq('id', row.id);
         if (error) throw error;
@@ -202,7 +202,7 @@ const ChairManagement = () => {
       .join('\n')
       .trim();
     const conversionNote = `Converted from a rejected chair application on ${new Date().toLocaleDateString()}.`;
-    const { error } = await (supabase.from('applications') as any)
+    const { error } = await supabase.from('applications')
       .update({
         application_type: 'delegate',
         notes: strippedNotes ? `${conversionNote}\n${strippedNotes}` : conversionNote,
@@ -495,7 +495,7 @@ const ChairManagement = () => {
       //    just by name, so someone else with the same name is untouched).
       if (chair.committee_id) {
         const field = chair.role === 'co_chair' ? 'co_chair' : 'chair';
-        const { error: cErr } = await (supabase.from('committees') as any)
+        const { error: cErr } = await supabase.from('committees')
           .update({ [field]: null })
           .eq('id', chair.committee_id)
           .eq(field, chair.full_name);

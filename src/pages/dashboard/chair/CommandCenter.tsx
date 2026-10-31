@@ -108,7 +108,7 @@ export default function CommandCenter() {
     if (!committeeId) return;
 
     const loadCountries = () => {
-      (supabase.from('country_assignments') as any)
+      supabase.from('country_assignments')
         .select('application_id, country, country_name')
         .eq('committee_id', committeeId)
         .then(({ data }: { data: any[] | null }) => {
@@ -201,7 +201,7 @@ export default function CommandCenter() {
 
   const handleAddManual = async () => {
     if (!manualName.trim() || !session) return;
-    const { error } = await (supabase.from('speakers_list') as any).insert({
+    const { error } = await supabase.from('speakers_list').insert({
       session_id: session.id,
       application_id: null,
       delegate_name: manualName.trim(),
@@ -262,7 +262,7 @@ export default function CommandCenter() {
     const [removed] = newOrder.splice(di, 1);
     newOrder.splice(ti, 0, removed);
     const results = await Promise.all(newOrder.map((s, idx) =>
-      (supabase.from('speakers_list') as any).update({ position: idx }).eq('id', s.id)
+      supabase.from('speakers_list').update({ position: idx }).eq('id', s.id)
     ));
     const failed = results.find((r: any) => r.error);
     if (failed) toast({ title: "Couldn't reorder speakers", description: failed.error.message, variant: 'destructive' });
