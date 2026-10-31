@@ -30,7 +30,6 @@ export const seasonsData = [
       "4 committees",
       "Held at the Presidential School in Fergana"
     ],
-    organizers: [],
     photos: [
       { url: "seasons/season 1/1.jpg", caption: "Inaugural Ceremony" },
       { url: "seasons/season 1/2.jpg", caption: "Committee Session" },
@@ -71,7 +70,6 @@ export const seasonsData = [
       "Academic discount introduced",
       "3 MyMUN awards"
     ],
-    organizers: [],
     photos: [
       { url: "seasons/season 2/3.jpg", caption: "Cover" },
       { url: "seasons/season 2/1.jpg", caption: "Opening Plenary" },
@@ -111,7 +109,6 @@ export const seasonsData = [
       "Nearly 500 applications",
       "Three days, right after New Year"
     ],
-    organizers: [],
     photos: [
       { url: "seasons/season 3/2.jpg", caption: "Cover" },
       { url: "seasons/season 3/1.jpg", caption: "Opening Ceremony" },
@@ -149,7 +146,6 @@ export const seasonsData = [
       "First conference at an outside venue",
       "Highest delegate ratings to date"
     ],
-    organizers: [],
     photos: [
       { url: "seasons/Season 4/1.jpg", caption: "Opening Ceremony" },
       { url: "seasons/Season 4/2.jpg", caption: "Committee Work" },
@@ -189,7 +185,6 @@ export const seasonsData = [
       "Partnership with Central Asian Medical University",
       "Committees in English, Russian and Uzbek"
     ],
-    organizers: [],
     photos: [
       { url: "seasons/Turonxcamu/3.jpg", caption: "Cover" },
       { url: "seasons/Turonxcamu/1.jpg", caption: "Opening Ceremony" },
@@ -229,7 +224,6 @@ export const seasonsData = [
       "Partnership with the Fergana Youth Affairs Agency",
       "Committees in English and Russian"
     ],
-    organizers: [],
     photos: [
       { url: "seasons/Season 5/4.jpg", caption: "Cover" },
       { url: "seasons/Season 5/1.jpg", caption: "Opening Ceremony" },
@@ -268,7 +262,6 @@ export const seasonsData = [
       "Partnership with SATashkent",
       "New award categories"
     ],
-    organizers: [],
     photos: [
       { url: "seasons/season 6/1.JPG", caption: "Opening Ceremony" },
       { url: "seasons/season 6/2.JPG", caption: "Committee Sessions" },
@@ -308,7 +301,6 @@ export const seasonsData = [
       "Back at the Presidential School in Fergana, home of Season 1",
       "Debates in English, Uzbek and Russian"
     ],
-    organizers: [],
     photos: [
       { url: "seasons/season 7/1.jpg", caption: "Second anniversary wall" },
       { url: "seasons/season 7/2.jpg", caption: "Committee Sessions" },
@@ -348,11 +340,6 @@ export type SeasonData = {
   experience: string;
   milestone: string;
   highlights: string[];
-  organizers: Array<{
-    name: string;
-    role: string;
-    image: string;
-  }>;
   photos: Array<{
     url: string;
     caption: string;

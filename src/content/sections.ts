@@ -210,11 +210,6 @@ const seasonFields: Field[] = [
     { key: 'url', label: 'Image', type: 'image' },
     { key: 'caption', label: 'Caption', type: 'text' },
   ] },
-  { key: 'organizers', label: 'Organizers', type: 'list', itemLabel: 'Organizer', titleKey: 'name', fields: [
-    { key: 'name', label: 'Name', type: 'text' },
-    { key: 'role', label: 'Role', type: 'text' },
-    { key: 'image', label: 'Photo', type: 'image' },
-  ] },
   {
     key: '__style', label: 'Colours (advanced)', type: 'group', collapsed: true,
     hint: 'Tailwind classes. New seasons copy these from the season above; you rarely need to change them.',
