@@ -11,7 +11,6 @@ import {
   type EventData, type DebateTeam, type Criterion, loadEvent, seatLabel, sheetTotal, TEAM_TONES,
 } from '@/lib/debateEvent';
 
-const table = (name: string) => supabase.from(name as any) as any;
 type Tab = 'scores' | 'pairs' | 'rankings';
 
 /** One team's score sheet for the signed-in judge. */
@@ -30,14 +29,15 @@ function ScoreCard({ team, tone, data, criteria, userId, judgeName, onSaved, onD
   const numbers = Object.fromEntries(criteria.map(c => [c.label, Math.min(Number(c.max) || 0, Math.max(0, Number(values[c.label]) || 0))]));
   const total = sheetTotal(numbers, criteria);
   const max = criteria.reduce((s, c) => s + (Number(c.max) || 0), 0);
-  const complete = criteria.every(c => values[c.label] !== '');
+  // `?? ''`: criteria can change after the card mounts (site content loads late on a fresh phone).
+  const complete = criteria.every(c => (values[c.label] ?? '') !== '');
   const dirty = criteria.some(c => (values[c.label] || '') !== (mine?.scores?.[c.label] != null ? String(mine.scores[c.label]) : '')) || notes !== (mine?.notes || '');
 
   useEffect(() => { onDirty(team.id, dirty); }, [dirty, team.id, onDirty]);
 
   const save = async () => {
     setSaving(true);
-    const { error } = await table('debate_scores').upsert(
+    const { error } = await supabase.from('debate_scores').upsert(
       { judge_id: userId, judge_name: judgeName, team_id: team.id, scores: numbers, total, notes: notes || null, updated_at: new Date().toISOString() },
       { onConflict: 'judge_id,team_id' },
     );
@@ -70,7 +70,7 @@ function ScoreCard({ team, tone, data, criteria, userId, judgeName, onSaved, onD
                 min={0}
                 max={c.max}
                 step={1}
-                value={values[c.label]}
+                value={values[c.label] ?? ''}
                 onChange={e => setValues(v => ({ ...v, [c.label]: e.target.value }))}
                 aria-label={`${c.label} for team ${team.label}, out of ${c.max}`}
                 className={`w-20 rounded-md border px-2 py-1.5 text-right tabular-nums focus:outline-none focus:ring-2 focus:ring-debate-blue/30 ${Number(values[c.label]) > c.max ? 'border-red-400' : 'border-gray-300'}`}
@@ -127,7 +127,7 @@ export default function Judging() {
 
   const vote = async (pairingId: string, winnerId: string) => {
     if (!userId) return;
-    const { error } = await table('debate_pair_votes').upsert(
+    const { error } = await supabase.from('debate_pair_votes').upsert(
       { judge_id: userId, judge_name: fullName, pairing_id: pairingId, winner_id: winnerId, updated_at: new Date().toISOString() },
       { onConflict: 'judge_id,pairing_id' },
     );

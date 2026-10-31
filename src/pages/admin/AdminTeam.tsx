@@ -85,7 +85,6 @@ const shrink = (file: File): Promise<Blob> =>
     img.src = URL.createObjectURL(file);
   });
 
-const table = () => supabase.from('team_members');
 const input = 'w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500';
 
 const AdminTeam = () => {
@@ -100,7 +99,7 @@ const AdminTeam = () => {
 
   const fetchAll = async () => {
     setLoading(true);
-    const { data, error } = await table().select('*').order('team').order('sort_order').order('name');
+    const { data, error } = await supabase.from('team_members').select('*').order('team').order('sort_order').order('name');
     if (error) fail('Could not load the team (has migration 046 been run?)', error);
     setMembers(data || []);
     setLoading(false);
@@ -148,7 +147,7 @@ const AdminTeam = () => {
       return;
     }
     setSaving(true);
-    const { error } = draft.id ? await table().update(row).eq('id', draft.id) : await table().insert(row);
+    const { error } = draft.id ? await supabase.from('team_members').update(row).eq('id', draft.id) : await supabase.from('team_members').insert(row);
     setSaving(false);
     if (error) { fail('Could not save', error); return; }
     toast({ title: draft.id ? 'Saved' : 'Added' });
@@ -158,7 +157,7 @@ const AdminTeam = () => {
 
   const remove = async (m: TeamMember) => {
     if (!(await confirmAction(`Remove ${m.name} from the Team page?`, { danger: true }))) return;
-    const { error } = await table().delete().eq('id', m.id);
+    const { error } = await supabase.from('team_members').delete().eq('id', m.id);
     if (error) { fail('Could not remove', error); return; }
     setMembers(prev => prev.filter(x => x.id !== m.id));
   };

@@ -13,7 +13,6 @@ import {
   type EventData, type Debater, loadEvent, generatePairings, splitIntoTeams, nextSlot, seatLabel, TEAM_TONES,
 } from '@/lib/debateEvent';
 
-const table = (name: string) => supabase.from(name as any) as any;
 type Tab = 'teams' | 'pairings' | 'rounds' | 'results';
 
 /** Admin → Debate day: teams, one-on-one pairings and live results (SG + Academics). */
@@ -50,20 +49,20 @@ export default function DebateDay() {
     const used = new Set(data.teams.map(t => t.label));
     const label = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').find(l => !used.has(l));
     if (!label) return;
-    const { error } = await table('debate_teams').insert({ label });
+    const { error } = await supabase.from('debate_teams').insert({ label });
     if (error) return fail('Could not add team', error);
     load();
   };
 
   const saveTeam = async (id: string, fields: { name?: string; position?: string }) => {
-    const { error } = await table('debate_teams').update(fields).eq('id', id);
+    const { error } = await supabase.from('debate_teams').update(fields).eq('id', id);
     if (error) return fail('Could not save team', error);
     setData(d => d && { ...d, teams: d.teams.map(t => (t.id === id ? { ...t, ...fields } : t)) });
   };
 
   const removeTeam = async (id: string, label: string) => {
     if (!(await confirmAction(`Delete team ${label}? Its members go back to unassigned, and its score sheets are deleted.`, { title: 'Delete team', danger: true }))) return;
-    const { error } = await table('debate_teams').delete().eq('id', id);
+    const { error } = await supabase.from('debate_teams').delete().eq('id', id);
     if (error) return fail('Could not delete team', error);
     load();
   };
@@ -71,7 +70,7 @@ export default function DebateDay() {
   const assign = async (person: Debater, teamId: string) => {
     if (!data) return;
     const fields = teamId ? { team_id: teamId, slot: nextSlot(data.roster, teamId) } : { team_id: null, slot: null };
-    const { error } = await table('debate_registrations').update(fields).eq('id', person.id);
+    const { error } = await supabase.from('debate_registrations').update(fields).eq('id', person.id);
     if (error) return fail('Could not move debater', error);
     setData(d => d && { ...d, roster: d.roster.map(r => (r.id === person.id ? { ...r, ...fields } : r)) });
   };
@@ -86,7 +85,10 @@ export default function DebateDay() {
     setBusy(true);
     try {
       const rows = splitIntoTeams(data.roster, data.teams.map(t => t.id));
-      const results = await Promise.all(rows.map(({ id, ...fields }) => table('debate_registrations').update(fields).eq('id', id)));
+      // Empty every seat first: seats are unique per team, so swapping two people in place would collide.
+      const cleared = await supabase.from('debate_registrations').update({ team_id: null, slot: null }).not('team_id', 'is', null);
+      if (cleared.error) throw cleared.error;
+      const results = await Promise.all(rows.map(({ id, ...fields }) => supabase.from('debate_registrations').update(fields).eq('id', id)));
       const failed = results.find((r: any) => r.error);
       if (failed) throw failed.error;
       toast({ title: `${rows.length} debaters dealt into ${n} teams` });
@@ -109,10 +111,10 @@ export default function DebateDay() {
     try {
       const { pairs, byes } = generatePairings(seated);
       if (data.pairings.length) {
-        const { error } = await table('debate_pairings').delete().in('id', data.pairings.map(p => p.id));
+        const { error } = await supabase.from('debate_pairings').delete().in('id', data.pairings.map(p => p.id));
         if (error) throw error;
       }
-      const { error } = await table('debate_pairings').insert(pairs.map(([a, b], i) => ({ round: 1, position: i, a_id: a.id, b_id: b.id })));
+      const { error } = await supabase.from('debate_pairings').insert(pairs.map(([a, b], i) => ({ round: 1, position: i, a_id: a.id, b_id: b.id })));
       if (error) throw error;
       await load();
       toast({ title: `${pairs.length} pairs created`, description: byes.length ? `Sitting this round out: ${byes.map(b => b.full_name).join(', ')}.` : undefined });
@@ -124,8 +126,13 @@ export default function DebateDay() {
   };
 
   const editPair = async (id: string, side: 'a_id' | 'b_id', value: string) => {
-    const { error } = await table('debate_pairings').update({ [side]: value }).eq('id', id);
+    const cast = data?.votes.filter(v => v.pairing_id === id).length ?? 0;
+    if (cast && !(await confirmAction(`Judges have already voted on this pair. Changing it deletes those ${cast} vote${cast === 1 ? '' : 's'}.`, { title: 'Change pair', confirmLabel: 'Change', danger: true }))) return load();
+    const { error } = await supabase.from('debate_pairings').update({ [side]: value }).eq('id', id);
     if (error) return fail('Could not change pair', error);
+    // Votes were for the old pair; judges vote again.
+    const votes = await supabase.from('debate_pair_votes').delete().eq('pairing_id', id);
+    if (votes.error) fail('Pair changed, but its old votes could not be cleared', votes.error);
     load();
   };
 
@@ -135,14 +142,14 @@ export default function DebateDay() {
     if (!data) return;
     const b = seated.find(d => d.team_id !== seated[0]?.team_id);
     if (!b) { toast({ title: 'Put debaters in at least two teams first' }); return; }
-    const { error } = await table('debate_pairings').insert({ round: 1, position: data.pairings.length, a_id: seated[0].id, b_id: b.id });
+    const { error } = await supabase.from('debate_pairings').insert({ round: 1, position: data.pairings.length, a_id: seated[0].id, b_id: b.id });
     if (error) return fail('Could not add pair', error);
     load();
   };
 
   const removePair = async (id: string) => {
     if (!(await confirmAction('Remove this pair and its votes?', { title: 'Remove pair', confirmLabel: 'Remove', danger: true }))) return;
-    const { error } = await table('debate_pairings').delete().eq('id', id);
+    const { error } = await supabase.from('debate_pairings').delete().eq('id', id);
     if (error) return fail('Could not remove pair', error);
     load();
   };

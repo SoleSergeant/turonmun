@@ -23,16 +23,15 @@ export interface EventData {
   votes: PairVote[];
 }
 
-const table = (name: string) => supabase.from(name as any) as any;
 
 /** Everything the judging panel and the results need. Judges get names via debate_roster(), never contact details. */
 export async function loadEvent(): Promise<EventData> {
   const [teams, roster, pairings, scores, votes] = await Promise.all([
-    table('debate_teams').select('id, label, name, position').order('label'),
+    supabase.from('debate_teams').select('id, label, name, position').order('label'),
     supabase.rpc('debate_roster'),
-    table('debate_pairings').select('id, round, position, a_id, b_id').order('round').order('position'),
-    table('debate_scores').select('*'),
-    table('debate_pair_votes').select('*'),
+    supabase.from('debate_pairings').select('id, round, position, a_id, b_id').order('round').order('position'),
+    supabase.from('debate_scores').select('*'),
+    supabase.from('debate_pair_votes').select('*'),
   ]);
   const err = teams.error || roster.error || pairings.error || scores.error || votes.error;
   if (err) throw err;

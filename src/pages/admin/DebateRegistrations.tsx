@@ -89,7 +89,11 @@ const DebateRegistrations = () => {
     if (ids.length > 1 && !(await confirmAction(`Mark ${ids.length} registrations as ${STATUSES.find(s => s.value === status)?.label.toLowerCase()}?`, { title: 'Bulk update', confirmLabel: 'Apply' }))) return;
     const { error } = await supabase.from('debate_registrations')
       // A new decision hasn't been emailed yet.
-      .update({ status, reviewed_at: new Date().toISOString(), decision_emailed_at: null })
+      .update({
+        status, reviewed_at: new Date().toISOString(), decision_emailed_at: null,
+        // Debate day only lists accepted debaters; a hidden seat would block it for others.
+        ...(status === 'approved' ? {} : { team_id: null, slot: null }),
+      })
       .in('id', ids);
     if (error) { toast({ title: 'Update failed', description: error.message, variant: 'destructive' }); return; }
     patchLocal(ids, { status, decision_emailed_at: null });
