@@ -9,6 +9,7 @@ import DecisionEmailPanel from '@/components/admin/DecisionEmailPanel';
 import DelegateAdminPanel, { PAYMENT_STATUSES, paymentTone, type DelegateFields } from '@/components/admin/DelegateAdminPanel';
 import { confirmAction } from '@/components/admin/ConfirmDialog';
 import { supabase } from '@/integrations/supabase/client';
+import { exportApplicationsToCsv } from '@/utils/applicationsCsv';
 import { useToast } from '@/hooks/use-toast';
 import { useAdminRole } from '@/hooks/useAdminRole';
 import { getCurrentSeason, inSeason } from '@/lib/season';
@@ -267,15 +268,9 @@ const Delegates = () => {
     toast({ title: `Exported ${shown.length} delegates` });
   };
 
-  const exportExcel = async () => {
+  const exportFull = () => {
     setExportOpen(false);
-    try {
-      // xlsx is ~200 KB; load it only when someone exports.
-      const { exportApplicationsToExcel } = await import('@/utils/excelExport');
-      exportApplicationsToExcel(shown as any, 'TuronMUN_Delegate_Applications');
-    } catch (err: any) {
-      toast({ title: 'Export failed', description: err.message, variant: 'destructive' });
-    }
+    exportApplicationsToCsv(shown as any, 'TuronMUN_Delegate_Applications');
   };
 
   const open = rows.find(r => r.id === openId) || null;
@@ -305,8 +300,8 @@ const Delegates = () => {
                       <span className="font-medium text-gray-900">Working list (CSV)</span>
                       <span className="block text-xs text-gray-500">Contacts, payment, seat, emergency contact</span>
                     </button>
-                    <button onClick={exportExcel} className="block w-full border-t px-4 py-2.5 text-left hover:bg-gray-50">
-                      <span className="font-medium text-gray-900">Full applications (Excel)</span>
+                    <button onClick={exportFull} className="block w-full border-t px-4 py-2.5 text-left hover:bg-gray-50">
+                      <span className="font-medium text-gray-900">Full applications (CSV)</span>
                       <span className="block text-xs text-gray-500">Every answer from the form</span>
                     </button>
                   </div>

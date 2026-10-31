@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { CalendarRange, Download, Loader2, Archive, AlertTriangle } from 'lucide-react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import { supabase } from '@/integrations/supabase/client';
+import { exportApplicationsToCsv } from '@/utils/applicationsCsv';
 import { useToast } from '@/hooks/use-toast';
 import { resetSeasonCache } from '@/lib/season';
 
@@ -100,8 +101,7 @@ const Seasons = () => {
         .eq('season', season.number)
         .order('created_at', { ascending: false });
       if (error) throw error;
-      const { exportApplicationsToExcel } = await import('@/utils/excelExport');
-      exportApplicationsToExcel((data || []) as Parameters<typeof exportApplicationsToExcel>[0], `TuronMUN_${season.name.replace(/\s+/g, '_')}_Applications`);
+      exportApplicationsToCsv((data || []) as Parameters<typeof exportApplicationsToCsv>[0], `TuronMUN_${season.name.replace(/\s+/g, '_')}_Applications`);
     } catch (err: any) {
       toast({ title: 'Export failed', description: err.message, variant: 'destructive' });
     } finally {
