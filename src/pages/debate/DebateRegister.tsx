@@ -362,8 +362,8 @@ export default function DebateRegister() {
                 </select>
               </Field>
             </div>
-            <Field label="Tournaments you've taken part in">
-              <textarea rows={2} value={form.past_tournaments ?? ''} onChange={e => set('past_tournaments', e.target.value)} className={inputCls} />
+            <Field label="Talk about your experience in debates">
+              <textarea rows={3} value={form.past_tournaments ?? ''} onChange={e => set('past_tournaments', e.target.value)} className={inputCls} />
             </Field>
             <Field label="Why do you want to join?">
               <textarea rows={4} value={form.motivation ?? ''} onChange={e => set('motivation', e.target.value)} className={inputCls} />

@@ -119,7 +119,7 @@ const DebateRegistrations = () => {
   const exportCsv = () => {
     downloadCsv(datedFilename('turon-debate-registrations'), [
       ['Name', 'Email', 'Phone', 'Telegram', 'Date of birth', 'Gender', 'School / university', 'Grade', 'City',
-        'English level', 'Experience', 'Preferred side', 'Past tournaments', 'Motivation', 'Heard from', 'Status', 'Notes', 'Registered'],
+        'English level', 'Experience', 'Preferred side', 'Debate experience (in their words)', 'Motivation', 'Heard from', 'Status', 'Notes', 'Registered'],
       ...shown.map(r => [
         r.full_name, r.email, r.phone, r.telegram, r.date_of_birth, r.gender, r.institution, r.grade, r.city,
         r.english_level, experienceLabel(r.experience), r.preferred_side, r.past_tournaments, r.motivation, r.heard_from,
@@ -355,7 +355,7 @@ const DebateRegistrations = () => {
                                     <div key={k}><dt className="text-xs text-gray-500">{k}</dt><dd className="text-gray-900">{v}</dd></div>
                                   ))}
                                 </dl>
-                                {r.past_tournaments && <p className="mt-3 text-sm"><span className="text-xs text-gray-500">Past tournaments</span><br />{r.past_tournaments}</p>}
+                                {r.past_tournaments && <p className="mt-3 text-sm"><span className="text-xs text-gray-500">Their debate experience</span><br />{r.past_tournaments}</p>}
                                 {r.motivation && <p className="mt-3 whitespace-pre-line text-sm"><span className="text-xs text-gray-500">Why they want to join</span><br />{r.motivation}</p>}
                                 <label className="mt-4 block text-sm">
                                   <span className="text-xs text-gray-500">Internal note (only admins see this)</span>
