@@ -18,6 +18,11 @@ export function youtubeId(url: string | null | undefined): string | null {
   }
 }
 
-/** Privacy-friendly embed URL (no tracking cookies until the video is played). */
+/**
+ * Privacy-friendly embed URL (no tracking cookies until the video is played).
+ * rel=0: suggestions only from the same channel; iv_load_policy=3: no
+ * annotations; playsinline: stays in the page on iPhones. YouTube no longer
+ * lets embeds hide the title/share/logo or pick the quality.
+ */
 export const youtubeEmbedUrl = (id: string) =>
-  `https://www.youtube-nocookie.com/embed/${id}?rel=0&modestbranding=1`;
+  `https://www.youtube-nocookie.com/embed/${id}?rel=0&iv_load_policy=3&playsinline=1`;
