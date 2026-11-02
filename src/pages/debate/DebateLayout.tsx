@@ -76,8 +76,9 @@ export default function DebateLayout({ title, children, nav }: {
 
         {/* fixed, not sticky: the site-wide overflow-x on <body> breaks sticky */}
         <header className="fixed inset-x-0 top-0 z-30 border-b border-slate-200 bg-white/90 backdrop-blur-md">
-          <div className="container mx-auto flex h-14 items-center justify-between gap-3 px-4 sm:h-16">
-            <Link to={path('/')} className={`flex min-w-0 items-center gap-2 rounded-lg ${focusRing}`}>
+          {/* 3 columns on md+ so the section links sit at the true page centre, under the headline */}
+          <div className="container mx-auto flex h-14 items-center justify-between gap-3 px-4 sm:h-16 md:grid md:grid-cols-[1fr_auto_1fr]">
+            <Link to={path('/')} className={`flex min-w-0 items-center gap-2 justify-self-start rounded-lg ${focusRing}`}>
               <img src="/debate/podium.svg" alt="" width={502} height={671} className="h-8 w-auto shrink-0 sm:h-9" />
               <span className={`${headingCls} truncate text-lg leading-none text-debate-blue sm:text-xl`}>{d.name}</span>
             </Link>
@@ -90,7 +91,7 @@ export default function DebateLayout({ title, children, nav }: {
               </nav>
             )}
 
-            <div className="flex shrink-0 items-center gap-1 text-sm sm:gap-2">
+            <div className="flex shrink-0 items-center gap-1 justify-self-end text-sm md:col-start-3 sm:gap-2">
               {user ? (
                 <Link to={path('/register')} className={navLink}>
                   <span className="hidden sm:inline">My registration</span>
