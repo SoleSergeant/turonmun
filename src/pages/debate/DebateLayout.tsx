@@ -49,7 +49,7 @@ export default function DebateLayout({ title, children, nav }: {
   const general = useContent('general');
   const { user } = useAuth();
   const path = useDebatePath();
-  const navLink = `rounded-lg px-3 py-2 font-medium text-slate-700 transition hover:bg-debate-blue-50 hover:text-debate-blue ${focusRing}`;
+  const navLink = `inline-flex items-center rounded-xl px-3 py-2 font-medium text-slate-700 transition hover:bg-debate-blue-50 hover:text-debate-blue ${focusRing}`;
   const iconLink = `rounded-lg p-2.5 text-white/75 transition hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white`;
 
   return (
