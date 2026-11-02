@@ -149,8 +149,12 @@ export default function Judging() {
   };
 
   // Everyone else who has a sheet or a vote: paper judges and judges with accounts (for corrections).
+  // A paper judge just added has nothing saved yet, so add them too or the drop-down shows "Me".
   const otherJudges = data
-    ? [...new Map([...data.scores, ...data.votes].filter(s => s.judge_id !== userId).map(s => [s.judge_id, s.judge_name || 'Unnamed judge'])).entries()]
+    ? [...new Map([
+        ...[...data.scores, ...data.votes].filter(s => s.judge_id !== userId).map(s => [s.judge_id, s.judge_name || 'Unnamed judge'] as const),
+        ...(scoringFor ? [[scoringFor.id, scoringFor.name] as const] : []),
+      ]).entries()]
     : [];
   const switchJudge = async (next: { id: string; name: string } | null) => {
     if (Object.values(dirtyTeams).some(Boolean) && !(await confirmAction('Unsaved scores on this page will be lost.', { title: 'Switch judge', confirmLabel: 'Switch' }))) return;
