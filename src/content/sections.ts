@@ -351,10 +351,10 @@ const debate = {
   show_side_stats: true,
   // Event day (Admin → Debate day, judges' panel)
   judging_criteria: [
-    { label: 'Arguments & logic', max: 25 },
+    { label: 'Arguments & Logic', max: 25 },
     { label: 'Rebuttal', max: 25 },
-    { label: 'Speaking & presentation', max: 20 },
-    { label: 'Evidence / examples', max: 15 },
+    { label: 'Speaking & Presentation', max: 20 },
+    { label: 'Evidence & Examples', max: 15 },
     { label: 'Teamwork', max: 15 },
   ],
   reveal_teams: false,

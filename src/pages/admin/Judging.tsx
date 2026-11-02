@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { Loader2, CheckCircle2, ClipboardList, Swords, Trophy } from 'lucide-react';
+import { Loader2, CheckCircle2, ClipboardList, Swords, Trophy, Printer } from 'lucide-react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import DebateResults from '@/components/admin/DebateResults';
 import { supabase } from '@/integrations/supabase/client';
@@ -7,6 +7,8 @@ import { useToast } from '@/hooks/use-toast';
 import { useAdminRole } from '@/hooks/useAdminRole';
 import { useContent } from '@/content/store';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
+import { confirmAction } from '@/components/admin/ConfirmDialog';
+import { adminPath } from '@/lib/adminPath';
 import {
   type EventData, type DebateTeam, type Criterion, loadEvent, seatLabel, sheetTotal, TEAM_TONES,
 } from '@/lib/debateEvent';
@@ -98,8 +100,12 @@ function ScoreCard({ team, tone, data, criteria, userId, judgeName, onSaved, onD
 export default function Judging() {
   const { toast } = useToast();
   const debate = useContent('debate');
-  const { fullName } = useAdminRole();
+  const { fullName, role } = useAdminRole();
   const [userId, setUserId] = useState<string | null>(null);
+  // SG/Academics can type in a paper judge's sheet; null = scoring as myself.
+  const [scoringFor, setScoringFor] = useState<{ id: string; name: string } | null>(null);
+  const [newJudge, setNewJudge] = useState<string | null>(null);
+  const isStaff = role === 'sg' || role === 'academics';
   const [data, setData] = useState<EventData | null>(null);
   const [missing, setMissing] = useState(false);
   const [tab, setTab] = useState<Tab>('scores');
@@ -125,18 +131,31 @@ export default function Judging() {
     return () => clearInterval(id);
   }, [tab, load]);
 
+  const judgeId = scoringFor?.id ?? userId;
+  const judgeName = scoringFor?.name ?? fullName;
+
   const vote = async (pairingId: string, winnerId: string) => {
-    if (!userId) return;
+    if (!judgeId) return;
     const { error } = await supabase.from('debate_pair_votes').upsert(
-      { judge_id: userId, judge_name: fullName, pairing_id: pairingId, winner_id: winnerId, updated_at: new Date().toISOString() },
+      { judge_id: judgeId, judge_name: judgeName, pairing_id: pairingId, winner_id: winnerId, updated_at: new Date().toISOString() },
       { onConflict: 'judge_id,pairing_id' },
     );
-    if (error) { toast({ title: 'Could not save your vote', description: error.message, variant: 'destructive' }); return; }
+    if (error) { toast({ title: 'Could not save the vote', description: error.message, variant: 'destructive' }); return; }
     setData(d => d && {
       ...d,
-      votes: [...d.votes.filter(v => !(v.pairing_id === pairingId && v.judge_id === userId)),
-        { id: 'local', judge_id: userId, judge_name: fullName, pairing_id: pairingId, winner_id: winnerId }],
+      votes: [...d.votes.filter(v => !(v.pairing_id === pairingId && v.judge_id === judgeId)),
+        { id: 'local', judge_id: judgeId, judge_name: judgeName, pairing_id: pairingId, winner_id: winnerId }],
     });
+  };
+
+  // Everyone else who has a sheet or a vote: paper judges and judges with accounts (for corrections).
+  const otherJudges = data
+    ? [...new Map([...data.scores, ...data.votes].filter(s => s.judge_id !== userId).map(s => [s.judge_id, s.judge_name || 'Unnamed judge'])).entries()]
+    : [];
+  const switchJudge = async (next: { id: string; name: string } | null) => {
+    if (Object.values(dirtyTeams).some(Boolean) && !(await confirmAction('Unsaved scores on this page will be lost.', { title: 'Switch judge', confirmLabel: 'Switch' }))) return;
+    setDirtyTeams({});
+    setScoringFor(next);
   };
 
   const tabs: { key: Tab; label: string; icon: typeof Trophy }[] = [
@@ -144,16 +163,52 @@ export default function Judging() {
     { key: 'pairs', label: 'One-on-one', icon: Swords },
     { key: 'rankings', label: 'Rankings', icon: Trophy },
   ];
-  const scored = data && userId ? data.scores.filter(s => s.judge_id === userId).length : 0;
-  const voted = data && userId ? data.votes.filter(v => v.judge_id === userId).length : 0;
+  const scored = data && judgeId ? data.scores.filter(s => s.judge_id === judgeId).length : 0;
+  const voted = data && judgeId ? data.votes.filter(v => v.judge_id === judgeId).length : 0;
 
   return (
     <AdminLayout title="Judging">
       <div className="space-y-6">
-        <div>
-          <h2 className="text-2xl font-semibold text-gray-900">{debate.name} · Judging</h2>
-          <p className="text-gray-600">Your sheets are saved under your name. Rankings average all judges.</p>
+        <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-end">
+          <div>
+            <h2 className="text-2xl font-semibold text-gray-900">{debate.name} · Judging</h2>
+            <p className="text-gray-600">Score here or on paper. Sheets are saved under the judge's name; rankings average all judges.</p>
+          </div>
+          <a href={adminPath('/judging/print')} target="_blank" rel="noreferrer" className="inline-flex shrink-0 items-center gap-2 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+            <Printer className="h-4 w-4" /> Print paper sheets
+          </a>
         </div>
+
+        {isStaff && data && (
+          <div className={`flex flex-wrap items-center gap-2 rounded-xl border p-3 text-sm ${scoringFor ? 'border-amber-300 bg-amber-50' : 'bg-white'}`}>
+            <label htmlFor="scoring-for" className="font-medium text-gray-700">Scoring for</label>
+            <select
+              id="scoring-for"
+              value={newJudge !== null ? '__new' : scoringFor?.id ?? ''}
+              onChange={e => {
+                const v = e.target.value;
+                if (v === '__new') { setNewJudge(''); return; }
+                setNewJudge(null);
+                switchJudge(v ? { id: v, name: otherJudges.find(([id]) => id === v)?.[1] ?? '' } : null);
+              }}
+              className="rounded-md border border-gray-300 bg-white px-2 py-1.5"
+            >
+              <option value="">Me ({fullName || 'my account'})</option>
+              {otherJudges.map(([id, name]) => <option key={id} value={id}>{name}</option>)}
+              <option value="__new">+ Add a paper judge…</option>
+            </select>
+            {newJudge !== null && (
+              <form
+                className="flex gap-2"
+                onSubmit={e => { e.preventDefault(); if (newJudge.trim()) { switchJudge({ id: crypto.randomUUID(), name: newJudge.trim() }); setNewJudge(null); } }}
+              >
+                <input autoFocus value={newJudge} onChange={e => setNewJudge(e.target.value)} placeholder="Judge's name" className="rounded-md border border-gray-300 px-2 py-1.5" />
+                <button className="rounded-md bg-debate-blue px-3 py-1.5 font-medium text-white hover:bg-debate-blue-700">Start</button>
+              </form>
+            )}
+            {scoringFor && <span className="text-amber-800">Typing in {scoringFor.name}'s paper sheet. Scores and votes below are saved under their name.</span>}
+          </div>
+        )}
 
         {missing ? (
           <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">The judging panel isn't set up yet (migration 045).</div>
@@ -179,7 +234,7 @@ export default function Judging() {
               ) : (
                 <div className="grid gap-4 lg:grid-cols-2">
                   {data.teams.map((t, i) => (
-                    <ScoreCard key={t.id} team={t} tone={TEAM_TONES[i % 2]} data={data} criteria={criteria} userId={userId} judgeName={fullName} onSaved={load} onDirty={onDirty} />
+                    <ScoreCard key={`${judgeId}:${t.id}`} team={t} tone={TEAM_TONES[i % 2]} data={data} criteria={criteria} userId={judgeId!} judgeName={judgeName} onSaved={load} onDirty={onDirty} />
                   ))}
                 </div>
               )}
@@ -191,7 +246,7 @@ export default function Judging() {
               ) : (
                 <ul className="space-y-3">
                   {data.pairings.map((p, i) => {
-                    const myVote = data.votes.find(v => v.pairing_id === p.id && v.judge_id === userId)?.winner_id;
+                    const myVote = data.votes.find(v => v.pairing_id === p.id && v.judge_id === judgeId)?.winner_id;
                     return (
                       <li key={p.id} className="rounded-xl border bg-white p-4 shadow-sm">
                         <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-400">Pair {i + 1} · tap the winner</p>
