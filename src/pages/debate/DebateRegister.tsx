@@ -376,6 +376,12 @@ export default function DebateRegister() {
             </Field>
           </fieldset>
 
+          {d.rules.trim() && (
+            <details className="rounded-lg border border-slate-200 bg-slate-50 text-sm">
+              <summary className={`cursor-pointer rounded-lg px-3 py-2 font-medium text-debate-blue ${focusRing}`}>Read the {d.rules_title.toLowerCase()}</summary>
+              <p className="whitespace-pre-line px-3 pb-3 leading-relaxed text-slate-700">{d.rules}</p>
+            </details>
+          )}
           <label className="flex items-start gap-3 text-sm text-slate-700">
             <input
               type="checkbox"

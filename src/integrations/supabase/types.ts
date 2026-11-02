@@ -1745,6 +1745,7 @@ export type Database = {
         Returns: undefined
       }
       current_season: { Args: never; Returns: number }
+      debate_public_results: { Args: never; Returns: Json }
       debate_roster: {
         Args: never
         Returns: {

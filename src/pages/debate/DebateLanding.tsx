@@ -2,6 +2,9 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ArrowRight, Play, ChevronDown, CalendarClock, Clapperboard } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { type EventData } from '@/lib/debateEvent';
+import DebateResults from '@/components/admin/DebateResults';
 import { useContent } from '@/content/store';
 import { youtubeId, youtubeEmbedUrl } from '@/lib/youtube';
 import DebateLayout, { useDebateRegistrationOpen, focusRing, primaryButton, headingCls } from './DebateLayout';
@@ -72,10 +75,22 @@ export default function DebateLanding() {
     return () => io.disconnect();
   }, [open]);
 
+  // Public results (migration 053): the function returns null until "Show results publicly" is on.
+  const [results, setResults] = useState<EventData | null>(null);
+  useEffect(() => {
+    if (!d.show_results) { setResults(null); return; }
+    supabase.rpc('debate_public_results').then(({ data }) => setResults(data as unknown as EventData | null));
+  }, [d.show_results]);
+
+  const criteria = (d.judging_criteria || []).filter(c => c.label);
+  const totalPoints = criteria.reduce((s, c) => s + (Number(c.max) || 0), 0);
   const hasDeadline = !!deadline && !isNaN(deadline.getTime());
   const nav = [
+    ...(results?.teams.length ? [{ href: '#results', label: d.results_title }] : []),
     ...(videoId ? [{ href: '#video', label: 'Video' }] : []),
     ...(d.steps.length ? [{ href: '#how-it-works', label: d.steps_title }] : []),
+    ...(criteria.length ? [{ href: '#judging', label: 'Judging' }] : []),
+    ...(d.rules.trim() ? [{ href: '#rules', label: d.rules_title }] : []),
     ...(d.faq.length ? [{ href: '#faq', label: d.faq_title }] : []),
   ];
 
@@ -147,6 +162,14 @@ export default function DebateLanding() {
         </div>
       </section>
 
+      {/* ── Results (after the event) ───────────────────────────────── */}
+      {results && results.teams.length > 0 && (
+        <section id="results" className="container mx-auto max-w-5xl scroll-mt-20 px-4 py-16 sm:py-20">
+          <h2 className={`${headingCls} mb-8 text-center text-3xl text-debate-blue sm:text-4xl`}>{d.results_title}</h2>
+          <DebateResults data={results} criteria={criteria} />
+        </section>
+      )}
+
       {/* ── Key details ──────────────────────────────────────────────── */}
       {d.info.length > 0 && (
         <section aria-label="Key details" className="bg-debate-blue text-white">
@@ -189,6 +212,37 @@ export default function DebateLanding() {
               </motion.li>
             ))}
           </ol>
+        </section>
+      )}
+
+      {/* ── Judging criteria (same list the judges score with) ──────── */}
+      {criteria.length > 0 && (
+        <section id="judging" className="scroll-mt-20 bg-slate-50 py-16 sm:py-24">
+          <div className="container mx-auto max-w-3xl px-4">
+            <h2 className={`${headingCls} text-center text-3xl text-debate-blue sm:text-4xl`}>{d.judging_title}</h2>
+            {d.judging_intro && <p className="mx-auto mt-3 max-w-xl text-center text-slate-600">{d.judging_intro.replace('{total}', String(totalPoints))}</p>}
+            <ul className="mt-10 space-y-4">
+              {criteria.map((c, i) => (
+                <li key={c.label} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+                  <div className="flex items-baseline justify-between gap-4">
+                    <span className="font-semibold text-slate-900">{c.label}</span>
+                    <span className={`${headingCls} text-xl text-debate-maroon`}>{c.max}<span className="ml-1 text-sm font-medium text-slate-500">pts</span></span>
+                  </div>
+                  <div aria-hidden className="mt-3 h-2 overflow-hidden rounded-full bg-slate-100">
+                    <div className={`h-full rounded-full ${i % 2 ? 'bg-debate-maroon' : 'bg-debate-blue'}`} style={{ width: `${totalPoints ? (Number(c.max) / totalPoints) * 100 : 0}%` }} />
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      )}
+
+      {/* ── Rules ────────────────────────────────────────────────────── */}
+      {d.rules.trim() && (
+        <section id="rules" className="container mx-auto max-w-3xl scroll-mt-20 px-4 py-16 sm:py-24">
+          <h2 className={`${headingCls} mb-6 text-center text-3xl text-debate-blue sm:text-4xl`}>{d.rules_title}</h2>
+          <p className="whitespace-pre-line rounded-2xl border border-slate-200 bg-white p-6 leading-relaxed text-slate-700 shadow-sm">{d.rules}</p>
         </section>
       )}
 
