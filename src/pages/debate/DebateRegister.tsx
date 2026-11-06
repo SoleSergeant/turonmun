@@ -112,6 +112,7 @@ export default function DebateRegister() {
     e.preventDefault();
     if (!user || !form) return;
     if (sideStats.sides.length > 0 && !form.preferred_side) { setError('Please choose the side you would like to be on.'); return; }
+    if (!form.motivation?.trim()) { setError('Please tell us why you want to join.'); return; }
     if (!form.agreed_to_rules) { setError('Please agree to the rules to continue.'); return; }
     setError(null);
     setSaving(true);
@@ -362,8 +363,8 @@ export default function DebateRegister() {
                 </select>
               </Field>
             </div>
-            <Field label="Why do you want to join?">
-              <textarea rows={4} value={form.motivation ?? ''} onChange={e => set('motivation', e.target.value)} className={inputCls} />
+            <Field label="Why do you want to join?" required>
+              <textarea required rows={4} value={form.motivation ?? ''} onChange={e => set('motivation', e.target.value)} className={inputCls} />
             </Field>
             <Field label="How did you hear about us?">
               <select value={form.heard_from ?? ''} onChange={e => set('heard_from', e.target.value)} className={inputCls}>
