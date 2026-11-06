@@ -366,8 +366,8 @@ export default function DebateRegister() {
             <Field label="Why do you want to join?" required>
               <textarea required rows={4} value={form.motivation ?? ''} onChange={e => set('motivation', e.target.value)} className={inputCls} />
             </Field>
-            <Field label="How did you hear about us?">
-              <select value={form.heard_from ?? ''} onChange={e => set('heard_from', e.target.value)} className={inputCls}>
+            <Field label="How did you hear about us?" required>
+              <select required value={form.heard_from ?? ''} onChange={e => set('heard_from', e.target.value)} className={inputCls}>
                 <option value="">—</option>
                 {HEARD_FROM.map(h => <option key={h}>{h}</option>)}
               </select>
