@@ -18,15 +18,15 @@ export default function AboutTimeline() {
 
         <div className="max-w-4xl mx-auto">
           {timelineEvents.map((event, index) => (
-            <div key={index} className="flex gap-4 mb-12">
+            <div key={index} className="flex gap-4">
+              {/* no gap between rows, so the line runs on to the next dot */}
               <div className="flex flex-col items-center">
-                <div className="w-6 h-6 rounded-full bg-diplomatic-500 flex items-center justify-center">
-                </div>
+                <div className="w-6 h-6 shrink-0 rounded-full bg-diplomatic-500" />
                 {index !== timelineEvents.length - 1 && (
-                  <div className="w-0.5 h-full bg-diplomatic-200" />
+                  <div className="w-0.5 flex-1 bg-diplomatic-200" />
                 )}
               </div>
-              <div className="flex-1 pb-8">
+              <div className="flex-1 pb-20">
                 <div className="text-sm text-diplomatic-600 font-semibold mb-1">
                   {event.date}
                 </div>

@@ -9,7 +9,7 @@ export const seasonsData = [
     location: "Presidential School in Fergana",
     route: "/seasons/1",
     theme: "The Trembling Dawn",
-    description: "The first TuronMUN, then called FerganaPSMUN: 80 delegates and 4 committees at the Presidential School in Fergana.",
+    description: "The first TuronMUN, then called FerganaPS MUN: 80 delegates and 4 committees at the Presidential School in Fergana.",
     color: "from-diplomatic-600 to-diplomatic-800",
     accentColor: "bg-diplomatic-600",
     lightBg: "bg-diplomatic-50",
@@ -61,7 +61,7 @@ export const seasonsData = [
       fee: "69,000 UZS",
       location: "Fergana Presidential school"
     },
-    experience: "Delegates stayed in the school dormitory, so the conference carried on after sessions: Mafia and chess in the evenings, Monopoly, football in the afternoons and an eFootball tournament. MyMUN later gave FerganaPSMUN three awards: Best Small Conference, Best Logistics and Best Socials.",
+    experience: "Delegates stayed in the school dormitory, so the conference carried on after sessions: Mafia and chess in the evenings, Monopoly, football in the afternoons and an eFootball tournament. MyMUN later gave FerganaPS MUN three awards: Best Small Conference, Best Logistics and Best Socials.",
     milestone: "The first season with dormitory places and a participation fee, along with a discount for strong academic results.",
     highlights: [
       "50 delegates",
