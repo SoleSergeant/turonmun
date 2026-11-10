@@ -53,7 +53,7 @@ const next_season = {
 
 const hero = {
   eyebrow: 'Model United Nations · Fergana, Uzbekistan',
-  intro: 'A student-run Model UN conference in Fergana. Since July 2024 we have run seven seasons for school and university students from across Uzbekistan.',
+  intro: 'A student-run Model UN conference in Fergana. Since July 2024 we have run eight conferences for school and university students from across Uzbekistan.',
   apply_button: 'Apply Now',
   committees_button: 'Explore Committees',
   accolades: [
@@ -124,7 +124,7 @@ const sponsors = {
 // ── About page ─────────────────────────────────────────────────────────
 const about_page = {
   title: 'About TuronMUN',
-  intro: 'TuronMUN started at the Presidential School in Fergana in the summer of 2024, run by students who wanted a proper MUN conference in the region. Two years and seven seasons later, it is still run by students.',
+  intro: 'TuronMUN started at the Presidential School in Fergana in the summer of 2024, run by students who wanted a proper MUN conference in the region. Two years and eight conferences later, it is still run by students.',
   primary_button: 'Apply',
   secondary_button: 'Past Conferences',
   mission_title: 'What we do',
@@ -137,6 +137,7 @@ const about_page = {
     { date: 'November 5, 2024', title: 'Season 2', description: 'A smaller season with two committees.', milestones: ['2 committees', '50 delegates', 'Location: Presidential School in Fergana'] },
     { date: 'January 4, 2025', title: 'Season 3', description: 'Our largest season at the time, and the first Uzbek-language committee.', milestones: ['5 committees', '105 delegates', 'Location: Presidential School in Fergana'] },
     { date: 'January 25, 2025', title: 'Historic Partnership', description: 'Partnership with the Central Asian University MUN in Nukus.', milestones: ['First MUN conference in Karakalpakstan', 'Expanding MUN culture in new regions', 'Strengthening national MUN community'] },
+    { date: 'April 12, 2025', title: 'Season 4', description: 'Our first conference outside the Presidential School, and the first step towards expansion and the rebrand.', milestones: ['Held at Rahimov School, Fergana branch', '80 delegates', '4 committees'] },
     { date: 'May 1, 2025', title: 'MyMUN Awards 2024', description: 'Season 2 (November 5, 2024) takes first place in three categories of the MyMUN 2024 awards.', milestones: ['1st, Best Small Conference', '1st, Best Socials', '1st, Best Logistics'] },
     { date: 'May 12, 2025', title: 'Rebranding to TuronMUN', description: 'FerganaPS MUN becomes TuronMUN.', milestones: ['New name and logo'] },
     { date: 'July 28, 2025', title: 'TuronMUN x CAMU', description: 'Our first anniversary, held at Central Asian Medical University.', milestones: ['First joint MUN with a medical university', '120 delegates', '6 committees in 3 languages', '3rd, Best Medium Conference, MyMUN 2025 awards'] },
