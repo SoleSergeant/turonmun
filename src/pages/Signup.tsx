@@ -147,7 +147,8 @@ const Signup = () => {
               {error && (
                 <motion.div
                   variants={itemVariants}
-                  className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3 mb-6"
+                  role="alert"
+                className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3 mb-6"
                 >
                   <AlertCircle className="text-red-600 flex-shrink-0 mt-0.5" size={20} />
                   <div>
@@ -230,7 +231,8 @@ const Signup = () => {
                       <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-neutral-700 transition-colors"
+                        aria-label={showPassword ? 'Hide password' : 'Show password'}
+                        className="inline-flex items-center justify-center absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-neutral-700 transition-colors"
                       >
                         {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                       </button>
@@ -257,7 +259,8 @@ const Signup = () => {
                       <button
                         type="button"
                         onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-neutral-700 transition-colors"
+                        aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                        className="inline-flex items-center justify-center absolute right-3 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-neutral-700 transition-colors"
                       >
                         {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
                       </button>

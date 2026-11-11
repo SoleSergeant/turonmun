@@ -124,6 +124,7 @@ const ResetPasswordChange = () => {
             {error && (
               <motion.div
                 variants={itemVariants}
+                role="alert"
                 className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3 mb-6"
               >
                 <AlertCircle className="text-red-600 flex-shrink-0 mt-0.5" size={20} />
@@ -175,7 +176,8 @@ const ResetPasswordChange = () => {
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-3.5 text-neutral-500 hover:text-neutral-700"
+                      aria-label={showPassword ? 'Hide password' : 'Show password'}
+                      className="inline-flex items-center justify-center absolute right-3 top-3.5 text-neutral-500 hover:text-neutral-700"
                       disabled={isLoading}
                     >
                       {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
@@ -207,7 +209,8 @@ const ResetPasswordChange = () => {
                     <button
                       type="button"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute right-3 top-3.5 text-neutral-500 hover:text-neutral-700"
+                      aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
+                      className="inline-flex items-center justify-center absolute right-3 top-3.5 text-neutral-500 hover:text-neutral-700"
                       disabled={isLoading}
                     >
                       {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}

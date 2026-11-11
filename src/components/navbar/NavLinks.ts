@@ -18,6 +18,7 @@ export const navLinks = [
   // Season entries are filled in by useNavLinks() from Site content → Seasons.
   { name: 'Past Conferences', path: '/past-conferences', hasDropdown: true, dropdownItems: [] as { name: string; path: string }[] },
   { name: 'Contact', path: '/contact' },
+  { name: 'Apply', path: '/register' },
 ];
 
 /** Menu links, with the Past Conferences dropdown built from the season list. */

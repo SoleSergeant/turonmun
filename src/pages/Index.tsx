@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { motion, type Variants } from 'framer-motion';
 import { Seo } from '../components/seo';
 import Navbar from '../components/Navbar';
@@ -22,34 +22,28 @@ const Index = () => {
     window.scrollTo(0, 0);
   }, []);
 
-  // Cursor highlight & magnetic effect
+  // Pointer glow: mouse devices only, at most one update per frame, and the
+  // position is set on the glow itself so the rest of the page isn't restyled.
+  // Phones never get the glow layer at all: a full-screen blended layer is costly to draw.
+  const [hasMouse] = useState(() => window.matchMedia('(hover: hover) and (pointer: fine)').matches);
+  const glowRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
+    if (!hasMouse) return;
+    let frame = 0;
     const handleMouseMove = (e: MouseEvent) => {
-      const xPercent = (e.clientX / window.innerWidth) * 100;
-      const yPercent = (e.clientY / window.innerHeight) * 100;
-      document.documentElement.style.setProperty('--cursor-x', `${xPercent}%`);
-      document.documentElement.style.setProperty('--cursor-y', `${yPercent}%`);
-    };
-
-    const handleMagneticMove = (e: MouseEvent) => {
-      const targets = document.querySelectorAll<HTMLElement>('[data-magnetic="true"]');
-      targets.forEach((el) => {
-        const rect = el.getBoundingClientRect();
-        const relX = e.clientX - (rect.left + rect.width / 2);
-        const relY = e.clientY - (rect.top + rect.height / 2);
-        const strength = 0.08;
-        el.style.transform = `translate3d(${relX * strength}px, ${relY * strength}px, 0)`;
+      if (frame) return;
+      frame = requestAnimationFrame(() => {
+        frame = 0;
+        glowRef.current?.style.setProperty('--cursor-x', `${(e.clientX / window.innerWidth) * 100}%`);
+        glowRef.current?.style.setProperty('--cursor-y', `${(e.clientY / window.innerHeight) * 100}%`);
       });
     };
-
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('mousemove', handleMagneticMove);
-
+    window.addEventListener('mousemove', handleMouseMove, { passive: true });
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('mousemove', handleMagneticMove);
+      cancelAnimationFrame(frame);
     };
-  }, []);
+  }, [hasMouse]);
 
   // Animation variants for staggered reveals
   const containerVariants: Variants = {
@@ -88,7 +82,7 @@ const Index = () => {
           description: latestSeason.description,
         }}
       />
-      <div className="cursor-highlight" aria-hidden="true" />
+      {hasMouse && <div ref={glowRef} className="cursor-highlight" aria-hidden="true" />}
       <Navbar />
       <motion.main
         variants={containerVariants}

@@ -35,7 +35,7 @@ export default function Footer() {
 
         {/* Quick Links */}
         <div>
-          <h3 className="text-lg font-display font-semibold mb-6 text-white">Quick Links</h3>
+          <h2 className="text-lg font-display font-semibold mb-6 text-white">Quick Links</h2>
           <ul className="space-y-3">
             <li>
               <Link to="/" className="text-blue-200 hover:text-white transition-colors inline-flex items-center">
@@ -67,7 +67,7 @@ export default function Footer() {
 
         {/* Contact */}
         <div>
-          <h3 className="text-lg font-display font-semibold mb-6 text-white">Contact</h3>
+          <h2 className="text-lg font-display font-semibold mb-6 text-white">Contact</h2>
           <ul className="space-y-4">
             <li className="flex items-start">
               <Mail className="mr-3 shrink-0 mt-1 text-blue-300" size={18} />
@@ -88,7 +88,7 @@ export default function Footer() {
 
         {/* Important Info */}
         <div>
-          <h3 className="text-lg font-display font-semibold mb-6 text-white">TuronMUN</h3>
+          <h2 className="text-lg font-display font-semibold mb-6 text-white">TuronMUN</h2>
           <ul className="space-y-3">
             <li>
               <Link to="/about" className="text-blue-200 hover:text-white transition-colors inline-flex items-center">

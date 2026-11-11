@@ -71,7 +71,6 @@ DropdownItem.displayName = 'DropdownItem';
 const NavbarDesktop: React.FC<NavbarDesktopProps> = ({ scrolled, isHomePage, navLinks }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const [isNavigating, setIsNavigating] = useState(false);
   const { user } = useAuthState();
   const [isChair, setIsChair] = useState(() => {
     // Initialize from cache if available
@@ -114,18 +113,10 @@ const NavbarDesktop: React.FC<NavbarDesktopProps> = ({ scrolled, isHomePage, nav
     checkChairRole();
   }, [user?.email]); // Only re-run when email changes
 
-  // Handle delayed navigation with transition
+  // Go straight away: the old 300ms wait made every menu click feel laggy.
   const handleNavigation = useCallback((path: string) => {
-    if (isNavigating) return; // Prevent multiple clicks
-
-    setIsNavigating(true);
-
-    // Add a small delay before navigation to allow for transition
-    setTimeout(() => {
-      navigate(path);
-      setIsNavigating(false);
-    }, 300); // Increased delay for smoother transition
-  }, [navigate, isNavigating]);
+    navigate(path);
+  }, [navigate]);
 
   const handleDashboardClick = (e: React.MouseEvent) => {
     const role = localStorage.getItem('userRole') || 'delegate';

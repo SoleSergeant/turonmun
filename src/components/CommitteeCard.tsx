@@ -10,6 +10,8 @@ interface CommitteeCardProps {
   imageUrl?: string;
   icon?: LucideIcon;
   chairs?: string[];
+  /** h3 under a section heading (home); h2 when the cards follow the page title directly. */
+  headingLevel?: 'h2' | 'h3';
 }
 
 const FALLBACK = '/images/committees/unga.png';
@@ -26,6 +28,7 @@ export default function CommitteeCard({
   imageUrl = FALLBACK,
   icon: Icon = Globe,
   chairs = [],
+  headingLevel: Heading = 'h3',
 }: CommitteeCardProps) {
   const [src, setSrc] = useState(imageUrl);
 
@@ -52,7 +55,7 @@ export default function CommitteeCard({
 
       <div className="flex flex-1 flex-col p-5">
         <span className="mb-2 self-start rounded-md bg-diplomatic-700 px-2.5 py-1 text-xs font-semibold text-white">{abbreviation}</span>
-        <h3 className="font-display text-lg font-semibold leading-snug text-diplomatic-900">{name}</h3>
+        <Heading className="font-display text-lg font-semibold leading-snug text-diplomatic-900">{name}</Heading>
         {description && <p className="mt-2 line-clamp-3 text-sm text-neutral-600">{description}</p>}
 
         {chairs.length > 0 && (

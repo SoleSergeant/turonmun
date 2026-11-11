@@ -39,7 +39,18 @@ const Hero = () => {
 
   return (
     <section className="relative flex min-h-[88vh] items-center overflow-hidden bg-diplomatic-950 pt-24 pb-12 sm:pt-28 lg:pb-16">
-      <img src="/images/hero.jpg" alt="" aria-hidden className="absolute inset-0 h-full w-full object-cover" />
+      <img
+        src="/images/hero.jpg"
+        srcSet="/images/hero-828.jpg 828w, /images/hero.jpg 1600w"
+        sizes="100vw"
+        width={1600}
+        height={900}
+        fetchPriority="high"
+        decoding="async"
+        alt=""
+        aria-hidden
+        className="absolute inset-0 h-full w-full object-cover"
+      />
       <div className="absolute inset-0 bg-gradient-to-r from-diplomatic-950/95 via-diplomatic-950/85 to-diplomatic-950/60" />
 
       <div className="container relative z-10">

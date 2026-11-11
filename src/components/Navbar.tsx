@@ -81,7 +81,9 @@ export default function Navbar() {
           <button
             onClick={toggleMenu}
             className="p-2 text-white"
-            aria-label="Toggle menu"
+            aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+            aria-expanded={mobileMenuOpen}
+            aria-controls="mobile-menu"
           >
             <div className="flex flex-col justify-center w-6 h-6 space-y-1.5 relative">
               <motion.span

@@ -97,9 +97,9 @@ const Team = () => {
           </div>
 
           {isLoading ? (
-            <div className="text-center py-16 text-neutral-400">Loading…</div>
+            <div className="min-h-[80vh] text-center py-16 text-neutral-500" role="status">Loading…</div>
           ) : members.length === 0 ? (
-            <div className="text-center py-16 text-neutral-400">The team will be introduced here soon.</div>
+            <div className="text-center py-16 text-neutral-500">The team will be introduced here soon.</div>
           ) : (
             <div className="space-y-12 max-w-5xl mx-auto">
               {byTeam(current).map(([t, list]) => (

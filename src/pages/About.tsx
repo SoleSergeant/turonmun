@@ -15,6 +15,7 @@ export default function About() {
     <div className="min-h-screen">
       <Navbar />
 
+      <main>
       <section className="bg-neutral-50 pt-32 pb-16 md:pt-40 md:pb-24">
         <div className="container mx-auto max-w-3xl px-4">
           <h1 className="mb-6 font-display text-4xl font-bold text-diplomatic-900 md:text-5xl">{text.title}</h1>
@@ -33,6 +34,7 @@ export default function About() {
       <AboutSeasons />
       <AboutTimeline />
       <AboutGallery />
+      </main>
 
       <Footer />
     </div>

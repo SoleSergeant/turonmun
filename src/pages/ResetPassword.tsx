@@ -90,6 +90,7 @@ const ResetPassword = () => {
             {error && (
               <motion.div
                 variants={itemVariants}
+                role="alert"
                 className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-start gap-3 mb-6"
               >
                 <AlertCircle className="text-red-600 flex-shrink-0 mt-0.5" size={20} />

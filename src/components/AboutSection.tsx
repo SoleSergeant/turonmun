@@ -9,7 +9,7 @@ export default function AboutSection() {
       <div className="container grid gap-14 lg:grid-cols-2 lg:gap-20">
         <div>
           <h2 className="font-display text-3xl font-bold leading-tight text-diplomatic-900 md:text-4xl">
-            {rich(content.headline, 'text-gold-500')}
+            {rich(content.headline, 'text-gold-600')}
           </h2>
           <div className="mt-6 space-y-4 text-neutral-700 leading-relaxed">
             {content.paragraphs.map((text, i) => <p key={i}>{text}</p>)}

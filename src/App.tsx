@@ -180,7 +180,7 @@ const ScrollToTop = () => {
 
   useEffect(() => {
     // Scroll to top when pathname changes
-    window.scrollTo(0, 0);
+    window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
 
     // GA page-view tracking (gtag injected by Vercel Analytics or external script)
     if (typeof window.gtag === 'function') {

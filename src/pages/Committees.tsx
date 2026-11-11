@@ -71,6 +71,7 @@ const Committees = () => {
                       imageUrl={committee.imageUrl}
                       icon={getIcon(committee.abbreviation)}
                       chairs={committee.chairs}
+                      headingLevel="h2"
                     />
                   </motion.div>
                 );
@@ -82,7 +83,7 @@ const Committees = () => {
               transition={{ duration: 0.3, delay: 0.2 }}
               className="glass-panel p-8 text-center max-w-3xl mx-auto"
             >
-              <h3 className="text-2xl font-display font-semibold mb-4">{text.committees_cta_title}</h3>
+              <h2 className="text-2xl font-display font-semibold mb-4">{text.committees_cta_title}</h2>
               <p className="mb-6 text-neutral-600">
                 {fill(text.committees_cta_text)}
               </p>

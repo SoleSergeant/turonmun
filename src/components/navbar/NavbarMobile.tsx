@@ -58,12 +58,7 @@ const MobileDropdownItem = memo(({
       onClick={handleClick}
     >
       <ChevronRight size={14} className="mr-2 opacity-70" />
-      <div>
-        <div className="text-sm">{item.name}</div>
-        <div className="text-xs opacity-75">
-          {item.name}
-        </div>
-      </div>
+      <span className="text-sm">{item.name}</span>
     </a>
   );
 });
@@ -80,7 +75,6 @@ const NavbarMobile: React.FC<NavbarMobileProps> = ({
   const location = useLocation();
   const navigate = useNavigate();
   const [openDropdowns, setOpenDropdowns] = useState<string[]>([]);
-  const [isNavigating, setIsNavigating] = useState(false);
   const { user } = useAuthState();
   const [isChair, setIsChair] = useState(() => {
     // Initialize from cache if available
@@ -153,19 +147,10 @@ const NavbarMobile: React.FC<NavbarMobileProps> = ({
 
   // Handle delayed navigation with transition
   const handleNavigation = useCallback((path: string) => {
-    if (isNavigating) return; // Prevent multiple clicks
 
-    setIsNavigating(true);
-
-    // Close the mobile menu
     toggleMenu();
-
-    // Add a small delay before navigation to allow for transition
-    setTimeout(() => {
-      navigate(path);
-      setIsNavigating(false);
-    }, 300); // Increased delay for smoother transition
-  }, [navigate, isNavigating, toggleMenu]);
+    navigate(path);
+  }, [navigate, toggleMenu]);
 
   return (
     <AnimatePresence>
@@ -175,8 +160,9 @@ const NavbarMobile: React.FC<NavbarMobileProps> = ({
           animate={{ opacity: 1, height: 'auto' }}
           exit={{ opacity: 0, height: 0 }}
           transition={{ duration: 0.2 }}
+          id="mobile-menu"
           className={cn(
-            "md:hidden absolute top-16 left-0 right-0 overflow-hidden z-50",
+            "xl:hidden absolute top-full left-0 right-0 overflow-y-auto overscroll-contain max-h-[calc(100dvh-4rem)] z-50",
             scrolled
               ? 'bg-diplomatic-900 shadow-elegant border-t border-diplomatic-800'
               : isHomePage
@@ -290,6 +276,13 @@ const NavbarMobile: React.FC<NavbarMobileProps> = ({
                   >
                     <LogIn size={18} />
                     <span>Login</span>
+                  </Link>
+                  <Link
+                    to="/signup"
+                    className="mt-3 bg-gold-400 hover:bg-gold-300 text-diplomatic-900 font-semibold py-3 px-4 rounded-md transition-colors w-full flex justify-center items-center"
+                    onClick={toggleMenu}
+                  >
+                    Sign up
                   </Link>
                 </motion.div>
               )}

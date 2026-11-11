@@ -191,7 +191,7 @@ const RegistrationSelection = () => {
                   href={general.telegram_url}
                   target="_blank"
                   rel="noreferrer"
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#0088cc] hover:bg-[#0077b5] text-white font-semibold transition-colors"
+                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#0077b5] hover:bg-[#006699] text-white font-semibold transition-colors"
                 >
                   <Send className="w-4 h-4" />
                   Follow us on Telegram
