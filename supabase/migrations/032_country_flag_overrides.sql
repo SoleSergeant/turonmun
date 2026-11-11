@@ -15,7 +15,7 @@ CREATE INDEX IF NOT EXISTS idx_flag_overrides_updated_at
 
 -- updated_at trigger
 CREATE OR REPLACE FUNCTION public.country_flag_overrides_touch()
-RETURNS TRIGGER LANGUAGE plpgsql AS $$
+RETURNS TRIGGER LANGUAGE plpgsql SET search_path = public AS $$
 BEGIN
   NEW.updated_at = now();
   RETURN NEW;
@@ -31,6 +31,7 @@ ALTER TABLE public.country_flag_overrides ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "Anyone can read flag overrides"    ON public.country_flag_overrides;
 DROP POLICY IF EXISTS "SG or Academics can write flags"   ON public.country_flag_overrides;
+DROP POLICY IF EXISTS "SG or Academics can update flags"  ON public.country_flag_overrides;
 DROP POLICY IF EXISTS "SG or Academics can delete flags"  ON public.country_flag_overrides;
 
 -- Public read — flag images are not sensitive and the matrix is public.

@@ -6,6 +6,7 @@ import { useContent } from '@/content/store';
 import DebateLayout, { inputCls, primaryButton, focusRing, headingCls } from './DebateLayout';
 import { useDebatePath } from './paths';
 
+import { safeNext } from '@/lib/safeUrl';
 type Mode = 'signin' | 'signup' | 'reset';
 
 /** Sign in / create account for Turon Debate (same accounts as the MUN site). */
@@ -14,7 +15,7 @@ export default function DebateLogin() {
   const navigate = useNavigate();
   const [params] = useSearchParams();
   const path = useDebatePath();
-  const redirect = params.get('redirect') || path('/register');
+  const redirect = safeNext(params.get('redirect'), path('/register'));
   const { user, login, signup, signInWithGoogle, resetPassword } = useAuth();
 
   const [mode, setMode] = useState<Mode>(params.get('mode') === 'signup' ? 'signup' : 'signin');

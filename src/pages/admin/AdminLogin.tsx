@@ -24,7 +24,8 @@ const AdminLogin = () => {
         const { data: adminData, error: adminError } = await supabase
           .from('admin_users')
           .select('*')
-          .eq('id', session.user.id)
+          .eq('email', (session.user.email || '').toLowerCase())
+          .eq('is_active', true)
           .single();
 
         if (!adminError && adminData) {
@@ -83,7 +84,8 @@ const AdminLogin = () => {
         const { data: adminData, error: adminError } = await supabase
           .from('admin_users')
           .select('*')
-          .eq('id', data.user.id)
+          .eq('email', (data.user.email || '').toLowerCase())
+          .eq('is_active', true)
           .single();
 
         if (adminError || !adminData) {

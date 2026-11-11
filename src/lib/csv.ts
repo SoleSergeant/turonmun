@@ -1,6 +1,16 @@
 type Cell = string | number | boolean | null | undefined;
 
-const escapeCell = (value: Cell) => `"${(value ?? '').toString().replace(/"/g, '""')}"`;
+/**
+ * Applicant-typed text that Excel would run as a formula (=, @, or +/- followed
+ * by anything but a number or phone) gets a leading apostrophe.
+ */
+const neutralise = (text: string) =>
+  /^[=@\t\r]/.test(text) || (/^[+-]/.test(text) && !/^[+-][\d\s().,-]*$/.test(text)) ? `'${text}` : text;
+
+const escapeCell = (value: Cell) => {
+  const text = (value ?? '').toString();
+  return `"${(typeof value === 'string' ? neutralise(text) : text).replace(/"/g, '""')}"`;
+};
 
 /** RFC 4180 CSV: every cell quoted, quotes doubled. */
 export const toCsv = (rows: Cell[][]) => rows.map(r => r.map(escapeCell).join(',')).join('\r\n');

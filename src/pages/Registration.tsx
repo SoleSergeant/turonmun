@@ -10,6 +10,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useFormSettings } from '@/hooks/useFormSettings';
 import { useFormAutosave } from '@/hooks/useFormAutosave';
 import { AlertCircle, Clock, Save } from 'lucide-react';
+import { getCurrentSeason, inSeason } from '@/lib/season';
 
 const Registration = () => {
   const { toast } = useToast();
@@ -126,10 +127,12 @@ const Registration = () => {
 
     // Check if user already submitted an application
     const checkExisting = async () => {
-      const { data } = await supabase
+      // This season only: last season's application must not block a new one.
+      const season = await getCurrentSeason();
+      const { data } = await inSeason(supabase
         .from('applications')
         .select('id')
-        .eq('user_id', user.id)
+        .eq('user_id', user.id), season)
         .limit(1);
 
       if (data && data.length > 0) {

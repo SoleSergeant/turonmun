@@ -12,6 +12,7 @@ import { useFormAutosave } from '@/hooks/useFormAutosave';
 import DynamicFormStep from '@/components/registration/DynamicFormStep';
 import type { FormQuestion } from '@/hooks/useFormSettings';
 import { useContent, useFill, rich } from '@/content/store';
+import { getCurrentSeason, inSeason } from '@/lib/season';
 
 const TOTAL_STEPS = 3;
 const STEP_SUBTITLES: Record<number, string> = {
@@ -57,10 +58,11 @@ export default function VolunteerApplication() {
       ...prev,
       fullName: prev.fullName || user.user_metadata?.full_name || user.user_metadata?.name || '',
     }));
-    supabase.from('volunteer_applications')
+    // This season only: last season's application must not block a new one.
+    getCurrentSeason().then(season => inSeason(supabase.from('volunteer_applications')
       .select('id')
-      .eq('user_id', user.id)
-      .limit(1)
+      .eq('user_id', user.id), season)
+      .limit(1))
       .then(({ data }: { data: any[] | null }) => {
         if (data && data.length > 0) setAlreadyApplied(true);
       });

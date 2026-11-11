@@ -27,7 +27,8 @@ export default function ChairRoute({ children }: ChairRouteProps) {
         const { data: adminUser, error } = await supabase
           .from('admin_users')
           .select('role')
-          .eq('email', user.email)
+          .eq('email', (user.email || '').toLowerCase())
+          .eq('is_active', true)
           .single();
 
         if (error || !adminUser) {

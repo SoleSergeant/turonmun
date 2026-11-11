@@ -63,8 +63,8 @@ Deno.serve(async (req) => {
   } catch {
     return json({ error: 'Invalid JSON' }, 400);
   }
-  const all = body.messages || [];
-  const messages = all.filter(m => isEmail(m?.to) && m.subject && m.html);
+  const all = Array.isArray(body.messages) ? body.messages : [];
+  const messages = all.filter(m => isEmail(m?.to) && typeof m.subject === 'string' && m.subject && typeof m.html === 'string' && m.html);
   // Reported back so the panel only marks people who were actually emailed.
   const skipped = all.filter(m => !messages.includes(m)).map(m => m?.to ?? '');
   if (messages.length === 0) return json({ error: 'No valid email addresses', skipped }, 400);
@@ -88,7 +88,7 @@ Deno.serve(async (req) => {
     return json({ error: result?.message || `Resend error ${res.status}` }, 502);
   }
 
-  const kind = body.kind || 'custom';
+  const kind = typeof body.kind === 'string' && body.kind ? body.kind : 'custom';
   await service.from('activity_log').insert({
     actor_email: user.email,
     actor_name: admin.full_name,

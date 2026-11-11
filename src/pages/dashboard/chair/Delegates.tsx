@@ -4,6 +4,7 @@ import { Users, Globe, Flag, Search, Download, FileText, X } from 'lucide-react'
 import { useOutletContext } from 'react-router-dom';
 import { downloadCsv, datedFilename } from '@/lib/csv';
 
+import { safeHref } from '@/lib/safeUrl';
 interface DelegatesProps {
   committees: any[];
   applications: any[];
@@ -249,9 +250,9 @@ export default function ChairDelegates() {
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  {viewingPaper.file_url && (
+                  {safeHref(viewingPaper.file_url) && (
                     <a
-                      href={viewingPaper.file_url}
+                      href={safeHref(viewingPaper.file_url)}
                       target="_blank"
                       rel="noreferrer"
                       className="px-3 py-1.5 bg-gold-400/20 text-gold-400 rounded-lg text-xs font-bold hover:bg-gold-400/30 transition-colors"

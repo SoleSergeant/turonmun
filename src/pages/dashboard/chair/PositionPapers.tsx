@@ -20,6 +20,7 @@ import { useOutletContext } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
+import { safeHref } from '@/lib/safeUrl';
 interface PositionPapersProps {
   committees: any[];
   applications: any[];
@@ -79,8 +80,9 @@ export default function ChairPositionPapers() {
 
   const handleDownload = (paper: any) => {
     // Papers are uploaded files (PDF/DOC) — open the file directly.
-    if (paper.file_url) {
-      window.open(paper.file_url, '_blank', 'noopener,noreferrer');
+    const fileUrl = safeHref(paper.file_url);
+    if (fileUrl) {
+      window.open(fileUrl, '_blank', 'noopener,noreferrer');
       return;
     }
     // Fallback for any legacy text-only papers
@@ -275,9 +277,9 @@ export default function ChairPositionPapers() {
                     )}
                   </div>
 
-                  {paper.file_url ? (
+                  {safeHref(paper.file_url) ? (
                     <a
-                      href={paper.file_url}
+                      href={safeHref(paper.file_url)}
                       target="_blank"
                       rel="noreferrer"
                       onClick={(e) => e.stopPropagation()}
@@ -371,9 +373,9 @@ export default function ChairPositionPapers() {
                       {selectedPaper.status}
                     </span>
                   </div>
-                  {selectedPaper.file_url ? (
+                  {safeHref(selectedPaper.file_url) ? (
                     <a
-                      href={selectedPaper.file_url}
+                      href={safeHref(selectedPaper.file_url)}
                       target="_blank"
                       rel="noreferrer"
                       className="inline-flex items-center gap-2 px-4 py-2 bg-gold-500/20 text-gold-300 rounded-lg text-sm font-medium hover:bg-gold-500/30 transition-colors"

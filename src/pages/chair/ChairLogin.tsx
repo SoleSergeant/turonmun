@@ -22,7 +22,8 @@ const ChairLogin = () => {
                 const { data: adminData, error } = await supabase
                     .from('admin_users')
                     .select('role')
-                    .eq('email', session.user.email)
+                    .eq('email', (session.user.email || '').toLowerCase())
+                    .eq('is_active', true)
                     .single();
 
                 // Roles that are allowed to access the chair dashboard
@@ -63,7 +64,8 @@ const ChairLogin = () => {
                 const { data: adminData, error: adminError } = await supabase
                     .from('admin_users')
                     .select('role')
-                    .eq('id', data.user.id)
+                    .eq('email', (data.user.email || '').toLowerCase())
+                    .eq('is_active', true)
                     .single();
 
                 // Roles that are allowed to access the chair dashboard (case-insensitive check)
@@ -71,7 +73,6 @@ const ChairLogin = () => {
                 const userRole = (adminData as any)?.role?.toLowerCase();
 
                 if (adminError || !userRole || !allowedRoles.includes(userRole)) {
-                    console.error('Access Denied details:', { adminError, role: userRole, email: data.user.email });
                     await supabase.auth.signOut();
                     toast({
                         title: 'Access Denied',

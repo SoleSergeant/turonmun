@@ -55,7 +55,8 @@ export const useContactForm = () => {
       }
 
       // Submit to Supabase
-      const { data, error } = await supabase
+      // No .select(): visitors may insert but not read, so asking for the row back is refused.
+      const { error } = await supabase
         .from('contact_messages')
         .insert({
           full_name: formData.fullName,
@@ -64,8 +65,7 @@ export const useContactForm = () => {
           subject: formData.subject,
           message: formData.message,
           is_read: false
-        })
-        .select();
+        });
 
       if (error) {
         console.error('Contact form error:', error);
@@ -77,8 +77,6 @@ export const useContactForm = () => {
         return;
       }
 
-      console.log('Contact message sent successfully:', data);
-      
       toast({
         title: "Message Sent!",
         description: "Thank you for your message. We'll get back to you soon!",

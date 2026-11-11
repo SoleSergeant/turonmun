@@ -10,12 +10,13 @@ import { useAuth } from '../hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { useContent, useFill, rich } from '@/content/store';
 
+import { safeNext } from '@/lib/safeUrl';
 const Signup = () => {
   const regText = useContent('registration');
   const fill = useFill();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const redirectTo = searchParams.get('redirect') || '/dashboard';
+  const redirectTo = safeNext(searchParams.get('redirect'), '/dashboard');
   const { signup, signInWithGoogle, isLoading, error, setError } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -55,9 +56,9 @@ const Signup = () => {
       return;
     }
 
-    if (formData.password.length < 6) {
+    if (formData.password.length < 8) {
       setError({
-        message: 'Password must be at least 6 characters long',
+        message: 'Password must be at least 8 characters long',
       });
       return;
     }

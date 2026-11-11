@@ -1,5 +1,6 @@
 import React from 'react';
 import { isChairApplication } from '@/lib/applications';
+import { safeHref } from '@/lib/safeUrl';
 import {
   X,
   Mail,
@@ -352,10 +353,13 @@ const ApplicationManagementModal: React.FC<ApplicationManagementModalProps> = ({
 
                   {application.portfolio_link && (
                     <DetailRow icon={ExternalLink} label="Portfolio" value={
-                      <a href={application.portfolio_link} target="_blank" rel="noopener noreferrer"
-                        className="text-blue-600 hover:underline flex items-center gap-1">
-                        View Profile <ExternalLink size={12} />
-                      </a>
+                      // Applicant-typed: only http(s) becomes a link, anything else is shown as text.
+                      safeHref(application.portfolio_link) ? (
+                        <a href={safeHref(application.portfolio_link)} target="_blank" rel="noopener noreferrer"
+                          className="text-blue-600 hover:underline flex items-center gap-1">
+                          View Profile <ExternalLink size={12} />
+                        </a>
+                      ) : application.portfolio_link
                     } color="text-blue-400" />
                   )}
                 </div>

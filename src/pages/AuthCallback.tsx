@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 
+import { safeNext } from '@/lib/safeUrl';
 const AuthCallback = () => {
   const navigate = useNavigate();
 
@@ -36,7 +37,7 @@ const AuthCallback = () => {
 
           // Get the next redirect path
           const url = new URL(window.location.href);
-          const next = url.searchParams.get('next');
+          const next = safeNext(url.searchParams.get('next'), '');
 
           // Subdomain-aware redirection
           const hostname = window.location.hostname;

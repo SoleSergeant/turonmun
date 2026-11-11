@@ -13,6 +13,7 @@ import { useCommittees } from '@/hooks/useCommittees';
 import DynamicFormStep from '@/components/registration/DynamicFormStep';
 import type { FormQuestion } from '@/hooks/useFormSettings';
 import { useContent, useFill, rich } from '@/content/store';
+import { getCurrentSeason, inSeason } from '@/lib/season';
 
 // ── Fallback constants (used when DB form_questions are empty) ──────────────
 const ROLES = ['Chair', 'Co-Chair'];
@@ -69,10 +70,11 @@ export default function ChairApplication() {
       email: user.email ?? '',
       fullName: user.user_metadata?.full_name ?? user.user_metadata?.name ?? '',
     }));
-    supabase.from('applications')
+    // This season only: last season's application must not block a new one.
+    getCurrentSeason().then(season => inSeason(supabase.from('applications')
       .select('id, application_type')
-      .eq('user_id', user.id)
-      .limit(20)
+      .eq('user_id', user.id), season)
+      .limit(20))
       .then(({ data }: { data: any[] | null }) => {
         if (data?.some((a: any) => a.application_type === 'chair')) {
           setAlreadyApplied(true);

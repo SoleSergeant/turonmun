@@ -45,8 +45,8 @@ const ResetPasswordChange = () => {
       return;
     }
 
-    if (formData.password.length < 6) {
-      setError({ message: 'Password must be at least 6 characters long' });
+    if (formData.password.length < 8) {
+      setError({ message: 'Password must be at least 8 characters long' });
       return;
     }
 
@@ -182,7 +182,7 @@ const ResetPasswordChange = () => {
                     </button>
                   </div>
                   <p className="text-xs text-neutral-500 mt-2">
-                    Minimum 6 characters
+                    Minimum 8 characters
                   </p>
                 </div>
 
@@ -219,7 +219,7 @@ const ResetPasswordChange = () => {
                 <div className="p-4 bg-diplomatic-50 border border-diplomatic-200 rounded-lg">
                   <p className="text-sm text-diplomatic-700 font-medium mb-2">Password Requirements:</p>
                   <ul className="text-xs text-diplomatic-600 space-y-1">
-                    <li>✓ At least 6 characters</li>
+                    <li>✓ At least 8 characters</li>
                     <li>✓ Mix of uppercase and lowercase letters</li>
                     <li>✓ Include numbers and special characters for better security</li>
                   </ul>

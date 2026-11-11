@@ -10,10 +10,11 @@ export const JsonLd: React.FC<JsonLdProps> = ({ type = 'application/ld+json', da
     <script
       type={type}
       dangerouslySetInnerHTML={{
+        // "<" escaped so text containing </script> cannot close the tag.
         __html: JSON.stringify({
           '@context': 'https://schema.org',
           ...data,
-        }),
+        }).replace(/</g, '\\u003c'),
       }}
     />
   );

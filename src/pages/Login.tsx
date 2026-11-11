@@ -8,10 +8,11 @@ import { CustomButton } from '../components/ui/custom-button';
 import { Checkbox } from '../components/ui/checkbox';
 import { useAuth } from '../hooks/useAuth';
 
+import { safeNext } from '@/lib/safeUrl';
 const Login = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const redirectTo = searchParams.get('redirect') || '/';
+  const redirectTo = safeNext(searchParams.get('redirect'), '/');
   const { login, signInWithGoogle, isLoading, error, setError } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
