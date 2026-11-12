@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import AdminLayout from '@/components/admin/AdminLayout';
+import PastSeasonAwards from '@/components/admin/PastSeasonAwards';
 import { supabase } from '@/integrations/supabase/client';
 import { downloadCsv, datedFilename } from '@/lib/csv';
 import { useToast } from '@/hooks/use-toast';
@@ -174,6 +175,8 @@ const AdminAwards = () => {
             ))}
           </div>
         )}
+
+        <PastSeasonAwards />
       </div>
     </AdminLayout>
   );

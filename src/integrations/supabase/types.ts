@@ -1121,6 +1121,57 @@ export type Database = {
         }
         Relationships: []
       }
+      participations: {
+        Row: {
+          attended: boolean | null
+          award: string | null
+          certificate_code: string
+          committee: string | null
+          country: string | null
+          created_at: string
+          email: string
+          event: string
+          full_name: string
+          id: string
+          role: string
+          season: number | null
+          source: string
+          user_id: string | null
+        }
+        Insert: {
+          attended?: boolean | null
+          award?: string | null
+          certificate_code?: string
+          committee?: string | null
+          country?: string | null
+          created_at?: string
+          email: string
+          event: string
+          full_name: string
+          id?: string
+          role: string
+          season?: number | null
+          source?: string
+          user_id?: string | null
+        }
+        Update: {
+          attended?: boolean | null
+          award?: string | null
+          certificate_code?: string
+          committee?: string | null
+          country?: string | null
+          created_at?: string
+          email?: string
+          event?: string
+          full_name?: string
+          id?: string
+          role?: string
+          season?: number | null
+          source?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       position_papers: {
         Row: {
           application_id: string | null
@@ -1802,6 +1853,15 @@ export type Database = {
       set_check_in: {
         Args: { p_checked: boolean; p_id: string; p_kind: string }
         Returns: string
+      }
+      set_past_award: {
+        Args: {
+          p_award: string
+          p_committee: string
+          p_participation: string | null
+          p_season: number
+        }
+        Returns: undefined
       }
       start_new_season: {
         Args: { p_name?: string; p_number: number }

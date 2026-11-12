@@ -9,7 +9,8 @@ import {
   LogOut,
   Radio,
   Settings,
-  MessageSquare
+  MessageSquare,
+  History
 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useContent, useFill, rich } from '@/content/store';
@@ -24,6 +25,7 @@ const navigationItems = [
   { name: 'My Committee', href: '/dashboard/committee', icon: Users },
   { name: 'Live Session', href: '/dashboard/live', icon: Radio },
   { name: 'Messages', href: '/dashboard/messages', icon: MessageSquare },
+  { name: 'My History', href: '/dashboard/history', icon: History },
   { name: 'Settings', href: '/dashboard/settings', icon: Settings },
 ];
 

@@ -15,6 +15,7 @@ import { useAdminRole } from '@/hooks/useAdminRole';
 import { getCurrentSeason, inSeason } from '@/lib/season';
 import { downloadCsv, datedFilename } from '@/lib/csv';
 import { sendEmails, templates, partialResult, wasDelivered, type SendResult } from '@/lib/email';
+import { describe, type Participation } from '@/lib/participations';
 
 /**
  * Delegates: the whole delegate pipeline on one page, from application to
@@ -75,6 +76,18 @@ const Delegates = () => {
   const [emailTo, setEmailTo] = useState<Row[] | null>(null);
   const [exportOpen, setExportOpen] = useState(false);
   const loadedRef = useRef(false);
+  const [history, setHistory] = useState<Record<string, Participation[]>>({});
+
+  // Past TuronMUN events per email, for the "returning" badge. Changes only at
+  // season rollover, so it is loaded once rather than on every realtime refresh.
+  useEffect(() => {
+    supabase.from('participations').select('*').order('season', { ascending: false, nullsFirst: false })
+      .then(({ data }) => {
+        const map: Record<string, Participation[]> = {};
+        for (const p of data ?? []) (map[p.email] ??= []).push(p);
+        setHistory(map);
+      });
+  }, []);
 
   // ── Data ────────────────────────────────────────────────────────────
   const load = useCallback(async () => {
@@ -391,6 +404,19 @@ const Delegates = () => {
                               <span className="block text-xs text-gray-500">{r.email}</span>
                               <span className="block text-xs text-gray-500">{r.institution}</span>
                             </button>
+                            {(() => {
+                              const past = history[String(r.email ?? '').toLowerCase()];
+                              if (!past?.length) return null;
+                              const awards = past.filter(p => p.award).length;
+                              return (
+                                <span
+                                  className="mt-1 inline-block rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-medium text-indigo-700"
+                                  title={past.map(describe).join('\n')}
+                                >
+                                  Returning · {past.length} past {past.length === 1 ? 'event' : 'events'}{awards ? ` · ${awards} award${awards === 1 ? '' : 's'}` : ''}
+                                </span>
+                              );
+                            })()}
                             <div className="mt-1 flex flex-wrap items-center gap-1.5">
                               {r.telegram_username && (
                                 <a href={`https://t.me/${String(r.telegram_username).replace('@', '')}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-sky-700 hover:underline">
@@ -466,11 +492,21 @@ const Delegates = () => {
           onUpdateStatus={(id, status) => setStatus([id], status)}
           onDelete={canDelete ? remove : undefined}
           adminPanel={
-            <DelegateAdminPanel
-              app={open}
-              seat={seats[open.id] ? { committee: seats[open.id].committee, country: seats[open.id].country } : null}
-              onChange={fields => patch([open.id], fields)}
-            />
+            <>
+              {history[String(open.email ?? '').toLowerCase()]?.length > 0 && (
+                <div className="mb-4 rounded-lg border border-indigo-100 bg-indigo-50/60 p-3">
+                  <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-indigo-700">Past TuronMUN events</p>
+                  <ul className="space-y-1 text-sm text-gray-800">
+                    {history[String(open.email).toLowerCase()].map(p => <li key={p.id}>{describe(p)}</li>)}
+                  </ul>
+                </div>
+              )}
+              <DelegateAdminPanel
+                app={open}
+                seat={seats[open.id] ? { committee: seats[open.id].committee, country: seats[open.id].country } : null}
+                onChange={fields => patch([open.id], fields)}
+              />
+            </>
           }
         />
       )}

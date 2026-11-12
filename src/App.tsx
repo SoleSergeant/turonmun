@@ -83,6 +83,7 @@ const MyCommittee = lazy(() => import("./pages/dashboard/MyCommittee"));
 const DashboardMessages = lazy(() => import("./pages/dashboard/Messages"));
 const DashboardSettings = lazy(() => import("./pages/dashboard/Settings"));
 const LiveSession = lazy(() => import("./pages/dashboard/LiveSession"));
+const MyHistory = lazy(() => import("./pages/dashboard/MyHistory"));
 
 // Chair dashboard
 // Turon Debate (debat.turonmun.com)
@@ -331,6 +332,7 @@ const App = () => {
           <Route path="committee" element={<MyCommittee />} />
           <Route path="live" element={<LiveSession />} />
           <Route path="messages" element={<DashboardMessages />} />
+          <Route path="history" element={<MyHistory />} />
           <Route path="settings" element={<DashboardSettings />} />
         </Route>
 
