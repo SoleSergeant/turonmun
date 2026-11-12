@@ -1854,6 +1854,10 @@ export type Database = {
         Args: { p_checked: boolean; p_id: string; p_kind: string }
         Returns: string
       }
+      record_debate_history: {
+        Args: { p_awards?: Json; p_event: string }
+        Returns: number
+      }
       set_past_award: {
         Args: {
           p_award: string

@@ -13,7 +13,7 @@ export default function MyHistory() {
   useEffect(() => {
     if (!user?.id) return;
     supabase.from('participations').select('*').eq('user_id', user.id)
-      .order('season', { ascending: false, nullsFirst: false })
+      // Rows are saved when each event ends, so this is newest event first (debates have no season).
       .order('created_at', { ascending: false })
       .then(({ data, error }) => {
         if (error) setError(error.message);

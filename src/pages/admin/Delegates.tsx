@@ -81,7 +81,7 @@ const Delegates = () => {
   // Past TuronMUN events per email, for the "returning" badge. Changes only at
   // season rollover, so it is loaded once rather than on every realtime refresh.
   useEffect(() => {
-    supabase.from('participations').select('*').order('season', { ascending: false, nullsFirst: false })
+    supabase.from('participations').select('*').order('created_at', { ascending: false })
       .then(({ data }) => {
         const map: Record<string, Participation[]> = {};
         for (const p of data ?? []) (map[p.email] ??= []).push(p);

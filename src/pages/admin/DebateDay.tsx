@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Trash2, Shuffle, Loader2, Users, Swords, Trophy, Gavel, Timer } from 'lucide-react';
+import { Plus, Trash2, Shuffle, Loader2, Users, Swords, Trophy, Gavel, Timer, History } from 'lucide-react';
+import { historyAwards } from '@/lib/debateHistory';
 import AdminLayout from '@/components/admin/AdminLayout';
 import DebateResults from '@/components/admin/DebateResults';
 import DebateRunSheet from '@/components/admin/DebateRunSheet';
@@ -11,6 +12,7 @@ import { useContent } from '@/content/store';
 import { adminPath } from '@/lib/adminPath';
 import {
   type EventData, type Debater, loadEvent, generatePairings, splitIntoTeams, nextSlot, seatLabel, TEAM_TONES,
+  teamRankings, pairResults,
 } from '@/lib/debateEvent';
 
 type Tab = 'teams' | 'pairings' | 'rounds' | 'results';
@@ -42,6 +44,26 @@ export default function DebateDay() {
   }, [tab, load]);
 
   const fail = (title: string, error: any) => toast({ title, description: error?.message, variant: 'destructive' });
+
+  // ── Participation history ───────────────────────────────────────────
+  // Month in the name keeps two editions apart (rows are unique per event name).
+  const defaultHistoryEvent = `${debate.name || 'Turon Debate'} · ${new Date().toLocaleString('en-GB', { month: 'long', year: 'numeric' })}`;
+  const [historyEvent, setHistoryEvent] = useState<string | null>(null);
+  const saveHistory = async () => {
+    if (!data) return;
+    const event = (historyEvent ?? defaultHistoryEvent).trim();
+    if (!event) return;
+    const awards = historyAwards(teamRankings(data, debate.judging_criteria), pairResults(data), data.roster);
+    if (!(await confirmAction(
+      `Save ${data.roster.length} debaters and the judges to participation history as "${event}"? ${Object.keys(awards).length} will get an award.`,
+      { title: 'Save to history', confirmLabel: 'Save' },
+    ))) return;
+    setBusy(true);
+    const { data: n, error } = await supabase.rpc('record_debate_history', { p_event: event, p_awards: awards });
+    setBusy(false);
+    if (error) return fail('Could not save history', error);
+    toast({ title: 'Saved to history', description: `${n} people now have "${event}" in My History.` });
+  };
 
   // ── Teams ───────────────────────────────────────────────────────────
   const addTeam = async () => {
@@ -310,7 +332,31 @@ export default function DebateDay() {
 
             {tab === 'rounds' && <DebateRunSheet data={data} onGeneratePairings={generate} generating={busy} />}
 
-            {tab === 'results' && <DebateResults data={data} criteria={debate.judging_criteria} />}
+            {tab === 'results' && (
+              <div className="space-y-6">
+                <DebateResults data={data} criteria={debate.judging_criteria} />
+                <section className="rounded-xl border bg-white p-5 shadow-sm">
+                  <h3 className="font-semibold text-gray-900">Save to participation history</h3>
+                  <p className="mt-1 text-sm text-gray-600">
+                    After the event: adds every accepted debater (with team, "Winning team" and one-on-one wins) and every judge to their My History.
+                    Saving again updates the same event.
+                  </p>
+                  <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+                    <label className="sr-only" htmlFor="history-event">Event name</label>
+                    <input
+                      id="history-event"
+                      value={historyEvent ?? defaultHistoryEvent}
+                      onChange={e => setHistoryEvent(e.target.value)}
+                      className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm"
+                    />
+                    <button onClick={saveHistory} disabled={busy || !data.roster.length}
+                      className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-debate-blue px-4 py-2 text-sm font-medium text-white hover:bg-debate-blue-700 disabled:opacity-50">
+                      <History className="h-4 w-4" /> Save to history
+                    </button>
+                  </div>
+                </section>
+              </div>
+            )}
           </>
         )}
       </div>
