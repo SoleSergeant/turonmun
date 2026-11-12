@@ -307,6 +307,14 @@ const seo = {
   share_image: 'https://www.turonmun.com/og-image.png?v=2',
 };
 
+const certificates = {
+  background_url: '',
+  debate_background_url: '',
+  signer_name: '',
+  signer_title: 'Secretary-General',
+  signature_url: '',
+};
+
 const extras = {
   secret_title: 'If you found this, just know…',
   secret_lines: [
@@ -603,6 +611,18 @@ export const SECTIONS = {
       { key: 'default_description', label: 'Default description', type: 'textarea' },
       { key: 'keywords', label: 'Keywords', type: 'text' },
       { key: 'share_image', label: 'Share image', type: 'image' },
+    ],
+  },
+  certificates: {
+    key: 'certificates', group: 'Site', title: 'Certificates',
+    description: 'Design of the certificates delegates download from My History (only for people marked attended).',
+    defaults: certificates,
+    fields: [
+      { key: 'background_url', label: 'Certificate background', type: 'image', hint: 'A4 landscape image (e.g. 3508 × 2480) with your border, logos and seals, and the middle left empty for the text. Leave empty for the built-in design.' },
+      { key: 'debate_background_url', label: 'Turon Debate background', type: 'image', hint: 'Same, for debaters and judges. Leave empty for the built-in debate design.' },
+      { key: 'signer_name', label: 'Signed by (name)', type: 'text' },
+      { key: 'signer_title', label: 'Signed by (title)', type: 'text' },
+      { key: 'signature_url', label: 'Signature image', type: 'image', hint: 'Transparent PNG of the signature. Optional.' },
     ],
   },
   extras: {

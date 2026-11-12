@@ -567,6 +567,7 @@ const FormSettingsPage = () => {
           fee_amount: Number(draft.fee_amount),
           ielts_discount: Number(draft.ielts_discount),
           sat_discount: Number(draft.sat_discount),
+          returning_discount: Number(draft.returning_discount) || 0,
           step_labels: draft.step_labels,
           form_questions: (draft.form_questions ?? []) as unknown as Json,
         })
@@ -721,7 +722,7 @@ const FormSettingsPage = () => {
                 <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
                   <DollarSign size={16} className="text-emerald-600" /> Fee Configuration
                 </h3>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-5">
                   <div>
                     <label className={labelCls}>Base Fee (UZS)</label>
                     <input type="number" min="0" className={inputCls}
@@ -739,6 +740,13 @@ const FormSettingsPage = () => {
                     <input type="number" min="0" className={inputCls}
                       value={draft.sat_discount}
                       onChange={e => set('sat_discount', Number(e.target.value))} />
+                  </div>
+                  <div>
+                    <label className={labelCls}>Returning Delegate Discount (UZS)</label>
+                    <input type="number" min="0" className={inputCls}
+                      value={draft.returning_discount ?? 0}
+                      onChange={e => set('returning_discount', Number(e.target.value))} />
+                    <p className="mt-1 text-[11px] text-gray-400">For accounts that were a delegate in an earlier season. Checked automatically.</p>
                   </div>
                 </div>
 

@@ -33,6 +33,7 @@ import {
   Swords,
   Gavel,
   UsersRound,
+  ScrollText,
   LucideIcon,
 } from 'lucide-react';
 
@@ -75,6 +76,7 @@ const NAV: { group: string; items: NavItem[] }[] = [
       { path: '/schedule', label: 'Schedule', icon: Calendar, roles: ACADEMIC },
       { path: '/resources', label: 'Resources', icon: FileText, roles: ACADEMIC },
       { path: '/awards', label: 'Awards', icon: Award, roles: ACADEMIC },
+      { path: '/certificates', label: 'Certificates', icon: ScrollText, roles: ACADEMIC },
       { path: '/check-in', label: 'Check-in', icon: QrCode, roles: ['sg', 'academics', 'logistics', 'registration'] },
     ],
   },

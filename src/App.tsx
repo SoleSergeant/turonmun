@@ -49,6 +49,7 @@ const VolunteerApplication = lazy(() => import("./pages/VolunteerApplication"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 const Awards = lazy(() => import("./pages/Awards"));
 const Team = lazy(() => import("./pages/Team"));
+const Verify = lazy(() => import("./pages/Verify"));
 
 // Admin pages — only ever loaded for the admin subdomain
 const AdminLogin = lazy(() => import("./pages/admin/AdminLogin"));
@@ -66,6 +67,7 @@ const ChairManagement = lazy(() => import("./pages/admin/ChairManagement"));
 const AdminVolunteers = lazy(() => import("./pages/admin/AdminVolunteers"));
 const AdminAnalytics = lazy(() => import("./pages/admin/Analytics"));
 const AdminAwards = lazy(() => import("./pages/admin/AdminAwards"));
+const AdminCertificates = lazy(() => import("./pages/admin/Certificates"));
 const SiteContent = lazy(() => import("./pages/admin/SiteContent"));
 const AdminTeam = lazy(() => import("./pages/admin/AdminTeam"));
 const DebateRegistrations = lazy(() => import("./pages/admin/DebateRegistrations"));
@@ -151,7 +153,7 @@ const PAGE_TITLES: Record<string, string> = {
   '/register/chair': 'Chair application', '/register/volunteer': 'Volunteer application',
   '/login': 'Sign in', '/signup': 'Create an account', '/reset-password': 'Reset password',
   '/schedule': 'Schedule', '/resources': 'Resources', '/contact': 'Contact',
-  '/past-conferences': 'Past Conferences', '/awards': 'Awards',
+  '/past-conferences': 'Past Conferences', '/awards': 'Awards', '/verify': 'Verify a certificate',
   '/dashboard': 'My dashboard', '/chair-login': 'Chair sign in', '/chair-dashboard': 'Chair dashboard',
 };
 const PageTitle = () => {
@@ -233,6 +235,7 @@ const App = () => {
           <Route path="/judging/print" element={<AdminRoute allow={['sg','academics','judge']}><JudgingPrint /></AdminRoute>} />
           <Route path="/analytics" element={<AdminRoute allow={['sg','academics']}><AdminAnalytics /></AdminRoute>} />
           <Route path="/awards" element={<AdminRoute allow={['sg','academics']}><AdminAwards /></AdminRoute>} />
+          <Route path="/certificates" element={<AdminRoute allow={['sg','academics']}><AdminCertificates /></AdminRoute>} />
           <Route path="/content" element={<AdminRoute allow={['sg']}><SiteContent /></AdminRoute>} />
           <Route path="/homepage" element={<Navigate to="/content" replace />} />
           <Route path="/team" element={<AdminRoute allow={['sg']}><AdminTeam /></AdminRoute>} />
@@ -305,6 +308,8 @@ const App = () => {
         <Route path="/past-conferences" element={<PastConferences />} />
         <Route path="/awards" element={<Awards />} />
         <Route path="/team" element={<Team />} />
+        <Route path="/verify" element={<Verify />} />
+        <Route path="/verify/:code" element={<Verify />} />
         <Route path="/seasons/Season5" element={<Navigate to="/seasons/5" replace />} />
         {/* Every past season (built-in and admin-added) — see Site content → Seasons */}
         <Route path="/seasons/:slug" element={<SeasonRoute />} />

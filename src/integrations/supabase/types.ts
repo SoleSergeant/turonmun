@@ -946,6 +946,7 @@ export type Database = {
           max_capacity: number | null
           opens_at: string | null
           sat_discount: number
+          returning_discount: number
           step_labels: Json
           updated_at: string | null
           updated_by: string | null
@@ -963,6 +964,7 @@ export type Database = {
           max_capacity?: number | null
           opens_at?: string | null
           sat_discount?: number
+          returning_discount?: number
           step_labels?: Json
           updated_at?: string | null
           updated_by?: string | null
@@ -980,6 +982,7 @@ export type Database = {
           max_capacity?: number | null
           opens_at?: string | null
           sat_discount?: number
+          returning_discount?: number
           step_labels?: Json
           updated_at?: string | null
           updated_by?: string | null
@@ -1739,6 +1742,7 @@ export type Database = {
           max_capacity: number | null
           opens_at: string | null
           sat_discount: number
+          returning_discount: number
           step_labels: Json
           updated_at: string | null
           updated_by: string | null
@@ -1820,6 +1824,7 @@ export type Database = {
       is_active_admin: { Args: never; Returns: boolean }
       is_chair_of: { Args: { p_committee_id: string }; Returns: boolean }
       is_debate_judge: { Args: never; Returns: boolean }
+      is_returning_delegate: { Args: never; Returns: boolean }
       is_sg: { Args: never; Returns: boolean }
       log_activity: {
         Args: {
@@ -1858,6 +1863,10 @@ export type Database = {
         Args: { p_awards?: Json; p_event: string }
         Returns: number
       }
+      set_participation_attended: {
+        Args: { p_attended: boolean; p_id: string }
+        Returns: undefined
+      }
       set_past_award: {
         Args: {
           p_award: string
@@ -1887,6 +1896,17 @@ export type Database = {
       update_own_application_name: {
         Args: { p_full_name: string }
         Returns: undefined
+      }
+      verify_certificate: {
+        Args: { p_code: string }
+        Returns: {
+          award: string | null
+          committee: string | null
+          country: string | null
+          event: string
+          full_name: string
+          role: string
+        }[]
       }
     }
     Enums: {

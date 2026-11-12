@@ -11,6 +11,7 @@ import { useFormSettings } from '@/hooks/useFormSettings';
 import { useFormAutosave } from '@/hooks/useFormAutosave';
 import { AlertCircle, Clock, Save } from 'lucide-react';
 import { getCurrentSeason, inSeason } from '@/lib/season';
+import type { Participation } from '@/lib/participations';
 
 const Registration = () => {
   const { toast } = useToast();
@@ -18,6 +19,18 @@ const Registration = () => {
   const { user } = useAuth();
   const { settings: formSettings, isEffectivelyClosed, closedReason, deadlineSoon } = useFormSettings('delegate');
   const [step, setStep] = useState(1);
+
+  // Past delegate → welcome note and returning discount. The server applies
+  // the same rule when the application is saved (059), so this is display only.
+  const [pastDelegate, setPastDelegate] = useState<Participation | null>(null);
+  useEffect(() => {
+    if (!user?.id) return;
+    supabase.from('participations').select('*')
+      .eq('user_id', user.id).eq('role', 'delegate').not('season', 'is', null)
+      .order('created_at', { ascending: false }).limit(1)
+      .then(({ data }) => setPastDelegate(data?.[0] ?? null));
+  }, [user?.id]);
+  const returningDiscount = pastDelegate ? (formSettings?.returning_discount ?? 0) : 0;
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [alreadyApplied, setAlreadyApplied] = useState(false);
@@ -192,7 +205,7 @@ const Registration = () => {
     const baseFee = formSettings?.fee_amount ?? Number(import.meta.env.VITE_APP_DELEGATE_FEE ?? 90000);
     const ieltsDiscount = (formData.hasIELTS === 'yes') ? (formSettings?.ielts_discount ?? 10000) : 0;
     const satDiscount = (formData.hasSAT === 'yes') ? (formSettings?.sat_discount ?? 10000) : 0;
-    const discount = ieltsDiscount + satDiscount;
+    const discount = ieltsDiscount + satDiscount + returningDiscount;
     return {
       originalFee: baseFee,
       discount,
@@ -461,6 +474,14 @@ Photo URL: ${photoUrl || 'N/A'}
         <div className="bg-amber-50 border-b border-amber-200 px-4 py-2 flex items-center justify-center gap-2 text-amber-800 text-sm">
           <Clock size={15} />
           <span>Application deadline: <strong>{new Date(formSettings.deadline).toLocaleString()}</strong></span>
+        </div>
+      )}
+      {pastDelegate && step < 6 && (
+        <div className="bg-diplomatic-50 border-b border-diplomatic-100 px-4 py-2 text-center text-diplomatic-900 text-sm">
+          <strong>Welcome back!</strong>{' '}
+          You were a delegate at {/turon/i.test(pastDelegate.event) ? pastDelegate.event : `TuronMUN ${pastDelegate.event}`}
+          {pastDelegate.award ? <> — <strong>{pastDelegate.award}</strong></> : ''}.
+          {returningDiscount > 0 && <> Your returning-delegate discount of <strong>{returningDiscount.toLocaleString()} UZS</strong> is included in your fee.</>}
         </div>
       )}
       {/* Draft restored banner */}

@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from 'react';
-import { Award, History, Loader2 } from 'lucide-react';
+import { Award, Download, History, Loader2 } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+import { useCertificateDesign } from '@/hooks/useCertificateDesign';
+import { downloadCertificate } from '@/lib/certificate';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import { ROLE_LABEL, type Participation } from '@/lib/participations';
@@ -22,6 +25,19 @@ export default function MyHistory() {
   }, [user?.id]);
 
   const awards = rows?.filter(r => r.award).length ?? 0;
+  const design = useCertificateDesign();
+  const { toast } = useToast();
+  const [busyId, setBusyId] = useState<string | null>(null);
+  const download = async (r: Participation) => {
+    setBusyId(r.id);
+    try {
+      await downloadCertificate(r, design);
+    } catch (e: any) {
+      toast({ title: 'Could not create the certificate', description: e?.message, variant: 'destructive' });
+    } finally {
+      setBusyId(null);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -61,11 +77,24 @@ export default function MyHistory() {
                     {r.committee}{r.committee && r.country && ' · '}{r.country && <span className="text-white">{r.country}</span>}
                   </p>
                 )}
-                {r.award && (
-                  <p className="mt-3 inline-flex items-center gap-1.5 rounded-lg bg-gold-400/15 px-3 py-1.5 text-sm font-semibold text-gold-300">
-                    <Award className="h-4 w-4" /> {r.award}
-                  </p>
-                )}
+                <div className="mt-3 flex flex-wrap items-center gap-3">
+                  {r.award && (
+                    <p className="inline-flex items-center gap-1.5 rounded-lg bg-gold-400/15 px-3 py-1.5 text-sm font-semibold text-gold-300">
+                      <Award className="h-4 w-4" /> {r.award}
+                    </p>
+                  )}
+                  {r.attended ? (
+                    <button
+                      onClick={() => download(r)}
+                      disabled={busyId === r.id}
+                      className="inline-flex items-center gap-1.5 rounded-lg border border-white/15 px-3 py-1.5 text-sm font-medium text-white/90 hover:bg-white/10 disabled:opacity-50"
+                    >
+                      {busyId === r.id ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />} Certificate
+                    </button>
+                  ) : (
+                    <span className="text-xs text-white/40">Certificate available once your attendance is confirmed</span>
+                  )}
+                </div>
               </div>
             </li>
           ))}

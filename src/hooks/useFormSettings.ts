@@ -41,6 +41,7 @@ export interface FormSettings {
   fee_amount: number;
   ielts_discount: number;
   sat_discount: number;
+  returning_discount: number;      // off the fee for past delegates (checked on the server)
   custom_questions: CustomQuestion[];
   step_labels: string[];           // editable labels for the 5 form steps
   form_questions: FormQuestion[];  // full configurable question list
@@ -58,6 +59,7 @@ const DEFAULTS: Omit<FormSettings, 'id' | 'updated_at' | 'updated_by'> = {
   fee_amount: 90000,
   ielts_discount: 10000,
   sat_discount: 10000,
+  returning_discount: 0,
   custom_questions: [],
   step_labels: [...DEFAULT_STEP_LABELS],
   form_questions: [],
