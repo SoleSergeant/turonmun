@@ -23,5 +23,6 @@ test('state variants are escaped and kept above base rules', () => {
 });
 
 test('generated stylesheet is up to date (run `npm run admin-theme`)', () => {
-  assert.equal(readFileSync(new URL(`../${OUT}`, import.meta.url), 'utf8'), build());
+  // A Windows checkout may turn the file's line endings into CRLF.
+  assert.equal(readFileSync(new URL(`../${OUT}`, import.meta.url), 'utf8').replace(/\r\n/g, '\n'), build());
 });
