@@ -63,7 +63,8 @@ export default function Telegram() {
   const [people, setPeople] = useState<Person[] | null>(null);
   const [picked, setPicked] = useState<Set<string>>(new Set());
   const [busyIds, setBusyIds] = useState<Set<string>>(new Set()); // already queued or being sent
-  const [text, setText] = useState('Dear {first_name},\n\n');
+  // {name}, not {first_name}: many people register surname first ("Abdullaev Erkin").
+  const [text, setText] = useState('Dear {name},\n\n');
   const [templates, setTemplates] = useState<Template[]>([]);
   const [templateName, setTemplateName] = useState('');
   const [queueing, setQueueing] = useState(false);
@@ -300,7 +301,7 @@ export default function Telegram() {
               </div>
               <textarea id="tg-text" value={text} onChange={e => setText(e.target.value)} rows={9} className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm" />
               <p className="text-xs text-gray-500">
-                {'{name}'} full name · {'{first_name}'} · {'{event}'} · {'{committee}'} and {'{country}'} for seated delegates · **bold** and __italic__ work in Telegram.
+                {'{name}'} full name as registered · {'{first_name}'} (the first word, so a surname for "Surname Name" registrations) · {'{event}'} · {'{committee}'} and {'{country}'} for seated delegates · **bold** and __italic__ work in Telegram.
               </p>
               {bad && <p className="text-sm text-red-700">{bad} isn't a placeholder and would be sent as typed.</p>}
               <div className="flex gap-2">
