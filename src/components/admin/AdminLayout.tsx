@@ -10,7 +10,7 @@ import { ConfirmHost } from '@/components/admin/ConfirmDialog';
 import { confirmLeave } from '@/hooks/useUnsavedChanges';
 import { PROJECT_KEY, SHARED, locate, readProject, visibleGroups, visibleProjects, type BadgeKey, type NavGroup, type ProjectId } from '@/lib/adminNav';
 import {
-  Award, Calendar, Gavel, Globe, Home, LogOut, Mail, Menu, Mic, Monitor, Moon, QrCode, ScrollText, Settings, Sun, Swords, Users, X,
+  Award, Calendar, Gavel, Globe, Home, LogOut, Mail, Menu, Mic, Monitor, Moon, QrCode, ScrollText, Send, Settings, Sun, Swords, Users, X,
   type LucideIcon,
 } from 'lucide-react';
 import '@/styles/admin-theme.css';
@@ -28,7 +28,7 @@ const initialDark = () => {
 
 const ICONS: Record<string, LucideIcon> = {
   home: Home, users: Users, globe: Globe, calendar: Calendar, qr: QrCode, award: Award, mail: Mail,
-  mic: Mic, swords: Swords, gavel: Gavel, scroll: ScrollText, monitor: Monitor, settings: Settings,
+  mic: Mic, send: Send, swords: Swords, gavel: Gavel, scroll: ScrollText, monitor: Monitor, settings: Settings,
 };
 
 // ── Menu badges: things waiting for someone ─────────────────────────────

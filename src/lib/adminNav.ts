@@ -48,6 +48,7 @@ export const PROJECTS: NavProject[] = [
       ] },
       { id: 'inbox', label: 'Inbox', icon: 'mail', badge: 'messages', tabs: [
         { path: '/messages', label: 'Messages', roles: SG },
+        { path: '/telegram', label: 'Telegram', roles: ACADEMIC },
       ] },
     ],
   },
@@ -67,6 +68,9 @@ export const PROJECTS: NavProject[] = [
       ] },
       { id: 'dcert', label: 'Certificates', icon: 'scroll', tabs: [
         { path: '/certificates', label: 'Certificates', roles: ACADEMIC },
+      ] },
+      { id: 'dtelegram', label: 'Telegram', icon: 'send', tabs: [
+        { path: '/telegram', label: 'Telegram', roles: ACADEMIC },
       ] },
       { id: 'dsite', label: 'Debate website', icon: 'monitor', tabs: [
         { path: '/debate-site', label: 'Debate site', roles: SG },

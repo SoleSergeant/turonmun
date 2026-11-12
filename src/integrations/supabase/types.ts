@@ -751,6 +751,7 @@ export type Database = {
           admin_notes: string | null
           agreed_to_rules: boolean
           city: string | null
+          contacted_at: string | null
           created_at: string
           date_of_birth: string | null
           decision_emailed_at: string | null
@@ -779,6 +780,7 @@ export type Database = {
           admin_notes?: string | null
           agreed_to_rules?: boolean
           city?: string | null
+          contacted_at?: string | null
           created_at?: string
           date_of_birth?: string | null
           decision_emailed_at?: string | null
@@ -807,6 +809,7 @@ export type Database = {
           admin_notes?: string | null
           agreed_to_rules?: boolean
           city?: string | null
+          contacted_at?: string | null
           created_at?: string
           date_of_birth?: string | null
           decision_emailed_at?: string | null
@@ -1605,6 +1608,129 @@ export type Database = {
         }
         Relationships: []
       }
+      telegram_batches: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          note: string | null
+          status: string
+          title: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          note?: string | null
+          status?: string
+          title: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          note?: string | null
+          status?: string
+          title?: string
+        }
+        Relationships: []
+      }
+      telegram_outbox: {
+        Row: {
+          attempts: number
+          batch_id: string
+          claimed_at: string | null
+          created_at: string
+          error: string | null
+          finished_at: string | null
+          id: string
+          name: string
+          position: number
+          recipient_id: string | null
+          recipient_type: string
+          status: string
+          text: string
+          username: string
+        }
+        Insert: {
+          attempts?: number
+          batch_id: string
+          claimed_at?: string | null
+          created_at?: string
+          error?: string | null
+          finished_at?: string | null
+          id?: string
+          name?: string
+          position?: number
+          recipient_id?: string | null
+          recipient_type?: string
+          status?: string
+          text: string
+          username: string
+        }
+        Update: {
+          attempts?: number
+          batch_id?: string
+          claimed_at?: string | null
+          created_at?: string
+          error?: string | null
+          finished_at?: string | null
+          id?: string
+          name?: string
+          position?: number
+          recipient_id?: string | null
+          recipient_type?: string
+          status?: string
+          text?: string
+          username?: string
+        }
+        Relationships: []
+      }
+      telegram_sender: {
+        Row: {
+          account: string | null
+          id: number
+          last_seen: string | null
+          message: string | null
+          state: string | null
+        }
+        Insert: {
+          account?: string | null
+          id?: number
+          last_seen?: string | null
+          message?: string | null
+          state?: string | null
+        }
+        Update: {
+          account?: string | null
+          id?: number
+          last_seen?: string | null
+          message?: string | null
+          state?: string | null
+        }
+        Relationships: []
+      }
+      telegram_templates: {
+        Row: {
+          body: string
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          body: string
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       users: {
         Row: {
           created_at: string | null
@@ -1887,6 +2013,18 @@ export type Database = {
       }
       start_new_season: {
         Args: { p_name?: string; p_number: number }
+        Returns: undefined
+      }
+      telegram_claim_next: {
+        Args: never
+        Returns: Database["public"]["Tables"]["telegram_outbox"]["Row"][]
+      }
+      telegram_complete: {
+        Args: { p_error?: string; p_id: string; p_ok: boolean; p_pause?: boolean }
+        Returns: undefined
+      }
+      telegram_heartbeat: {
+        Args: { p_account?: string; p_message?: string; p_state: string }
         Returns: undefined
       }
       unassign_seat: { Args: { p_assignment_id: string }; Returns: undefined }

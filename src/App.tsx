@@ -61,6 +61,7 @@ const AdminMessages = lazy(() => import("./pages/admin/AdminMessages"));
 const Delegates = lazy(() => import("./pages/admin/Delegates"));
 const DebateDay = lazy(() => import("./pages/admin/DebateDay"));
 const DebateHome = lazy(() => import("./pages/admin/DebateHome"));
+const AdminTelegram = lazy(() => import("./pages/admin/Telegram"));
 const Judging = lazy(() => import("./pages/admin/Judging"));
 const JudgingPrint = lazy(() => import("./pages/admin/JudgingPrint"));
 const Allocation = lazy(() => import("./pages/admin/Allocation"));
@@ -225,6 +226,7 @@ const App = () => {
           <Route path="/resources" element={<AdminRoute allow={['sg','academics']}><AdminResources /></AdminRoute>} />
           <Route path="/applications" element={<KeepQueryRedirect to="/delegates" />} />
           <Route path="/messages" element={<AdminRoute allow={['sg']}><AdminMessages /></AdminRoute>} />
+          <Route path="/telegram" element={<AdminRoute allow={['sg','academics']}><AdminTelegram /></AdminRoute>} />
           <Route path="/delegates" element={<AdminRoute allow={['sg','academics']}><Delegates /></AdminRoute>} />
           <Route path="/allocation" element={<AdminRoute allow={['sg','academics']}><Allocation /></AdminRoute>} />
           <Route path="/country-matrix" element={<Navigate to="/allocation?view=matrix" replace />} />
