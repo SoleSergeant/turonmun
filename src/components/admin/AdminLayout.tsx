@@ -1,5 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -10,9 +10,21 @@ import { ConfirmHost } from '@/components/admin/ConfirmDialog';
 import { confirmLeave } from '@/hooks/useUnsavedChanges';
 import { PROJECT_KEY, SHARED, locate, readProject, visibleGroups, visibleProjects, type BadgeKey, type NavGroup, type ProjectId } from '@/lib/adminNav';
 import {
-  Award, Calendar, Gavel, Globe, Home, LogOut, Mail, Menu, Mic, Monitor, QrCode, ScrollText, Settings, Swords, Users, X,
+  Award, Calendar, Gavel, Globe, Home, LogOut, Mail, Menu, Mic, Monitor, Moon, QrCode, ScrollText, Settings, Sun, Swords, Users, X,
   type LucideIcon,
 } from 'lucide-react';
+import '@/styles/admin-theme.css';
+import '@/styles/admin-dark.css';
+
+// ── Theme: follows the computer until someone picks one (kept per browser) ──
+const THEME_KEY = 'admin-theme';
+const initialDark = () => {
+  try {
+    const saved = localStorage.getItem(THEME_KEY);
+    if (saved) return saved === 'dark';
+  } catch { /* storage blocked: follow the system */ }
+  return window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? false;
+};
 
 const ICONS: Record<string, LucideIcon> = {
   home: Home, users: Users, globe: Globe, calendar: Calendar, qr: QrCode, award: Award, mail: Mail,
@@ -58,6 +70,18 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
   const isRealAdminSubdomain = window.location.hostname.startsWith('admin.');
   const [seasonName, setSeasonName] = useState<string | null>(null);
   const [counts, setCounts] = useState<Counts>(countCache?.data ?? {});
+  const [dark, setDarkState] = useState(initialDark);
+  const setDark = (next: (d: boolean) => boolean) => setDarkState(d => {
+    const v = next(d);
+    try { localStorage.setItem(THEME_KEY, v ? 'dark' : 'light'); } catch { /* not remembered */ }
+    return v;
+  });
+  // On <html> so dialogs and toasts rendered outside the layout follow it too.
+  // Never removed between pages, so moving around doesn't flash the other theme.
+  useLayoutEffect(() => {
+    document.documentElement.classList.add('admin-theme');
+    document.documentElement.classList.toggle('dark', dark);
+  }, [dark]);
 
   useEffect(() => {
     getCurrentSeason().then(season => setSeasonName(season?.name ?? null));
@@ -140,7 +164,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
   const tabs = group && group.tabs.length > 1 ? group.tabs : [];
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className="flex h-screen admin-canvas">
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
         <div
@@ -151,7 +175,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
 
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-30 w-64 transform bg-white border-r border-gray-200 text-gray-700 transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 shadow-xl lg:shadow-none flex flex-col ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        className={`fixed inset-y-0 left-0 z-30 w-64 transform admin-chrome border-r border-gray-200 text-gray-700 transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 shadow-xl lg:shadow-none flex flex-col ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'
           }`}
       >
         <div className="px-5 py-4 flex items-center justify-between border-b border-gray-200 shrink-0">
@@ -181,14 +205,14 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
 
         <nav className="mt-3 px-3 flex-1 overflow-y-auto pb-4" aria-label="Admin menu">
           {projects.length > 1 && (
-            <div className="mb-3 flex gap-1 rounded-lg bg-gray-100 p-1" role="group" aria-label="Project">
+            <div className="mb-3 grid grid-cols-2 gap-1 rounded-lg bg-gray-100 p-1" role="group" aria-label="Project">
               {projects.map(p => (
                 <a
                   key={p.id}
                   href={adminPath(p.groups[0].tabs[0].path)}
                   onClick={e => go(e, p.groups[0].tabs[0].path, p.id)}
                   aria-current={p.id === projectId ? 'true' : undefined}
-                  className={`flex-1 rounded-md px-2 py-1.5 text-center text-xs font-semibold transition-colors ${p.id === projectId
+                  className={`flex min-h-8 items-center justify-center rounded-md px-2 py-1.5 text-center text-xs font-semibold leading-tight transition-colors ${p.id === projectId
                       ? 'bg-white text-panel-800 shadow-sm'
                       : 'text-gray-500 hover:text-gray-800'
                     }`}
@@ -234,7 +258,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
         </nav>
 
         {/* User Profile Snippet at Bottom */}
-        <div className="shrink-0 px-4 py-3 bg-gray-50 border-t border-gray-200">
+        <div className="shrink-0 px-4 py-3 border-t border-gray-200">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-panel-100 flex items-center justify-center text-xs font-semibold text-panel-700">
               {(displayName?.charAt(0) || 'A').toUpperCase()}
@@ -245,6 +269,15 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
                 {role ? ROLE_LABELS[role] : 'Admin'}
               </p>
             </div>
+            <button
+              type="button"
+              onClick={() => setDark(d => !d)}
+              aria-label={dark ? 'Switch to light theme' : 'Switch to dark theme'}
+              title={dark ? 'Light theme' : 'Dark theme'}
+              className="rounded-lg p-2 text-gray-500 hover:bg-gray-100 hover:text-gray-800 transition-colors"
+            >
+              {dark ? <Sun size={18} /> : <Moon size={18} />}
+            </button>
           </div>
         </div>
       </aside>
@@ -252,7 +285,7 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
       {/* Main content */}
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         {/* Header: the menu item's name, and its pages as tabs */}
-        <header className="bg-white border-b border-gray-200 z-10">
+        <header className="admin-chrome border-b border-gray-200 z-10">
           <div className={`flex items-center px-4 ${tabs.length ? 'pt-4 pb-2' : 'py-4'}`}>
             <button
               onClick={() => setSidebarOpen(true)}

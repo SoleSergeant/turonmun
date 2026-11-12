@@ -223,7 +223,7 @@ export default function DebateDay() {
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <p className="text-sm text-gray-600">
                     {data.roster.length} accepted · {seated.length} in teams.{' '}
-                    Debaters see their team only when <Link to={adminPath('/content')} className="text-panel-700 hover:underline">Site content → Turon Debate → Show teams to debaters</Link> is on
+                    Debaters see their team only when <Link to={adminPath('/debate-site')} className="text-panel-700 hover:underline">Debate website → Show teams to debaters</Link> is on
                     {debate.reveal_teams ? ' (it is).' : ' (it is off).'}
                   </p>
                   <div className="flex gap-2">

@@ -11,8 +11,6 @@ import {
   Mail,
   MapPin,
   MessageSquare,
-  Mic,
-  History,
   Send,
   Shield,
   UserCheck,
@@ -48,16 +46,12 @@ interface Snapshot {
   pendingChairs: number;
   pendingVolunteers: number | null;
   unansweredMessages: number | null;
-  pendingDebaters: number | null;
-  /** Accepted debaters, while judges' scores are newer than the last "Save to history". */
-  debateUnsaved: number | null;
 }
 
 interface Stats {
   delegates: DelegateRow[];
   chairs: StatRow[];
   volunteers: StatRow[];
-  debaters: StatRow[] | null;
 }
 
 const ACADEMIC: Role[] = ['sg', 'academics'];
@@ -86,7 +80,7 @@ const AdminDashboard = () => {
     (async () => {
       try {
         const season = await getCurrentSeason();
-        const [apps, seats, messages, volunteers, recentApps, debate, lastScore, lastDebateSave] = await Promise.all([
+        const [apps, seats, messages, volunteers, recentApps] = await Promise.all([
           selectWithOptional('applications', APP_COLUMNS, 'decision_emailed_at', season),
           (async () => {
             const r = await supabase.from('country_assignments').select('application_id, notified_at');
@@ -99,13 +93,7 @@ const AdminDashboard = () => {
           inSeason(supabase.from('applications').select('id, full_name, institution, status, created_at, notes, application_type'), season)
             .order('created_at', { ascending: false })
             .limit(6),
-          supabase.from('debate_registrations').select('status, created_at'),
-          supabase.from('debate_scores').select('updated_at').order('updated_at', { ascending: false }).limit(1),
-          supabase.from('participations').select('created_at').eq('role', 'debater').order('created_at', { ascending: false }).limit(1),
         ]);
-        const debateRows = debate.error ? null : ((debate.data || []) as any[]);
-        const scoredAt = lastScore.data?.[0]?.updated_at;
-        const savedAt = lastDebateSave.data?.[0]?.created_at;
 
         const delegates = apps.rows.filter(a => !isChairApplication(a));
         const chairs = apps.rows.filter(a => isChairApplication(a));
@@ -123,9 +111,6 @@ const AdminDashboard = () => {
           pendingChairs: chairs.filter(a => !a.status || a.status === 'pending').length,
           pendingVolunteers: volunteers.error ? null : ((volunteers.data || []) as any[]).filter(v => v.status === 'pending').length,
           unansweredMessages: messages.error ? null : ((messages.data || []) as any[]).filter(m => !m.responded_at).length,
-          pendingDebaters: debateRows ? debateRows.filter(r => r.status === 'pending').length : null,
-          debateUnsaved: !debateRows || lastScore.error || lastDebateSave.error ? null
-            : scoredAt && (!savedAt || scoredAt > savedAt) ? debateRows.filter(r => r.status === 'approved').length : 0,
         });
         setRecent((recentApps.data || []) as any[]);
         setStats({
@@ -135,7 +120,6 @@ const AdminDashboard = () => {
           })),
           chairs: chairs.map(a => ({ created_at: a.created_at, status: a.status })),
           volunteers: volunteers.error ? [] : (volunteers.data || []) as StatRow[],
-          debaters: debate.error ? null : ((debate.data || []) as StatRow[]),
         });
       } catch (err: any) {
         setError(err.message || 'Could not load the dashboard');
@@ -151,8 +135,6 @@ const AdminDashboard = () => {
     { key: 'announce', count: snap.seatsUnannounced, title: 'Seats not announced', hint: 'Seated delegates who haven’t been emailed', path: '/allocation', icon: Mail, roles: ACADEMIC },
     { key: 'chairs', count: snap.pendingChairs, title: 'Chair applications', hint: 'Waiting for a decision', path: '/chairs', icon: Shield, roles: ACADEMIC },
     { key: 'volunteers', count: snap.pendingVolunteers, title: 'Volunteer applications', hint: 'Waiting for a decision', path: '/volunteers', icon: Heart, roles: ['sg', 'logistics'] },
-    { key: 'debaters', count: snap.pendingDebaters, title: 'Debate registrations', hint: 'Waiting for a decision (bulk accept in Turon Debate → Registrations)', path: '/debate', icon: Mic, roles: ACADEMIC },
-    { key: 'debate-history', count: snap.debateUnsaved, title: 'Debate results not saved', hint: 'Judges have scored: save to history in Debate day → Results', path: '/debate-day', icon: History, roles: ACADEMIC },
     { key: 'messages', count: snap.unansweredMessages, title: 'Unanswered messages', hint: 'Contact form messages without a reply', path: '/messages', icon: MessageSquare, roles: ['sg'] },
   ] : [];
 

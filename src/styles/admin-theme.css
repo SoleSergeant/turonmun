@@ -1,0 +1,26 @@
+/* Admin panel surfaces, light and dark. Colour classes used on admin pages
+   get their dark versions from admin-dark.css (generated). */
+
+html.admin-theme {
+  --a-canvas: #e9ecf0;   /* page behind the cards: soft gray, not white */
+  --a-chrome: #f6f7f9;   /* sidebar and header */
+  --a-surface: #ffffff;  /* cards (bg-white) */
+}
+html.admin-theme.dark {
+  --a-canvas: #0e1217;
+  --a-chrome: #12161d;
+  --a-surface: #161b23;
+  color-scheme: dark;
+}
+html.admin-theme.dark body {
+  background: var(--a-canvas);
+  color: #e7eaef;
+}
+
+.admin-canvas { background-color: var(--a-canvas); }
+.admin-chrome { background-color: var(--a-chrome); }
+
+/* Shadows read as smudges on dark surfaces; borders carry the edges instead. */
+html.admin-theme.dark .shadow-sm,
+html.admin-theme.dark .shadow,
+html.admin-theme.dark .shadow-md { box-shadow: none; }

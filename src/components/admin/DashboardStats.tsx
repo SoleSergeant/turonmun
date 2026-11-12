@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { BarChart3, Heart, Mic, Shield, Users, LucideIcon } from 'lucide-react';
+import { BarChart3, Heart, Shield, Users, LucideIcon } from 'lucide-react';
 import { adminPath } from '@/lib/adminPath';
 
 export interface StatRow {
@@ -19,8 +19,6 @@ interface Props {
   delegates: DelegateRow[];
   chairs: StatRow[];
   volunteers: StatRow[];
-  /** null when the debate table isn't readable / set up. */
-  debaters: StatRow[] | null;
 }
 
 const DAY = 86_400_000;
@@ -54,10 +52,10 @@ function TypeTile({ icon: Icon, label, total, week, to }: { icon: LucideIcon; la
 }
 
 /** "Applications this season" block on the admin dashboard. */
-export default function DashboardStats({ delegates, chairs, volunteers, debaters }: Props) {
+export default function DashboardStats({ delegates, chairs, volunteers }: Props) {
   const [hover, setHover] = useState<number | null>(null);
 
-  const all = useMemo(() => [...delegates, ...chairs, ...volunteers, ...(debaters || [])], [delegates, chairs, volunteers, debaters]);
+  const all = useMemo(() => [...delegates, ...chairs, ...volunteers], [delegates, chairs, volunteers]);
 
   // New applications per day, last 30 days (all types).
   const days = useMemo(() => {
@@ -100,11 +98,10 @@ export default function DashboardStats({ delegates, chairs, volunteers, debaters
         </Link>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <TypeTile icon={Users} label="Delegates" total={delegates.length} week={thisWeek(delegates)} to="/delegates" />
         <TypeTile icon={Shield} label="Chairs" total={chairs.length} week={thisWeek(chairs)} to="/chairs" />
         <TypeTile icon={Heart} label="Volunteers" total={volunteers.length} week={thisWeek(volunteers)} to="/volunteers" />
-        {debaters && <TypeTile icon={Mic} label="Turon Debate" total={debaters.length} week={thisWeek(debaters)} to="/debate" />}
       </div>
 
       <div className="grid gap-4 xl:grid-cols-5">

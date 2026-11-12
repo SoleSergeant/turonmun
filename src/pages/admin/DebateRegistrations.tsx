@@ -193,7 +193,7 @@ const DebateRegistrations = () => {
       <div className="space-y-6">
         <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
           <div>
-            <p className="text-gray-600">Registrations from {debateSiteUrl.replace('https://', '')}. Edit the site itself in Site content → Turon Debate.</p>
+            <p className="text-gray-600">Registrations from {debateSiteUrl.replace('https://', '')}. Edit the site itself in Debate website.</p>
           </div>
           <div className="flex flex-wrap gap-2">
             <Link to={adminPath('/debate-day')} className="inline-flex items-center gap-1 rounded-lg bg-panel-600 px-3 py-2 text-sm font-medium text-white hover:bg-panel-700">
