@@ -578,6 +578,9 @@ export type Database = {
           is_read: boolean | null
           message: string | null
           phone: string | null
+          responded_at: string | null
+          responded_by: string | null
+          response_message: string | null
           subject: string | null
         }
         Insert: {
@@ -588,6 +591,9 @@ export type Database = {
           is_read?: boolean | null
           message?: string | null
           phone?: string | null
+          responded_at?: string | null
+          responded_by?: string | null
+          response_message?: string | null
           subject?: string | null
         }
         Update: {
@@ -598,6 +604,9 @@ export type Database = {
           is_read?: boolean | null
           message?: string | null
           phone?: string | null
+          responded_at?: string | null
+          responded_by?: string | null
+          response_message?: string | null
           subject?: string | null
         }
         Relationships: []
