@@ -60,6 +60,7 @@ const AdminResources = lazy(() => import("./pages/admin/AdminResources"));
 const AdminMessages = lazy(() => import("./pages/admin/AdminMessages"));
 const Delegates = lazy(() => import("./pages/admin/Delegates"));
 const DebateDay = lazy(() => import("./pages/admin/DebateDay"));
+const DebateHome = lazy(() => import("./pages/admin/DebateHome"));
 const Judging = lazy(() => import("./pages/admin/Judging"));
 const JudgingPrint = lazy(() => import("./pages/admin/JudgingPrint"));
 const Allocation = lazy(() => import("./pages/admin/Allocation"));
@@ -231,6 +232,8 @@ const App = () => {
           <Route path="/volunteers" element={<AdminRoute allow={['sg','logistics']}><AdminVolunteers /></AdminRoute>} />
           <Route path="/debate" element={<AdminRoute allow={['sg','academics']}><DebateRegistrations /></AdminRoute>} />
           <Route path="/debate-day" element={<AdminRoute allow={['sg','academics']}><DebateDay /></AdminRoute>} />
+          <Route path="/debate-home" element={<AdminRoute allow={['sg','academics']}><DebateHome /></AdminRoute>} />
+          <Route path="/debate-site" element={<AdminRoute allow={['sg']}><SiteContent only="debate" /></AdminRoute>} />
           <Route path="/judging" element={<AdminRoute allow={['sg','academics','judge']}><Judging /></AdminRoute>} />
           <Route path="/judging/print" element={<AdminRoute allow={['sg','academics','judge']}><JudgingPrint /></AdminRoute>} />
           <Route path="/analytics" element={<AdminRoute allow={['sg','academics']}><AdminAnalytics /></AdminRoute>} />

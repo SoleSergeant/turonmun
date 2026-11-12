@@ -88,9 +88,6 @@ const AdminAwards = () => {
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h2 className="text-2xl font-semibold text-gray-900 flex items-center gap-2">
-              <Trophy className="h-6 w-6 text-amber-500" /> Awards
-            </h2>
             <p className="text-gray-600">Chairs pick winners; lock to finalize, then publish to the public page.</p>
           </div>
           <div className="flex flex-wrap items-center gap-2">

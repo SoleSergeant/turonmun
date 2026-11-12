@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Download, Loader2, Printer, ScrollText, Search } from 'lucide-react';
+import { Download, Loader2, Printer, Search } from 'lucide-react';
 import AdminLayout from '@/components/admin/AdminLayout';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -8,6 +8,7 @@ import { useCertificateDesign } from '@/hooks/useCertificateDesign';
 import { downloadCertificate, openPrintWindow, printCertificates } from '@/lib/certificate';
 import { ROLE_LABEL, type Participation } from '@/lib/participations';
 import { adminPath } from '@/lib/adminPath';
+import { readProject } from '@/lib/adminNav';
 
 /**
  * Admin → Certificates: per event, who attended (only they get a
@@ -29,8 +30,12 @@ export default function Certificates() {
   }, [toast]);
   useEffect(() => { load(); }, [load]);
 
+  // This page sits in both menus: show the events of the project you're in.
   // Newest event first (rows come newest first).
-  const events = useMemo(() => [...new Set((rows ?? []).map(r => r.event))], [rows]);
+  const debateMenu = readProject() === 'debate';
+  const events = useMemo(() => [...new Set((rows ?? [])
+    .filter(r => (r.role === 'debater' || r.role === 'judge') === debateMenu)
+    .map(r => r.event))], [rows, debateMenu]);
   const current = event || events[0] || '';
   const list = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -77,9 +82,6 @@ export default function Certificates() {
       <div className="space-y-6">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <h2 className="flex items-center gap-2 text-2xl font-semibold text-gray-900">
-              <ScrollText className="h-6 w-6 text-amber-500" /> Certificates
-            </h2>
             <p className="text-gray-600">
               Only people marked attended get a certificate (in My History and here). The design is in{' '}
               <Link to={adminPath('/content')} className="text-panel-600 hover:underline">Site content → Certificates</Link>.
@@ -98,7 +100,9 @@ export default function Certificates() {
         {rows === null ? (
           <div className="py-16 text-center text-gray-500"><Loader2 className="mx-auto h-6 w-6 animate-spin" /></div>
         ) : events.length === 0 ? (
-          <div className="rounded-lg border bg-white p-10 text-center text-gray-500">No participation records yet.</div>
+          <div className="rounded-lg border bg-white p-10 text-center text-gray-500">
+            {debateMenu ? 'No debate records yet. They appear after Event day → Results → Save to history.' : 'No participation records yet.'}
+          </div>
         ) : (
           <>
             <div className="flex flex-col gap-3 sm:flex-row">

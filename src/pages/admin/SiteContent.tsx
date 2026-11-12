@@ -30,12 +30,13 @@ const PREVIEW: Record<string, string> = {
  * Admin → Site content (SG only). Every text, link, image and list on the
  * public site, grouped by section. Unsaved sections show the built-in text.
  */
-const SiteContent = () => {
+const SiteContent = ({ only }: { only?: string }) => {
   const { toast } = useToast();
   const [rows, setRows] = useState<Record<string, Row>>({});
   const [loading, setLoading] = useState(true);
   const [missing, setMissing] = useState(false);
-  const [activeKey, setActiveKey] = useState(SECTION_LIST[0].key);
+  // `only`: one section without the picker (Turon Debate → Debate website).
+  const [activeKey, setActiveKey] = useState(only ?? SECTION_LIST[0].key);
   const [draft, setDraft] = useState<Record<string, unknown>>({});
   const [dirty, setDirty] = useState(false);
   useUnsavedChanges(dirty);
@@ -114,7 +115,7 @@ const SiteContent = () => {
     : (isAdminHost() ? getSection('seo').site_url.replace(/\/$/, '') : '') + (PREVIEW[activeKey] ?? '/');
 
   return (
-    <AdminLayout title="Site content">
+    <AdminLayout title={only ? section.title : 'Site content'}>
       {missing ? (
         <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
           Site content isn't set up yet. Run <code className="font-mono">supabase/migrations/040_site_content.sql</code> first.
@@ -123,7 +124,7 @@ const SiteContent = () => {
         <div className="flex justify-center py-12"><Loader2 className="h-6 w-6 animate-spin text-gray-400" /></div>
       ) : (
         <div className="flex flex-col gap-6 lg:flex-row">
-          <aside className="lg:w-64 lg:shrink-0">
+          <aside className="lg:w-64 lg:shrink-0" hidden={!!only}>
             <div className="space-y-4 rounded-lg border bg-white p-3 shadow-sm lg:sticky lg:top-0">
               {groups.map(([group, sections]) => (
                 <div key={group}>

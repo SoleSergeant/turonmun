@@ -3,101 +3,44 @@ import React, { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { useAdminRole, ROLE_LABELS, AdminRole } from '@/hooks/useAdminRole';
+import { useAdminRole, ROLE_LABELS } from '@/hooks/useAdminRole';
 import { adminPath } from '@/lib/adminPath';
-import { getCurrentSeason } from '@/lib/season';
+import { getCurrentSeason, inSeason } from '@/lib/season';
 import { ConfirmHost } from '@/components/admin/ConfirmDialog';
 import { confirmLeave } from '@/hooks/useUnsavedChanges';
+import { PROJECT_KEY, SHARED, locate, readProject, visibleGroups, visibleProjects, type BadgeKey, type NavGroup, type ProjectId } from '@/lib/adminNav';
 import {
-  LayoutDashboard,
-  Users,
-  Calendar,
-  FileText,
-  Mail,
-  LogOut,
-  Menu,
-  X,
-  Globe,
-  ClipboardList,
-  Shield,
-  BarChart3,
-  Map,
-  Award,
-  Home,
-  QrCode,
-  Heart,
-  UserCog,
-  History,
-  CalendarRange,
-  Mic,
-  Swords,
-  Gavel,
-  UsersRound,
-  ScrollText,
-  LucideIcon,
+  Award, Calendar, Gavel, Globe, Home, LogOut, Mail, Menu, Mic, Monitor, QrCode, ScrollText, Settings, Swords, Users, X,
+  type LucideIcon,
 } from 'lucide-react';
 
-type NavItem = { path: string; label: string; icon: LucideIcon; roles: NonNullable<AdminRole>[] };
+const ICONS: Record<string, LucideIcon> = {
+  home: Home, users: Users, globe: Globe, calendar: Calendar, qr: QrCode, award: Award, mail: Mail,
+  mic: Mic, swords: Swords, gavel: Gavel, scroll: ScrollText, monitor: Monitor, settings: Settings,
+};
 
-const SG: NonNullable<AdminRole>[] = ['sg'];
-const ACADEMIC: NonNullable<AdminRole>[] = ['sg', 'academics'];
-
-// One place that decides who sees what. Keep in sync with the allow lists
-// on the routes in App.tsx (and the database policies in migration 036).
-const NAV: { group: string; items: NavItem[] }[] = [
-  {
-    group: 'Overview',
-    items: [
-      { path: '/dashboard', label: 'Dashboard', icon: LayoutDashboard, roles: ['sg', 'academics', 'logistics'] },
-      { path: '/analytics', label: 'Analytics', icon: BarChart3, roles: ACADEMIC },
-    ],
-  },
-  {
-    group: 'People',
-    items: [
-      { path: '/delegates', label: 'Delegates', icon: Users, roles: ACADEMIC },
-      { path: '/chairs', label: 'Chairs', icon: Shield, roles: ACADEMIC },
-      { path: '/volunteers', label: 'Volunteers', icon: Heart, roles: ['sg', 'logistics'] },
-    ],
-  },
-  {
-    group: 'Turon Debate',
-    items: [
-      { path: '/debate', label: 'Registrations', icon: Mic, roles: ACADEMIC },
-      { path: '/debate-day', label: 'Debate day', icon: Swords, roles: ACADEMIC },
-      { path: '/judging', label: 'Judging', icon: Gavel, roles: ['sg', 'academics', 'judge'] },
-    ],
-  },
-  {
-    group: 'Conference',
-    items: [
-      { path: '/committees', label: 'Committees', icon: Globe, roles: ACADEMIC },
-      { path: '/allocation', label: 'Allocation', icon: Map, roles: ACADEMIC },
-      { path: '/schedule', label: 'Schedule', icon: Calendar, roles: ACADEMIC },
-      { path: '/resources', label: 'Resources', icon: FileText, roles: ACADEMIC },
-      { path: '/awards', label: 'Awards', icon: Award, roles: ACADEMIC },
-      { path: '/certificates', label: 'Certificates', icon: ScrollText, roles: ACADEMIC },
-      { path: '/check-in', label: 'Check-in', icon: QrCode, roles: ['sg', 'academics', 'logistics', 'registration'] },
-    ],
-  },
-  {
-    group: 'Site',
-    items: [
-      { path: '/content', label: 'Site content', icon: Home, roles: SG },
-      { path: '/team', label: 'Team', icon: UsersRound, roles: SG },
-      { path: '/forms', label: 'Forms', icon: ClipboardList, roles: SG },
-      { path: '/messages', label: 'Messages', icon: Mail, roles: SG },
-    ],
-  },
-  {
-    group: 'Administration',
-    items: [
-      { path: '/accounts', label: 'Admin accounts', icon: UserCog, roles: SG },
-      { path: '/seasons', label: 'Seasons', icon: CalendarRange, roles: SG },
-      { path: '/activity', label: 'Activity log', icon: History, roles: SG },
-    ],
-  },
-];
+// ── Menu badges: things waiting for someone ─────────────────────────────
+// shortcut: counts are cached for a minute across page changes, so a badge can
+// lag a decision by up to 60 s; refetch on the change itself if that ever matters.
+type Counts = Partial<Record<BadgeKey, number>>;
+let countCache: { at: number; data: Counts } | null = null;
+async function fetchCounts(): Promise<Counts> {
+  if (countCache && Date.now() - countCache.at < 60_000) return countCache.data;
+  const season = await getCurrentSeason();
+  const head = { count: 'exact' as const, head: true };
+  const pending = 'status.is.null,status.eq.pending';
+  const [apps, vols, debaters, messages] = await Promise.all([
+    inSeason(supabase.from('applications').select('id', head), season).or(pending),
+    inSeason(supabase.from('volunteer_applications').select('id', head), season).eq('status', 'pending'),
+    supabase.from('debate_registrations').select('id', head).eq('status', 'pending'),
+    supabase.from('contact_messages').select('id', head).is('responded_at', null),
+  ]);
+  // A role that can't read a table gets an error or 0, never someone else's count.
+  const n = (r: { count: number | null; error: unknown }) => (r.error ? 0 : r.count ?? 0);
+  const data = { applications: n(apps) + n(vols), debaters: n(debaters), messages: n(messages) };
+  countCache = { at: Date.now(), data };
+  return data;
+}
 
 interface AdminLayoutProps {
   children: React.ReactNode;
@@ -114,18 +57,39 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
 
   const isRealAdminSubdomain = window.location.hostname.startsWith('admin.');
   const [seasonName, setSeasonName] = useState<string | null>(null);
+  const [counts, setCounts] = useState<Counts>(countCache?.data ?? {});
 
   useEffect(() => {
     getCurrentSeason().then(season => setSeasonName(season?.name ?? null));
   }, []);
+  useEffect(() => {
+    if (role) fetchCounts().then(setCounts).catch(() => {});
+  }, [role, location.pathname]);
 
-  // While the role is still loading, render no nav items so a restricted
-  // role never sees a flash of pages it can't open.
-  const navGroups = roleLoading || !role
-    ? []
-    : NAV
-        .map(g => ({ ...g, items: g.items.filter(i => i.roles.includes(role)) }))
-        .filter(g => g.items.length > 0);
+  // While the role is still loading, render no menu so a restricted role
+  // never sees a flash of pages it can't open.
+  const ready = !roleLoading && !!role;
+  const projects = ready ? visibleProjects(role) : [];
+  const here = locate(location.pathname, readProject());
+  const projectId: ProjectId = projects.some(p => p.id === here?.project) ? here!.project
+    : projects.some(p => p.id === readProject()) ? readProject() : projects[0]?.id ?? 'mun';
+  const project = projects.find(p => p.id === projectId);
+  const shared = ready ? visibleGroups(SHARED, role) : [];
+  const group = here ? [...(project?.groups ?? []), ...shared].find(g => g.id === here.group.id) : undefined;
+
+  useEffect(() => {
+    try { sessionStorage.setItem(PROJECT_KEY, projectId); } catch { /* private mode: falls back to TuronMUN */ }
+  }, [projectId]);
+
+  // Ask before leaving a page with unsaved edits (new-tab clicks open normally).
+  const go = async (e: React.MouseEvent, path: string, nextProject?: ProjectId) => {
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
+    e.preventDefault();
+    if (!(await confirmLeave())) return;
+    if (nextProject) { try { sessionStorage.setItem(PROJECT_KEY, nextProject); } catch { /* ignore */ } }
+    setSidebarOpen(false);
+    navigate(adminPath(path));
+  };
 
   const handleLogout = async () => {
     if (!(await confirmLeave())) return;
@@ -145,6 +109,35 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
       });
     }
   };
+
+  const navLink = (g: NavGroup) => {
+    const Icon = ICONS[g.icon] ?? Home;
+    const active = group?.id === g.id;
+    const count = g.badge ? counts[g.badge] ?? 0 : 0;
+    return (
+      <li key={g.id}>
+        <Link
+          to={adminPath(g.tabs[0].path)}
+          onClick={e => go(e, g.tabs[0].path)}
+          aria-current={active ? 'page' : undefined}
+          className={`flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors group ${active
+              ? 'bg-panel-50 text-panel-800'
+              : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+            }`}
+        >
+          <Icon size={18} className={`mr-3 transition-colors ${active ? 'text-panel-600' : 'text-gray-400 group-hover:text-gray-600'}`} />
+          <span>{g.label}</span>
+          {count > 0 && (
+            <span className="ml-auto rounded-full bg-panel-100 px-2 text-xs font-semibold tabular-nums text-panel-800" aria-label={`${count} waiting`}>
+              {count > 99 ? '99+' : count}
+            </span>
+          )}
+        </Link>
+      </li>
+    );
+  };
+
+  const tabs = group && group.tabs.length > 1 ? group.tabs : [];
 
   return (
     <div className="flex h-screen bg-gray-100">
@@ -171,9 +164,9 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
               />
             </div>
             <div>
-              <span className="block text-base font-semibold tracking-tight text-gray-900">TuronMUN</span>
+              <span className="block text-base font-semibold tracking-tight text-gray-900">{project?.label ?? 'TuronMUN'}</span>
               <span className="block text-xs text-gray-500">
-                Admin panel{seasonName ? ` · ${seasonName}` : ''}
+                Admin panel{seasonName && projectId === 'mun' ? ` · ${seasonName}` : ''}
               </span>
             </div>
           </div>
@@ -186,57 +179,37 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
           </button>
         </div>
 
-        <nav className="mt-4 px-3 flex-1 overflow-y-auto pb-4">
-          {navGroups.map(({ group, items }) => (
-            <div key={group} className="mb-4">
-              <div className="px-3 py-1.5 text-[11px] font-semibold text-gray-500 uppercase tracking-wider">
-                {group}
-              </div>
-              <ul className="space-y-0.5">
-                {items.map((item) => {
-                  const active = location.pathname === item.path;
-                  return (
-                    <li key={item.path}>
-                      <Link
-                        to={adminPath(item.path)}
-                        onClick={async (e) => {
-                          // Ask before leaving a page with unsaved edits
-                          // (new-tab clicks open normally).
-                          if (e.metaKey || e.ctrlKey || e.shiftKey || e.button !== 0) return;
-                          e.preventDefault();
-                          if (!(await confirmLeave())) return;
-                          setSidebarOpen(false);
-                          navigate(adminPath(item.path));
-                        }}
-                        aria-current={active ? 'page' : undefined}
-                        className={`flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors group ${active
-                            ? 'bg-panel-50 text-panel-800'
-                            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-                          }`}
-                      >
-                        <item.icon size={18} className={`mr-3 transition-colors ${active ? 'text-panel-600' : 'text-gray-400 group-hover:text-gray-600'}`} />
-                        <span>{item.label}</span>
-                      </Link>
-                    </li>
-                  );
-                })}
-              </ul>
+        <nav className="mt-3 px-3 flex-1 overflow-y-auto pb-4" aria-label="Admin menu">
+          {projects.length > 1 && (
+            <div className="mb-3 flex gap-1 rounded-lg bg-gray-100 p-1" role="group" aria-label="Project">
+              {projects.map(p => (
+                <a
+                  key={p.id}
+                  href={adminPath(p.groups[0].tabs[0].path)}
+                  onClick={e => go(e, p.groups[0].tabs[0].path, p.id)}
+                  aria-current={p.id === projectId ? 'true' : undefined}
+                  className={`flex-1 rounded-md px-2 py-1.5 text-center text-xs font-semibold transition-colors ${p.id === projectId
+                      ? 'bg-white text-panel-800 shadow-sm'
+                      : 'text-gray-500 hover:text-gray-800'
+                    }`}
+                >
+                  {p.label}
+                </a>
+              ))}
             </div>
-          ))}
+          )}
 
-          <div className="px-3 py-1.5 mt-4 text-[11px] font-semibold text-gray-500 uppercase tracking-wider">
-            Account
-          </div>
-          <ul className="mt-1 space-y-0.5">
-            <li>
-              <button
-                onClick={handleLogout}
-                className="w-full flex items-center px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-red-50 hover:text-red-700 transition-colors group"
-              >
-                <LogOut size={18} className="mr-3 text-gray-400 group-hover:text-red-500 transition-colors" />
-                <span>Logout</span>
-              </button>
-            </li>
+          <ul className="space-y-0.5">
+            {(project?.groups ?? []).map(navLink)}
+          </ul>
+
+          {shared.length > 0 && (
+            <ul className="mt-3 space-y-0.5 border-t border-gray-200 pt-3">
+              {shared.map(navLink)}
+            </ul>
+          )}
+
+          <ul className="mt-3 space-y-0.5 border-t border-gray-200 pt-3">
             <li>
               <a
                 href="/"
@@ -245,8 +218,17 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
                 className="flex items-center px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors group"
               >
                 <Globe size={18} className="mr-3 text-gray-400 group-hover:text-gray-600 transition-colors" />
-                <span>View Website</span>
+                <span>View website</span>
               </a>
+            </li>
+            <li>
+              <button
+                onClick={handleLogout}
+                className="w-full flex items-center px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-red-50 hover:text-red-700 transition-colors group"
+              >
+                <LogOut size={18} className="mr-3 text-gray-400 group-hover:text-red-500 transition-colors" />
+                <span>Log out</span>
+              </button>
             </li>
           </ul>
         </nav>
@@ -269,20 +251,39 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
 
       {/* Main content */}
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        {/* Header */}
+        {/* Header: the menu item's name, and its pages as tabs */}
         <header className="bg-white border-b border-gray-200 z-10">
-          <div className="flex items-center justify-between p-4">
-            <div className="flex items-center">
-              <button
-                onClick={() => setSidebarOpen(true)}
-                aria-label="Open menu"
-                className="lg:hidden text-gray-700 hover:text-panel-600 mr-4"
-              >
-                <Menu size={24} />
-              </button>
-              <h1 className="text-xl font-semibold text-gray-900">{title}</h1>
-            </div>
+          <div className={`flex items-center px-4 ${tabs.length ? 'pt-4 pb-2' : 'py-4'}`}>
+            <button
+              onClick={() => setSidebarOpen(true)}
+              aria-label="Open menu"
+              className="lg:hidden text-gray-700 hover:text-panel-600 mr-4"
+            >
+              <Menu size={24} />
+            </button>
+            <h1 className="text-xl font-semibold text-gray-900">{group?.label ?? title}</h1>
           </div>
+          {tabs.length > 0 && (
+            <nav className="flex gap-1 overflow-x-auto px-4" aria-label={`${group!.label} pages`}>
+              {tabs.map(t => {
+                const active = location.pathname === t.path;
+                return (
+                  <Link
+                    key={t.path}
+                    to={adminPath(t.path)}
+                    onClick={e => go(e, t.path)}
+                    aria-current={active ? 'page' : undefined}
+                    className={`whitespace-nowrap border-b-2 px-3 pb-2.5 pt-1 text-sm transition-colors ${active
+                        ? 'border-panel-600 font-medium text-gray-900'
+                        : 'border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-800'
+                      }`}
+                  >
+                    {t.label}
+                  </Link>
+                );
+              })}
+            </nav>
+          )}
         </header>
 
         {/* Main content */}
