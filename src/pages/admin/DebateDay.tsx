@@ -183,7 +183,7 @@ export default function DebateDay() {
     { key: 'rounds', label: 'Rounds', icon: Timer },
     { key: 'results', label: 'Results', icon: Trophy },
   ];
-  const input = 'w-full rounded-md border border-gray-300 px-2.5 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-debate-blue/30';
+  const input = 'w-full rounded-md border border-gray-300 px-2.5 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-panel-600/30';
   const paired = (data?.pairings || []).flatMap(p => [p.a_id, p.b_id]);
   const inPairs = new Set(paired);
   // Editing a pair by hand can put someone in two pairs; allowed, but worth seeing.
@@ -212,7 +212,7 @@ export default function DebateDay() {
             <div className="flex gap-2 overflow-x-auto border-b" role="tablist">
               {tabs.map(t => (
                 <button key={t.key} role="tab" aria-selected={tab === t.key} onClick={() => { setTab(t.key); if (t.key === 'results') load(); }}
-                  className={`-mb-px inline-flex items-center gap-2 border-b-2 px-4 py-2.5 text-sm font-medium ${tab === t.key ? 'border-debate-blue text-debate-blue' : 'border-transparent text-gray-600 hover:text-gray-900'}`}>
+                  className={`-mb-px inline-flex items-center gap-2 border-b-2 px-4 py-2.5 text-sm font-medium ${tab === t.key ? 'border-panel-600 text-panel-700' : 'border-transparent text-gray-600 hover:text-gray-900'}`}>
                   <t.icon className="h-4 w-4" /> {t.label}
                 </button>
               ))}
@@ -223,14 +223,14 @@ export default function DebateDay() {
                 <div className="flex flex-wrap items-center justify-between gap-3">
                   <p className="text-sm text-gray-600">
                     {data.roster.length} accepted · {seated.length} in teams.{' '}
-                    Debaters see their team only when <Link to={adminPath('/content')} className="text-debate-blue hover:underline">Site content → Turon Debate → Show teams to debaters</Link> is on
+                    Debaters see their team only when <Link to={adminPath('/content')} className="text-panel-700 hover:underline">Site content → Turon Debate → Show teams to debaters</Link> is on
                     {debate.reveal_teams ? ' (it is).' : ' (it is off).'}
                   </p>
                   <div className="flex gap-2">
                     <button onClick={shuffleTeams} disabled={busy || !data.teams.length || !data.roster.length} title={data.teams.length ? undefined : 'Add teams first'} className="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm hover:bg-gray-50 disabled:opacity-50">
                       {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Shuffle className="h-4 w-4" />} Shuffle into teams
                     </button>
-                    <button onClick={addTeam} className="inline-flex items-center gap-1.5 rounded-lg bg-debate-blue px-3 py-2 text-sm font-medium text-white hover:bg-debate-blue-700">
+                    <button onClick={addTeam} className="inline-flex items-center gap-1.5 rounded-lg bg-panel-600 px-3 py-2 text-sm font-medium text-white hover:bg-panel-700">
                       <Plus className="h-4 w-4" /> Add team
                     </button>
                   </div>
@@ -296,7 +296,7 @@ export default function DebateDay() {
                   <p className="text-sm text-gray-600">Teammates are never paired. Change anyone with the drop-downs.</p>
                   <div className="flex gap-2">
                     <button onClick={addPair} disabled={seated.length < 2} className="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm hover:bg-gray-50 disabled:opacity-50"><Plus className="h-4 w-4" /> Add pair</button>
-                    <button onClick={generate} disabled={busy} className="inline-flex items-center gap-1.5 rounded-lg bg-debate-blue px-3 py-2 text-sm font-medium text-white hover:bg-debate-blue-700 disabled:opacity-50">
+                    <button onClick={generate} disabled={busy} className="inline-flex items-center gap-1.5 rounded-lg bg-panel-600 px-3 py-2 text-sm font-medium text-white hover:bg-panel-700 disabled:opacity-50">
                       {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Shuffle className="h-4 w-4" />} {data.pairings.length ? 'Re-generate' : 'Generate pairings'}
                     </button>
                   </div>
@@ -350,7 +350,7 @@ export default function DebateDay() {
                       className="flex-1 rounded-lg border border-gray-300 px-3 py-2 text-sm"
                     />
                     <button onClick={saveHistory} disabled={busy || !data.roster.length}
-                      className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-debate-blue px-4 py-2 text-sm font-medium text-white hover:bg-debate-blue-700 disabled:opacity-50">
+                      className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-panel-600 px-4 py-2 text-sm font-medium text-white hover:bg-panel-700 disabled:opacity-50">
                       <History className="h-4 w-4" /> Save to history
                     </button>
                   </div>

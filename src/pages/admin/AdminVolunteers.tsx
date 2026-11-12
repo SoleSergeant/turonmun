@@ -157,7 +157,7 @@ const AdminVolunteers: React.FC = () => {
             {STATUSES.map(s => (
               <button key={s} onClick={() => setStatusFilter(s)}
                 className={`px-2.5 py-1 rounded-md text-xs font-semibold capitalize transition-colors ${
-                  statusFilter === s ? 'bg-rose-600 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100'
+                  statusFilter === s ? 'bg-panel-600 text-white shadow-sm' : 'text-gray-600 hover:bg-gray-100'
                 }`}>
                 {s}
               </button>

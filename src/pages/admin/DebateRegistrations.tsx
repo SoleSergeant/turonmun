@@ -196,13 +196,13 @@ const DebateRegistrations = () => {
             <p className="text-gray-600">Registrations from {debateSiteUrl.replace('https://', '')}. Edit the site itself in Site content → Turon Debate.</p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Link to={adminPath('/debate-day')} className="inline-flex items-center gap-1 rounded-lg bg-debate-blue px-3 py-2 text-sm font-medium text-white hover:bg-debate-blue-700">
+            <Link to={adminPath('/debate-day')} className="inline-flex items-center gap-1 rounded-lg bg-panel-600 px-3 py-2 text-sm font-medium text-white hover:bg-panel-700">
               <Swords className="h-4 w-4" /> Debate day
             </Link>
             <a href={debateSiteUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 hover:bg-gray-50">
               <ExternalLink className="h-4 w-4" /> Open site
             </a>
-            <button onClick={exportCsv} disabled={shown.length === 0} className="inline-flex items-center gap-1 rounded-lg bg-green-600 px-3 py-2 text-sm text-white hover:bg-green-700 disabled:opacity-40">
+            <button onClick={exportCsv} disabled={shown.length === 0} className="inline-flex items-center gap-1 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 px-3 py-2 text-sm disabled:opacity-40">
               <Download className="h-4 w-4" /> Export CSV
             </button>
           </div>
@@ -215,14 +215,14 @@ const DebateRegistrations = () => {
         ) : (
           <>
             {untold.length > 0 && (
-              <div className="flex flex-col gap-3 rounded-lg border border-blue-200 bg-blue-50 p-4 sm:flex-row sm:items-center sm:justify-between">
-                <div className="text-sm text-blue-900">
+              <div className="flex flex-col gap-3 rounded-lg border border-panel-200 bg-panel-50 p-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="text-sm text-panel-900">
                   <p className="font-semibold">{untold.length} {untold.length === 1 ? "person hasn't" : "people haven't"} been told their result</p>
-                  <p className="text-blue-800">
+                  <p className="text-panel-800">
                     {DECIDED.map(s => ({ s, n: untold.filter(r => r.status === s).length })).filter(x => x.n).map(x => `${x.n} ${STATUSES.find(v => v.value === x.s)?.label.toLowerCase()}`).join(' · ')}
                   </p>
                 </div>
-                <button onClick={sendDecisions} disabled={emailBusy} className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50">
+                <button onClick={sendDecisions} disabled={emailBusy} className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-panel-600 px-4 py-2 text-sm font-medium text-white hover:bg-panel-700 disabled:opacity-50">
                   {emailBusy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mail className="h-4 w-4" />} Email their results
                 </button>
               </div>
@@ -233,7 +233,7 @@ const DebateRegistrations = () => {
                 <button
                   key={s.value}
                   onClick={() => setStatusFilter(s.value as Status | 'all')}
-                  className={`rounded-full px-3 py-1.5 text-sm font-medium ${statusFilter === s.value ? 'bg-diplomatic-600 text-white' : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'}`}
+                  className={`rounded-full px-3 py-1.5 text-sm font-medium ${statusFilter === s.value ? 'bg-panel-600 text-white' : 'bg-white text-gray-700 border border-gray-200 hover:bg-gray-50'}`}
                 >
                   {s.label} <span className="opacity-70">({counts[s.value] ?? 0})</span>
                 </button>
@@ -253,21 +253,21 @@ const DebateRegistrations = () => {
                     <button
                       key={side}
                       onClick={() => setSideFilter(sideFilter === side ? 'all' : side)}
-                      className={`rounded-lg border p-3 text-left transition ${sideFilter === side ? 'border-diplomatic-500 bg-diplomatic-50' : 'border-gray-200 hover:bg-gray-50'}`}
+                      className={`rounded-lg border p-3 text-left transition ${sideFilter === side ? 'border-panel-500 bg-panel-50' : 'border-gray-200 hover:bg-gray-50'}`}
                     >
                       <div className="flex items-baseline justify-between gap-2">
                         <span className="truncate text-sm font-medium text-gray-800">{side}</span>
                         <span className="text-lg font-semibold text-gray-900">{percent}%</span>
                       </div>
                       <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-gray-100">
-                        <div className="h-full rounded-full bg-diplomatic-500" style={{ width: `${percent}%` }} />
+                        <div className="h-full rounded-full bg-panel-500" style={{ width: `${percent}%` }} />
                       </div>
                       <div className="mt-1 text-xs text-gray-500">{count} registration{count === 1 ? '' : 's'}</div>
                     </button>
                   ))}
                 </div>
                 {sideFilter !== 'all' && (
-                  <button onClick={() => setSideFilter('all')} className="mt-3 text-xs text-diplomatic-700 hover:underline">Show all sides</button>
+                  <button onClick={() => setSideFilter('all')} className="mt-3 text-xs text-panel-700 hover:underline">Show all sides</button>
                 )}
               </div>
             )}
@@ -278,14 +278,14 @@ const DebateRegistrations = () => {
             </div>
 
             {selected.size > 0 && (
-              <div className="sticky top-0 z-10 flex flex-wrap items-center gap-2 rounded-lg border border-diplomatic-200 bg-diplomatic-50 px-4 py-3">
-                <span className="mr-2 text-sm font-semibold text-diplomatic-900">{selected.size} selected</span>
+              <div className="sticky top-0 z-10 flex flex-wrap items-center gap-2 rounded-lg border border-panel-200 bg-panel-50 px-4 py-3">
+                <span className="mr-2 text-sm font-semibold text-panel-900">{selected.size} selected</span>
                 {STATUSES.filter(s => s.value !== 'pending').map(s => (
                   <button key={s.value} onClick={() => setStatus([...selected], s.value)} className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm hover:bg-gray-50">
                     {s.label}
                   </button>
                 ))}
-                <button onClick={() => setEmailOpen(true)} className="inline-flex items-center gap-1 rounded-md bg-blue-600 px-3 py-1.5 text-sm text-white hover:bg-blue-700">
+                <button onClick={() => setEmailOpen(true)} className="inline-flex items-center gap-1 rounded-md bg-panel-600 px-3 py-1.5 text-sm text-white hover:bg-panel-700">
                   <Mail className="h-4 w-4" /> Email
                 </button>
                 <button onClick={() => setSelected(new Set())} className="ml-auto text-sm text-gray-500 hover:text-gray-800">Clear</button>
@@ -391,7 +391,7 @@ const DebateRegistrations = () => {
             <p className="text-xs text-gray-500">Each person gets their own copy.</p>
             <div className="flex justify-end gap-2">
               <button type="button" onClick={() => setEmailOpen(false)} className="rounded-lg border border-gray-300 px-4 py-2 text-sm">Cancel</button>
-              <button type="submit" disabled={emailBusy} className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm text-white disabled:opacity-50">
+              <button type="submit" disabled={emailBusy} className="inline-flex items-center gap-2 rounded-lg bg-panel-600 px-4 py-2 text-sm text-white disabled:opacity-50">
                 {emailBusy && <Loader2 className="h-4 w-4 animate-spin" />} Send
               </button>
             </div>

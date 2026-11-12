@@ -7,7 +7,7 @@ import { confirmAction } from '@/components/admin/ConfirmDialog';
 
 type Obj = Record<string, any>;
 
-const inputCls = 'w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-diplomatic-500 focus:ring-2 focus:ring-diplomatic-200';
+const inputCls = 'w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:border-panel-500 focus:ring-2 focus:ring-panel-200';
 
 /** Empty value for a new list item, built from its field definitions. */
 const blankFor = (fields: Field[]): Obj => {
@@ -130,7 +130,7 @@ function ListEditor({ field, value, onChange }: { field: Extract<Field, { type: 
           </div>
         );
       })}
-      <button type="button" onClick={add} className="inline-flex items-center gap-1 rounded-md border border-dashed border-gray-300 px-3 py-1.5 text-sm text-gray-600 hover:border-diplomatic-400 hover:text-diplomatic-700">
+      <button type="button" onClick={add} className="inline-flex items-center gap-1 rounded-md border border-dashed border-gray-300 px-3 py-1.5 text-sm text-gray-600 hover:border-panel-400 hover:text-panel-700">
         <Plus className="h-4 w-4" /> Add {field.itemLabel.toLowerCase()}
       </button>
     </div>
@@ -164,7 +164,7 @@ function FieldInput({ field, value, onChange }: { field: Field; value: any; onCh
     case 'boolean':
       return (
         <label className="inline-flex cursor-pointer items-center gap-2 text-sm text-gray-700">
-          <input type="checkbox" checked={!!value} onChange={e => onChange(e.target.checked)} className="h-4 w-4 rounded border-gray-300 text-diplomatic-600" />
+          <input type="checkbox" checked={!!value} onChange={e => onChange(e.target.checked)} className="h-4 w-4 rounded border-gray-300 text-panel-600" />
           {value ? 'Yes' : 'No'}
         </label>
       );

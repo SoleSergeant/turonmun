@@ -25,7 +25,7 @@ const AdminResources = () => {
     <AdminLayout title="Resources">
       {loading && !isEditing ? (
         <div className="flex items-center justify-center h-64">
-          <div className="loader w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+          <div className="loader w-8 h-8 border-4 border-panel-500 border-t-transparent rounded-full animate-spin"></div>
         </div>
       ) : isEditing ? (
         <ResourceForm

@@ -112,7 +112,7 @@ const DecisionEmailPanel: React.FC<{ applications: DecisionApp[]; onSent: () => 
           <button
             onClick={() => send(kind)}
             disabled={n === 0 || busy !== null}
-            className="flex items-center gap-2 rounded-md bg-diplomatic-600 px-3 py-2 text-sm font-medium text-white hover:bg-diplomatic-700 disabled:opacity-40"
+            className="flex items-center gap-2 rounded-md bg-panel-600 px-3 py-2 text-sm font-medium text-white hover:bg-panel-700 disabled:opacity-40"
           >
             {busy === kind ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mail className="h-4 w-4" />}
             Email {n}

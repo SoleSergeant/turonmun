@@ -117,13 +117,13 @@ const AdminLogin = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-diplomatic-50/50">
+    <div className="min-h-screen flex items-center justify-center bg-panel-50/50">
       <div className="max-w-md w-full p-8 bg-white rounded-lg shadow-lg">
         <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-diplomatic-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Shield className="text-diplomatic-700" size={24} />
+          <div className="w-16 h-16 bg-panel-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Shield className="text-panel-700" size={24} />
           </div>
-          <h1 className="text-2xl font-bold text-diplomatic-900">Admin Login</h1>
+          <h1 className="text-2xl font-bold text-panel-900">Admin Login</h1>
           <p className="text-neutral-600 mt-2">Sign in to access the TuronMUN admin dashboard</p>
         </div>
 
@@ -138,7 +138,7 @@ const AdminLogin = () => {
               autoComplete="email"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              className="w-full px-4 py-2 border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-diplomatic-500"
+              className="w-full px-4 py-2 border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-panel-500"
               placeholder="admin@turonmun.com"
               disabled={loading}
             />
@@ -156,7 +156,7 @@ const AdminLogin = () => {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-2 border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-diplomatic-500"
+              className="w-full px-4 py-2 border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-panel-500"
               placeholder="••••••••"
               disabled={loading}
             />
@@ -164,7 +164,7 @@ const AdminLogin = () => {
 
           <button
             type="submit"
-            className="w-full bg-diplomatic-700 text-white py-2 px-4 rounded-md hover:bg-diplomatic-800 transition-colors font-medium disabled:opacity-70"
+            className="w-full bg-panel-700 text-white py-2 px-4 rounded-md hover:bg-panel-800 transition-colors font-medium disabled:opacity-70"
             disabled={loading}
           >
             {loading ? 'Signing in...' : 'Sign In'}
@@ -201,7 +201,7 @@ const AdminLogin = () => {
         </div>
 
         <div className="mt-6 text-center">
-          <a href="/" className="text-diplomatic-600 hover:text-diplomatic-800 text-sm">
+          <a href="/" className="text-panel-600 hover:text-panel-800 text-sm">
             Return to Website
           </a>
         </div>

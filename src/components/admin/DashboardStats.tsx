@@ -41,7 +41,7 @@ const STATUSES = [
 
 function TypeTile({ icon: Icon, label, total, week, to }: { icon: LucideIcon; label: string; total: number; week: number; to: string }) {
   return (
-    <Link to={adminPath(to)} className="group rounded-xl border bg-white p-4 shadow-sm transition hover:border-diplomatic-200 hover:shadow-md">
+    <Link to={adminPath(to)} className="group rounded-xl border bg-white p-4 shadow-sm transition hover:border-panel-200 hover:shadow-md">
       <div className="flex items-center gap-2 text-sm text-gray-500">
         <Icon className="h-4 w-4 text-gray-400" /> {label}
       </div>
@@ -95,7 +95,7 @@ export default function DashboardStats({ delegates, chairs, volunteers, debaters
     <section aria-labelledby="season-stats" className="space-y-4">
       <div className="flex items-baseline justify-between gap-4">
         <h3 id="season-stats" className="text-lg font-semibold text-gray-900">Applications this season</h3>
-        <Link to={adminPath('/analytics')} className="inline-flex items-center gap-1 text-sm text-diplomatic-600 hover:underline">
+        <Link to={adminPath('/analytics')} className="inline-flex items-center gap-1 text-sm text-panel-600 hover:underline">
           <BarChart3 className="h-4 w-4" /> Full analytics
         </Link>
       </div>
@@ -128,7 +128,7 @@ export default function DashboardStats({ delegates, chairs, volunteers, debaters
                   onMouseEnter={() => setHover(i)}
                 >
                   <div
-                    className={`w-full rounded-t-[4px] transition-colors ${hover === i ? 'bg-diplomatic-700' : 'bg-diplomatic-500'}`}
+                    className={`w-full rounded-t-[4px] transition-colors ${hover === i ? 'bg-panel-700' : 'bg-panel-500'}`}
                     style={{ height: d.count ? `${Math.max(4, (d.count / maxDay) * 100)}%` : 0 }}
                   />
                 </div>
@@ -163,7 +163,7 @@ export default function DashboardStats({ delegates, chairs, volunteers, debaters
                   </span>
                 </div>
                 <div className="h-2 overflow-hidden rounded-full bg-gray-100">
-                  <div className="h-full rounded-full bg-diplomatic-500" style={{ width: `${(f.value / funnelMax) * 100}%` }} />
+                  <div className="h-full rounded-full bg-panel-500" style={{ width: `${(f.value / funnelMax) * 100}%` }} />
                 </div>
               </li>
             ))}
@@ -214,7 +214,7 @@ export default function DashboardStats({ delegates, chairs, volunteers, debaters
             </div>
           </div>
           <div className="mt-4 h-2 overflow-hidden rounded-full bg-gray-100" role="img" aria-label={`${expected ? Math.round((collected / expected) * 100) : 0}% of expected fees collected`}>
-            <div className="h-full rounded-full bg-diplomatic-500" style={{ width: `${expected ? (collected / expected) * 100 : 0}%` }} />
+            <div className="h-full rounded-full bg-panel-500" style={{ width: `${expected ? (collected / expected) * 100 : 0}%` }} />
           </div>
           <p className="mt-1 text-xs text-gray-500">
             {expected ? `${Math.round((collected / expected) * 100)}% of ${money(expected)} expected from accepted delegates` : 'No accepted delegates yet'}

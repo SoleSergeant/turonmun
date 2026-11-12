@@ -67,7 +67,7 @@ const FlagOverrideButton: React.FC<{ country: string }> = ({ country }) => {
         onClick={() => fileInputRef.current?.click()}
         disabled={busy}
         title={hasOverride ? 'Replace custom flag' : 'Upload custom flag'}
-        className="p-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded disabled:opacity-50"
+        className="p-1.5 text-panel-600 hover:text-panel-800 hover:bg-panel-50 rounded disabled:opacity-50"
       >
         <Upload size={14} />
       </button>
@@ -119,7 +119,7 @@ const CountryPicker: React.FC<{
         onChange={(e) => { setQuery(e.target.value); onChange(e.target.value); if (!open) setOpen(true); }}
         onFocus={() => { setQuery(value || ''); setOpen(true); }}
         placeholder={placeholder}
-        className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+        className="w-full px-4 py-2 pr-10 border border-gray-300 rounded-md focus:ring-2 focus:ring-panel-500 focus:border-transparent"
       />
       <button
         type="button"
@@ -139,7 +139,7 @@ const CountryPicker: React.FC<{
                 key={opt}
                 type="button"
                 onMouseDown={(e) => { e.preventDefault(); onChange(opt); setOpen(false); }}
-                className={`block w-full text-left px-3 py-1.5 text-sm hover:bg-blue-50 ${opt === value ? 'bg-blue-100 font-semibold' : ''}`}
+                className={`block w-full text-left px-3 py-1.5 text-sm hover:bg-panel-50 ${opt === value ? 'bg-panel-100 font-semibold' : ''}`}
               >
                 {opt}
               </button>
@@ -405,7 +405,7 @@ const CommitteeForm = ({
             <button
               type="button"
               onClick={addTopic}
-              className="text-sm text-diplomatic-600 hover:text-diplomatic-800 flex items-center"
+              className="text-sm text-panel-600 hover:text-panel-800 flex items-center"
             >
               <PlusCircle size={16} className="mr-1" /> Add Topic
             </button>
@@ -521,7 +521,7 @@ const CommitteeForm = ({
               <button
                 type="button"
                 onClick={addCountry}
-                className="text-sm text-diplomatic-600 hover:text-diplomatic-800 flex items-center"
+                className="text-sm text-panel-600 hover:text-panel-800 flex items-center"
               >
                 <PlusCircle size={16} className="mr-1" /> Add Country
               </button>
@@ -579,7 +579,7 @@ const CommitteeForm = ({
           </button>
           <button
             type="submit"
-            className="px-6 py-2 bg-diplomatic-700 text-white rounded-md hover:bg-diplomatic-800 font-semibold shadow-sm"
+            className="px-6 py-2 bg-panel-700 text-white rounded-md hover:bg-panel-800 font-semibold shadow-sm"
             disabled={isSubmitting}
           >
             {isSubmitting ? 'Saving...' : formData.id ? 'Update Committee' : 'Create Committee'}

@@ -134,7 +134,7 @@ const SiteContent = () => {
                         <button
                           onClick={() => choose(s.key)}
                           className={`flex w-full items-center justify-between rounded-md px-2 py-1.5 text-left text-sm ${
-                            s.key === activeKey ? 'bg-diplomatic-50 font-medium text-diplomatic-800' : 'text-gray-700 hover:bg-gray-50'
+                            s.key === activeKey ? 'bg-panel-50 font-medium text-panel-800' : 'text-gray-700 hover:bg-gray-50'
                           }`}
                         >
                           <span className="truncate">{s.title}</span>
@@ -152,7 +152,7 @@ const SiteContent = () => {
             <div className="flex flex-col gap-3 rounded-lg border bg-white p-5 shadow-sm sm:flex-row sm:items-start sm:justify-between">
               <div>
                 <h2 className="flex items-center gap-2 text-xl font-semibold text-gray-900">
-                  <FileText className="h-5 w-5 text-diplomatic-600" /> {section.title}
+                  <FileText className="h-5 w-5 text-panel-600" /> {section.title}
                 </h2>
                 {section.description && <p className="mt-1 text-sm text-gray-600">{section.description}</p>}
                 <p className="mt-1 text-xs text-gray-400">
@@ -178,7 +178,7 @@ const SiteContent = () => {
                 <button
                   onClick={save}
                   disabled={!dirty || saving}
-                  className="inline-flex items-center gap-2 rounded-lg bg-diplomatic-600 px-4 py-2 text-sm font-medium text-white hover:bg-diplomatic-700 disabled:opacity-40"
+                  className="inline-flex items-center gap-2 rounded-lg bg-panel-600 px-4 py-2 text-sm font-medium text-white hover:bg-panel-700 disabled:opacity-40"
                 >
                   {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                   Save
@@ -198,12 +198,12 @@ const SiteContent = () => {
             </div>
 
             {dirty && (
-              <div className="sticky bottom-4 flex items-center justify-between rounded-lg border border-diplomatic-200 bg-diplomatic-50 px-4 py-3 shadow-lg">
-                <span className="text-sm text-diplomatic-900">Unsaved changes</span>
+              <div className="sticky bottom-4 flex items-center justify-between rounded-lg border border-panel-200 bg-panel-50 px-4 py-3 shadow-lg">
+                <span className="text-sm text-panel-900">Unsaved changes</span>
                 <button
                   onClick={save}
                   disabled={saving}
-                  className="inline-flex items-center gap-2 rounded-lg bg-diplomatic-600 px-4 py-2 text-sm font-medium text-white hover:bg-diplomatic-700 disabled:opacity-50"
+                  className="inline-flex items-center gap-2 rounded-lg bg-panel-600 px-4 py-2 text-sm font-medium text-white hover:bg-panel-700 disabled:opacity-50"
                 >
                   {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                   Save

@@ -33,7 +33,7 @@ function PhotoFramer({ m, onChange }: { m: TeamMember; onChange: (p: Partial<Tea
         role="img"
         aria-label="Photo framing. Drag, or use the arrow keys, to move the photo."
         tabIndex={0}
-        className="relative overflow-hidden rounded-xl bg-gray-100 cursor-grab active:cursor-grabbing touch-none select-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-500"
+        className="relative overflow-hidden rounded-xl bg-gray-100 cursor-grab active:cursor-grabbing touch-none select-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-panel-500"
         style={{ width: FRAME, height: FRAME }}
         onPointerDown={e => { e.currentTarget.setPointerCapture(e.pointerId); drag.current = { x: e.clientX, y: e.clientY }; }}
         onPointerMove={e => {
@@ -56,11 +56,11 @@ function PhotoFramer({ m, onChange }: { m: TeamMember; onChange: (p: Partial<Tea
           <input
             type="range" min={1} max={3} step={0.05} value={m.photo_zoom}
             onChange={e => onChange({ photo_zoom: Number(e.target.value) })}
-            className="block w-full accent-blue-600"
+            className="block w-full accent-panel-600"
           />
         </label>
         <p className="text-xs text-gray-500">Drag the photo (or use the arrow keys) to move it.</p>
-        <button type="button" onClick={() => onChange(CENTRED)} className="inline-flex items-center gap-1 text-xs text-gray-600 hover:text-blue-600">
+        <button type="button" onClick={() => onChange(CENTRED)} className="inline-flex items-center gap-1 text-xs text-gray-600 hover:text-panel-600">
           <RotateCcw className="h-3.5 w-3.5" /> Reset framing
         </button>
       </div>
@@ -85,7 +85,7 @@ const shrink = (file: File): Promise<Blob> =>
     img.src = URL.createObjectURL(file);
   });
 
-const input = 'w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500';
+const input = 'w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-panel-500';
 
 const AdminTeam = () => {
   const { toast } = useToast();
@@ -167,9 +167,9 @@ const AdminTeam = () => {
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <p className="text-gray-600">
-            People on the public <a href="https://www.turonmun.com/team" target="_blank" rel="noreferrer" className="text-blue-600 underline">Team page</a>, grouped by team. Lower order numbers come first.
+            People on the public <a href="https://www.turonmun.com/team" target="_blank" rel="noreferrer" className="text-panel-600 underline">Team page</a>, grouped by team. Lower order numbers come first.
           </p>
-          <button onClick={() => setDraft(blank(teams[0]))} className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700">
+          <button onClick={() => setDraft(blank(teams[0]))} className="flex items-center gap-2 px-3 py-2 bg-panel-600 text-white rounded-lg text-sm hover:bg-panel-700">
             <Plus className="h-4 w-4" /> Add person
           </button>
         </div>
@@ -227,7 +227,7 @@ const AdminTeam = () => {
               )}
             </div>
             <div className="flex gap-2">
-              <button onClick={save} disabled={saving || uploading} className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 disabled:opacity-50">
+              <button onClick={save} disabled={saving || uploading} className="px-4 py-2 bg-panel-600 text-white rounded-lg text-sm hover:bg-panel-700 disabled:opacity-50">
                 {saving ? 'Saving…' : 'Save'}
               </button>
               <button onClick={() => setDraft(null)} className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm hover:bg-gray-50">Cancel</button>
@@ -258,7 +258,7 @@ const AdminTeam = () => {
                       </p>
                       <p className="text-sm text-gray-500 truncate">{m.role || '—'} · order {m.sort_order}</p>
                     </div>
-                    <button onClick={() => setDraft({ ...m })} className="p-2 text-gray-500 hover:text-blue-600" aria-label={`Edit ${m.name}`}><Pencil className="h-4 w-4" /></button>
+                    <button onClick={() => setDraft({ ...m })} className="p-2 text-gray-500 hover:text-panel-600" aria-label={`Edit ${m.name}`}><Pencil className="h-4 w-4" /></button>
                     <button onClick={() => remove(m)} className="p-2 text-gray-500 hover:text-red-600" aria-label={`Remove ${m.name}`}><Trash2 className="h-4 w-4" /></button>
                   </li>
                 ))}

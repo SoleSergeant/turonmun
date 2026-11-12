@@ -64,6 +64,21 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
+				// Admin panel accent: one calm, slightly muted blue for every action,
+				// link and selection (white text passes contrast from 600 up).
+				panel: {
+					50: '#f3f6fb',
+					100: '#e5ebf5',
+					200: '#cad6ea',
+					300: '#a5b8d8',
+					400: '#7b94c2',
+					500: '#5a76ab',
+					600: '#445f93',
+					700: '#384e7a',
+					800: '#2f4164',
+					900: '#283652',
+					950: '#1a2336',
+				},
 				// New MUN specific colors - elegant, diplomatic palette
 				// Turon Debate brand (logo files in public/debate): blue #013399, maroon #800032.
 				'debate-blue': {

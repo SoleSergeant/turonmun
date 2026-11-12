@@ -24,7 +24,7 @@ const ResourceList: React.FC<ResourceListProps> = ({
         <p className="text-gray-500 mb-4">No resources found</p>
         <button
           onClick={() => setIsEditing(true)}
-          className="text-diplomatic-600 hover:text-diplomatic-800 font-medium"
+          className="text-panel-600 hover:text-panel-800 font-medium"
         >
           Create your first resource
         </button>
@@ -53,7 +53,7 @@ const ResourceList: React.FC<ResourceListProps> = ({
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">
                     <div className="mr-2">
-                      <IconComponent size={18} className="text-diplomatic-700" />
+                      <IconComponent size={18} className="text-panel-700" />
                     </div>
                     <span>{resource.category}</span>
                   </div>
@@ -69,7 +69,7 @@ const ResourceList: React.FC<ResourceListProps> = ({
                     href={resource.link} 
                     target="_blank" 
                     rel="noopener noreferrer"
-                    className="text-diplomatic-600 hover:text-diplomatic-800 flex items-center"
+                    className="text-panel-600 hover:text-panel-800 flex items-center"
                   >
                     <Link size={16} className="mr-1" />
                     <span className="text-sm">View</span>
@@ -79,7 +79,7 @@ const ResourceList: React.FC<ResourceListProps> = ({
                 <td className="px-6 py-4 text-right text-sm font-medium whitespace-nowrap">
                   <button
                     onClick={() => handleEdit(resource)}
-                    className="text-diplomatic-600 hover:text-diplomatic-900 mr-3"
+                    className="text-panel-600 hover:text-panel-900 mr-3"
                   >
                     <Edit size={18} />
                   </button>

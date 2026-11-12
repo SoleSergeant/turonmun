@@ -190,7 +190,7 @@ const ByCommitteeView = () => {
             onChange={(e) => setSearch(e.target.value)}
             aria-label="Search committees"
             placeholder="Search committees..."
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-panel-500"
           />
         </div>
 
@@ -232,9 +232,9 @@ const ByCommitteeView = () => {
               return (
                 <div key={committee.id} className="bg-white rounded-lg shadow-sm border overflow-hidden">
                   {/* Committee header */}
-                  <div className="flex items-center justify-between px-5 py-3 bg-gradient-to-r from-diplomatic-50 to-white border-b">
+                  <div className="flex items-center justify-between px-5 py-3 bg-panel-50 border-b">
                     <div className="flex items-center gap-2">
-                      <Users className="h-4 w-4 text-diplomatic-600" />
+                      <Users className="h-4 w-4 text-panel-600" />
                       <span className="font-semibold text-gray-900">{committee.name}</span>
                       {!rosterMode && (
                         <span className="text-[11px] text-amber-700 bg-amber-50 border border-amber-200 rounded-full px-2 py-0.5">
@@ -339,7 +339,7 @@ const ByCommitteeView = () => {
                             aria-label="Country"
                             value={draftVal}
                             onChange={(e) => setDrafts(prev => ({ ...prev, [key]: e.target.value }))}
-                            className="w-32 text-sm border border-gray-300 rounded px-1.5 py-1 bg-white focus:ring-1 focus:ring-blue-400 focus:outline-none"
+                            className="w-32 text-sm border border-gray-300 rounded px-1.5 py-1 bg-white focus:ring-1 focus:ring-panel-400 focus:outline-none"
                           >
                             <option value="">Pick country…</option>
                             {options.map(c => <option key={c} value={c}>{c}</option>)}

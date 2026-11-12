@@ -246,7 +246,7 @@ const CheckIn = () => {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setScanning(true)}
-              className="flex items-center gap-2 px-3 py-2 bg-diplomatic-600 text-white rounded-lg text-sm font-medium hover:bg-diplomatic-700"
+              className="flex items-center gap-2 px-3 py-2 bg-panel-600 text-white rounded-lg text-sm font-medium hover:bg-panel-700"
             ><QrCode className="h-4 w-4" /> Scan QR</button>
             <button
               onClick={() => fetchAll()}
@@ -254,7 +254,7 @@ const CheckIn = () => {
             >Refresh</button>
             <button
               onClick={exportCSV}
-              className="flex items-center gap-2 px-3 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700"
+              className="flex items-center gap-2 px-3 py-2 border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 rounded-lg text-sm"
             ><Download className="h-4 w-4" /> Export CSV</button>
           </div>
         </div>
@@ -297,7 +297,7 @@ const CheckIn = () => {
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by name, email, country, committee, or 'chair'…"
-              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-panel-500"
             />
           </div>
           <label className="flex items-center gap-2 text-sm text-gray-700">
@@ -351,7 +351,7 @@ const CheckIn = () => {
                   ) : (
                     <button
                       onClick={() => setSelected(p)}
-                      className="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700"
+                      className="px-3 py-1.5 bg-panel-600 text-white rounded-lg text-sm font-semibold hover:bg-panel-700"
                     >Check in</button>
                   )}
                 </div>
@@ -366,8 +366,8 @@ const CheckIn = () => {
             <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
               <div className={`px-6 py-4 text-white flex items-center justify-between ${
                 selected.kind === 'chair'
-                  ? 'bg-gradient-to-r from-purple-600 to-purple-700'
-                  : 'bg-gradient-to-r from-amber-500 to-orange-500'
+                  ? 'bg-purple-700'
+                  : 'bg-amber-700'
               }`}>
                 <span className="text-sm font-bold uppercase tracking-wider">
                   🎫 Hand them their {selected.kind === 'chair' ? `${roleLabel(selected)} badge` : 'badge'}

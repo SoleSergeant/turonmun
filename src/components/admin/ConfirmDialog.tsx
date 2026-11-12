@@ -81,7 +81,7 @@ export function ConfirmHost() {
         onMouseDown={e => e.stopPropagation()}
       >
         <div className="flex gap-4">
-          <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${req.danger ? 'bg-red-100 text-red-600' : 'bg-diplomatic-100 text-diplomatic-700'}`}>
+          <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${req.danger ? 'bg-red-100 text-red-600' : 'bg-panel-100 text-panel-700'}`}>
             <Icon className="h-5 w-5" />
           </div>
           <div className="min-w-0">
@@ -93,14 +93,14 @@ export function ConfirmHost() {
           <button
             ref={cancelRef}
             onClick={() => close(false)}
-            className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-diplomatic-500"
+            className="rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-panel-500"
           >
             Cancel
           </button>
           <button
             ref={confirmRef}
             onClick={() => close(true)}
-            className={`rounded-lg px-4 py-2 text-sm font-semibold text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${req.danger ? 'bg-red-600 hover:bg-red-700 focus-visible:ring-red-500' : 'bg-diplomatic-600 hover:bg-diplomatic-700 focus-visible:ring-diplomatic-500'}`}
+            className={`rounded-lg px-4 py-2 text-sm font-semibold text-white focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 ${req.danger ? 'bg-red-600 hover:bg-red-700 focus-visible:ring-red-500' : 'bg-panel-600 hover:bg-panel-700 focus-visible:ring-panel-500'}`}
           >
             {req.confirmLabel || (req.danger ? 'Delete' : 'Confirm')}
           </button>

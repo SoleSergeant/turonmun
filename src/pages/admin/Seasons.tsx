@@ -155,7 +155,7 @@ const Seasons = () => {
                         <button
                           onClick={() => exportSeason(s)}
                           disabled={exporting !== null}
-                          className="inline-flex items-center gap-1 text-sm text-diplomatic-600 hover:underline disabled:opacity-50"
+                          className="inline-flex items-center gap-1 text-sm text-panel-600 hover:underline disabled:opacity-50"
                         >
                           {exporting === s.number ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
                           Export
@@ -169,7 +169,7 @@ const Seasons = () => {
 
             <div className="rounded-lg border border-red-200 bg-white p-6 shadow-sm">
               <h3 className="flex items-center gap-2 text-lg font-semibold text-gray-900">
-                <CalendarRange className="h-5 w-5 text-diplomatic-600" /> Start a new season
+                <CalendarRange className="h-5 w-5 text-panel-600" /> Start a new season
               </h3>
               <div className="mt-3 rounded-md bg-red-50 p-3 text-sm text-red-800">
                 <p className="mb-1 flex items-center gap-1 font-semibold"><AlertTriangle className="h-4 w-4" /> This will:</p>

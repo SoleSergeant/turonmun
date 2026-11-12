@@ -112,7 +112,7 @@ const MergeDemographicsModal: React.FC<Props> = ({ field, buckets, aliases, onCl
         {/* Header */}
         <div className="flex items-center justify-between p-5 border-b">
           <div className="flex items-center gap-2">
-            <Merge className="h-5 w-5 text-diplomatic-600" />
+            <Merge className="h-5 w-5 text-panel-600" />
             <h3 className="text-lg font-semibold text-gray-900">Merge duplicate {LABEL[field]}</h3>
           </div>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X size={20} /></button>
@@ -149,7 +149,7 @@ const MergeDemographicsModal: React.FC<Props> = ({ field, buckets, aliases, onCl
                     type="checkbox"
                     checked={selected.has(b.name)}
                     onChange={() => toggle(b.name)}
-                    className="rounded border-gray-300 text-diplomatic-600 focus:ring-diplomatic-500"
+                    className="rounded border-gray-300 text-panel-600 focus:ring-panel-500"
                   />
                   <span className="text-sm text-gray-800 truncate">{b.name}</span>
                 </div>
@@ -160,14 +160,14 @@ const MergeDemographicsModal: React.FC<Props> = ({ field, buckets, aliases, onCl
 
           {/* Canonical name + action */}
           {selected.size > 0 && (
-            <div className="bg-diplomatic-50 border border-diplomatic-100 rounded-lg p-3 space-y-2">
-              <label className="text-xs font-medium text-diplomatic-800">Count all selected as:</label>
+            <div className="bg-panel-50 border border-panel-100 rounded-lg p-3 space-y-2">
+              <label className="text-xs font-medium text-panel-800">Count all selected as:</label>
               <input
                 type="text"
                 value={canonical}
                 onChange={(e) => setCanonical(e.target.value)}
                 list="merge-canonical-options"
-                className="w-full px-3 py-2 border border-diplomatic-200 rounded-md text-sm"
+                className="w-full px-3 py-2 border border-panel-200 rounded-md text-sm"
                 placeholder="Canonical name to keep"
               />
               <datalist id="merge-canonical-options">
@@ -176,7 +176,7 @@ const MergeDemographicsModal: React.FC<Props> = ({ field, buckets, aliases, onCl
               <button
                 onClick={handleMerge}
                 disabled={saving}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-diplomatic-600 hover:bg-diplomatic-700 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-60"
+                className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-panel-600 hover:bg-panel-700 text-white rounded-lg text-sm font-medium transition-colors disabled:opacity-60"
               >
                 {saving ? <Loader2 size={16} className="animate-spin" /> : <Merge size={16} />}
                 Merge {selected.size} value{selected.size > 1 ? 's' : ''}

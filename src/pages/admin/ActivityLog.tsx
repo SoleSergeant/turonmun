@@ -31,7 +31,7 @@ const ACTION_TONE: Record<string, string> = {
   seat_removed: 'bg-red-100 text-red-700',
   account_deleted: 'bg-red-100 text-red-700',
   account_disabled: 'bg-red-100 text-red-700',
-  email_sent: 'bg-blue-100 text-blue-700',
+  email_sent: 'bg-panel-100 text-panel-700',
   seat_assigned: 'bg-purple-100 text-purple-700',
   payment_changed: 'bg-amber-100 text-amber-700',
   season_started: 'bg-green-100 text-green-700',

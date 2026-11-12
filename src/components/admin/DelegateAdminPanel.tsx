@@ -88,10 +88,10 @@ export default function DelegateAdminPanel({ app, seat, onChange }: {
     app.emergency_contact_relation && `(${app.emergency_contact_relation})`,
   ].filter(Boolean).join(' · ');
 
-  const input = 'w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-diplomatic-500';
+  const input = 'w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-panel-500';
 
   return (
-    <div className="rounded-xl border border-diplomatic-200 bg-diplomatic-50/60 p-5">
+    <div className="rounded-xl border border-panel-200 bg-panel-50/60 p-5">
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div>
           <p className="mb-1 flex items-center gap-1.5 text-xs font-semibold uppercase tracking-wide text-gray-500"><CreditCard size={13} /> Payment</p>
@@ -117,7 +117,7 @@ export default function DelegateAdminPanel({ app, seat, onChange }: {
           {seat ? (
             <p className="text-sm font-medium text-gray-900">{seat.country}<span className="block text-xs font-normal text-gray-600">{seat.committee}</span></p>
           ) : accepted && app.payment_status === 'paid' ? (
-            <Link to={adminPath('/allocation')} className="text-sm font-medium text-diplomatic-700 hover:underline">Allocate a seat →</Link>
+            <Link to={adminPath('/allocation')} className="text-sm font-medium text-panel-700 hover:underline">Allocate a seat →</Link>
           ) : (
             <p className="text-sm text-gray-500">After payment</p>
           )}
@@ -145,7 +145,7 @@ export default function DelegateAdminPanel({ app, seat, onChange }: {
       </div>
 
       {editing ? (
-        <form onSubmit={saveDetails} className="mt-5 grid gap-3 border-t border-diplomatic-200 pt-4 sm:grid-cols-2">
+        <form onSubmit={saveDetails} className="mt-5 grid gap-3 border-t border-panel-200 pt-4 sm:grid-cols-2">
           <label className="text-xs font-medium text-gray-600">Full name<input name="full_name" required defaultValue={app.full_name} className={input} /></label>
           <label className="text-xs font-medium text-gray-600">Email<input name="email" type="email" required defaultValue={app.email} className={input} /></label>
           <label className="text-xs font-medium text-gray-600">Phone<input name="phone" type="tel" defaultValue={app.phone || ''} className={input} /></label>
@@ -153,13 +153,13 @@ export default function DelegateAdminPanel({ app, seat, onChange }: {
           <label className="text-xs font-medium text-gray-600 sm:col-span-2">Home city / country<input name="country" defaultValue={app.country || ''} className={input} /></label>
           <div className="flex justify-end gap-2 sm:col-span-2">
             <button type="button" onClick={() => setEditing(false)} className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm hover:bg-gray-50">Cancel</button>
-            <button type="submit" disabled={saving} className="inline-flex items-center gap-2 rounded-lg bg-diplomatic-600 px-4 py-2 text-sm font-semibold text-white hover:bg-diplomatic-700 disabled:opacity-50">
+            <button type="submit" disabled={saving} className="inline-flex items-center gap-2 rounded-lg bg-panel-600 px-4 py-2 text-sm font-semibold text-white hover:bg-panel-700 disabled:opacity-50">
               {saving && <Loader2 className="h-4 w-4 animate-spin" />} Save details
             </button>
           </div>
         </form>
       ) : (
-        <button onClick={() => setEditing(true)} className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-diplomatic-700 hover:underline">
+        <button onClick={() => setEditing(true)} className="mt-4 inline-flex items-center gap-1.5 text-sm font-medium text-panel-700 hover:underline">
           <Pencil size={14} /> Edit contact details
         </button>
       )}

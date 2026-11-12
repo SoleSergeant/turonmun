@@ -158,38 +158,38 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
 
       {/* Sidebar */}
       <aside
-        className={`fixed inset-y-0 left-0 z-30 w-64 transform bg-gradient-to-b from-diplomatic-900 to-diplomatic-800 text-white transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 shadow-xl flex flex-col ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        className={`fixed inset-y-0 left-0 z-30 w-64 transform bg-white border-r border-gray-200 text-gray-700 transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0 shadow-xl lg:shadow-none flex flex-col ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'
           }`}
       >
-        <div className="p-6 flex items-center justify-between border-b border-white/10 shrink-0">
+        <div className="px-5 py-4 flex items-center justify-between border-b border-gray-200 shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-white/20 to-white/5 backdrop-blur-sm rounded-xl flex items-center justify-center border border-white/10 shadow-inner">
+            <div className="w-9 h-9 bg-panel-700 rounded-lg flex items-center justify-center">
               <img
                 src="/logos/turonmun-logo-320.png"
                 alt="TuronMUN Logo"
-                className="w-7 h-7 object-contain drop-shadow-md"
+                className="w-6 h-6 object-contain"
               />
             </div>
             <div>
-              <span className="block text-lg font-bold tracking-tight text-white">TuronMUN</span>
-              <span className="block text-xs text-diplomatic-200 font-medium tracking-wider uppercase">
-                Admin Panel{seasonName ? ` · ${seasonName}` : ''}
+              <span className="block text-base font-semibold tracking-tight text-gray-900">TuronMUN</span>
+              <span className="block text-xs text-gray-500">
+                Admin panel{seasonName ? ` · ${seasonName}` : ''}
               </span>
             </div>
           </div>
           <button
             onClick={() => setSidebarOpen(false)}
             aria-label="Close menu"
-            className="lg:hidden text-white/70 hover:text-white transition-colors"
+            className="lg:hidden text-gray-400 hover:text-gray-700 transition-colors"
           >
             <X size={20} />
           </button>
         </div>
 
-        <nav className="mt-6 px-3 flex-1 overflow-y-auto pb-4">
+        <nav className="mt-4 px-3 flex-1 overflow-y-auto pb-4">
           {navGroups.map(({ group, items }) => (
             <div key={group} className="mb-4">
-              <div className="px-3 py-1.5 text-[10px] font-bold text-diplomatic-200 uppercase tracking-widest opacity-80">
+              <div className="px-3 py-1.5 text-[11px] font-semibold text-gray-500 uppercase tracking-wider">
                 {group}
               </div>
               <ul className="space-y-0.5">
@@ -208,16 +208,14 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
                           setSidebarOpen(false);
                           navigate(adminPath(item.path));
                         }}
-                        className={`flex items-center px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group ${active
-                            ? 'bg-white/10 text-white shadow-sm border border-white/5'
-                            : 'text-diplomatic-100 hover:bg-white/5 hover:text-white hover:translate-x-1'
+                        aria-current={active ? 'page' : undefined}
+                        className={`flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors group ${active
+                            ? 'bg-panel-50 text-panel-800'
+                            : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
                           }`}
                       >
-                        <item.icon size={18} className={`mr-3 transition-colors ${active ? 'text-diplomatic-200' : 'text-diplomatic-400 group-hover:text-diplomatic-200'}`} />
+                        <item.icon size={18} className={`mr-3 transition-colors ${active ? 'text-panel-600' : 'text-gray-400 group-hover:text-gray-600'}`} />
                         <span>{item.label}</span>
-                        {active && (
-                          <div className="ml-auto w-1.5 h-1.5 rounded-full bg-diplomatic-200 shadow-[0_0_8px_rgba(255,255,255,0.5)]" />
-                        )}
                       </Link>
                     </li>
                   );
@@ -226,16 +224,16 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
             </div>
           ))}
 
-          <div className="px-3 py-1.5 mt-4 text-[10px] font-bold text-diplomatic-200 uppercase tracking-widest opacity-80">
+          <div className="px-3 py-1.5 mt-4 text-[11px] font-semibold text-gray-500 uppercase tracking-wider">
             Account
           </div>
-          <ul className="mt-1 space-y-1">
+          <ul className="mt-1 space-y-0.5">
             <li>
               <button
                 onClick={handleLogout}
-                className="w-full flex items-center px-4 py-3 rounded-lg text-sm font-medium text-diplomatic-100 hover:bg-red-500/10 hover:text-red-200 hover:border hover:border-red-500/20 transition-all duration-200 group"
+                className="w-full flex items-center px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-red-50 hover:text-red-700 transition-colors group"
               >
-                <LogOut size={18} className="mr-3 text-diplomatic-400 group-hover:text-red-300 transition-colors" />
+                <LogOut size={18} className="mr-3 text-gray-400 group-hover:text-red-500 transition-colors" />
                 <span>Logout</span>
               </button>
             </li>
@@ -244,9 +242,9 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
                 href="/"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center px-4 py-3 rounded-lg text-sm font-medium text-diplomatic-100 hover:bg-white/5 hover:text-white transition-all duration-200 group"
+                className="flex items-center px-3 py-2 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors group"
               >
-                <Globe size={18} className="mr-3 text-diplomatic-400 group-hover:text-diplomatic-200 transition-colors" />
+                <Globe size={18} className="mr-3 text-gray-400 group-hover:text-gray-600 transition-colors" />
                 <span>View Website</span>
               </a>
             </li>
@@ -254,14 +252,14 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
         </nav>
 
         {/* User Profile Snippet at Bottom */}
-        <div className="shrink-0 p-4 bg-black/20 backdrop-blur-sm border-t border-white/5">
+        <div className="shrink-0 px-4 py-3 bg-gray-50 border-t border-gray-200">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-diplomatic-700 flex items-center justify-center text-xs font-bold text-white border border-white/10">
+            <div className="w-8 h-8 rounded-full bg-panel-100 flex items-center justify-center text-xs font-semibold text-panel-700">
               {(displayName?.charAt(0) || 'A').toUpperCase()}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium text-white truncate">{displayName}</p>
-              <p className="text-xs text-diplomatic-300 truncate">
+              <p className="text-sm font-medium text-gray-900 truncate">{displayName}</p>
+              <p className="text-xs text-gray-500 truncate">
                 {role ? ROLE_LABELS[role] : 'Admin'}
               </p>
             </div>
@@ -272,13 +270,13 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children, title }) => {
       {/* Main content */}
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         {/* Header */}
-        <header className="bg-white border-b shadow-sm z-10">
+        <header className="bg-white border-b border-gray-200 z-10">
           <div className="flex items-center justify-between p-4">
             <div className="flex items-center">
               <button
                 onClick={() => setSidebarOpen(true)}
                 aria-label="Open menu"
-                className="lg:hidden text-gray-700 hover:text-diplomatic-600 mr-4"
+                className="lg:hidden text-gray-700 hover:text-panel-600 mr-4"
               >
                 <Menu size={24} />
               </button>

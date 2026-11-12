@@ -171,7 +171,7 @@ const AdminDashboard = () => {
           <p className="text-sm">{error}</p>
         </div>
       ) : !snap || roleLoading ? (
-        <div className="flex h-64 items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-diplomatic-600" /></div>
+        <div className="flex h-64 items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-panel-600" /></div>
       ) : (
         <div className="space-y-8">
           <div>
@@ -195,7 +195,7 @@ const AdminDashboard = () => {
                           <span className="block font-medium text-gray-900">{t.title}</span>
                           <span className="block text-sm text-gray-500">{t.hint}</span>
                         </span>
-                        <ChevronRight className="h-4 w-4 shrink-0 text-gray-300 group-hover:text-diplomatic-600" aria-hidden />
+                        <ChevronRight className="h-4 w-4 shrink-0 text-gray-300 group-hover:text-panel-600" aria-hidden />
                       </Link>
                     </li>
                   ))}
@@ -223,7 +223,7 @@ const AdminDashboard = () => {
             <div className="rounded-xl border bg-white shadow-sm">
               <div className="flex items-center justify-between border-b px-5 py-3">
                 <h3 className="font-semibold text-gray-800">Latest applications</h3>
-                <Link to={adminPath('/delegates')} className="text-sm text-diplomatic-600 hover:underline">All delegates</Link>
+                <Link to={adminPath('/delegates')} className="text-sm text-panel-600 hover:underline">All delegates</Link>
               </div>
               <ul className="divide-y divide-gray-100">
                 {recent.map(a => (

@@ -75,7 +75,7 @@ function ScoreCard({ team, tone, data, criteria, userId, judgeName, onSaved, onD
                 value={values[c.label] ?? ''}
                 onChange={e => setValues(v => ({ ...v, [c.label]: e.target.value }))}
                 aria-label={`${c.label} for team ${team.label}, out of ${c.max}`}
-                className={`w-20 rounded-md border px-2 py-1.5 text-right tabular-nums focus:outline-none focus:ring-2 focus:ring-debate-blue/30 ${Number(values[c.label]) > c.max ? 'border-red-400' : 'border-gray-300'}`}
+                className={`w-20 rounded-md border px-2 py-1.5 text-right tabular-nums focus:outline-none focus:ring-2 focus:ring-panel-600/30 ${Number(values[c.label]) > c.max ? 'border-red-400' : 'border-gray-300'}`}
               />
               <span className="w-8 text-xs text-gray-400">/{c.max}</span>
             </span>
@@ -87,7 +87,7 @@ function ScoreCard({ team, tone, data, criteria, userId, judgeName, onSaved, onD
 
       <div className="mt-3 flex items-center justify-between">
         <p className="text-sm text-gray-600">Total <span className="text-lg font-semibold tabular-nums text-gray-900">{total}</span> / {max}</p>
-        <button onClick={save} disabled={saving || !complete || !dirty} className="inline-flex items-center gap-2 rounded-lg bg-debate-maroon px-4 py-2 text-sm font-semibold text-white hover:bg-debate-maroon-700 disabled:opacity-40">
+        <button onClick={save} disabled={saving || !complete || !dirty} className="inline-flex items-center gap-2 rounded-lg bg-panel-600 px-4 py-2 text-sm font-semibold text-white hover:bg-panel-700 disabled:opacity-40">
           {saving && <Loader2 className="h-4 w-4 animate-spin" />} {mine ? 'Update' : 'Save'}
         </button>
       </div>
@@ -207,7 +207,7 @@ export default function Judging() {
                 onSubmit={e => { e.preventDefault(); if (newJudge.trim()) { switchJudge({ id: crypto.randomUUID(), name: newJudge.trim() }); setNewJudge(null); } }}
               >
                 <input autoFocus value={newJudge} onChange={e => setNewJudge(e.target.value)} placeholder="Judge's name" className="rounded-md border border-gray-300 px-2 py-1.5" />
-                <button className="rounded-md bg-debate-blue px-3 py-1.5 font-medium text-white hover:bg-debate-blue-700">Start</button>
+                <button className="rounded-md bg-panel-600 px-3 py-1.5 font-medium text-white hover:bg-panel-700">Start</button>
               </form>
             )}
             {scoringFor && <span className="text-amber-800">Typing in {scoringFor.name}'s paper sheet. Scores and votes below are saved under their name.</span>}
@@ -223,7 +223,7 @@ export default function Judging() {
             <div className="grid grid-cols-3 border-b sm:flex sm:gap-1" role="tablist">
               {tabs.map(t => (
                 <button key={t.key} role="tab" aria-selected={tab === t.key} onClick={() => { setTab(t.key); load(); }}
-                  className={`-mb-px flex flex-col items-center justify-center gap-0.5 whitespace-nowrap border-b-2 px-1 py-2 text-sm font-medium sm:flex-row sm:justify-start sm:gap-2 sm:px-4 sm:py-2.5 ${tab === t.key ? 'border-debate-blue text-debate-blue' : 'border-transparent text-gray-600 hover:text-gray-900'}`}>
+                  className={`-mb-px flex flex-col items-center justify-center gap-0.5 whitespace-nowrap border-b-2 px-1 py-2 text-sm font-medium sm:flex-row sm:justify-start sm:gap-2 sm:px-4 sm:py-2.5 ${tab === t.key ? 'border-panel-600 text-panel-700' : 'border-transparent text-gray-600 hover:text-gray-900'}`}>
                   <t.icon className="hidden h-4 w-4 sm:block" aria-hidden /> {t.label}
                   {t.key === 'scores' && <span className="text-xs text-gray-400">{scored}/{data.teams.length}</span>}
                   {t.key === 'pairs' && <span className="text-xs text-gray-400">{voted}/{data.pairings.length}</span>}

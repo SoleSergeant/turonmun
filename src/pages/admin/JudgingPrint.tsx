@@ -40,7 +40,7 @@ export default function JudgingPrint() {
     <div className="mx-auto max-w-3xl p-8 text-gray-900 print:max-w-none print:p-0">
       <div className="mb-8 flex items-center justify-between rounded-lg border bg-gray-50 p-4 print:hidden">
         <p className="text-sm text-gray-600">{data.teams.length} team sheet{data.teams.length === 1 ? '' : 's'}{data.pairings.length ? ' + one-on-one page' : ''}. Print one set per paper judge.</p>
-        <button onClick={() => window.print()} className="inline-flex items-center gap-2 rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white">
+        <button onClick={() => window.print()} className="inline-flex items-center gap-2 rounded-lg bg-panel-700 px-4 py-2 text-sm font-medium text-white hover:bg-panel-800">
           <Printer className="h-4 w-4" /> Print
         </button>
       </div>

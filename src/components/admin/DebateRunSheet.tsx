@@ -38,7 +38,7 @@ function RoundTimer({ seconds }: { seconds: number }) {
         {clock(left)}
       </span>
       <div className="flex gap-2">
-        <button onClick={() => setRunning(r => !r)} className="inline-flex items-center gap-1.5 rounded-lg bg-debate-blue px-4 py-2.5 text-sm font-medium text-white hover:bg-debate-blue-700">
+        <button onClick={() => setRunning(r => !r)} className="inline-flex items-center gap-1.5 rounded-lg bg-panel-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-panel-700">
           {running ? <><Pause className="h-4 w-4" /> Pause</> : <><Play className="h-4 w-4" /> Start</>}
         </button>
         <button onClick={() => { setRunning(false); setLeft(seconds); }} className="inline-flex items-center gap-1.5 rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm hover:bg-gray-50">
@@ -69,7 +69,7 @@ export default function DebateRunSheet({ data, onGeneratePairings, generating }:
         {ROUNDS.map((r, i) => (
           <li key={r.title}>
             <button onClick={() => update({ round: i })} aria-current={saved.round === i ? 'step' : undefined}
-              className={`h-full w-full rounded-xl border p-3 text-left text-sm transition ${saved.round === i ? 'border-debate-blue bg-debate-blue text-white' : 'bg-white hover:border-gray-300'}`}>
+              className={`h-full w-full rounded-xl border p-3 text-left text-sm transition ${saved.round === i ? 'border-panel-600 bg-panel-600 text-white' : 'bg-white hover:border-gray-300'}`}>
               <span className={`block text-xs font-semibold uppercase ${saved.round === i ? 'text-white/70' : 'text-gray-400'}`}>Round {i + 1}</span>
               <span className="font-medium">{r.title}</span>
             </button>

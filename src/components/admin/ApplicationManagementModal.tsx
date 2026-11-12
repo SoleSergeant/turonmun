@@ -233,7 +233,7 @@ const ApplicationManagementModal: React.FC<ApplicationManagementModalProps> = ({
       <div className="absolute inset-4 md:inset-8 lg:inset-12 bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col max-w-6xl mx-auto">
         
         {/* ─── Header ─── */}
-        <div className="relative flex flex-wrap items-center justify-between gap-3 px-5 py-4 pr-14 sm:px-8 sm:py-5 border-b border-gray-200 bg-gradient-to-r from-slate-800 to-slate-900">
+        <div className="relative flex flex-wrap items-center justify-between gap-3 px-5 py-4 pr-14 sm:px-8 sm:py-5 border-b border-gray-200 bg-panel-900">
           <div className="flex items-center space-x-4">
             {photoUrl ? (
               <img src={photoUrl} alt={application.full_name}
@@ -295,12 +295,12 @@ const ApplicationManagementModal: React.FC<ApplicationManagementModalProps> = ({
               {/* Personal Information */}
               <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
                 <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-3 flex items-center gap-2">
-                  <User size={16} className="text-blue-600" /> Personal Information
+                  <User size={16} className="text-panel-600" /> Personal Information
                 </h3>
                 <div className="divide-y divide-gray-100">
                   <DetailRow icon={Mail} label="Email" value={
-                    <a href={`mailto:${application.email}`} className="text-blue-600 hover:underline">{application.email}</a>
-                  } color="text-blue-400" />
+                    <a href={`mailto:${application.email}`} className="text-panel-600 hover:underline">{application.email}</a>
+                  } color="text-panel-400" />
 
                   {telegram && (
                     <DetailRow icon={MessageSquare} label="Telegram" value={
@@ -330,7 +330,7 @@ const ApplicationManagementModal: React.FC<ApplicationManagementModalProps> = ({
                   )}
 
                   {gender && (
-                    <DetailRow icon={User} label="Gender" value={gender} color="text-indigo-400" />
+                    <DetailRow icon={User} label="Gender" value={gender} color="text-panel-400" />
                   )}
 
                   {grade && (
@@ -356,11 +356,11 @@ const ApplicationManagementModal: React.FC<ApplicationManagementModalProps> = ({
                       // Applicant-typed: only http(s) becomes a link, anything else is shown as text.
                       safeHref(application.portfolio_link) ? (
                         <a href={safeHref(application.portfolio_link)} target="_blank" rel="noopener noreferrer"
-                          className="text-blue-600 hover:underline flex items-center gap-1">
+                          className="text-panel-600 hover:underline flex items-center gap-1">
                           View Profile <ExternalLink size={12} />
                         </a>
                       ) : application.portfolio_link
-                    } color="text-blue-400" />
+                    } color="text-panel-400" />
                   )}
                 </div>
               </div>
@@ -417,7 +417,7 @@ const ApplicationManagementModal: React.FC<ApplicationManagementModalProps> = ({
                     )}
                     {emergencyPhone && (
                       <DetailRow icon={Phone} label="Em. Phone" value={
-                        <a href={`tel:${emergencyPhone}`} className="text-blue-600 hover:underline">{emergencyPhone}</a>
+                        <a href={`tel:${emergencyPhone}`} className="text-panel-600 hover:underline">{emergencyPhone}</a>
                       } color="text-red-400" />
                     )}
                   </div>
@@ -456,7 +456,7 @@ const ApplicationManagementModal: React.FC<ApplicationManagementModalProps> = ({
                 <div className="space-y-2 mb-4">
                   {[
                     { n: '1st', val: application.committee_preference1, color: 'bg-green-50 border-green-200 text-green-800' },
-                    { n: '2nd', val: application.committee_preference2, color: 'bg-blue-50 border-blue-200 text-blue-800' },
+                    { n: '2nd', val: application.committee_preference2, color: 'bg-panel-50 border-panel-200 text-panel-800' },
                     { n: '3rd', val: application.committee_preference3, color: 'bg-purple-50 border-purple-200 text-purple-800' },
                   ].map(c => (
                     <div key={c.n} className={`flex items-center gap-3 px-3 py-2 rounded-lg border ${c.color}`}>
@@ -528,20 +528,20 @@ const ApplicationManagementModal: React.FC<ApplicationManagementModalProps> = ({
 
                     {/* SAT */}
                     {satUrl && (
-                      <div className="p-3 bg-blue-50 rounded-lg border border-blue-200">
+                      <div className="p-3 bg-panel-50 rounded-lg border border-panel-200">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-2">
-                            <FileText size={16} className="text-blue-600" />
-                            <span className="text-sm font-semibold text-blue-800">SAT Certificate</span>
+                            <FileText size={16} className="text-panel-600" />
+                            <span className="text-sm font-semibold text-panel-800">SAT Certificate</span>
                           </div>
                           {satScore && (
-                            <span className="text-sm font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded">
+                            <span className="text-sm font-bold text-panel-700 bg-panel-100 px-2 py-0.5 rounded">
                               Score: {satScore}
                             </span>
                           )}
                         </div>
                         <a href={satUrl} target="_blank" rel="noopener noreferrer"
-                          className="mt-2 inline-flex items-center gap-1 text-xs text-blue-700 hover:underline font-medium">
+                          className="mt-2 inline-flex items-center gap-1 text-xs text-panel-700 hover:underline font-medium">
                           <ExternalLink size={12} /> Open Document
                         </a>
                       </div>
@@ -572,7 +572,7 @@ const ApplicationManagementModal: React.FC<ApplicationManagementModalProps> = ({
                     <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${application.has_ielts ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-400'}`}>
                       IELTS {application.has_ielts ? '✓' : '✗'}
                     </span>
-                    <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${application.has_sat ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-400'}`}>
+                    <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${application.has_sat ? 'bg-panel-100 text-panel-700' : 'bg-gray-100 text-gray-400'}`}>
                       SAT {application.has_sat ? '✓' : '✗'}
                     </span>
                   </div>
@@ -632,7 +632,7 @@ const ApplicationManagementModal: React.FC<ApplicationManagementModalProps> = ({
                 application.type2_selected_prompt || application.type2_political_response) && (
                 <div className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
                   <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-3 flex items-center gap-2">
-                    <FileText size={16} className="text-indigo-500" /> All Form Responses
+                    <FileText size={16} className="text-panel-500" /> All Form Responses
                   </h3>
                   <div className="space-y-3">
                     {application.unique_delegate_trait && (
@@ -737,8 +737,8 @@ const ApplicationManagementModal: React.FC<ApplicationManagementModalProps> = ({
               disabled={application.status === 'waitlisted'}
               className={`px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition-all ${
                 application.status === 'waitlisted'
-                  ? 'bg-orange-100 text-orange-700 cursor-default'
-                  : 'bg-orange-500 text-white hover:bg-orange-600 shadow-sm hover:shadow-md'
+                  ? 'bg-orange-100 text-orange-800 cursor-default'
+                  : 'bg-orange-700 text-white hover:bg-orange-800 shadow-sm hover:shadow-md'
               }`}
             >
               <Clock size={15} /> Waitlist
@@ -759,7 +759,7 @@ const ApplicationManagementModal: React.FC<ApplicationManagementModalProps> = ({
             {onDelete && (
               <button
                 onClick={() => onDelete(application.id)}
-                className="px-4 py-2 bg-gray-700 text-white rounded-lg text-sm font-semibold flex items-center gap-2 hover:bg-gray-800 shadow-sm hover:shadow-md transition-all"
+                className="px-4 py-2 border border-red-200 bg-white text-red-700 rounded-lg text-sm font-semibold flex items-center gap-2 hover:bg-red-50 transition-colors"
               >
                 <Trash2 size={15} /> Delete
               </button>

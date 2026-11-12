@@ -185,7 +185,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
         <div
           className={cn(
             'border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-all duration-200',
-            isDragging ? 'border-blue-500 bg-blue-50 scale-[1.01]' : 'border-gray-300 hover:border-gray-400',
+            isDragging ? 'border-panel-500 bg-panel-50 scale-[1.01]' : 'border-gray-300 hover:border-gray-400',
             isUploading && 'opacity-70 pointer-events-none'
           )}
           onDragOver={handleDragOver}
@@ -196,11 +196,11 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
         >
           {isUploading ? (
             <div className="flex flex-col items-center justify-center space-y-3">
-              <Loader2 className="h-8 w-8 text-blue-500 animate-spin" />
+              <Loader2 className="h-8 w-8 text-panel-500 animate-spin" />
               <div className="text-sm font-medium text-gray-700">Uploading image...</div>
               <div className="w-full bg-gray-200 rounded-full h-2.5">
                 <div 
-                  className="bg-blue-600 h-2.5 rounded-full transition-all duration-300 ease-out"
+                  className="bg-panel-600 h-2.5 rounded-full transition-all duration-300 ease-out"
                   style={{ width: `${uploadProgress}%` }}
                 />
               </div>
@@ -210,7 +210,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
             <div className="flex flex-col items-center justify-center space-y-2">
               <Upload className="h-10 w-10 text-gray-400 mb-2" />
               <div className="text-sm text-gray-600">
-                <span className="font-medium text-blue-600 hover:text-blue-700">Click to upload</span> or drag and drop
+                <span className="font-medium text-panel-600 hover:text-panel-700">Click to upload</span> or drag and drop
               </div>
               <div className="text-xs text-gray-500">
                 PNG, JPG, WebP, AVIF up to 5MB
@@ -279,7 +279,7 @@ const ImageUpload: React.FC<ImageUploadProps> = ({
                     setIsImageLoading(true);
                     setImageError(false);
                   }}
-                  className="mt-2 text-xs text-blue-600 hover:text-blue-700 font-medium"
+                  className="mt-2 text-xs text-panel-600 hover:text-panel-700 font-medium"
                 >
                   Retry
                 </button>

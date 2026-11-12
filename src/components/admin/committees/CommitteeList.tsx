@@ -57,7 +57,7 @@ const CommitteeList = ({ committees, onEdit, loading, fetchCommittees }: Committ
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="loader w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+        <div className="loader w-8 h-8 border-4 border-panel-500 border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -68,7 +68,7 @@ const CommitteeList = ({ committees, onEdit, loading, fetchCommittees }: Committ
         <p className="text-gray-500 mb-4">No committees found</p>
         <button
           onClick={() => onEdit({ id: '', name: '', description: '', topics: [], created_at: '' })}
-          className="text-diplomatic-600 hover:text-diplomatic-800 font-medium"
+          className="text-panel-600 hover:text-panel-800 font-medium"
         >
           Create your first committee
         </button>
@@ -102,8 +102,8 @@ const CommitteeList = ({ committees, onEdit, loading, fetchCommittees }: Committ
               <tr key={committee.id} className="hover:bg-gray-50">
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">
-                    <div className="flex-shrink-0 h-10 w-10 rounded-full bg-diplomatic-100 flex items-center justify-center">
-                      <IconComponent size={18} className="text-diplomatic-700" />
+                    <div className="flex-shrink-0 h-10 w-10 rounded-full bg-panel-100 flex items-center justify-center">
+                      <IconComponent size={18} className="text-panel-700" />
                     </div>
                     <div className="ml-4">
                       <div className="text-sm font-medium text-gray-900">{displayName}</div>
@@ -138,7 +138,7 @@ const CommitteeList = ({ committees, onEdit, loading, fetchCommittees }: Committ
                     {committee.topics.map((topic, idx) => (
                       <span
                         key={idx}
-                        className="px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded-full"
+                        className="px-2 py-1 bg-panel-50 text-panel-700 text-xs rounded-full"
                       >
                         {topic}
                       </span>
@@ -149,7 +149,7 @@ const CommitteeList = ({ committees, onEdit, loading, fetchCommittees }: Committ
                   <button
                     onClick={() => onEdit(committee)}
                     aria-label={`Edit ${committee.name}`}
-                    className="text-diplomatic-600 hover:text-diplomatic-900 mr-3"
+                    className="text-panel-600 hover:text-panel-900 mr-3"
                   >
                     <Edit size={18} />
                   </button>

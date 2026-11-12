@@ -151,7 +151,7 @@ const AdminMessages = () => {
                   key={f.key}
                   onClick={() => setFilter(f.key)}
                   className={`rounded-md px-3 py-1.5 text-sm font-medium ${
-                    filter === f.key ? 'bg-diplomatic-600 text-white' : 'text-gray-600 hover:bg-gray-50'
+                    filter === f.key ? 'bg-panel-600 text-white' : 'text-gray-600 hover:bg-gray-50'
                   }`}
                 >
                   {f.label} <span className="opacity-70">({counts[f.key]})</span>
@@ -164,12 +164,12 @@ const AdminMessages = () => {
 
         {loading ? (
           <div className="flex justify-center py-12">
-            <div className="loader w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            <div className="loader w-8 h-8 border-4 border-panel-500 border-t-transparent rounded-full animate-spin"></div>
           </div>
         ) : shown.length > 0 ? (
           <div className="grid gap-6">
             {shown.map((message) => (
-              <Card key={message.id} className={message.is_read ? 'bg-gray-50' : 'bg-white border-l-4 border-l-blue-500'}>
+              <Card key={message.id} className={message.is_read ? 'bg-gray-50' : 'bg-white border-l-4 border-l-panel-500'}>
                 <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
                   <div>
                     <CardTitle className="text-xl flex items-center gap-2">
@@ -204,7 +204,7 @@ const AdminMessages = () => {
                         rows={5}
                         autoFocus
                         placeholder={`Reply to ${message.full_name}…`}
-                        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500"
+                        className="w-full rounded-lg border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-panel-500"
                       />
                       <div className="flex justify-end gap-2">
                         <Button variant="outline" size="sm" onClick={() => { setReplyingTo(null); setReplyText(''); }}>

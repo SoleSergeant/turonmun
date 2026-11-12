@@ -50,7 +50,7 @@ const AdminCommittees = () => {
     return (
       <AdminLayout title="Committees">
         <div className="flex items-center justify-center h-64">
-          <div className="loader w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+          <div className="loader w-8 h-8 border-4 border-panel-500 border-t-transparent rounded-full animate-spin"></div>
           <p className="ml-3 text-gray-600">Authenticating...</p>
         </div>
       </AdminLayout>
@@ -82,7 +82,7 @@ const AdminCommittees = () => {
             <h2 className="text-xl font-semibold">Committee List</h2>
             <button
               onClick={() => setIsEditing(true)}
-              className="btn bg-diplomatic-700 text-white py-2 px-4 rounded-md hover:bg-diplomatic-800 flex items-center"
+              className="btn bg-panel-700 text-white py-2 px-4 rounded-md hover:bg-panel-800 flex items-center"
             >
               <PlusCircle size={18} className="mr-2" /> Add Committee
             </button>

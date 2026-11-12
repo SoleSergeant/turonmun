@@ -69,7 +69,7 @@ const FormBuilderSection: React.FC<{
   stepLabels: string[];
   onUpdate: (qs: FormQuestion[]) => void;
 }> = ({ questions, stepLabels, onUpdate }) => {
-  const inputE = 'w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white';
+  const inputE = 'w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-panel-500 focus:border-transparent bg-white';
   const [openStep, setOpenStep] = useState<number | null>(null);
   const [editId, setEditId] = useState<string | null>(null);
   const [editDraft, setEditDraft] = useState<FormQuestion | null>(null);
@@ -132,7 +132,7 @@ const FormBuilderSection: React.FC<{
   };
 
   return (
-    <div className={`${inputCls.replace('w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent', '')} bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden`}>
+    <div className={`${inputCls.replace('w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-panel-500 focus:border-transparent', '')} bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden`}>
       <div className="px-5 py-4 border-b border-gray-100 flex items-center gap-2">
         <ClipboardList size={16} className="text-violet-600" />
         <h3 className="font-semibold text-gray-900">Form Builder</h3>
@@ -251,7 +251,7 @@ const FormBuilderSection: React.FC<{
                           )}
                           <div className="flex gap-2 pt-1">
                             <button onClick={saveEdit} disabled={!editDraft.label.trim()}
-                              className="px-3 py-1.5 bg-violet-600 text-white text-sm rounded-lg hover:bg-violet-700 disabled:opacity-50 font-medium">Save</button>
+                              className="px-3 py-1.5 bg-panel-600 text-white text-sm rounded-lg hover:bg-panel-700 disabled:opacity-50 font-medium">Save</button>
                             <button onClick={cancelEdit}
                               className="px-3 py-1.5 border border-gray-300 text-sm rounded-lg hover:bg-gray-50">Cancel</button>
                           </div>
@@ -310,7 +310,7 @@ const FormBuilderSection: React.FC<{
                       )}
                       <div className="flex gap-2 pt-1">
                         <button onClick={saveEdit} disabled={!editDraft.label.trim()}
-                          className="px-3 py-1.5 bg-violet-600 text-white text-sm rounded-lg hover:bg-violet-700 disabled:opacity-50 font-medium">Add Question</button>
+                          className="px-3 py-1.5 bg-panel-600 text-white text-sm rounded-lg hover:bg-panel-700 disabled:opacity-50 font-medium">Add Question</button>
                         <button onClick={cancelEdit}
                           className="px-3 py-1.5 border border-gray-300 text-sm rounded-lg hover:bg-gray-50">Cancel</button>
                       </div>
@@ -396,7 +396,7 @@ const FormPreviewModal: React.FC<{
                 key={s}
                 onClick={() => setStep(s)}
                 title={stepLabel(s)}
-                className={`w-7 h-7 rounded-full text-xs font-bold transition-colors ${s === step ? 'bg-amber-600 text-white' : 'bg-white border border-amber-300 text-amber-700 hover:bg-amber-100'}`}
+                className={`w-7 h-7 rounded-full text-xs font-bold transition-colors ${s === step ? 'bg-amber-700 text-white' : 'bg-white border border-amber-300 text-amber-700 hover:bg-amber-100'}`}
               >
                 {s}
               </button>
@@ -426,7 +426,7 @@ const FormPreviewModal: React.FC<{
       </div>
 
       {/* Form content */}
-      <div className="flex-1 overflow-y-auto bg-gradient-to-b from-white to-diplomatic-50">
+      <div className="flex-1 overflow-y-auto bg-gradient-to-b from-white to-panel-50">
         <div className="container pt-8 pb-16">
           <RegistrationSteps currentStep={Math.min(step, 5)} labels={stepLabels} />
           <div className="max-w-3xl mx-auto mt-6">
@@ -480,7 +480,7 @@ const FormPreviewModal: React.FC<{
   );
 };
 
-const inputCls = 'w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent';
+const inputCls = 'w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-panel-500 focus:border-transparent';
 const labelCls = 'block text-xs font-semibold text-gray-600 mb-1';
 const sectionCls = 'bg-white rounded-xl border border-gray-200 shadow-sm p-5';
 
@@ -600,7 +600,7 @@ const FormSettingsPage = () => {
     return (
       <AdminLayout title="Forms">
         <div className="flex items-center justify-center h-64">
-          <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+          <Loader2 className="h-8 w-8 animate-spin text-panel-500" />
         </div>
       </AdminLayout>
     );
@@ -623,7 +623,7 @@ const FormSettingsPage = () => {
         <div className="flex gap-2">
           {(['delegate', 'chair', 'volunteer'] as const).map(t => (
             <button key={t} onClick={() => switchTab(t)}
-              className={`px-5 py-2 rounded-lg text-sm font-semibold transition-colors ${tab === t ? 'bg-blue-600 text-white shadow' : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'}`}>
+              className={`px-5 py-2 rounded-lg text-sm font-semibold transition-colors ${tab === t ? 'bg-panel-600 text-white shadow' : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'}`}>
               {t === 'delegate' ? 'Delegate Registration' : t === 'chair' ? 'Chair Application' : 'Volunteer Application'}
             </button>
           ))}
@@ -683,7 +683,7 @@ const FormSettingsPage = () => {
             {/* ── Open / Close dates & Capacity ── */}
             <div className={sectionCls}>
               <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                <Calendar size={16} className="text-blue-600" /> Open / Close Dates &amp; Capacity
+                <Calendar size={16} className="text-panel-600" /> Open / Close Dates &amp; Capacity
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
@@ -829,7 +829,7 @@ const FormSettingsPage = () => {
             {/* ── Footer save ── */}
             <div className="flex justify-end pb-8">
               <button onClick={handleSave} disabled={saving}
-                className="flex items-center gap-2 px-6 py-2.5 bg-blue-600 text-white rounded-xl font-semibold hover:bg-blue-700 disabled:opacity-50 shadow transition-colors">
+                className="flex items-center gap-2 px-6 py-2.5 bg-panel-600 text-white rounded-xl font-semibold hover:bg-panel-700 disabled:opacity-50 shadow transition-colors">
                 {saving ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
                 Save Changes
               </button>

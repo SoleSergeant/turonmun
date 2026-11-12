@@ -102,7 +102,7 @@ const VolunteerApplicationModal: React.FC<Props> = ({
 
       <div className="absolute inset-4 md:inset-8 lg:inset-12 bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col max-w-5xl mx-auto">
         {/* Header */}
-        <div className="flex items-center justify-between px-8 py-5 border-b border-gray-200 bg-gradient-to-r from-rose-700 to-rose-800">
+        <div className="flex items-center justify-between px-8 py-5 border-b border-gray-200 bg-panel-900">
           <div className="flex items-center gap-4">
             <div className="w-14 h-14 bg-white/10 rounded-full flex items-center justify-center border border-white/20">
               <User size={24} className="text-white/80" />
@@ -138,8 +138,8 @@ const VolunteerApplicationModal: React.FC<Props> = ({
                 </h3>
                 <div className="divide-y divide-gray-100">
                   <Row icon={Mail} label="Email" value={
-                    <a href={`mailto:${application.email}`} className="text-blue-600 hover:underline">{application.email}</a>
-                  } color="text-blue-400" />
+                    <a href={`mailto:${application.email}`} className="text-panel-600 hover:underline">{application.email}</a>
+                  } color="text-panel-400" />
                   <Row icon={MessageSquare} label="Contact" value={
                     isTelegram ? (
                       <a href={`https://t.me/${telegramHandle}`} target="_blank" rel="noopener noreferrer" className="text-sky-600 hover:underline">{telegram}</a>
@@ -178,7 +178,7 @@ const VolunteerApplicationModal: React.FC<Props> = ({
               {notesRows.length > 0 && (
                 <section className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm">
                   <h3 className="text-sm font-bold text-gray-900 uppercase tracking-wider mb-3 flex items-center gap-2">
-                    <FileText size={16} className="text-indigo-500" /> Additional Responses
+                    <FileText size={16} className="text-panel-500" /> Additional Responses
                   </h3>
                   <div className="divide-y divide-gray-100">
                     {notesRows.map((row, i) => (

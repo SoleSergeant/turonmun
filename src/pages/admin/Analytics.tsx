@@ -174,7 +174,7 @@ const Analytics = () => {
       const statusDistribution = [
         { status: 'Approved', count: statusCounts['approved'] || 0, color: 'bg-green-500' },
         { status: 'Pending', count: statusCounts['pending'] || 0, color: 'bg-yellow-500' },
-        { status: 'Waitlisted', count: statusCounts['waitlisted'] || 0, color: 'bg-blue-500' },
+        { status: 'Waitlisted', count: statusCounts['waitlisted'] || 0, color: 'bg-panel-500' },
         { status: 'Rejected', count: statusCounts['rejected'] || 0, color: 'bg-red-500' }
       ];
 
@@ -270,7 +270,7 @@ const Analytics = () => {
     return (
       <AdminLayout title="Analytics">
         <div className="flex items-center justify-center h-96">
-          <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+          <Loader2 className="h-8 w-8 animate-spin text-panel-600" />
         </div>
       </AdminLayout>
     );
@@ -291,9 +291,9 @@ const Analytics = () => {
               <div>
                 <p className="text-sm text-gray-600">Total Registrations</p>
                 <p className="text-2xl font-semibold text-gray-900">{data.totalRegistrations}</p>
-                <p className="text-xs text-blue-600">Live data</p>
+                <p className="text-xs text-panel-600">Live data</p>
               </div>
-              <Users className="h-8 w-8 text-blue-500" />
+              <Users className="h-8 w-8 text-panel-500" />
             </div>
           </div>
           <div className="bg-white rounded-lg shadow-sm p-6 border">
@@ -334,14 +334,14 @@ const Analytics = () => {
           <div className="bg-white rounded-lg shadow-sm border p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-gray-900">Committee Assignments</h3>
-              <Globe className="h-5 w-5 text-blue-500" />
+              <Globe className="h-5 w-5 text-panel-500" />
             </div>
             <div className="space-y-3">
               {data.committeeDistribution.length === 0 ? (
                 <p className="text-gray-500 text-center py-8">No committee assignments yet.</p>
               ) : (
                 data.committeeDistribution.map((committee, idx) => {
-                  const colors = ['bg-blue-500', 'bg-indigo-500', 'bg-purple-500', 'bg-teal-500', 'bg-emerald-500', 'bg-gray-400'];
+                  const colors = ['bg-panel-500', 'bg-panel-500', 'bg-purple-500', 'bg-teal-500', 'bg-emerald-500', 'bg-gray-400'];
                   const barColor = committee.name === 'Unassigned' ? 'bg-gray-400' : colors[idx % colors.length];
                   return (
                     <div key={committee.name}>

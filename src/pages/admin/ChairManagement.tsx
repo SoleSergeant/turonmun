@@ -540,7 +540,8 @@ const ChairManagement = () => {
   };
 
   const getStatusColor = (isActive: boolean) => {
-    return isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
+    // Inactive is normal between seasons, not an error, so it stays neutral.
+    return isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-700';
   };
 
   return (
@@ -561,7 +562,7 @@ const ChairManagement = () => {
               setUserSearchResults([]);
               setShowAddModal(true);
             }}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-panel-600 text-white rounded-lg hover:bg-panel-700 transition-colors"
           >
             <Plus className="h-4 w-4" />
             Add Chair
@@ -579,9 +580,9 @@ const ChairManagement = () => {
         <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
           <div className="px-4 py-4 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div className="flex items-center gap-2">
-              <ClipboardList className="h-5 w-5 text-indigo-600" />
+              <ClipboardList className="h-5 w-5 text-panel-600" />
               <h3 className="text-lg font-semibold text-gray-900">Chair Applications</h3>
-              <span className="ml-1 text-xs bg-indigo-100 text-indigo-700 rounded-full px-2 py-0.5 font-medium">
+              <span className="ml-1 text-xs bg-panel-100 text-panel-700 rounded-full px-2 py-0.5 font-medium">
                 {chairApps.filter(a => a.status === 'pending').length} pending
               </span>
             </div>
@@ -592,7 +593,7 @@ const ChairManagement = () => {
                   onClick={() => setAppStatusFilter(f)}
                   className={`px-3 py-1.5 rounded text-xs font-medium transition-colors ${
                     appStatusFilter === f
-                      ? 'bg-indigo-600 text-white'
+                      ? 'bg-panel-600 text-white'
                       : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                   }`}
                 >
@@ -701,7 +702,7 @@ const ChairManagement = () => {
                                 setAssignCommitteeId('');
                                 setAssignModal(app);
                               }}
-                              className="flex items-center gap-1 px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded hover:bg-blue-200 transition-colors"
+                              className="flex items-center gap-1 px-2 py-1 bg-panel-100 text-panel-700 text-xs rounded hover:bg-panel-200 transition-colors"
                               title="Re-assign to a different committee or role"
                             >
                               <UserCheck className="h-3 w-3" />
@@ -810,7 +811,7 @@ const ChairManagement = () => {
                         <div className="flex items-center gap-2">
                           <button
                             onClick={() => openEditModal(chair)}
-                            className="p-1 text-blue-600 hover:bg-blue-100 rounded"
+                            className="p-1 text-panel-600 hover:bg-panel-100 rounded"
                             title="Edit"
                           >
                             <Edit className="h-4 w-4" />
@@ -853,7 +854,7 @@ const ChairManagement = () => {
                   <button
                     type="button"
                     onClick={() => { setAddMode('existing'); setSelectedExistingUser(null); setUserSearchQuery(''); setUserSearchResults([]); }}
-                    className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md text-sm font-medium transition-colors ${addMode === 'existing' ? 'bg-white shadow text-blue-700 border border-gray-200' : 'text-gray-500 hover:text-gray-700'
+                    className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md text-sm font-medium transition-colors ${addMode === 'existing' ? 'bg-white shadow text-panel-700 border border-gray-200' : 'text-gray-500 hover:text-gray-700'
                       }`}
                   >
                     <UserCheck className="h-4 w-4" />
@@ -862,7 +863,7 @@ const ChairManagement = () => {
                   <button
                     type="button"
                     onClick={() => setAddMode('new')}
-                    className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md text-sm font-medium transition-colors ${addMode === 'new' ? 'bg-white shadow text-blue-700 border border-gray-200' : 'text-gray-500 hover:text-gray-700'
+                    className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-md text-sm font-medium transition-colors ${addMode === 'new' ? 'bg-white shadow text-panel-700 border border-gray-200' : 'text-gray-500 hover:text-gray-700'
                       }`}
                   >
                     <Plus className="h-4 w-4" />
@@ -886,7 +887,7 @@ const ChairManagement = () => {
                               setSelectedExistingUser(null);
                               searchUsers(e.target.value);
                             }}
-                            className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                            className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-panel-500 focus:border-transparent"
                             placeholder="Type name or email..."
                           />
                           {userSearchLoading && <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 animate-spin text-gray-400" />}
@@ -901,7 +902,7 @@ const ChairManagement = () => {
                               key={u.id}
                               type="button"
                               onClick={() => { setSelectedExistingUser(u); setUserSearchQuery(u.full_name); setUserSearchResults([]); }}
-                              className="w-full text-left px-4 py-3 hover:bg-blue-50 transition-colors"
+                              className="w-full text-left px-4 py-3 hover:bg-panel-50 transition-colors"
                             >
                               <div className="font-medium text-gray-900 text-sm">{u.full_name}</div>
                               <div className="text-xs text-gray-500">{u.email}</div>
@@ -942,7 +943,7 @@ const ChairManagement = () => {
                           required
                           value={formData.full_name}
                           onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-                          className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-panel-500"
                           placeholder="Jane Smith"
                         />
                       </div>
@@ -953,7 +954,7 @@ const ChairManagement = () => {
                           required
                           value={formData.email}
                           onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                          className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-panel-500"
                           placeholder="jane@example.com"
                         />
                       </div>
@@ -965,7 +966,7 @@ const ChairManagement = () => {
                           minLength={6}
                           value={formData.password}
                           onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                          className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                          className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-panel-500"
                           placeholder="Min. 6 characters"
                         />
                       </div>
@@ -979,7 +980,7 @@ const ChairManagement = () => {
                       <select
                         value={formData.role}
                         onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-panel-500"
                       >
                         <option value="chair">Chair</option>
                         <option value="co_chair">Co-Chair</option>
@@ -990,7 +991,7 @@ const ChairManagement = () => {
                       <select
                         value={formData.committee_id}
                         onChange={(e) => setFormData({ ...formData, committee_id: e.target.value })}
-                        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-panel-500"
                       >
                         <option value="">None</option>
                         {committees.map(c => (
@@ -1011,7 +1012,7 @@ const ChairManagement = () => {
                     <button
                       type="submit"
                       disabled={actionLoading || (addMode === 'existing' && !selectedExistingUser)}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2 text-sm"
+                      className="px-4 py-2 bg-panel-600 text-white rounded-lg hover:bg-panel-700 disabled:opacity-50 flex items-center gap-2 text-sm"
                     >
                       {actionLoading && <Loader2 className="h-4 w-4 animate-spin" />}
                       {addMode === 'existing' ? 'Promote to Chair' : 'Create Account'}
@@ -1044,7 +1045,7 @@ const ChairManagement = () => {
                     <select
                       value={assignRole}
                       onChange={e => setAssignRole(e.target.value)}
-                      className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-panel-500"
                     >
                       <option value="chair">Chair</option>
                       <option value="co_chair">Co-Chair</option>
@@ -1055,7 +1056,7 @@ const ChairManagement = () => {
                     <select
                       value={assignCommitteeId}
                       onChange={e => setAssignCommitteeId(e.target.value)}
-                      className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-panel-500"
                     >
                       <option value="">Select a committee…</option>
                       {committees.map(c => (
@@ -1065,7 +1066,7 @@ const ChairManagement = () => {
                   </div>
 
                   {(assignModal.committeePreference1 || assignModal.committeePreference2) && (
-                    <div className="bg-blue-50 rounded-lg p-3 text-xs text-blue-700">
+                    <div className="bg-panel-50 rounded-lg p-3 text-xs text-panel-700">
                       <p className="font-medium mb-1">Applicant's preferred committees:</p>
                       {assignModal.committeePreference1 && <p>1st choice: {assignModal.committeePreference1}</p>}
                       {assignModal.committeePreference2 && <p>2nd choice: {assignModal.committeePreference2}</p>}
@@ -1114,7 +1115,7 @@ const ChairManagement = () => {
                       required
                       value={formData.full_name}
                       onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-panel-500"
                     />
                   </div>
                   <div>
@@ -1124,7 +1125,7 @@ const ChairManagement = () => {
                       required
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-panel-500"
                     />
                   </div>
                   <div>
@@ -1132,7 +1133,7 @@ const ChairManagement = () => {
                     <select
                       value={formData.role}
                       onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-panel-500"
                     >
                       <option value="chair">Chair</option>
                       <option value="co_chair">Co-Chair</option>
@@ -1143,7 +1144,7 @@ const ChairManagement = () => {
                     <select
                       value={formData.committee_id}
                       onChange={(e) => setFormData({ ...formData, committee_id: e.target.value })}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-panel-500"
                     >
                       <option value="">None</option>
                       {committees.map(committee => (
@@ -1162,7 +1163,7 @@ const ChairManagement = () => {
                     <button
                       type="submit"
                       disabled={actionLoading}
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
+                      className="px-4 py-2 bg-panel-600 text-white rounded-lg hover:bg-panel-700 disabled:opacity-50 flex items-center gap-2"
                     >
                       {actionLoading && <Loader2 className="h-4 w-4 animate-spin" />}
                       Save Changes

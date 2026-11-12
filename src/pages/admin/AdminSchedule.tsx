@@ -23,7 +23,7 @@ interface ScheduleEvent {
 
 const typeColors: Record<string, string> = {
   ceremony: 'bg-yellow-100 text-yellow-800',
-  session:  'bg-blue-100 text-blue-800',
+  session:  'bg-panel-100 text-panel-800',
   social:   'bg-green-100 text-green-800',
   meal:     'bg-orange-100 text-orange-800',
   break:    'bg-gray-100 text-gray-700',
@@ -190,7 +190,7 @@ const AdminSchedule = () => {
     <AdminLayout title="Schedule">
       {loading && !editingEvent ? (
         <div className="flex items-center justify-center h-64">
-          <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+          <div className="w-8 h-8 border-4 border-panel-500 border-t-transparent rounded-full animate-spin" />
         </div>
       ) : editingEvent ? (
         /* ── Event form ── */
@@ -308,7 +308,7 @@ const AdminSchedule = () => {
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 bg-diplomatic-700 text-white rounded-md hover:bg-diplomatic-800"
+                className="px-4 py-2 bg-panel-700 text-white rounded-md hover:bg-panel-800"
                 disabled={isSubmittingEvent}
               >
                 {isSubmittingEvent ? 'Saving…' : editingEvent.id ? 'Update Event' : 'Add Event'}
@@ -322,7 +322,7 @@ const AdminSchedule = () => {
           {/* Conference date bar */}
           <div className="bg-white rounded-lg shadow-sm p-4 mb-6 flex flex-col sm:flex-row sm:items-center gap-3">
             <div className="flex items-center gap-2 text-gray-700 font-medium">
-              <Calendar size={18} className="text-diplomatic-600" />
+              <Calendar size={18} className="text-panel-600" />
               Conference Date
             </div>
             <div className="flex items-center gap-3 flex-1">
@@ -338,12 +338,12 @@ const AdminSchedule = () => {
                 <span className="text-sm text-gray-500">{formattedDate}</span>
               )}
               {isUpdatingDate && (
-                <div className="w-4 h-4 border-2 border-diplomatic-500 border-t-transparent rounded-full animate-spin" />
+                <div className="w-4 h-4 border-2 border-panel-500 border-t-transparent rounded-full animate-spin" />
               )}
             </div>
             <button
               onClick={handleCreateEvent}
-              className="bg-diplomatic-700 text-white py-2 px-4 rounded-md hover:bg-diplomatic-800 flex items-center text-sm"
+              className="bg-panel-700 text-white py-2 px-4 rounded-md hover:bg-panel-800 flex items-center text-sm"
             >
               <PlusCircle size={16} className="mr-2" /> Add Event
             </button>
@@ -356,7 +356,7 @@ const AdminSchedule = () => {
               <p className="text-gray-500 mb-4">No events yet</p>
               <button
                 onClick={handleCreateEvent}
-                className="text-diplomatic-600 hover:text-diplomatic-800 font-medium"
+                className="text-panel-600 hover:text-panel-800 font-medium"
               >
                 Add the first event
               </button>
@@ -364,8 +364,8 @@ const AdminSchedule = () => {
           ) : (
             <div className="bg-white rounded-lg shadow-sm overflow-hidden">
               {/* Header */}
-              <div className="bg-diplomatic-50 px-5 py-3 border-b border-diplomatic-100">
-                <p className="text-sm text-diplomatic-700 font-medium">
+              <div className="bg-panel-50 px-5 py-3 border-b border-panel-100">
+                <p className="text-sm text-panel-700 font-medium">
                   {scheduleEvents.length} event{scheduleEvents.length !== 1 ? 's' : ''} · sorted by start time
                 </p>
               </div>
@@ -375,7 +375,7 @@ const AdminSchedule = () => {
                   <div key={event.id} className="flex items-start gap-4 p-4 hover:bg-gray-50 group">
                     {/* Time column */}
                     <div className="w-28 flex-shrink-0 pt-0.5">
-                      <div className="flex items-center gap-1 text-diplomatic-700 font-semibold text-sm">
+                      <div className="flex items-center gap-1 text-panel-700 font-semibold text-sm">
                         <Clock size={13} />
                         {event.start_time}
                       </div>
@@ -413,7 +413,7 @@ const AdminSchedule = () => {
                           <button
                             type="button"
                             onClick={() => handleEditEvent(event)}
-                            className="p-2 rounded-md text-diplomatic-600 hover:bg-diplomatic-50"
+                            className="p-2 rounded-md text-panel-600 hover:bg-panel-50"
                             title="Edit"
                           >
                             <Edit size={15} />

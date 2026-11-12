@@ -134,7 +134,7 @@ const AdminAccounts = () => {
           </div>
           <button
             onClick={() => setShowAdd(v => !v)}
-            className="flex items-center gap-2 rounded-lg bg-diplomatic-600 px-4 py-2 text-sm font-medium text-white hover:bg-diplomatic-700"
+            className="flex items-center gap-2 rounded-lg bg-panel-600 px-4 py-2 text-sm font-medium text-white hover:bg-panel-700"
           >
             <Plus className="h-4 w-4" /> Add account
           </button>
@@ -165,7 +165,7 @@ const AdminAccounts = () => {
             </div>
             <div className="flex justify-end gap-2">
               <button type="button" onClick={() => setShowAdd(false)} className="rounded-lg border border-gray-300 px-4 py-2 text-sm hover:bg-gray-50">Cancel</button>
-              <button type="submit" disabled={saving} className="flex items-center gap-2 rounded-lg bg-diplomatic-600 px-4 py-2 text-sm font-medium text-white hover:bg-diplomatic-700 disabled:opacity-50">
+              <button type="submit" disabled={saving} className="flex items-center gap-2 rounded-lg bg-panel-600 px-4 py-2 text-sm font-medium text-white hover:bg-panel-700 disabled:opacity-50">
                 {saving && <Loader2 className="h-4 w-4 animate-spin" />} Add
               </button>
             </div>

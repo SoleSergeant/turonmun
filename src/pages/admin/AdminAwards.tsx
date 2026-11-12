@@ -97,7 +97,7 @@ const AdminAwards = () => {
             <button onClick={fetchAll} className="flex items-center gap-2 px-3 py-2 bg-white border border-gray-300 rounded-lg text-sm hover:bg-gray-50">
               <RefreshCw className="h-4 w-4" /> Refresh
             </button>
-            <button onClick={exportCSV} className="flex items-center gap-2 px-3 py-2 bg-green-600 text-white rounded-lg text-sm hover:bg-green-700">
+            <button onClick={exportCSV} className="flex items-center gap-2 px-3 py-2 border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 rounded-lg text-sm">
               <Download className="h-4 w-4" /> Export CSV
             </button>
             <button
@@ -109,7 +109,7 @@ const AdminAwards = () => {
             </button>
             <button
               onClick={() => updateSettings({ published: !published })}
-              className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-white ${published ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-700 hover:bg-gray-800'}`}
+              className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm text-white ${published ? 'bg-panel-600 hover:bg-panel-700' : 'bg-gray-700 hover:bg-gray-800'}`}
             >
               {published ? <Globe className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
               {published ? 'Published (live)' : 'Publish to website'}
@@ -118,7 +118,7 @@ const AdminAwards = () => {
         </div>
 
         {published && (
-          <div className="px-4 py-2 rounded-lg bg-blue-50 border border-blue-200 text-blue-800 text-sm">
+          <div className="px-4 py-2 rounded-lg bg-panel-50 border border-panel-200 text-panel-800 text-sm">
             Winners are <strong>live on the public Awards page</strong>. Upload photos below — they appear publicly.
           </div>
         )}
@@ -155,7 +155,7 @@ const AdminAwards = () => {
                               </div>
                             </div>
                             {locked ? (
-                              <label className="inline-flex items-center gap-1.5 text-xs text-blue-600 hover:underline cursor-pointer">
+                              <label className="inline-flex items-center gap-1.5 text-xs text-panel-600 hover:underline cursor-pointer">
                                 <Upload className="h-3.5 w-3.5" />
                                 {uploading === a.id ? 'Uploading…' : a.photo_url ? 'Replace photo' : 'Upload photo'}
                                 <input type="file" accept="image/*" className="hidden" onChange={(e) => uploadPhoto(a, e.target.files?.[0])} />

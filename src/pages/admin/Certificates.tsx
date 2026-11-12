@@ -82,13 +82,13 @@ export default function Certificates() {
             </h2>
             <p className="text-gray-600">
               Only people marked attended get a certificate (in My History and here). The design is in{' '}
-              <Link to={adminPath('/content')} className="text-blue-600 hover:underline">Site content → Certificates</Link>.
+              <Link to={adminPath('/content')} className="text-panel-600 hover:underline">Site content → Certificates</Link>.
             </p>
           </div>
           <button
             onClick={printAll}
             disabled={!attended.length || !!printing}
-            className="inline-flex shrink-0 items-center gap-2 rounded-lg bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800 disabled:opacity-50"
+            className="inline-flex shrink-0 items-center gap-2 rounded-lg bg-panel-700 px-4 py-2 text-sm font-medium text-white hover:bg-panel-800 disabled:opacity-50"
           >
             {printing ? <Loader2 className="h-4 w-4 animate-spin" /> : <Printer className="h-4 w-4" />}
             {printing ? `Preparing ${printing}` : `Print all (${attended.length})`}

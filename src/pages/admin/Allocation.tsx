@@ -40,7 +40,7 @@ const Allocation = () => {
                   key={key}
                   onClick={() => switchTo(key)}
                   className={`flex items-center gap-2 rounded-md px-4 py-1.5 text-sm font-medium transition-colors ${
-                    view === key ? 'bg-diplomatic-600 text-white' : 'text-gray-600 hover:bg-gray-50'
+                    view === key ? 'bg-panel-600 text-white' : 'text-gray-600 hover:bg-gray-50'
                   }`}
                 >
                   <Icon className="h-4 w-4" />

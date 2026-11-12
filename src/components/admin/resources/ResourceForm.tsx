@@ -174,7 +174,7 @@ const ResourceForm: React.FC<ResourceFormProps> = ({
               name="category"
               value={formData.category}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-diplomatic-500 focus:border-transparent transition-all"
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-panel-500 focus:border-transparent transition-all"
               required
             >
               <option value="">Select a category</option>
@@ -192,7 +192,7 @@ const ResourceForm: React.FC<ResourceFormProps> = ({
               name="committee_id"
               value={formData.committee_id || ""}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-diplomatic-500 focus:border-transparent transition-all"
+              className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-panel-500 focus:border-transparent transition-all"
             >
               <option value="">All Committees (Global)</option>
               {committees.map((comm) => (
@@ -224,7 +224,7 @@ const ResourceForm: React.FC<ResourceFormProps> = ({
             value={formData.description}
             onChange={handleChange}
             rows={3}
-            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-diplomatic-500 focus:border-transparent transition-all"
+            className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-panel-500 focus:border-transparent transition-all"
             placeholder="Provide a brief overview of this resource"
             required
           />
@@ -236,7 +236,7 @@ const ResourceForm: React.FC<ResourceFormProps> = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <p className="text-xs text-gray-500">Option 1: Upload File</p>
-                <div className="relative border-2 border-dashed border-gray-200 rounded-lg p-4 hover:border-diplomatic-400 transition-colors">
+                <div className="relative border-2 border-dashed border-gray-200 rounded-lg p-4 hover:border-panel-400 transition-colors">
                   <input
                     type="file"
                     onChange={handleFileChange}

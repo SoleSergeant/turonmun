@@ -428,14 +428,14 @@ const MatrixView = () => {
           <div className="flex items-center gap-3">
             <button
               onClick={() => setShowAddCountryDialog(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-panel-600 text-white rounded-lg hover:bg-panel-700 transition-colors"
             >
               <MapPin className="h-4 w-4" />
               Add Country
             </button>
             <button
               onClick={exportToCSV}
-              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 rounded-lg transition-colors"
             >
               <Download className="h-4 w-4" />
               Export CSV
@@ -443,7 +443,7 @@ const MatrixView = () => {
             <button
               onClick={fetchAllData}
               disabled={loading}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+              className="flex items-center gap-2 px-4 py-2 bg-panel-600 text-white rounded-lg hover:bg-panel-700 transition-colors disabled:opacity-50"
             >
               <RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
               Refresh
@@ -459,7 +459,7 @@ const MatrixView = () => {
                 <p className="text-sm text-gray-600">Total Slots</p>
                 <p className="text-2xl font-semibold text-gray-900">{stats.totalSlots}</p>
               </div>
-              <Globe className="h-8 w-8 text-blue-500" />
+              <Globe className="h-8 w-8 text-panel-500" />
             </div>
           </div>
           <div className="bg-white rounded-lg shadow-sm p-4 border">
@@ -494,7 +494,7 @@ const MatrixView = () => {
                   placeholder="Search countries..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-panel-500 focus:border-transparent"
                 />
               </div>
             </div>
@@ -505,7 +505,7 @@ const MatrixView = () => {
                   aria-label="Show"
                   value={filterAssigned}
                   onChange={(e) => setFilterAssigned(e.target.value)}
-                  className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-panel-500 focus:border-transparent"
                 >
                   <option value="all">All Countries</option>
                   <option value="assigned">Has Assignments</option>
@@ -528,7 +528,7 @@ const MatrixView = () => {
                 onChange={(e) => setNewCountry(e.target.value)}
                 onKeyPress={(e) => e.key === 'Enter' && addCustomCountry()}
                 placeholder="Enter country name..."
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent mb-4"
+                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-panel-500 focus:border-transparent mb-4"
                 autoFocus
               />
               <div className="flex gap-3 justify-end">
@@ -544,7 +544,7 @@ const MatrixView = () => {
                 <button
                   onClick={addCustomCountry}
                   disabled={!newCountry.trim()}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                  className="px-4 py-2 bg-panel-600 text-white rounded-lg hover:bg-panel-700 disabled:opacity-50"
                 >
                   Add Country
                 </button>
@@ -563,9 +563,9 @@ const MatrixView = () => {
                     Country
                   </th>
                   {committees.map(committee => (
-                    <th key={committee.id} className="px-4 py-3 text-center text-xs font-medium text-gray-700 tracking-wider min-w-[200px] bg-gradient-to-b from-gray-50 to-gray-100">
+                    <th key={committee.id} className="px-4 py-3 text-center text-xs font-medium text-gray-700 tracking-wider min-w-[200px] bg-gray-50">
                       <div className="flex flex-col items-center gap-1">
-                        <span className="font-bold text-sm text-diplomatic-800">{committee.abbreviation}</span>
+                        <span className="font-bold text-sm text-panel-800">{committee.abbreviation}</span>
                         <span className="font-normal text-[10px] text-gray-600 normal-case">{committee.name}</span>
                       </div>
                     </th>
@@ -648,7 +648,7 @@ const MatrixView = () => {
                                         e.target.value = ''; // Reset selection
                                       }
                                     }}
-                                    className="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white hover:bg-gray-50"
+                                    className="w-full px-2 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-panel-500 focus:border-transparent bg-white hover:bg-gray-50"
                                     defaultValue=""
                                   >
                                     <option value="" disabled>Assign delegate...</option>
@@ -703,10 +703,10 @@ const MatrixView = () => {
         </div>
 
         {/* Info */}
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div className="bg-panel-50 border border-panel-200 rounded-lg p-4">
           <div className="flex items-start gap-3">
-            <AlertTriangle className="h-5 w-5 text-blue-600 flex-shrink-0 mt-0.5" />
-            <div className="text-sm text-blue-900">
+            <AlertTriangle className="h-5 w-5 text-panel-600 flex-shrink-0 mt-0.5" />
+            <div className="text-sm text-panel-900">
               <p className="font-medium mb-1">Important Notes:</p>
               <ul className="list-disc list-inside space-y-1">
                 <li>Only approved delegates appear in the assignment dropdowns</li>

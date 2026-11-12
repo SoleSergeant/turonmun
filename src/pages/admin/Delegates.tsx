@@ -292,7 +292,7 @@ const Delegates = () => {
   return (
     <AdminLayout title="Delegates">
       {loading ? (
-        <div className="flex h-64 items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-diplomatic-600" /></div>
+        <div className="flex h-64 items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-panel-600" /></div>
       ) : (
         <div className="space-y-5">
           <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
@@ -304,7 +304,7 @@ const Delegates = () => {
                 <Mail className="h-4 w-4" /> Remind unpaid
               </button>
               <div className="relative">
-                <button onClick={() => setExportOpen(v => !v)} className="inline-flex items-center gap-2 rounded-lg bg-green-600 px-3 py-2 text-sm font-medium text-white hover:bg-green-700" aria-expanded={exportOpen}>
+                <button onClick={() => setExportOpen(v => !v)} className="inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50 px-3 py-2 text-sm font-medium" aria-expanded={exportOpen}>
                   <Download className="h-4 w-4" /> Export <ChevronDown className="h-4 w-4" />
                 </button>
                 {exportOpen && (
@@ -333,7 +333,7 @@ const Delegates = () => {
                 role="tab"
                 aria-selected={stage === s.key}
                 onClick={() => setStage(s.key)}
-                className={`shrink-0 rounded-full px-3 py-1.5 text-sm font-medium ${stage === s.key ? 'bg-diplomatic-600 text-white' : 'border border-gray-200 bg-white text-gray-700 hover:bg-gray-50'}`}
+                className={`shrink-0 rounded-full px-3 py-1.5 text-sm font-medium ${stage === s.key ? 'bg-panel-600 text-white' : 'border border-gray-200 bg-white text-gray-700 hover:bg-gray-50'}`}
               >
                 {s.label} <span className="opacity-70">({counts[s.key] ?? 0})</span>
               </button>
@@ -352,15 +352,15 @@ const Delegates = () => {
           </div>
 
           {selected.size > 0 && (
-            <div className="sticky top-0 z-10 flex flex-wrap items-center gap-2 rounded-lg border border-diplomatic-200 bg-diplomatic-50 px-4 py-3">
-              <span className="mr-1 text-sm font-semibold text-diplomatic-900">{selected.size} selected</span>
+            <div className="sticky top-0 z-10 flex flex-wrap items-center gap-2 rounded-lg border border-panel-200 bg-panel-50 px-4 py-3">
+              <span className="mr-1 text-sm font-semibold text-panel-900">{selected.size} selected</span>
               <button onClick={() => setStatus([...selected], 'approved')} className="rounded-md bg-green-600 px-3 py-1.5 text-sm text-white hover:bg-green-700">Accept</button>
-              <button onClick={() => setStatus([...selected], 'waitlisted')} className="rounded-md bg-orange-500 px-3 py-1.5 text-sm text-white hover:bg-orange-600">Waitlist</button>
+              <button onClick={() => setStatus([...selected], 'waitlisted')} className="rounded-md bg-orange-700 px-3 py-1.5 text-sm text-white hover:bg-orange-800">Waitlist</button>
               <button onClick={() => setStatus([...selected], 'rejected')} className="rounded-md bg-red-600 px-3 py-1.5 text-sm text-white hover:bg-red-700">Reject</button>
-              <span className="mx-1 hidden h-5 w-px bg-diplomatic-200 sm:block" />
+              <span className="mx-1 hidden h-5 w-px bg-panel-200 sm:block" />
               <button onClick={() => setPayment([...selected], 'paid')} className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm hover:bg-gray-50">Mark paid</button>
               <button onClick={() => remind(true)} disabled={busy} className="rounded-md border border-gray-300 bg-white px-3 py-1.5 text-sm hover:bg-gray-50 disabled:opacity-50">Payment reminder</button>
-              <button onClick={() => setEmailTo(selectedRows)} className="inline-flex items-center gap-1 rounded-md bg-blue-600 px-3 py-1.5 text-sm text-white hover:bg-blue-700"><Mail className="h-4 w-4" /> Email</button>
+              <button onClick={() => setEmailTo(selectedRows)} className="inline-flex items-center gap-1 rounded-md bg-panel-600 px-3 py-1.5 text-sm text-white hover:bg-panel-700"><Mail className="h-4 w-4" /> Email</button>
               <button onClick={() => setSelected(new Set())} className="ml-auto text-sm text-gray-500 hover:text-gray-800">Clear</button>
             </div>
           )}
@@ -410,7 +410,7 @@ const Delegates = () => {
                               const awards = past.filter(p => p.award).length;
                               return (
                                 <span
-                                  className="mt-1 inline-block rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-medium text-indigo-700"
+                                  className="mt-1 inline-block rounded-full bg-panel-50 px-2 py-0.5 text-[11px] font-medium text-panel-700"
                                   title={past.map(describe).join('\n')}
                                 >
                                   Returning · {past.length} past {past.length === 1 ? 'event' : 'events'}{awards ? ` · ${awards} award${awards === 1 ? '' : 's'}` : ''}
@@ -424,7 +424,7 @@ const Delegates = () => {
                                 </a>
                               )}
                               {r.has_ielts && <span className="rounded-full bg-green-50 px-1.5 text-[10px] font-medium text-green-700"><FileText className="mr-0.5 inline h-2.5 w-2.5" />IELTS</span>}
-                              {r.has_sat && <span className="rounded-full bg-blue-50 px-1.5 text-[10px] font-medium text-blue-700"><FileText className="mr-0.5 inline h-2.5 w-2.5" />SAT</span>}
+                              {r.has_sat && <span className="rounded-full bg-panel-50 px-1.5 text-[10px] font-medium text-panel-700"><FileText className="mr-0.5 inline h-2.5 w-2.5" />SAT</span>}
                               {r.contacted && <span className="rounded-full bg-gray-100 px-1.5 text-[10px] font-medium text-gray-600">Contacted</span>}
                             </div>
                           </td>
@@ -470,7 +470,7 @@ const Delegates = () => {
                           </td>
                           <td className="whitespace-nowrap px-4 py-3 align-top text-xs text-gray-500">{new Date(r.created_at).toLocaleDateString()}</td>
                           <td className="px-4 py-3 align-top text-right">
-                            <button onClick={() => setOpenId(r.id)} className="inline-flex items-center gap-1 rounded-lg bg-diplomatic-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-diplomatic-700">
+                            <button onClick={() => setOpenId(r.id)} className="inline-flex items-center gap-1 rounded-lg bg-panel-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-panel-700">
                               <Settings className="h-3.5 w-3.5" /> Manage
                             </button>
                           </td>
@@ -494,8 +494,8 @@ const Delegates = () => {
           adminPanel={
             <>
               {history[String(open.email ?? '').toLowerCase()]?.length > 0 && (
-                <div className="mb-4 rounded-lg border border-indigo-100 bg-indigo-50/60 p-3">
-                  <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-indigo-700">Past TuronMUN events</p>
+                <div className="mb-4 rounded-lg border border-panel-100 bg-panel-50/60 p-3">
+                  <p className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-panel-700">Past TuronMUN events</p>
                   <ul className="space-y-1 text-sm text-gray-800">
                     {history[String(open.email).toLowerCase()].map(p => <li key={p.id}>{describe(p)}</li>)}
                   </ul>
@@ -526,7 +526,7 @@ const Delegates = () => {
             <p className="text-xs text-gray-500">Each person gets their own copy.</p>
             <div className="flex justify-end gap-2">
               <button type="button" onClick={() => setEmailTo(null)} className="rounded-lg border border-gray-300 px-4 py-2 text-sm">Cancel</button>
-              <button type="submit" disabled={busy} className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm text-white disabled:opacity-50">
+              <button type="submit" disabled={busy} className="inline-flex items-center gap-2 rounded-lg bg-panel-600 px-4 py-2 text-sm text-white disabled:opacity-50">
                 {busy && <Loader2 className="h-4 w-4 animate-spin" />} Send
               </button>
             </div>
