@@ -158,7 +158,17 @@ export const templates = {
     ),
   }),
 
-  debateDecision: (p: { to: string; name: string; status: 'approved' | 'waitlisted' | 'rejected'; event: string }): OutgoingEmail => {
+  /** `text`: subject and message from Site content → Turon Debate ({name}, {event} filled in here). */
+  debateDecision: (p: { to: string; name: string; status: 'approved' | 'waitlisted' | 'rejected'; event: string; text?: { subject?: string; body?: string } }): OutgoingEmail => {
+    const fill = (s: string) => s.replace(/\{name\}/g, firstName(p.name)).replace(/\{event\}/g, p.event);
+    if (p.text?.subject?.trim() && p.text?.body?.trim()) {
+      return {
+        to: p.to,
+        subject: fill(p.text.subject.trim()),
+        html: layout(textToHtml(fill(p.text.body.trim())), { label: 'View my registration', href: `${SITE_URL}/debat/register` }),
+        text: fill(p.text.body.trim()),
+      };
+    }
     const lines = {
       approved: `Congratulations! Your registration for ${p.event} has been accepted. We will send the schedule and round details closer to the date.`,
       waitlisted: `Thank you for registering for ${p.event}. All places are currently taken, so you are on the waiting list. We will email you as soon as a place opens.`,

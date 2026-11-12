@@ -143,7 +143,11 @@ const DebateRegistrations = () => {
     let failure: string | null = null;
     try {
       result = await sendEmails(
-        untold.map(r => templates.debateDecision({ to: r.email, name: r.full_name, status: r.status as typeof DECIDED[number], event: debate.name })),
+        untold.map(r => {
+          const status = r.status as typeof DECIDED[number];
+          const text = { subject: debate[`email_${status}_subject`], body: debate[`email_${status}_body`] };
+          return templates.debateDecision({ to: r.email, name: r.full_name, status, event: debate.name, text });
+        }),
         'debate_decision',
       );
     } catch (err: any) {

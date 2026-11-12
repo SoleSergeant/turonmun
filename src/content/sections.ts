@@ -376,6 +376,13 @@ const debate = {
   rules_label: 'I agree to follow the tournament rules and code of conduct.',
   success_title: 'Registration received',
   success_text: "Thank you for registering. We'll review your registration and contact you by email or Telegram.",
+  // Decision emails ("Send decision emails" in Registrations). {name} = first name, {event} = Name above.
+  email_approved_subject: "You're in: {event}",
+  email_approved_body: 'Dear {name},\n\nCongratulations! Your registration for {event} has been accepted. We will send the schedule and round details closer to the date.\n\nBest regards,\nThe {event} team',
+  email_waitlisted_subject: "{event}: you're on the waiting list",
+  email_waitlisted_body: 'Dear {name},\n\nThank you for registering for {event}. All places are currently taken, so you are on the waiting list. We will email you as soon as a place opens.\n\nBest regards,\nThe {event} team',
+  email_rejected_subject: 'Your {event} registration',
+  email_rejected_body: "Dear {name},\n\nThank you for registering for {event}. Unfortunately we can't offer you a place this time. We hope to see you at a future round.\n\nBest regards,\nThe {event} team",
 };
 
 // ── Section registry ───────────────────────────────────────────────────
@@ -678,6 +685,12 @@ export const SECTIONS = {
       { key: 'reveal_teams', label: 'Show teams to debaters', type: 'boolean', hint: "Accepted debaters see their team, position and one-on-one opponent on their registration page." },
       { key: 'success_title', label: 'After registering — title', type: 'text' },
       { key: 'success_text', label: 'After registering — text', type: 'textarea' },
+      { key: 'email_approved_subject', label: 'Accepted email — subject', type: 'text', hint: 'Sent by "Send decision emails" in Registrations. {event} becomes the Name above.' },
+      { key: 'email_approved_body', label: 'Accepted email — message', type: 'textarea', hint: '{name} becomes the debater\'s first name, {event} the Name above. A "View my registration" button is added below.' },
+      { key: 'email_waitlisted_subject', label: 'Waitlisted email — subject', type: 'text' },
+      { key: 'email_waitlisted_body', label: 'Waitlisted email — message', type: 'textarea' },
+      { key: 'email_rejected_subject', label: 'Rejected email — subject', type: 'text' },
+      { key: 'email_rejected_body', label: 'Rejected email — message', type: 'textarea' },
     ],
   },
 } satisfies Record<string, Section<any>>;
